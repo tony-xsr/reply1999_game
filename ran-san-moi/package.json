@@ -1,0 +1,8 @@
+{
+  "name": "ran-san-moi",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/snake.test.js"
+  }
+}
