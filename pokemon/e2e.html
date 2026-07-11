@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>E2E RUNNING</title>
+  <style>
+    html, body, iframe { margin: 0; width: 100%; height: 100%; border: 0; }
+  </style>
+</head>
+<body>
+  <!-- Dùng "./" (không phải "./index.html") — serve cleanUrls redirect
+       /pokemon/index.html → /pokemon (mất dấu / cuối) làm gãy đường dẫn tương đối -->
+  <iframe id="game" src="./"></iframe>
+  <script>
+    // Chuyển tiếp ?theme=... vào game (dùng khi chụp screenshot kiểm theme)
+    if (location.search) document.getElementById('game').src = './' + location.search;
+  </script>
+
+  <script type="module">
+    // Bot tự chơi qua DOM thật của index.html (iframe cùng origin):
+    // bấm CHƠI → chơi sạch bàn từng level → bấm LEVEL TIẾP → ... → thắng cả 7 level.
+    import { findAnyMove } from './src/pathfinder.js';
+    import { ICONS } from './src/board.js';
+
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    const ROWS = 9, COLS = 16;
+    const frame = document.getElementById('game');
+
+    const run = async () => {
+      const doc = frame.contentDocument;
+      await sleep(300);
+
+      doc.getElementById('btnPlay').click();
+      await sleep(200);
+
+      let levelsCleared = 0;
+      let guard = 0;
+      while (guard++ < 3000) {
+        // Overlay kết thúc?
+        if (!doc.getElementById('endOverlay').classList.contains('hidden')) break;
+        // Overlay qua level → bấm tiếp
+        if (!doc.getElementById('levelOverlay').classList.contains('hidden')) {
+          levelsCleared++;
+          doc.getElementById('btnNextLevel').click();
+          await sleep(200);
+          continue;
+        }
+
+        const cells = [...doc.querySelectorAll('.cell')];
+        const cellAt = (r, c) => cells[r * COLS + c];
+        if (cells.length === 0) { await sleep(200); continue; }
+
+        // Dựng ma trận từ DOM (phản ánh cả dồn ô/shuffle)
+        const board = [];
+        for (let r = 0; r < ROWS; r++) {
+          const row = [];
+          for (let c = 0; c < COLS; c++) {
+            const el = cellAt(r, c);
+            row.push(el.classList.contains('filled') ? ICONS.indexOf(el.textContent) : null);
+          }
+          board.push(row);
+        }
+        if (board.flat().every((v) => v == null)) { await sleep(200); continue; }
+
+        const mv = findAnyMove(board);
+        if (!mv) { await sleep(300); continue; } // chờ game tự shuffle
+        cellAt(mv.a.r, mv.a.c).click();
+        cellAt(mv.b.r, mv.b.c).click();
+        await sleep(360);
+      }
+
+      const endShown = !doc.getElementById('endOverlay').classList.contains('hidden');
+      const endTitle = doc.getElementById('endTitle').textContent;
+      const emoji = doc.getElementById('endEmoji').textContent;
+      const score = doc.getElementById('score').textContent;
+      const level = doc.getElementById('levelLabel').textContent;
+      const victory = endShown && emoji === '🏆';
+      const ok = victory && levelsCleared === 6 && Number(score) > 0;
+      document.title = `E2E ${ok ? 'OK' : 'FAIL'} end=${endShown} emoji=${emoji} clearedOverlays=${levelsCleared} ` +
+        `level=${level} score=${score} title=${endTitle}`;
+    };
+
+    frame.addEventListener('load', () => { run(); }, { once: true });
+  </script>
+</body>
+</html>

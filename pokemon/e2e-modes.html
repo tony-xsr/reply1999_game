@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>E2E MODES RUNNING</title>
+  <style>
+    html, body, iframe { margin: 0; width: 100%; height: 100%; border: 0; }
+  </style>
+</head>
+<body>
+  <iframe id="game" src="./"></iframe>
+
+  <script type="module">
+    // Smoke test 3 chế độ mới: Daily (chơi hết bàn), Zen (qua level 1), Duel (chơi hết ván).
+    import { findAnyMove } from './src/pathfinder.js';
+    import { ICONS } from './src/board.js';
+
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    const ROWS = 9, COLS = 16;
+    const frame = document.getElementById('game');
+
+    const loadFrame = () => new Promise((resolve) => {
+      frame.addEventListener('load', () => resolve(), { once: true });
+      frame.src = './';
+    });
+
+    function readBoard(doc) {
+      const cells = [...doc.querySelectorAll('.cell')];
+      if (!cells.length) return null;
+      const board = [];
+      for (let r = 0; r < ROWS; r++) {
+        const row = [];
+        for (let c = 0; c < COLS; c++) {
+          const el = cells[r * COLS + c];
+          row.push(el.classList.contains('filled') ? ICONS.indexOf(el.textContent) : null);
+        }
+        board.push(row);
+      }
+      return { board, cells };
+    }
+
+    // Chơi đến khi stopFn trả về chuỗi kết quả (hoặc hết guard)
+    async function playUntil(doc, stopFn, guardMax = 1500) {
+      let guard = 0;
+      while (guard++ < guardMax) {
+        const done = stopFn(doc);
+        if (done) return done;
+        const data = readBoard(doc);
+        if (!data) { await sleep(200); continue; }
+        const mv = findAnyMove(data.board);
+        if (!mv) { await sleep(300); continue; }
+        data.cells[mv.a.r * COLS + mv.a.c].click();
+        data.cells[mv.b.r * COLS + mv.b.c].click();
+        await sleep(360);
+      }
+      return 'GUARD';
+    }
+
+    const overlayShown = (doc, id) => !doc.getElementById(id).classList.contains('hidden');
+
+    (async () => {
+      const results = [];
+
+      // --- Daily: chơi hết bàn → overlay kết thúc 📅 ---
+      await sleep(300);
+      let doc = frame.contentDocument;
+      doc.getElementById('btnDaily').click();
+      await sleep(200);
+      let out = await playUntil(doc, (d) => (overlayShown(d, 'endOverlay')
+        ? `daily:${d.getElementById('endEmoji').textContent}` : null));
+      results.push(out);
+
+      // --- Zen: qua level 1 → overlay qua level, không có đồng hồ chạy ---
+      await loadFrame();
+      doc = frame.contentDocument;
+      await sleep(300);
+      doc.getElementById('btnZen').click();
+      await sleep(200);
+      const zenBarFull = doc.getElementById('timeFill').style.width === '100%';
+      out = await playUntil(doc, (d) => (overlayShown(d, 'levelOverlay') ? 'zen:clear' : null));
+      results.push(`${out}:bar=${zenBarFull}`);
+
+      // --- Duel: chơi hết ván → overlay kết thúc, có tỉ số ---
+      await loadFrame();
+      doc = frame.contentDocument;
+      await sleep(300);
+      doc.getElementById('btnDuel').click();
+      await sleep(200);
+      const duelHudShown = !doc.getElementById('duelHud').classList.contains('hidden');
+      out = await playUntil(doc, (d) => (overlayShown(d, 'endOverlay')
+        ? `duel:${d.getElementById('endEmoji').textContent}:${d.getElementById('endScore').textContent}` : null));
+      results.push(`${out}:hud=${duelHudShown}`);
+
+      const ok = results[0] === 'daily:📅'
+        && results[1] === 'zen:clear:bar=true'
+        && results[2].startsWith('duel:⚔️') && results[2].endsWith(':hud=true');
+      document.title = `E2E-MODES ${ok ? 'OK' : 'FAIL'} | ${results.join(' | ')}`;
+    })();
+  </script>
+</body>
+</html>

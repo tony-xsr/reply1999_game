@@ -1,0 +1,19 @@
+{
+  "name": "reply1999-game",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Reply1999 Games — bộ sưu tập game tách từ gamecollection",
+  "scripts": {
+    "dev": "serve . -l 8766 --no-clipboard",
+    "start": "serve . -l 8766 --no-clipboard",
+    "deploy": "vercel --prod",
+    "deploy:preview": "vercel",
+    "test": "npm --prefix pokemon test && node to-mau/src/letters.test.js && node tap-viet/src/strokes.test.js && node hoc-vui/src/words.test.js && node lat-hinh/src/deck.test.js && node ran-san-moi/src/snake.test.js && node ghep-hinh/src/puzzle.test.js && node co-caro/src/caro.test.js && node xep-gach/src/tetris.test.js && node bat-vit/src/ducks.test.js && node o-an-quan/src/oanquan.test.js && node nhay-lo-co/src/loco.test.js && node hoc-van/src/van.test.js && node toan-lop-1/src/toan.test.js && node tu-duy/src/tuduy.test.js && node tro-xua/src/troxua.test.js && node co-ganh/src/coganh.test.js && node co-ca-ngua/src/ludo.test.js"
+  },
+  "devDependencies": {
+    "serve": "^14.2.4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
