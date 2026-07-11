@@ -1,0 +1,157 @@
+/* Rắn Săn Mồi — tông pastel trẻ em, bàn chơi màu cỏ nhạt. */
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #fff6e8;
+  --panel: #ffffff;
+  --ink: #241e2e;
+  --muted: #5d5370;
+  --accent: #ff8a3d;      /* trang trí: viền, nhấn nhá */
+  --accent-deep: #c2410c; /* chữ cam & nền nút chữ trắng — tương phản ≥5:1 */
+  --line: #f0e2cc;
+  --grass1: #e8f6dc;
+  --grass2: #ddf0cd;
+}
+
+html, body { height: 100%; }
+body {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, #ffe9c8 0%, transparent 70%),
+    var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.shell {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px max(12px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.top { display: flex; align-items: center; gap: 8px; }
+.top h1 { font-size: 1.1rem; flex: 1; }
+.target {
+  font-size: 1.15rem; font-weight: 900;
+  background: var(--panel);
+  border: 2px solid var(--accent);
+  color: var(--accent-deep);
+  border-radius: 999px;
+  padding: 6px 13px;
+}
+.score {
+  font-weight: 900; font-size: 1.1rem; color: var(--ink);
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 13px;
+}
+
+.round-btn {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: var(--panel);
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 2px 5px rgba(90, 60, 20, 0.12);
+}
+.round-btn:active { transform: scale(0.93); }
+
+.tabs-row { display: flex; gap: 6px; justify-content: center; }
+.tab {
+  border: 2px solid var(--line);
+  background: var(--panel);
+  font-size: 0.9rem; font-weight: 800; color: var(--muted);
+  padding: 8px 14px; border-radius: 999px; cursor: pointer;
+}
+.tab.active { background: var(--accent-deep); border-color: var(--accent-deep); color: #fff; }
+
+.stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.board-wrap {
+  position: relative;
+  width: 100%;
+  max-width: min(100%, 118dvh);
+  aspect-ratio: 17 / 15;
+  border: 4px solid #b5d49a;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 5px 14px rgba(90, 60, 20, 0.18);
+}
+.board-wrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.overlay {
+  position: absolute; inset: 0;
+  background: rgba(255, 250, 240, 0.9);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px; text-align: center;
+  z-index: 5;
+}
+.overlay.hidden { display: none; }
+.ov-emoji { font-size: 4rem; animation: pop 0.5s ease-out; }
+.ov-text { font-size: 1.3rem; font-weight: 900; white-space: pre-line; }
+@keyframes pop {
+  from { transform: scale(0.5); }
+  60% { transform: scale(1.15); }
+  to { transform: scale(1); }
+}
+.big-btn {
+  background: linear-gradient(180deg, #ee6f1a, #c2410c);
+  color: #fff;
+  border: none; border-radius: 14px;
+  font-size: 1.1rem; font-weight: 900;
+  padding: 13px 32px; cursor: pointer;
+  box-shadow: 0 4px 10px rgba(194, 65, 12, 0.4);
+}
+.big-btn:active { transform: translateY(2px); }
+
+/* D-pad */
+.dpad {
+  display: grid;
+  grid-template-areas: ". up ." "left down right";
+  gap: 8px;
+  justify-content: center;
+  padding-bottom: 2px;
+}
+.dpad-btn {
+  width: 64px; height: 52px;
+  border-radius: 14px;
+  border: 2px solid var(--line);
+  background: var(--panel);
+  font-size: 1.3rem; font-weight: 900; color: var(--accent-deep);
+  cursor: pointer;
+  box-shadow: 0 3px 6px rgba(90, 60, 20, 0.15);
+}
+.dpad-btn:active { transform: scale(0.92); background: #fff1e2; }
+.dpad-btn.up { grid-area: up; }
+.dpad-btn.left { grid-area: left; }
+.dpad-btn.down { grid-area: down; }
+.dpad-btn.right { grid-area: right; }
+
+.confetti-piece {
+  position: fixed;
+  top: -12px; left: var(--x);
+  width: 10px; height: 14px;
+  z-index: 60;
+  animation: confetti-fall 2.2s var(--delay) ease-in forwards;
+}
+@keyframes confetti-fall {
+  to { transform: translateY(105vh) rotate(var(--rot)); }
+}
+
+/* Máy tính có bàn phím: thu nhỏ d-pad */
+@media (min-width: 900px) and (hover: hover) {
+  .dpad-btn { width: 52px; height: 40px; font-size: 1rem; }
+}
+@media (max-width: 560px) {
+  .top h1 { font-size: 0.85rem; }
+}
