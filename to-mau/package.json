@@ -1,0 +1,8 @@
+{
+  "name": "to-mau",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/letters.test.js"
+  }
+}

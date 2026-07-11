@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#fff6e8">
+  <title>Tô Màu Chữ &amp; Số</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <a class="round-btn" href="/" data-i18n-title="pika.btn.home" title="TRANG CHỦ">🏠</a>
+      <h1 data-i18n="tomau.title">🎨 Tô Màu Chữ &amp; Số</h1>
+      <div class="tabs">
+        <button class="tab active" id="tabLetters">Aa</button>
+        <button class="tab" id="tabDigits">123</button>
+      </div>
+      <button class="round-btn" id="btnMode" data-i18n-title="tomau.mode" title="Đổi chế độ">🖌️</button>
+      <button class="round-btn" id="btnSay" data-i18n-title="tomau.say" title="Đọc lại">📢</button>
+      <button class="round-btn" id="btnSound" data-i18n-title="pika.btn.sound" title="Âm thanh">🔊</button>
+    </header>
+
+    <div class="mode-label" id="modeLabel" data-i18n="tomau.mode.free">Tô tự do</div>
+
+    <!-- Dải chọn chữ/số, có ⭐ cho chữ đã tô xong -->
+    <nav class="picker" id="picker"></nav>
+
+    <main class="stage">
+      <div class="canvas-wrap" id="canvasWrap">
+        <canvas id="paintCanvas" width="640" height="640"></canvas>
+        <canvas id="labelCanvas" width="640" height="640"></canvas>
+        <!-- Màn khen thưởng sau khi tô xong -->
+        <div class="cheer hidden" id="cheer">
+          <div class="cheer-emoji" id="cheerEmoji">🐔</div>
+          <div class="cheer-text" id="cheerText"></div>
+          <div class="cheer-animals" id="cheerAnimals"></div>
+          <button class="big-btn" id="btnNext" data-i18n="tomau.next">TIẾP ▶</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Khay màu -->
+    <footer class="palette" id="palette"></footer>
+  </div>
+
+  <script src="/i18n.js"></script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
