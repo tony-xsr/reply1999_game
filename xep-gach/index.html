@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#fff6e8">
+  <title>Xếp Gạch</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <a class="round-btn" href="/" data-i18n-title="pika.btn.home" title="TRANG CHỦ">🏠</a>
+      <h1 data-i18n="xepgach.title">🏗️ Xếp Gạch</h1>
+      <div class="chip-stat" id="lines">0 <span data-i18n="xepgach.lines">dòng</span></div>
+      <div class="chip-stat score" id="score">0</div>
+      <button class="round-btn" id="btnSound" data-i18n-title="pika.btn.sound" title="Âm thanh">🔊</button>
+    </header>
+
+    <main class="stage">
+      <div class="board-wrap">
+        <canvas id="gameCanvas" width="400" height="640"></canvas>
+        <div class="overlay" id="overlay">
+          <div class="ov-emoji" id="ovEmoji">🏗️</div>
+          <div class="ov-text" id="ovText" data-i18n="ran.start">Bấm để chơi!</div>
+          <button class="big-btn" id="btnPlay" data-i18n="ran.play">CHƠI ▶</button>
+        </div>
+      </div>
+      <div class="side-panel">
+        <div class="next-box">
+          <span data-i18n="xepgach.next">Tiếp theo</span>
+          <canvas id="nextCanvas" width="120" height="90"></canvas>
+        </div>
+      </div>
+    </main>
+
+    <div class="dpad">
+      <button class="dpad-btn" data-act="left">◀</button>
+      <button class="dpad-btn rot" data-act="rotate">🔄</button>
+      <button class="dpad-btn" data-act="down">▼</button>
+      <button class="dpad-btn drop" data-act="drop">⤓</button>
+      <button class="dpad-btn" data-act="right">▶</button>
+    </div>
+  </div>
+
+  <script src="/i18n.js"></script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

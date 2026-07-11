@@ -1,0 +1,8 @@
+{
+  "name": "xep-gach",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/tetris.test.js"
+  }
+}
