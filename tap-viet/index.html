@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#fff6e8">
+  <title>Tập Viết Chữ</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <a class="round-btn" href="/" data-i18n-title="pika.btn.home" title="TRANG CHỦ">🏠</a>
+      <h1 data-i18n="tapviet.title">✍️ Tập Viết Chữ</h1>
+      <button class="round-btn" id="btnSay" data-i18n-title="tomau.say" title="Đọc lại">📢</button>
+      <button class="round-btn" id="btnRedo" data-i18n-title="tapviet.redo" title="Viết lại">↺</button>
+      <button class="round-btn" id="btnSound" data-i18n-title="pika.btn.sound" title="Âm thanh">🔊</button>
+    </header>
+
+    <div class="tabs-row">
+      <button class="tab active" id="tabBasic" data-i18n="tapviet.tab.basic">✏️ Nét</button>
+      <button class="tab" id="tabVi">🇻🇳 ABC</button>
+      <button class="tab" id="tabEn">🇬🇧 ABC</button>
+      <button class="tab" id="tabName" data-i18n="tapviet.tab.name">⭐ Tên bé</button>
+    </div>
+
+    <!-- Dải chọn chữ (ẩn ở chế độ Tên bé) -->
+    <nav class="picker" id="picker"></nav>
+
+    <!-- Dãy chữ của tên bé (chỉ hiện ở chế độ Tên bé) -->
+    <div class="name-row hidden" id="nameRow"></div>
+
+    <main class="stage">
+      <div class="board-wrap" id="boardWrap">
+        <div class="hint-line" id="hintLine"></div>
+        <canvas id="traceCanvas" width="640" height="640"></canvas>
+        <!-- Màn khen thưởng -->
+        <div class="cheer hidden" id="cheer">
+          <div class="cheer-stars" id="cheerStars">⭐⭐⭐</div>
+          <div class="cheer-emoji" id="cheerEmoji">🐔</div>
+          <div class="cheer-text" id="cheerText"></div>
+          <button class="big-btn" id="btnNext" data-i18n="tomau.next">TIẾP ▶</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/i18n.js"></script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

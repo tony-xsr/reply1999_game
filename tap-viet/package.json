@@ -1,0 +1,8 @@
+{
+  "name": "tap-viet",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/strokes.test.js"
+  }
+}
