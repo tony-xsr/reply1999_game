@@ -1,0 +1,8 @@
+{
+  "name": "pokemon-onet",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/pathfinder.test.js && node src/game.test.js && node src/stats.test.js"
+  }
+}
