@@ -1,0 +1,8 @@
+{
+  "name": "tro-xua",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/troxua.test.js"
+  }
+}
