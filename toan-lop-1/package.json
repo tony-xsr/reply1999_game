@@ -1,0 +1,8 @@
+{
+  "name": "toan-lop-1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/toan.test.js"
+  }
+}
