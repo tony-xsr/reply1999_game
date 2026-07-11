@@ -1,0 +1,8 @@
+{
+  "name": "tu-duy",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/tuduy.test.js"
+  }
+}
