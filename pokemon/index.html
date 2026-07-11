@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0a0f">
+  <title>Pikachu Classic — Onet Connect</title>
+  <script>
+    // Áp theme trước khi vẽ để không bị chớp màu (?theme=... dùng cho test)
+    (function () {
+      let th = null;
+      try {
+        th = new URLSearchParams(location.search).get('theme') || localStorage.getItem('pika.theme');
+      } catch (e) { /* ignore */ }
+      if (['dark', 'light', 'forest', 'ocean'].includes(th)) {
+        document.documentElement.dataset.theme = th;
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="game-shell">
+    <!-- Thanh trên: gợi ý | level | thanh thời gian | điểm -->
+    <header class="top-bar">
+      <div class="hint-count" id="hintCount" data-i18n-title="pika.hints.title" title="Lượt gợi ý còn lại">✥ <span id="hintNum">10</span></div>
+      <div class="level-label" id="levelLabel">Level 1/7</div>
+      <div class="time-bar" data-i18n-aria="pika.time.aria" aria-label="Thời gian còn lại">
+        <div class="time-fill" id="timeFill"></div>
+      </div>
+      <div class="combo-pop" id="comboPop"></div>
+      <div class="duel-hud hidden" id="duelHud">
+        <span class="duel-p active" id="duelP1">🔵 <b id="duelS1">0</b></span>
+        <span class="duel-p" id="duelP2">🔴 <b id="duelS2">0</b></span>
+      </div>
+      <div class="score" id="score">0</div>
+    </header>
+
+    <div class="main-area">
+      <!-- Cột nút trái -->
+      <nav class="side-bar">
+        <button class="side-btn" id="btnNew" data-i18n="pika.btn.new">MỚI</button>
+        <button class="side-btn" id="btnHint"><span data-i18n="pika.btn.hint">GỢI Ý</span></button>
+        <button class="side-btn" id="btnShuffle"><span data-i18n="pika.btn.shuffle">XÁO</span> <span id="shuffleNum">5</span></button>
+        <button class="side-btn" id="btnTop" data-i18n="pika.btn.top">TOP</button>
+        <button class="side-btn side-btn--icon" id="btnIcons" data-i18n-title="pika.btn.icons" title="Đổi bộ hình">🐰</button>
+        <button class="side-btn side-btn--icon" id="btnPause" data-i18n-title="pika.btn.pause" title="Tạm dừng (Esc)">⏸</button>
+        <button class="side-btn side-btn--icon" id="btnSound" data-i18n-title="pika.btn.sound" title="Âm thanh">🔊</button>
+        <button class="side-btn side-btn--icon" id="btnMenu" data-i18n-title="pika.btn.menu" title="MENU">☰</button>
+        <a class="side-btn side-btn--icon" href="/" data-i18n-title="pika.btn.home" title="TRANG CHỦ">🏠</a>
+      </nav>
+
+      <!-- Vùng bàn chơi: grid ô + canvas vẽ đường nối -->
+      <main class="board-wrap" id="boardWrap">
+        <div class="board" id="board" role="grid" data-i18n-aria="pika.board.aria" aria-label="Bàn chơi Pikachu"></div>
+        <canvas class="path-canvas" id="pathCanvas"></canvas>
+      </main>
+    </div>
+  </div>
+
+  <!-- Thông báo nhỏ (xáo trộn, hết gợi ý...) -->
+  <div class="toast" id="toast" role="status"></div>
+
+  <!-- Menu chính -->
+  <div class="overlay" id="menuOverlay">
+    <div class="overlay-card">
+      <div class="overlay-emoji">🐰🦊🐼</div>
+      <h1 class="menu-title">Pikachu Classic</h1>
+      <p class="menu-sub" data-i18n="pika.menu.sub">Nối 2 hình giống nhau — tối đa 2 lần gấp khúc. 7 level!</p>
+      <button class="user-chip" id="btnUser" data-i18n-title="pika.user.title" title="Người chơi">👤 <b id="userName">Khách</b> ▾</button>
+      <div class="mode-grid">
+        <button class="side-btn overlay-btn" id="btnPlay" data-i18n="pika.menu.classic">CỔ ĐIỂN ▶</button>
+        <button class="side-btn overlay-btn overlay-btn--ghost" id="btnZen">🧘 <span data-i18n="pika.menu.zen">ZEN</span></button>
+        <button class="side-btn overlay-btn overlay-btn--ghost" id="btnDaily">📅 <span data-i18n="pika.menu.daily">DAILY</span> <span class="daily-best" id="dailyBest"></span></button>
+        <button class="side-btn overlay-btn overlay-btn--ghost" id="btnDuel">⚔️ <span data-i18n="pika.menu.duel">2 NGƯỜI</span></button>
+      </div>
+      <div class="settings-row">
+        <label>
+          <span data-i18n="pika.menu.icons">Bộ hình</span>
+          <select id="selIcons">
+            <option value="animals" data-i18n="pika.icons.animals">🐰 Động vật</option>
+            <option value="fruits" data-i18n="pika.icons.fruits">🍎 Trái cây</option>
+            <option value="faces" data-i18n="pika.icons.faces">😀 Mặt cười</option>
+            <option value="pokemon" selected data-i18n="pika.icons.pokemon">⚡ Pokémon</option>
+            <option value="mix" data-i18n="pika.icons.mix">🐰⚡ Trộn</option>
+          </select>
+        </label>
+        <label>
+          <span data-i18n="pika.menu.size">Cỡ bàn</span>
+          <select id="selSize">
+            <option value="10x6" data-i18n="pika.size.small">Nhỏ 10×6</option>
+            <option value="14x8" data-i18n="pika.size.medium">Vừa 14×8</option>
+            <option value="16x9" selected data-i18n="pika.size.large">Lớn 16×9</option>
+          </select>
+        </label>
+        <label>
+          <span data-i18n="pika.menu.theme">Giao diện</span>
+          <select id="selTheme">
+            <option value="dark" selected data-i18n="pika.theme.dark">🌙 Tối</option>
+            <option value="light" data-i18n="pika.theme.light">☀️ Sáng</option>
+            <option value="forest" data-i18n="pika.theme.forest">🌲 Rừng</option>
+            <option value="ocean" data-i18n="pika.theme.ocean">🌊 Đại dương</option>
+          </select>
+        </label>
+      </div>
+      <div class="menu-links">
+        <button class="side-btn overlay-btn overlay-btn--ghost" id="btnMenuTop" data-i18n="pika.btn.top">TOP</button>
+        <button class="side-btn overlay-btn overlay-btn--ghost" id="btnAch">🏅 <span data-i18n="pika.ach.title">Thành tích</span></button>
+        <button class="side-btn overlay-btn overlay-btn--ghost" id="btnStats">📊 <span data-i18n="pika.stats.title">Report</span></button>
+        <a class="side-btn overlay-btn overlay-btn--ghost" href="/">🏠 <span data-i18n="pika.btn.home">TRANG CHỦ</span></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thành tích -->
+  <div class="overlay hidden" id="achOverlay">
+    <div class="overlay-card">
+      <div class="overlay-emoji">🏅</div>
+      <h2 data-i18n="pika.ach.title">Thành tích</h2>
+      <ul class="ach-list" id="achList"></ul>
+      <button class="side-btn overlay-btn" id="btnAchClose" data-i18n="pika.top.close">ĐÓNG</button>
+    </div>
+  </div>
+
+  <!-- Tạm dừng -->
+  <div class="overlay hidden" id="pauseOverlay">
+    <div class="overlay-card">
+      <div class="overlay-emoji">⏸</div>
+      <h2 data-i18n="pika.pause.title">Tạm dừng</h2>
+      <button class="side-btn overlay-btn" id="btnResume" data-i18n="pika.pause.resume">TIẾP TỤC</button>
+      <button class="side-btn overlay-btn overlay-btn--ghost" id="btnPauseMenu">☰ <span data-i18n="pika.btn.menu">MENU</span></button>
+    </div>
+  </div>
+
+  <!-- Thắng level -->
+  <div class="overlay hidden" id="levelOverlay">
+    <div class="overlay-card">
+      <div class="overlay-emoji">🎉</div>
+      <h2 id="levelClearTitle" data-i18n="pika.level.clear">Qua level!</h2>
+      <p id="levelBonus"></p>
+      <button class="side-btn overlay-btn" id="btnNextLevel" data-i18n="pika.level.next">LEVEL TIẾP ▶</button>
+    </div>
+  </div>
+
+  <!-- Kết thúc: thắng cả game hoặc hết giờ -->
+  <div class="overlay hidden" id="endOverlay">
+    <div class="overlay-card">
+      <div class="overlay-emoji" id="endEmoji">🏆</div>
+      <h2 id="endTitle"></h2>
+      <p id="endScore"></p>
+      <ol class="top-list" id="endTopList"></ol>
+      <button class="side-btn overlay-btn" id="btnEndNew" data-i18n="pika.end.again">CHƠI LẠI</button>
+      <button class="side-btn overlay-btn overlay-btn--ghost" id="btnEndMenu">☰ <span data-i18n="pika.btn.menu">MENU</span></button>
+    </div>
+  </div>
+
+  <!-- Bảng điểm TOP -->
+  <div class="overlay hidden" id="topOverlay">
+    <div class="overlay-card">
+      <div class="overlay-emoji">🏅</div>
+      <h2 data-i18n="pika.top.title">Bảng điểm TOP</h2>
+      <ol class="top-list" id="topList"></ol>
+      <button class="side-btn overlay-btn" id="btnTopClose" data-i18n="pika.top.close">ĐÓNG</button>
+    </div>
+  </div>
+
+  <!-- Hồ sơ người chơi: chọn tên có sẵn hoặc thêm tên mới -->
+  <div class="overlay hidden" id="userOverlay">
+    <div class="overlay-card">
+      <div class="overlay-emoji">👤</div>
+      <h2 data-i18n="pika.user.title">Người chơi</h2>
+      <div class="user-list" id="userList"></div>
+      <div class="user-add">
+        <input type="text" id="userInput" maxlength="20" data-i18n-placeholder="pika.user.placeholder" placeholder="Nhập tên của bé...">
+        <button class="side-btn" id="btnUserAdd" data-i18n="pika.user.add">THÊM</button>
+      </div>
+      <button class="side-btn overlay-btn" id="btnUserClose" data-i18n="pika.top.close">ĐÓNG</button>
+    </div>
+  </div>
+
+  <!-- Report: thống kê thắng/thua + thời gian chơi 7 ngày -->
+  <div class="overlay hidden" id="statsOverlay">
+    <div class="overlay-card overlay-card--wide">
+      <div class="overlay-emoji">📊</div>
+      <h2><span data-i18n="pika.stats.title">Report</span> — <span id="statsName">Khách</span></h2>
+      <div class="kpi-row">
+        <div class="kpi"><b id="kpiGames">0</b><span data-i18n="pika.stats.games">Số ván</span></div>
+        <div class="kpi"><b id="kpiWinRate">—</b><span data-i18n="pika.stats.winrate">Tỷ lệ thắng</span></div>
+        <div class="kpi"><b id="kpiHours">0p</b><span data-i18n="pika.stats.time">Giờ chơi</span></div>
+      </div>
+      <div class="wl-meter-wrap">
+        <div class="wl-meter" id="wlMeter"></div>
+        <div class="wl-legend">
+          <span>✅ <span data-i18n="pika.stats.wins">Thắng</span>: <b id="wlWins">0</b></span>
+          <span>❌ <span data-i18n="pika.stats.losses">Thua</span>: <b id="wlLosses">0</b></span>
+        </div>
+      </div>
+      <h3 class="chart-title" data-i18n="pika.stats.days7">Phút chơi 7 ngày gần nhất</h3>
+      <div class="day-chart" id="dayChart"></div>
+      <p class="stats-empty hidden" id="statsEmpty" data-i18n="pika.stats.empty">Chưa có ván nào — chơi ván đầu tiên nhé!</p>
+      <button class="side-btn overlay-btn" id="btnStatsClose" data-i18n="pika.top.close">ĐÓNG</button>
+    </div>
+  </div>
+
+  <script src="/i18n.js"></script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
