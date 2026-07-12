@@ -1,0 +1,8 @@
+{
+  "name": "bat-vit",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/ducks.test.js"
+  }
+}
