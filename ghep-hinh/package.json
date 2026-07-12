@@ -1,0 +1,8 @@
+{
+  "name": "ghep-hinh",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/puzzle.test.js"
+  }
+}
