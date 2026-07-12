@@ -1,0 +1,8 @@
+{
+  "name": "hoc-van",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/van.test.js"
+  }
+}
