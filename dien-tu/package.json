@@ -1,0 +1,8 @@
+{
+  "name": "dien-tu",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/dientu.test.js"
+  }
+}
