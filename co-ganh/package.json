@@ -1,0 +1,8 @@
+{
+  "name": "co-ganh",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/coganh.test.js"
+  }
+}
