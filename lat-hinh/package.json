@@ -1,0 +1,8 @@
+{
+  "name": "lat-hinh",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/deck.test.js"
+  }
+}
