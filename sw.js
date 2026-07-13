@@ -1,6 +1,6 @@
 /* Reply1999 Games — root service worker.
    Scope = '/'. Cache hub + các game khi truy cập lần đầu. */
-const CACHE = 'reply1999-v12';
+const CACHE = 'reply1999-v17';
 const PRECACHE = [
   './', './index.html', './manifest.json', './i18n.js',
   './pokemon/index.html',
@@ -87,6 +87,26 @@ const PRECACHE = [
   './co-ca-ngua/style.css',
   './co-ca-ngua/src/ludo.js',
   './co-ca-ngua/src/app.js',
+  './dien-tu/index.html',
+  './dien-tu/style.css',
+  './dien-tu/src/dientu.js',
+  './dien-tu/src/app.js',
+  './ky-nang-song/index.html',
+  './ky-nang-song/style.css',
+  './ky-nang-song/src/kynang.js',
+  './ky-nang-song/src/app.js',
+  './khoa-hoc/index.html',
+  './khoa-hoc/style.css',
+  './khoa-hoc/src/khoahoc.js',
+  './khoa-hoc/src/app.js',
+  './tieng-anh/index.html',
+  './tieng-anh/style.css',
+  './tieng-anh/src/tienganh.js',
+  './tieng-anh/src/app.js',
+  './van-hoa-vn/index.html',
+  './van-hoa-vn/style.css',
+  './van-hoa-vn/src/vanhoa.js',
+  './van-hoa-vn/src/app.js',
   './pokemon/images/trimmed/pm0025_00_00_00_big.png',
   './pokemon/images/trimmed/pm0001_00_00_00_big.png',
   './pokemon/images/trimmed/pm0004_00_00_00_big.png',
