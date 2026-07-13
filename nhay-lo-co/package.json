@@ -1,0 +1,8 @@
+{
+  "name": "nhay-lo-co",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/loco.test.js"
+  }
+}
