@@ -276,6 +276,9 @@ chỗ**, **kỹ năng sống & cảm xúc**, **khoa học khám phá**, **văn h
 
 ## Nhóm 14 — Văn hóa & địa lý Việt Nam 🇻🇳
 
+> ✅ **ĐÃ LÀM XONG** cả 3 trò (14.1 + 14.2 + 14.3), gộp vào `van-hoa-vn/` — trò 14.3 tách thành
+> 2 tab riêng (Trang trí Tết tự do + Đèn lồng Trung Thu). Hub hiện có **23 game**.
+
 ### 14.1 Bản Đồ Việt Nam Bé 🗺️ (`ban-do-vn/`)
 - **Học được gì:** hình dáng đất nước, vị trí 3 miền Bắc–Trung–Nam, vài thành phố lớn (Hà Nội, Huế, TP.HCM), biển đảo Hoàng Sa–Trường Sa là của Việt Nam.
 - **Cách chơi:** bản đồ SVG đơn giản hóa (không chi tiết hành chính, chỉ khối lớn 3 miền); chạm đúng vùng khi được hỏi ("Miền Bắc đâu nhỉ?"); mỗi miền có 1-2 biểu tượng đặc trưng (Hà Nội: Hồ Gươm 🐢; Huế: Kinh thành 🏯; TP.HCM: Bến Nhà Rồng/chợ Bến Thành 🏛️).
