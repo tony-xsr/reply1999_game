@@ -106,7 +106,8 @@ export function stepMarbles(board, friction = 0.985) {
 /* ===== Nhảy dây: game nhịp điệu — dây quét qua chân thì phải đang ở trên không ===== */
 
 export function makeRope() {
-  return { period: 1500, phase: 0.25, count: 0, airborne: 0, alive: true };
+  // phase 0.6: dây vừa qua chân — bé có gần trọn 1 vòng làm quen trước nhịp đầu
+  return { period: 1500, phase: 0.6, count: 0, airborne: 0, alive: true };
 }
 
 /** Bé bật nhảy: lơ lửng 460ms. */

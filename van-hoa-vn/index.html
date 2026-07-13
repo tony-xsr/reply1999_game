@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#fff6e8">
+  <title>Văn Hóa &amp; Địa Lý Việt Nam</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <a class="round-btn" href="/" data-i18n-title="pika.btn.home" title="TRANG CHỦ">🏠</a>
+      <h1 data-i18n="vanhoa.title">🇻🇳 Văn Hóa Việt</h1>
+      <button class="round-btn" id="btnSay" data-i18n-title="tomau.say" title="Đọc lại">📢</button>
+      <button class="round-btn" id="btnSound" data-i18n-title="pika.btn.sound" title="Âm thanh">🔊</button>
+    </header>
+
+    <div class="tabs-row">
+      <button class="tab active" id="tabBanDo" data-i18n="vanhoa.tab.bando">🗺️ Bản đồ</button>
+      <button class="tab" id="tabMonAn" data-i18n="vanhoa.tab.monan">🍜 Món ăn</button>
+      <button class="tab" id="tabTet" data-i18n="vanhoa.tab.tet">🧧 Trang trí Tết</button>
+      <button class="tab" id="tabDenLong" data-i18n="vanhoa.tab.denlong">🏮 Đèn lồng</button>
+    </div>
+
+    <div class="dots" id="dots"></div>
+
+    <main class="stage">
+      <div class="question" id="question"></div>
+      <div class="field" id="field"></div>
+      <div class="tray" id="tray"></div>
+
+      <div class="cheer hidden" id="cheer">
+        <div class="cheer-emoji">🏆</div>
+        <div class="cheer-text" id="cheerText"></div>
+        <button class="big-btn" id="btnAgain" data-i18n="hocvui.again">CHƠI TIẾP ▶</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="/i18n.js"></script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
