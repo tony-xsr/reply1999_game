@@ -1,0 +1,8 @@
+{
+  "name": "khoa-hoc",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/khoahoc.test.js"
+  }
+}
