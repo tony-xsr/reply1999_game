@@ -1,0 +1,8 @@
+{
+  "name": "o-an-quan",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/oanquan.test.js"
+  }
+}
