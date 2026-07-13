@@ -1,0 +1,8 @@
+{
+  "name": "tieng-anh",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/tienganh.test.js"
+  }
+}
