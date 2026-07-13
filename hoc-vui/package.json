@@ -1,0 +1,8 @@
+{
+  "name": "hoc-vui",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/words.test.js"
+  }
+}
