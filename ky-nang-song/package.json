@@ -1,0 +1,8 @@
+{
+  "name": "ky-nang-song",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/kynang.test.js"
+  }
+}
