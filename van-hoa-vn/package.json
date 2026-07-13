@@ -1,0 +1,8 @@
+{
+  "name": "van-hoa-vn",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/vanhoa.test.js"
+  }
+}
