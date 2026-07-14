@@ -1,6 +1,6 @@
 /* Reply1999 Games — root service worker.
    Scope = '/'. Cache hub + các game khi truy cập lần đầu. */
-const CACHE = 'reply1999-v17';
+const CACHE = 'reply1999-v21';
 const PRECACHE = [
   './', './index.html', './manifest.json', './i18n.js',
   './pokemon/index.html',
@@ -107,6 +107,23 @@ const PRECACHE = [
   './van-hoa-vn/style.css',
   './van-hoa-vn/src/vanhoa.js',
   './van-hoa-vn/src/app.js',
+  './game-mini/index.html',
+  './dao-vang/index.html',
+  './dao-vang/style.css',
+  './dao-vang/src/daovang.js',
+  './dao-vang/src/app.js',
+  './dao-vang/images/coin.svg',
+  './dao-vang/images/moneybag.svg',
+  './dao-vang/images/gem.svg',
+  './dao-vang/images/rock.svg',
+  './dao-vang/images/skull.svg',
+  './dao-vang/images/dynamite.svg',
+  './dao-vang/images/clover.svg',
+  './dao-vang/images/book.svg',
+  './dao-vang/images/bolt.svg',
+  './dao-vang/images/sparkles.svg',
+  './dao-vang/images/pig.svg',
+  './dao-vang/images/rabbit.svg',
   './pokemon/images/trimmed/pm0025_00_00_00_big.png',
   './pokemon/images/trimmed/pm0001_00_00_00_big.png',
   './pokemon/images/trimmed/pm0004_00_00_00_big.png',

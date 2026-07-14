@@ -309,3 +309,107 @@ chỗ**, **kỹ năng sống & cảm xúc**, **khoa học khám phá**, **văn h
 - Nhóm 9 (sáng tạo tự do) và phần trang trí của 14.3 **không chấm điểm** — không ghi "thắng/thua" vào Report như các game khác, chỉ ghi thời gian chơi, để đúng tinh thần "chơi để chơi".
 - 13.2 (Phát Âm Theo Tôi) cần xin quyền micro — nên có màn giải thích rõ trước khi xin quyền, và game vẫn chơi được nếu bé/phụ huynh từ chối quyền (bỏ qua bước ghi âm, chỉ nghe mẫu).
 - 14.1 và 14.3 cần đầu tư SVG/asset hình ảnh nhiều hơn các nhóm khác — nên làm sau khi các nhóm "rẻ" (ít asset, nhiều logic) đã xong.
+
+
+Cách chơi game Đào Vàng
+Ở phiên bản chuẩn, game Đào Vàng có cách chơi khá đơn giản và dễ hiểu. Thậm chí, các bạn nhỏ tuổi cũng có thể dễ dàng hiểu rõ cách chơi ngay từ lần tiếp xúc đầu tiên. 
+
+Bạn sẽ hóa thân thành một người thợ mỏ và được trang bị một chiếc cần kéo. Công việc chính của bạn chính là đào được càng nhiều kim loại giá trị càng tốt. Trong quá trình đào, dây kéo sẽ di chuyển qua lại liên tục và bạn cần phải chớp thời cơ chính xác để dây kéo gắp trúng kim loại quý như vàng, kim cương. 
+
+Tùy vào giá trị vật phẩm gắp lên mà bạn sẽ được trả một khoản tiền tương ứng. Sau khi tích đủ số tiền (tương đương với điểm số) cần để vượt màn, bạn sẽ qua màn và đến với thử thách khó hơn tiếp theo. 
+
+choi-game-dao-vang-2
+
+Cần chú ý đến độ lớn của vật phẩm vì vật phẩm càng lớn thì thời gian kéo càng lâu. Nếu bạn tập trung quá nhiều vào vật phẩm lớn mà không để ý đến thời gian của màn chơi, bạn có thể thua trước khi kịp tích đủ số tiền để qua màn.
+
+Ngoài ra, trong game còn có các vật phẩm giá trị thấp như đá, heo, thỏ… Đặc biệt, bạn cần tránh kéo trúng các thùng thuốc nổ vì chúng sẽ phát nổ và làm mất đi các vật phẩm giá trị ở lân cận. 
+
+Đừng quên mua thêm vật phẩm để hỗ trợ cho màn chơi tiếp theo, bao gồm Thuốc nổ – Dynamite, Nước tăng lực – Strength drink, Cỏ 3 lá may mắn – Lucky Clover, Sách sưu tầm đá – Rock Collector Book, Đánh bóng kim cương – Diamond Polish.
+
+Đánh giá âm thanh – đồ họa khi chơi game Đào Vàng 
+Là một tựa game 2D, nhưng Đào Vàng vẫn khiến người chơi cảm thấy thích thú bởi đồ họa dạng hoạt hình đẹp mắt cùng chuyển động khá mượt mà. Nhìn chung, hiệu ứng trong game không có nhiều, chỉ xoay quanh các động tác đơn giản như dây kéo lắc qua lắc lại, kéo vật phẩm lên… 
+
+Ngoài ra, trong quá trình kéo vật phẩm, nhân vật trong game – chính là ảnh thợ đào vàng, thường sẽ có động thái nghiến răng, chau mày. Nếu để bạn, bạn còn có thể nhìn thấy thái độ của chủ cửa hàng sẽ có sự khác biệt khi bạn từ chối hoặc chọn mua vật phẩm mà họ đang bán.
+
+choi-game-dao-vang-3
+
+Bên cạnh đó, bối cảnh của mỗi màn chơi cũng khá đa dạng, đôi khi là thảo nguyên bạt ngàn xanh mướt, đôi khi là ngọn núi hùng vĩ, cũng có lúc là một hoang mạc đơn sơ. 
+
+Về âm thanh, game được trang bị khá nhiều hiệu ứng âm thanh, từ tiếng ròng rọc chạy, tiếng kéo các vật phẩm khác nhau… Ngoài ra, phần nhạc nền của game cũng mang lại cảm giác thoải mái và vui vẻ khi chơi. 
+
+Với đồ họa đơn giản, bạn không cần phải sở hữu một chiếc điện thoại có cấu hình mạnh để có thể chơi game Đào Vàng. Ngược lại, tựa game này khá nhẹ phù hợp với hầu hết các thiết bị hiện nay. Nếu muốn quay lại tuổi thơ với game Đào Vàng, bạn có thể tải về và trải nghiệm từ CH Play (đối với Android) hoặc App Store (đối với iOS). 
+
+Một số tựa game tương tự
+Nếu bạn muốn thử chơi game Đào Vàng nhưng ở một phiên bản độc đáo và mới lạ hơn, bạn có thể tham khảo một trong số các gợi ý sau:
+
+Tìm Vàng
+Game Tìm Vàng có cách chơi khá giống với Đào Vàng, nhưng bối cảnh, nhân vật và vật phẩm khi đào sẽ có đôi chút khác biệt. Game có tối đa 20 màn chơi và bạn cần đạt hoàn thành các mục tiêu nhất định để lần lượt vượt qua các màn. Trò chơi này có thể trải nghiệm được trên máy tính, và bạn chỉ cần canh đúng thời điểm để thả cần câu bằng cách click chuột hoặc ấn nút mũi tên chỉ xuống. 
+
+choi-game-dao-vang-4
+
+Đập vàng
+Khác với cách chơi game Đào Vàng, game Đập Vàng sẽ khiến bạn liên tưởng đến các trò chơi đập gạch. Trong game, bạn sẽ phải ném rìu vào những khu vực có từ 2 viên đá cùng màu trở lên, số đá đập được càng nhiều thì điểm lại càng cao. Hãy cân nhắc kỹ lưỡng để ném một cách chuẩn xác nhất khi chơi game. 
+
+choi-game-dao-vang-5
+
+Cơn sốt tìm vàng
+Tương tự với Đập vàng, trò chơi Cơn sốt tìm vàng cũng thuộc thể loại đập gạch. Người chơi sẽ kiếm điểm bằng cách chọn những khu vực có càng nhiều viên đá trùng màu càng tốt, khi tích đủ số lượng điểm cần thiết để qua màn, bạn sẽ tiếp tục đến với màn tiếp theo và tất nhiên là độ khó cũng sẽ tăng dần lên. 
+
+choi-game-dao-vang-6
+
+Vòng quay tìm vàng
+Trò chơi này mang yếu tố “may rủi” khá cao. Trong một vòng quay với nhiều vật phẩm khác nhau, người chơi sẽ được cung cấp 50 lượt quay. Sau mỗi lần quay, bạn sẽ nhận được các vật phẩm tương ứng và sử dụng chúng để xây dựng ngôi làng. Hãy tích cực quay và bảo vệ ngôi làng trước những thế lực thù địch đang hăm he bên ngoài. 
+
+choi-game-dao-vang-7
+
+Thợ đào vàng
+Cách chơi của Thợ đào vàng giống đến 80% so với các chơi game Đào Vàng. Trong game, bạn cũng sẽ bắt gặp các vật phẩm khác nhau và nhiệm vụ của bạn là gắp được càng nhiều vật phẩm giá trị càng tốt. Tuy nhiên, hãy cần thận và ngắm chuẩn xác khi thả cần câu vì hầu hết vàng, kim cương đều sẽ bị chắn bởi viên đá lớn mà giá trị chẳng đáng bao nhiêu. 
+
+choi-game-dao-vang-8
+
+Xây thị trấn vàng
+Ngay từ cái tên, chúng ta đã hiểu đôi nét về cách chơi của tựa game này. Về cơ bản, bạn sẽ phải điều khiển xe đi chở vàng và xây dựng một thị trấn sầm uất trong mơ. Xe chạy càng nhiều lượt thì tỷ lệ tăng cấp càng cao, và các công trình của bạn sẽ càng “xịn sò” hơn. 
+
+choi-game-dao-vang-9
+
+Thợ đào vàng Tom
+Đây là một phiên bản khác của trò chơi Đào Vàng. Trong game, bạn sẽ hóa thân thành nhân vật Tom – một thợ đào vàng chuyên nghiệp và nhiệm vụ chính của bạn là điều khiển cần kéo để gắp được càng nhiều vật phẩm giá trị càng tốt. Sau khi đạt đủ điểm yêu cầu, bạn sẽ được qua màn và đến với cấp độ khó hơn của game. 
+
+choi-game-dao-vang-10
+
+Kẻ đánh cắp vàng
+Đây là một trò chơi thuộc thể loại nhập vai phiêu lưu cực kỳ thú vị và hấp dẫn. Trong game, bạn sẽ phải sử dụng các phím lên, xuống, qua trái, qua phải để điều khiển nhân vật thu thập càng nhiều vàng càng tốt. Số vàng này sẽ được sử dụng để xây dựng nên tòa lâu đài trong mơ cho bạn. Ngoài ra, đừng quên sử dụng phím cách để nhân vật chạy nhanh hơn hoặc nhảy cao hơn với 2 lần nhấn phím mũi tên hướng lên. 
+
+choi-game-dao-vang-11
+
+Quý ngài săn vàng
+Tương tự với cách chơi game Đào Vàng, bạn cũng sẽ bắt đầu hành trình tìm kiếm các vật phẩm giá trị bằng cách thả cần câu chuẩn xác. Mỗi vật phẩm sẽ có giá trị khác nhau, và việc thu thập các vật phẩm giá trị cao sẽ giúp bạn qua màn một cách nhanh chóng và dễ dàng hơn. 
+
+choi-game-dao-vang-12
+
+Hũ vàng của Cleo
+Với trò chơi này, bạn sẽ điều khiển nhân vật của mình – chính là nàng Cleo để thu thập vàng và tiến đến chiến thắng cuối cùng. Nhìn chung, game khá đơn giản và dễ chơi, nên bạn có thể thử trải nghiệm nếu như đang tìm kiếm một trò chơi thuần giải trí. 
+
+choi-game-dao-vang-13
+
+Vị vua vàng
+Mặc dù cái tên là vậy, nhưng đây không phải là trò chơi thuộc mô típ Đào Vàng. Ngược lại, game khá giống với thể loại nối kim cương kinh điển. Trong game, bạn chỉ cần tìm kiếm và nối từ 3 hũ vàng lại với nhau theo hàng ngang hoặc theo hàng dọc để tính điểm. 
+
+choi-game-dao-vang-14
+
+Cuộc săn vàng
+Nếu bạn đang tìm kiếm một tựa game có cách chơi tương tự với cách chơi game Đào Vàng phiên bản cổ điển, Cuộc săn vàng sẽ là gợi ý hàng đầu dành cho bạn. Tuy nhiên, game này sẽ có một chút biến tấu khá thú vị. Trong game, các chú chuột sẽ ôm những vật phẩm có giá trị và bạn cần điều khiển cần câu một cách khéo léo nếu như muốn đến với những màn chơi tiếp theo.
+
+choi-game-dao-vang-15
+
+Đường hầm săn vàng
+Bạn sẽ sử dụng cây cuốc để đập vỡ các hòn đá lớn và thu thập vàng đang ẩn mình bên trong đó. Tuy nhiên, trong quá trình đó, bạn cần khéo léo di chuyển để tránh bị các viên đá vỡ ra rơi trúng mình. Sau khi thu thập đủ lượng vàng cần thiết, bạn sẽ giành chiến thắng cuối cùng.
+
+choi-game-dao-vang-16
+
+Đào hầm vàng
+Game này có cách chơi khá mới lạ và thú vị. Trong game, bạn sẽ vào vai một viên bóng và dùng những đường lăn của mình để thu thập vàng. Hãy vẽ những đường lăn đẹp mắt để thu thập được càng nhiều vàng càng tốt. Ngoài ra, trong quá trình di chuyển, bạn cũng cần tránh các chướng ngại vật để suôn sẻ về đến đích. 
+
+choi-game-dao-vang-17
+
+Bên trên là cách chơi game Đào Vàng và một số tựa game tương tự mà bạn có thể tham khảo. Nếu đây là tựa game gắn liền với tuổi thơ “chinh chiến” của bạn, đừng ngại ngần chia sẻ cảm nghĩ của mình với mọi người. Ngoài ra, đừng quên tải game và trải nghiệm cảm giác rất “xưa” cùng những tựa game trên, bạn nhé!
