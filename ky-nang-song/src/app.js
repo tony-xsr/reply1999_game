@@ -128,42 +128,48 @@ RENDER['cam-xuc'] = () => {
     card.className = 'situ-card';
     card.innerHTML = `<div class="s-emoji">${q.situation.emoji}</div><div class="s-text">${q.situation.text}</div>`;
     els.field.appendChild(card);
-    state.saySentence = q.situation.text;
 
     for (const opt of q.options) {
       const btn = document.createElement('button');
       btn.className = 'face-btn';
       btn.innerHTML = `<span class="f-emoji">${opt.face}</span><span class="f-name">${opt.name}</span>`;
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        speak(opt.name);
         if (opt.id !== q.answer) return wrong(btn);
         sfx.match(2);
-        speak(`${q.situation.text} — bé cảm thấy ${opt.name}!`);
+        setTimeout(() => speak(`${q.situation.text} — bé cảm thấy ${opt.name}!`), 550);
         questionDone();
         return null;
       });
       els.tray.appendChild(btn);
     }
+    const names = q.options.map((o) => o.name).join(', ');
+    state.saySentence = `${q.situation.text}. ${t('kynang.q.choices', 'Chọn')}: ${names}.`;
   } else {
     els.question.textContent = t('kynang.q.e2s', 'Cảm xúc này hợp với tình huống nào?');
     const card = document.createElement('div');
     card.className = 'situ-card';
     card.innerHTML = `<div class="s-emoji">${q.emotion.face}</div><div class="s-text">${q.emotion.name.toUpperCase()}</div>`;
     els.field.appendChild(card);
-    state.saySentence = `Cảm xúc ${q.emotion.name}`;
 
     for (const opt of q.options) {
       const btn = document.createElement('button');
       btn.className = 'situ-btn';
       btn.innerHTML = `<span class="b-emoji">${opt.emoji}</span><span class="b-text">${opt.text}</span>`;
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        speak(opt.text);
         if (opt !== q.answer) return wrong(btn);
         sfx.match(2);
-        speak(`${opt.text} — đúng là cảm xúc ${q.emotion.name}!`);
+        setTimeout(() => speak(`${opt.text} — đúng là cảm xúc ${q.emotion.name}!`), 700);
         questionDone();
         return null;
       });
       els.tray.appendChild(btn);
     }
+    const texts = q.options.map((o) => o.text).join(', ');
+    state.saySentence = `Cảm xúc ${q.emotion.name}. ${t('kynang.q.choices', 'Chọn')}: ${texts}.`;
   }
   speak(state.saySentence);
 };
