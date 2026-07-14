@@ -19,13 +19,19 @@ const t = (key, fallback) => {
 const $ = (id) => document.getElementById(id);
 const els = {
   subLine: $('subLine'), home: $('homeScreen'), play: $('playScreen'),
-  btnBack: $('btnBack'), btnNew: $('btnNew'), btnSound: $('btnSound'),
+  btnBack: $('btnBack'), btnNew: $('btnNew'), btnHelp: $('btnHelp'), btnSound: $('btnSound'),
   cheer: $('cheer'), cheerEmoji: $('cheerEmoji'), cheerText: $('cheerText'),
   btnAgain: $('btnAgain'), btnHome2: $('btnHome2'),
 };
 
-const state = { game: null, startedAt: Date.now(), ctx: {}, raf: 0 };
+const state = { game: null, startedAt: Date.now(), ctx: {}, raf: 0, instruction: '' };
 bindMute(() => sfx.muted);
+
+/** Đọc hướng dẫn + lưu lại để bấm ❓ nghe lại được (bé chưa đọc chữ vẫn chơi được). */
+function sayInstruction(text) {
+  state.instruction = text;
+  speak(text);
+}
 
 /* ===== Khung chung ===== */
 
@@ -69,6 +75,7 @@ function showHome() {
   els.btnBack.hidden = true;
   els.btnNew.hidden = true;
   els.subLine.textContent = '';
+  state.instruction = t('troxua.help.home', 'Chọn một trò chơi: Oẳn tù tì, Bắn bi, Ném lon, hoặc Nhảy dây!');
 }
 
 function startGame(game) {
@@ -162,7 +169,7 @@ function startRps() {
   }
 
   els.subLine.textContent = t('troxua.rps.hint', 'Thắng 3 ván trước là vô địch! Bao bọc búa, búa đập kéo, kéo cắt bao');
-  speak('Oẳn tù tì! Chọn búa, bao hoặc kéo nhé!');
+  sayInstruction('Oẳn tù tì! Chọn búa, bao hoặc kéo nhé!');
   state.ctx.rpsPlay = play;
 }
 
@@ -237,16 +244,22 @@ function startMarble() {
 
   const pos = (e) => {
     const rect = canvas.getBoundingClientRect();
+    // Không kẹp về 0-640: kéo tay ra ngoài mép canvas vẫn tính đúng khoảng cách/lực
     return { x: ((e.clientX - rect.left) / rect.width) * 640, y: ((e.clientY - rect.top) / rect.height) * 640 };
   };
-  canvas.addEventListener('pointerdown', (e) => { if (!rolling && board.shots > 0) aim = pos(e); draw(); });
+  canvas.addEventListener('pointerdown', (e) => {
+    if (!rolling && board.shots > 0) aim = pos(e);
+    // Giữ pointer dù tay kéo ra khỏi canvas — bi ở gần mép dưới nên cần kéo ra ngoài mới đủ lực
+    canvas.setPointerCapture(e.pointerId);
+    draw();
+  });
   canvas.addEventListener('pointermove', (e) => { if (aim && !rolling) { aim = pos(e); draw(); } });
   canvas.addEventListener('pointerup', () => {
     if (!aim || rolling || board.shots <= 0) return;
     // kéo về phía nào bắn về phía NGƯỢC lại (ná cao su)
     const dx = me.x - aim.x;
     const dy = me.y - aim.y;
-    const power = Math.min(22, Math.hypot(dx, dy) / 14);
+    const power = Math.min(22, Math.hypot(dx, dy) / 9);
     if (power > 1.5) {
       me.vx = (dx / Math.hypot(dx, dy)) * power;
       me.vy = (dy / Math.hypot(dx, dy)) * power;
@@ -261,7 +274,7 @@ function startMarble() {
   });
 
   hud();
-  speak('Kéo bi xanh như ná cao su rồi thả để bắn bi vàng văng khỏi vòng nhé!');
+  sayInstruction('Kéo bi xanh như ná cao su rồi thả để bắn bi vàng văng khỏi vòng nhé!');
   draw();
   state.ctx.marbleLoop = loop;
 }
@@ -349,7 +362,11 @@ function startCans() {
     const rect = canvas.getBoundingClientRect();
     return { x: ((e.clientX - rect.left) / rect.width) * 640, y: ((e.clientY - rect.top) / rect.height) * 640 };
   };
-  canvas.addEventListener('pointerdown', (e) => { if (!flying && game.throws > 0) aim = pos(e); draw(); });
+  canvas.addEventListener('pointerdown', (e) => {
+    if (!flying && game.throws > 0) aim = pos(e);
+    canvas.setPointerCapture(e.pointerId);
+    draw();
+  });
   canvas.addEventListener('pointermove', (e) => { if (aim && !flying) { aim = pos(e); draw(); } });
   canvas.addEventListener('pointerup', () => {
     if (!aim || flying || game.throws <= 0) return;
@@ -370,7 +387,7 @@ function startCans() {
   });
 
   hud();
-  speak('Kéo để chỉnh hướng và lực, thả tay để ném bóng đổ lon nhé!');
+  sayInstruction('Kéo để chỉnh hướng và lực, thả tay để ném bóng đổ lon nhé!');
   draw();
   state.ctx.cansLoop = loop;
   state.ctx.cansThrow = (power, angle) => { ball = throwBall(power, angle); game.throws--; flying = true; hud(); loop(); };
@@ -451,7 +468,7 @@ function startRope() {
   document.addEventListener('keydown', state.ctx.ropeKey);
 
   hud();
-  speak('Dây quét tới chân thì chạm màn hình để nhảy nhé!');
+  sayInstruction('Dây quét tới chân thì chạm màn hình để nhảy nhé!');
   last = performance.now();
   state.raf = requestAnimationFrame(loop);
   state.ctx.ropeJump = () => ropeJump(s);
@@ -468,6 +485,7 @@ els.btnBack.addEventListener('click', showHome);
 els.btnHome2.addEventListener('click', showHome);
 els.btnNew.addEventListener('click', () => { sfx.shuffle(); startGame(state.game); });
 els.btnAgain.addEventListener('click', () => { sfx.select(); startGame(state.game); });
+els.btnHelp.addEventListener('click', () => { sfx.select(); speak(state.instruction); });
 els.btnSound.addEventListener('click', () => {
   sfx.toggleMute();
   els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
@@ -476,6 +494,7 @@ els.btnSound.addEventListener('click', () => {
 
 els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
 showHome();
+speak(state.instruction); // đọc gợi ý ngay khi mới vào trang, bé chưa biết bấm ❓ cũng nghe được
 
 // Hook cho e2e test
 window.__troxua = { state, startGame, showHome };
