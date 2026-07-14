@@ -1,0 +1,8 @@
+{
+  "name": "dao-vang",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/daovang.test.js"
+  }
+}
