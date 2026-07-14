@@ -33,6 +33,12 @@ const MODES = {
   mice: { drift: true, hard: false },
   hard: { drift: false, hard: true },
 };
+// Vào thẳng qua link riêng (?mode=...) thì đổi luôn tiêu đề để không còn cảm giác
+// "đang ở trong Đào Vàng" — thẻ ở Game Mini trỏ tới đây trông như 1 game độc lập.
+const MODE_TITLE = {
+  mice: '🐭 Cuộc Săn Vàng',
+  hard: '🪨 Thợ Mỏ Liều Lĩnh',
+};
 const HARD_PROB = {
   gold_s: 0.14, gold_m: 0.12, gold_l: 0.06, diamond: 0.04, dynamite: 0.06,
   rock: 0.32, skull: 0.12, pig: 0.08, rabbit: 0.06,
@@ -337,8 +343,21 @@ els.btnSound.addEventListener('click', () => {
 });
 
 els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
-showHome();
-speak(state.instruction);
+// Vào thẳng 1 chế độ qua link riêng (vd. thẻ "Cuộc Săn Vàng" ở Game Mini trỏ tới ?mode=mice)
+// thay vì luôn phải qua màn chọn chế độ trước.
+const urlMode = new URLSearchParams(location.search).get('mode');
+if (urlMode && MODES[urlMode]) {
+  if (MODE_TITLE[urlMode]) {
+    document.title = MODE_TITLE[urlMode];
+    const h1 = document.querySelector('header h1');
+    h1.removeAttribute('data-i18n'); // nếu không, i18n.js sẽ ghi đè lại tiêu đề gốc lúc DOMContentLoaded
+    h1.textContent = MODE_TITLE[urlMode];
+  }
+  startMode(urlMode);
+} else {
+  showHome();
+  speak(state.instruction);
+}
 
 // Hook cho e2e test
 window.__daovang = { state, startMode, showHome, showShop, TYPES };
