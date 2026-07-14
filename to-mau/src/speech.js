@@ -14,7 +14,8 @@ export function speak(text, { rate = 0.9, lang = 'vi-VN' } = {}) {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = lang;
     u.rate = rate;
-    const voice = speechSynthesis.getVoices().find((v) => v.lang?.startsWith('vi'));
+    const prefix = lang.split('-')[0];
+    const voice = speechSynthesis.getVoices().find((v) => v.lang?.startsWith(prefix));
     if (voice) u.voice = voice;
     speechSynthesis.speak(u);
   } catch { /* trình duyệt không hỗ trợ */ }
