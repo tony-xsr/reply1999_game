@@ -1,0 +1,8 @@
+{
+  "name": "dap-vang",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/dapvang.test.js"
+  }
+}
