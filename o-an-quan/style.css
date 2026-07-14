@@ -4,12 +4,12 @@
 
 :root {
   --bg: #fff6e8;
-  --panel: #ffffff;
+  --panel: #fffaf2;     /* trang nga, diu hon thay vi trang choi */
   --ink: #241e2e;
   --muted: #5d5370;
   --accent: #ff8a3d;      /* trang trí: viền, nhấn nhá */
   --accent-deep: #c2410c; /* chữ cam & nền nút chữ trắng — tương phản ≥5:1 */
-  --line: #f0e2cc;
+  --line: #a8834a;      /* vien dam hon -- tuong phan ro tren nen trang/kem */
   --dirt: #e8d5ae;
   --chalk: #8a6a3a;
 }
