@@ -412,4 +412,105 @@ Game này có cách chơi khá mới lạ và thú vị. Trong game, bạn sẽ 
 
 choi-game-dao-vang-17
 
-Bên trên là cách chơi game Đào Vàng và một số tựa game tương tự mà bạn có thể tham khảo. Nếu đây là tựa game gắn liền với tuổi thơ “chinh chiến” của bạn, đừng ngại ngần chia sẻ cảm nghĩ của mình với mọi người. Ngoài ra, đừng quên tải game và trải nghiệm cảm giác rất “xưa” cùng những tựa game trên, bạn nhé!
+Bên trên là cách chơi game Đào Vàng và một số tựa game tương tự mà bạn có thể tham khảo. Nếu đây là tựa game gắn liền với tuổi thơ “chinh chiến” của bạn, đừng ngại ngần chia sẻ cảm nghĩ của mình với mọi người. Ngoài ra, đừng quên tải game và trải nghiệm cảm giác rất “xưa” cùng những tựa game trên, bạn nhé 
+
+
+## TIếp tục bổ sung games
+Các game tuổi thơ như bắn máy bay , pokemon đại chiến , hợp nhất caác số , plants vs zoombier , trốn tìm , kim cương , chém hoa quả, hãy viết tiếp kỹ càng và research kỹ , ghi vào , rồi tìm hình ảnh ,logo ,icon ,game assets và sau đó tôi sẽ nghiên cứu tiếp 
+
+### Lưu ý chung trước khi đọc — bản quyền & nguồn hình ảnh
+
+Repo này chạy hoàn toàn offline/local, nhưng **chạy local không đồng nghĩa được phép sao chép asset/tên gọi của game thương mại có bản quyền** — Pokémon (Nintendo/Game Freak/Creatures), Plants vs. Zombies (PopCap/EA) và Fruit Ninja (Halfbrick) đều là những thương hiệu được bảo hộ và thực thi rất gắt gao. Với 3 game này, phần nghiên cứu bên dưới **giữ nguyên cơ chế chơi (mechanic) nhưng đề xuất tên gọi + nhân vật + hình ảnh gốc**, không sao chép logo/nhân vật/asset thật — đúng cách đã làm với Đào Vàng (lấy cảm hứng cơ chế cần câu của Gold Miner, tự vẽ hình bằng canvas/CSS + icon Twemoji CC-BY thay vì asset gốc). Các game còn lại (bắn máy bay, hợp nhất số, trốn tìm, kim cương, chém hoa quả) đều thuộc **thể loại chơi phổ biến** (đã bị nhân bản hàng nghìn lần dưới nhiều tên khác nhau), không gắn với 1 thương hiệu cụ thể nên an toàn hơn nhiều.
+
+Nguồn hình ảnh đề xuất chung cho cả 7 game, theo đúng 2 cách đã dùng trong repo:
+1. **Tự vẽ bằng canvas/CSS** (gradient, shape, animation) — cách chủ đạo của toàn bộ 27 game hiện có (rắn, tetris, xe tăng, ngựa cờ, đào vàng...).
+2. **Icon mã nguồn mở giấy phép tự do** (Twemoji — CC-BY 4.0, đã dùng cho Đào Vàng) cho các icon rời rạc (trái cây, con vật, ngôi sao, kim cương...) khi cần trông "chỉn chu" hơn hình vẽ tay.
+
+---
+
+### 1. Bắn Máy Bay (đề xuất tên: "Phi Đội Nhí")
+
+**Cách chơi:** Game bắn súng cuộn màn hình dọc (vertical scrolling shoot-'em-up) kinh điển. Máy bay của bé ở nửa dưới màn hình, di chuyển trái/phải (hoặc tự do 2 chiều) bằng kéo tay/d-pad, tự động bắn hoặc bắn khi chạm màn hình. Vật cản/mục tiêu bay từ trên xuống theo waypoint hoặc rơi ngẫu nhiên, bé né hoặc bắn hạ để ăn điểm. Có vật phẩm rơi ra để nhặt (tăng tốc độ bắn, khiên bảo vệ, thêm máy bay hộ tống), boss xuất hiện sau mỗi vài chục giây/số điểm mốc.
+
+**Đề xuất "hiền hóa" cho trẻ em:** thay vì khung cảnh "phe ta bắn phe địch" (tính đối đầu/chiến tranh), đổi mục tiêu bắn hạ thành vật cản trung tính — thiên thạch, ong bắp cày nghịch ngợm, mây giông — hoặc đổi hẳn thành game né + thu thập (không bắn ai, chỉ né chướng ngại vật và gom sao/khinh khí cầu), phù hợp tinh thần "giải trí lành mạnh" của cả bộ sưu tập. Máy bay có thể thiết kế dạng thú/robot đáng yêu thay vì khí tài quân sự thật.
+
+**Tựa game tham khảo (thể loại phổ biến, không gắn 1 thương hiệu cụ thể):** 1942, Raiden, Galaga, Sky Force Reloaded, Chicken Invaders (đã tự "hiền hóa" bằng theme gà từ trước).
+
+**Đồ họa/âm thanh:** nền trời cuộn dọc liên tục (parallax 2 lớp mây), hiệu ứng "nổ" dạng bung hoa/pop tròn thay vì cháy nổ thật, nhạc nền tempo nhanh vui tươi, giọng đọc số điểm/combo cho bé nghe theo mô-típ đã dùng ở Trò Xưa và Đào Vàng.
+
+---
+
+### 2. Pokémon Đại Chiến (đề xuất tên gốc: "Thú Cưng Đại Chiến")
+
+**Cách chơi:** Đấu theo lượt (turn-based), mỗi bên có 1-3 con thú, mỗi lượt chọn 1 trong vài chiêu thức, trừ máu theo công thức sát thương có tính hệ khắc chế (vd. hệ Nước > Lửa > Cỏ > Nước theo vòng tròn tương khắc, hoặc đơn giản hơn cho trẻ nhỏ: mỗi hệ chỉ khắc đúng 1 hệ khác), thanh HP hiển thị trực quan, thắng thì lên cấp/học chiêu mới, có thể "thu phục" thêm thú mới sau mỗi trận.
+
+**⚠️ Lưu ý bản quyền quan trọng:** "Pokémon" là một trong những thương hiệu được bảo hộ gắt gao nhất thế giới — tên gọi, hơn 1000 nhân vật, hệ thống loại hình đều thuộc sở hữu Nintendo/Game Freak/Creatures và bị truy quét cả với dự án fan-made phi thương mại. Đáng chú ý: thư mục `pokemon/` hiện có trong repo (game nối hình kiểu Onet) đang dùng ảnh nhân vật Pokémon thật, có từ trước phiên làm việc này — bản thân điều đó đã tiềm ẩn rủi ro dù chỉ chạy offline/local. Nếu mở rộng thành hệ thống "đại chiến" đầy đủ (turn-based, tên/hệ nguyên tố/thiết kế nhân vật giống hệt), mức độ rủi ro sẽ tăng lên đáng kể, đặc biệt nếu sau này có ý định chia sẻ/public repo. Đề xuất: xây bộ thú cưng **hoàn toàn gốc** — tên, hình dáng, hệ nguyên tố tự đặt (có thể lấy cảm hứng từ 12 con giáp hoặc động vật Việt Nam quen thuộc: trâu, gà, cá, v.v. cho gần gũi văn hóa) — giữ đúng cơ chế turn-based + khắc hệ nhưng không dùng bất kỳ tên/hình nào của Pokémon thật.
+
+**Tựa game tham khảo (chỉ để hiểu cơ chế, không sao chép asset):** Pokémon, Dragon Quest Monsters, Temtem, Digimon, Monster Rancher.
+
+**Đồ họa/âm thanh:** thiết kế quái vật dạng vector đơn giản/pixel-art tự vẽ (dễ làm nhất quán phong cách với các game khác trong bộ), hiệu ứng tấn công đơn giản (rung lắc + flash màu khi trúng đòn, không cần animation phức tạp), nhạc chiến đấu vui nhộn tempo vừa, giọng đọc tên chiêu thức/kết quả trận đấu cho bé chưa đọc chữ.
+
+---
+
+### 3. Hợp Nhất Các Số ("2048" — đề xuất tên: "Gộp Số Vui")
+
+**Cách chơi:** Lưới ô vuông (thường 4×4), vuốt 1 trong 4 hướng để toàn bộ ô trượt về phía đó; 2 ô cùng số chạm nhau sẽ gộp thành 1 ô mang giá trị gấp đôi; sau mỗi lượt vuốt, 1 ô mới (giá trị nhỏ) xuất hiện ngẫu nhiên; mục tiêu đạt được ô có giá trị đích (2048 hoặc tùy chỉnh); thua khi bàn đầy kín mà không còn ô nào gộp được nữa.
+
+**Ghi chú bản quyền:** cơ chế "trượt & gộp" (phổ biến qua game *2048* của Gabriele Cirulli, vốn lấy cảm hứng từ *Threes!* của Asher Vollmer) đã bị nhân bản hàng nghìn lần dưới đủ loại tên khác nhau — đây gần như là cơ chế thuộc về thể loại chung (genre-generic), an toàn để tự viết lại với chủ đề/tên riêng.
+
+**Đề xuất cho trẻ em (rất hợp với hướng "học mà chơi" của cả bộ sưu tập):** thay số trừu tượng bằng hình trực quan — gộp 2 con vật nhỏ giống nhau thành 1 con to hơn (trứng → gà con → gà mẹ), hoặc gộp 2 trái cây nhỏ thành trái to hơn; hoặc giữ nguyên số nhưng thêm giọng đọc số khi gộp, ăn khớp với các game đếm số đã có (Nhảy Lò Cò Số, Toán Lớp 1).
+
+**Tựa game tham khảo:** 2048, Threes!, 1010!, Merge Dragons, Triple Town.
+
+**Đồ họa/âm thanh:** ô vuông bo góc, mỗi cấp giá trị 1 màu riêng (giống bảng màu tăng dần của bản gốc, dễ tự làm bằng CSS gradient), hiệu ứng nảy nhẹ (pop) khi gộp ô, âm thanh "ting" tăng dần cao độ theo cấp số — vừa vui tai vừa giúp bé cảm nhận "số càng lớn âm càng cao".
+
+---
+
+### 4. Thực Vật Đại Chiến Zombie ("Plants vs. Zombies" — đề xuất tên gốc: "Vườn Rau Thần Kỳ")
+
+**Cách chơi:** Tower-defense chia theo làn ngang (thường 5 làn). Bé đặt "cây phòng thủ" vào các ô trống trên làn, mỗi cây tốn 1 lượng "năng lượng" tích lũy dần theo thời gian hoặc nhặt được trên sân; quái vật xuất hiện từ mép phải, di chuyển chậm rãi sang trái theo đúng làn của chúng; cây tự động tấn công quái đi vào tầm; bé thua nếu có quái đi lọt hết làn tới nhà (mép trái); thắng khi cầm cự hết số đợt (wave) quy định, độ khó/số lượng quái tăng dần theo đợt.
+
+**⚠️ Lưu ý bản quyền quan trọng:** "Plants vs. Zombies" là thương hiệu của PopCap Games/Electronic Arts — tên gọi và toàn bộ thiết kế nhân vật (Peashooter, Sunflower, Zombie đội nón...) đều được bảo hộ, không nên sao chép. Đề xuất: giữ đúng cơ chế tower-defense theo làn (đặt phòng thủ – tài nguyên tích lũy – làn sóng địch tăng dần) nhưng đổi hẳn chủ đề — ví dụ khu vườn rau của bé bị sâu bọ/côn trùng phá hoại, bé trồng các loại rau/hoa có khả năng đặc biệt để xua đuổi sâu bọ. Ngoài vấn đề bản quyền, chủ đề "zombie" cũng hơi nặng cho trẻ nhỏ tuổi mẫu giáo dù bản gốc đã vẽ theo phong cách hài hước — đổi thành "sâu bọ tinh nghịch" sẽ thân thiện và phù hợp lứa tuổi hơn.
+
+**Tựa game tham khảo (chỉ để hiểu cơ chế):** Plants vs. Zombies, Kingdom Rush, Bloons TD, Fieldrunners.
+
+**Đồ họa/âm thanh:** nền vườn/sân cỏ chia làn rõ ràng bằng viền màu xen kẽ, icon cây/côn trùng dạng vector đơn giản dễ phân biệt, nhạc nền vui tươi rộn ràng (không dùng nhạc rùng rợn), hiệu ứng "gãi đầu ngơ ngác" khi côn trùng bị đẩy lui thay vì hiệu ứng bạo lực.
+
+---
+
+### 5. Trốn Tìm (đề xuất chuyển thể: "Bé Tìm Bạn" — dạng Hidden Object)
+
+**Cách chơi:** Trốn tìm vốn là trò chơi vận động ngoài trời truyền thống (đã có nhắc trong nhóm "Trò Xưa"), không phải 1 tựa game điện tử cụ thể nên không có vấn đề bản quyền — nhưng cũng cần chuyển thể phù hợp với màn hình. Hướng chuyển thể tự nhiên nhất là **hidden object** (tìm đồ vật/nhân vật ẩn trong tranh): hiển thị 1 khung cảnh vẽ chi tiết (sân trường, công viên, nhà bà...), cho danh sách vài bạn nhỏ/đồ vật đang "trốn" trong tranh, bé chạm đúng vị trí ẩn trong giới hạn thời gian; độ khó tăng dần theo cảnh phức tạp hơn và vật ẩn kỹ hơn (lẫn màu nền, chỉ lộ 1 phần nhỏ...). Biến thể thay thế: "tìm điểm khác biệt" giữa 2 bức tranh gần giống hệt nhau.
+
+**Tựa game tham khảo:** Hidden Folks, dòng game "Tìm điểm khác biệt" phổ biến trên di động, June's Journey.
+
+**Đồ họa/âm thanh:** tranh nền vẽ tay/vector nhiều chi tiết theo bối cảnh quen thuộc với trẻ Việt Nam (sân trường, chợ quê, công viên), hiệu ứng lấp lánh + âm thanh "tinh" khi tìm đúng, giọng đọc khen ngợi/gợi ý khi bé bí (ăn khớp mô-típ "đọc to hướng dẫn" đã làm cho các game khác trong bộ).
+
+---
+
+### 6. Kim Cương (đề xuất tên: "Kim Cương Lấp Lánh")
+
+**Ghi chú quan trọng — tránh trùng lặp:** bộ sưu tập hiện đã có 2 game thuộc họ "nối màu": **Vị Vua Vàng** (đổi chỗ 2 ô liền kề để tạo hàng ≥3 — cơ chế kiểu Bejeweled/Candy Crush) và **Đập Vàng** (bấm cụm ≥2 ô liền kề cùng màu để đập vỡ — cơ chế kiểu SameGame). Nếu "Kim Cương" chỉ lặp lại 1 trong 2 cơ chế trên với vỏ bọc khác thì sẽ khá dư thừa. Đề xuất 2 hướng THỰC SỰ khác biệt để cân nhắc:
+
+- **Kim cương rơi** (falling-block match, kiểu Puzzle League/Tetris Attack): các hàng kim cương liên tục đẩy từ dưới lên; bé chỉ được đổi chỗ 2 ô NẰM NGANG CẠNH NHAU (không phải chọn-rồi-đổi tự do như Vị Vua Vàng); nếu hàng kim cương chạm tới nóc bàn thì thua — tạo nhịp độ nhanh, dồn dập hơn hẳn Vị Vua Vàng.
+- **Kim cương nối đường** (kiểu Flow Free/Pipe): kéo nối các viên kim cương cùng màu thành 1 đường liền mạch không tự cắt nhau — hoàn toàn khác cơ chế "đổi chỗ" hay "đập cụm" đã có.
+
+**Tựa game tham khảo:** Bejeweled, Candy Crush Saga, Puzzle League/Tetris Attack, Flow Free.
+
+**Đồ họa/âm thanh:** có thể tái sử dụng icon `gem.svg` (Twemoji, CC-BY) đã tải sẵn cho Đào Vàng, vẽ thêm biến thể nhiều màu; hiệu ứng lấp lánh/tỏa sáng khi khớp được kim cương, âm thanh chuông trong trẻo khi ăn điểm.
+
+---
+
+### 7. Chém Hoa Quả ("Fruit Ninja" — đề xuất tên gốc: "Bé Hái Trái Cây")
+
+**Cách chơi:** Trái cây được "tung" lên từ mép dưới màn hình theo quỹ đạo parabol thật (dùng lại đúng công thức vật lý trọng lực đã viết cho Ném Lon trong Trò Xưa: vận tốc ban đầu + trọng lực kéo xuống dần), bé vuốt tay ngang qua trái cây để "chém" — tính bằng giao điểm giữa đoạn đường vuốt và vị trí trái cây tại thời điểm đó; né không chạm phải vật cấm (bom); combo tính điểm cao hơn khi chém trúng nhiều trái trong 1 lần vuốt liên tục; thua khi để rơi quá N trái mà không chém trúng.
+
+**⚠️ Lưu ý bản quyền:** "Fruit Ninja" là thương hiệu của Halfbrick Studios — nên tránh dùng đúng tên gọi và hình ảnh "lưỡi kiếm/ninja" đặc trưng của họ. Cơ chế lõi "vuốt để chém vật bay" thì đã được nhân bản rất nhiều dưới các tên khác nhau nên an toàn để viết lại. Đề xuất đổi hẳn phần hình ảnh "lưỡi kiếm ninja" (hơi mang tính bạo lực với trẻ nhỏ) thành vệt tay sáng lấp lánh hoặc hình bàn tay bé hái trái cây, giữ đúng cảm giác "vuốt nhanh, đã tay" nhưng thân thiện hơn với lứa tuổi mẫu giáo/tiểu học.
+
+**Tựa game tham khảo (chỉ để hiểu cơ chế):** Fruit Ninja, và rất nhiều clone "vuốt chém" khác trên chợ ứng dụng.
+
+**Đồ họa/âm thanh:** trái cây vector tươi sáng bay theo đúng vật lý (tái dùng engine Ném Lon), hiệu ứng "bổ đôi" khi chém trúng (2 nửa văng ra 2 hướng theo quán tính vốn có), âm thanh "chíu/bụp" giòn tai kèm giọng đọc tên trái cây khi chém trúng (kết hợp học từ vựng, ăn khớp tinh thần "vừa chơi vừa học" của cả bộ sưu tập), nhạc nền sôi động tempo nhanh.
+
+---
+
+Cả 7 game trên đều mới ở mức **nghiên cứu/lên ý tưởng**, chưa bắt tay code. Khi quyết định làm game nào, nên làm theo đúng quy trình đã áp dụng cho các game trong nhóm "Game Mini" (Đào Vàng, Đập Vàng, Vị Vua Vàng...): viết logic thuần (pure function) kèm unit test trước, rồi mới tới giao diện, và luôn tự vẽ/dùng icon nguồn mở thay vì sao chép asset của game thương mại gốc.
