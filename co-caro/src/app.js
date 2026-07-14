@@ -33,7 +33,8 @@ const state = {
 };
 
 bindMute(() => sfx.muted);
-const MARK = { x: '❌', o: '⭕' };
+const MARK = { x: '❌', o: '⭕' };            // dùng cho HUD/cheer — emoji dễ nhận diện
+const BOARD_MARK = { x: 'X', o: 'O' };       // dùng trên bàn cờ — chữ thường để CSS color có tác dụng (emoji ❌⭕ tô sẵn màu, bỏ qua color)
 
 function newRound() {
   const { n } = SIZES[state.size];
@@ -66,7 +67,7 @@ function updateHud() {
 function place(idx) {
   const cell = els.board.children[idx];
   state.cells[idx] = state.turn;
-  cell.textContent = MARK[state.turn];
+  cell.textContent = BOARD_MARK[state.turn];
   cell.classList.add(state.turn, 'pop');
   els.board.querySelector('.last')?.classList.remove('last');
   cell.classList.add('last');

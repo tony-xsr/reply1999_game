@@ -76,20 +76,31 @@ function buildBoard() {
 function render(legal = []) {
   document.querySelectorAll('.horse').forEach((h) => h.remove());
   const g = state.game;
+  // Nhóm ngựa theo ô: khi >1 con cùng ô, xếp 2×2 để con nào cũng thấy được
+  // (trước đây chỉ tách được tối đa 2 con, con thứ 3-4 sẽ bị đè khuất hoàn toàn).
+  const byCell = new Map();
   g.players.forEach((player, pi) => {
     player.pieces.forEach((p, i) => {
       if (p === GOAL) return;
       const [r, c] = cellOf(player.color, p, i);
-      const cell = state.cellEls.get(`${r},${c}`);
-      const horse = document.createElement('div');
+      const key = `${r},${c}`;
+      if (!byCell.has(key)) byCell.set(key, []);
+      byCell.get(key).push({ player, pi, i });
+    });
+  });
+  for (const [key, horses] of byCell) {
+    const cell = state.cellEls.get(key);
+    const stacked = horses.length > 1;
+    horses.forEach(({ player, pi, i }, idx) => {
       const movable = pi === g.turn && legal.includes(i) && !player.ai;
-      horse.className = `horse${movable ? ' movable' : ''}${cell.querySelector('.horse') ? ' mini' : ''}`;
+      const horse = document.createElement('div');
+      horse.className = `horse${movable ? ' movable' : ''}${stacked ? ` stack stack-${idx % 4}` : ''}`;
       horse.style.background = COLOR_INFO[player.color].hex;
       horse.textContent = '🐴';
       if (movable) horse.addEventListener('click', () => humanMove(i));
       cell.appendChild(horse);
     });
-  });
+  }
   const cur = g.players[g.turn];
   const info = COLOR_INFO[cur.color];
   els.turnChip.textContent = `${info.emoji} ${cur.ai ? '🤖 ' : ''}${t('caro.turn', 'đi nào')}`;
@@ -122,8 +133,10 @@ async function humanRoll() {
   await doRollAnimation();
   const roll = rollDie();
   state.roll = roll;
-  els.btnDie.textContent = DIE_FACES[roll];
+  els.btnDie.innerHTML = `<span class="face">${DIE_FACES[roll]}</span><span class="num">${roll}</span>`;
   sfx.select();
+  const info = COLOR_INFO[g.players[g.turn].color];
+  speak(`Ngựa ${info.name} đi ${roll} ô!`);
   const legal = legalPieces(g, roll);
   state.busy = false;
   if (!legal.length) {
@@ -155,7 +168,7 @@ async function aiTurn() {
   if (g.winner != null) return;
   await doRollAnimation();
   const roll = rollDie();
-  els.btnDie.textContent = DIE_FACES[roll];
+  els.btnDie.innerHTML = `<span class="face">${DIE_FACES[roll]}</span><span class="num">${roll}</span>`;
   const legal = legalPieces(g, roll);
   if (!legal.length) {
     passTurn(g);
