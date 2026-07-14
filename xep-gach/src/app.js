@@ -44,8 +44,8 @@ function draw() {
   const g = state.game;
   const size = els.canvas.width / COLS;
   ctx.clearRect(0, 0, els.canvas.width, els.canvas.height);
-  // lưới mờ
-  ctx.strokeStyle = '#f3e9d4';
+  // lưới — cùng tông với --line CSS, đủ đậm để nhìn rõ trên nền trắng ngà
+  ctx.strokeStyle = '#c2a468';
   for (let x = 1; x < COLS; x++) {
     ctx.beginPath(); ctx.moveTo(x * size, 0); ctx.lineTo(x * size, ROWS * size); ctx.stroke();
   }
