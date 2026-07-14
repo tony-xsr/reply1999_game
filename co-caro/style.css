@@ -4,12 +4,12 @@
 
 :root {
   --bg: #fff6e8;
-  --panel: #ffffff;
+  --panel: #fffaf2;     /* trang nga, diu hon thay vi trang choi */
   --ink: #241e2e;
   --muted: #5d5370;
   --accent: #ff8a3d;      /* trang trí: viền, nhấn nhá */
   --accent-deep: #c2410c; /* chữ cam & nền nút chữ trắng — tương phản ≥5:1 */
-  --line: #f0e2cc;
+  --line: #a8834a;      /* vien dam hon -- tuong phan ro tren nen trang/kem */
   --x-color: #1e88e5;
   --o-color: #e53935;
 }
@@ -90,27 +90,26 @@ body {
 .board {
   width: 100%; height: 100%;
   display: grid;
-  gap: 4px;
-  background: var(--panel);
+  gap: 3px;
+  background: var(--line);
   border: 3px solid var(--line);
   border-radius: 16px;
-  padding: 8px;
+  padding: 3px;
 }
 .cell {
-  border: 2px solid #f3e7d2;
-  border-radius: 8px;
-  background: #fffdf8;
+  border-radius: 6px;
+  background: var(--panel);
   font-weight: 900;
   color: var(--ink);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   min-width: 0; min-height: 0;
 }
-.cell:active { background: #fff1e2; }
+.cell:active { background: #ffe9cc; }
 .cell.x { color: var(--x-color); }
 .cell.o { color: var(--o-color); }
-.cell.winline { background: #ffefc2; border-color: #f5c542; animation: pop 0.4s ease-out; }
-.cell.last { background: #f2f8ff; }
+.cell.winline { background: #ffe694; animation: pop 0.4s ease-out; }
+.cell.last { background: #cfe4fb; }
 @keyframes pop {
   from { transform: scale(0.6); }
   60% { transform: scale(1.12); }
