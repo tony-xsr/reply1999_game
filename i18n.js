@@ -86,7 +86,7 @@
     /* ---- Footer ---- */
     'hub.footer.disclaimer': { vi: 'Mỗi game chạy hoàn toàn offline trong trình duyệt. Settings tự lưu localStorage.', en: 'Every game runs fully offline in your browser. Settings persist via localStorage.', ja: '各ゲームはブラウザでオフラインで動作します。設定は localStorage に保存されます。', zh: '所有游戏完全离线运行，设置自动保存到 localStorage。', ar: 'كل لعبة تعمل بدون إنترنت في متصفحك. تُحفظ الإعدادات في localStorage.' },
     'hub.footer.dev':        { vi: 'Developed by',                       en: 'Developed by',                     ja: '開発者',                            zh: '开发者',                         ar: 'تطوير' },
-    'hub.footer.warning':    { vi: '⚠ Mục đích <b>giải trí lành mạnh</b> & luyện tư duy. Không khuyến khích cờ bạc dưới mọi hình thức. Không được sao chép, phân phối lại dưới mọi hình thức khi chưa có sự đồng ý.', en: '⚠ For <b>healthy entertainment</b> & brain training. Gambling in any form is not encouraged. Unauthorized copying or redistribution is prohibited.', ja: '⚠ <b>健全な娯楽</b>と頭脳トレーニング目的。賭博はいかなる形でも推奨しません。無断複製・再配布禁止。', zh: '⚠ 仅供<b>健康娱乐</b>与思维训练。任何形式赌博均不予鼓励。未经许可禁止复制或再发布。', ar: '⚠ للترفيه الصحي وتدريب الذهن. لا يُشجَّع القمار بأي شكل. يُمنع النسخ غير المصرّح به.' },
+    'hub.footer.warning':    { vi: '💛 Dành cho <b>trẻ em học mà chơi, chơi mà học</b>. Không được sao chép, phân phối lại dưới mọi hình thức khi chưa có sự đồng ý.', en: '💛 Made for <b>kids to learn while playing</b>. Unauthorized copying or redistribution is prohibited.', ja: '💛 <b>遊びながら学べる</b>子ども向けコンテンツです。無断複製・再配布禁止。', zh: '💛 专为<b>寓教于乐</b>的儿童设计。未经许可禁止复制或再发布。', ar: '💛 مخصص لتعليم الأطفال أثناء اللعب. يُمنع النسخ غير المصرّح به.' },
     'hub.footer.copy':       { vi: '© 2026 tungtran. All rights reserved.', en: '© 2026 tungtran. All rights reserved.', ja: '© 2026 tungtran. 無断転載禁止。', zh: '© 2026 tungtran 版权所有。', ar: '© 2026 تونغ تران. جميع الحقوق محفوظة.' },
 
     /* ============================================================
@@ -238,6 +238,9 @@
     /* ============================================================
        PIKACHU (Onet Connect)
        ============================================================ */
+    'card.gamemini.title':      { vi: 'Game Mini',                          en: 'Mini Games',                           ja: 'ミニゲーム',                        zh: '迷你游戏',                      ar: 'ألعاب مصغرة' },
+    'card.gamemini.desc':       { vi: 'Danh sách các trò nhỏ vui nhộn — bắt đầu với Đào Vàng, thêm dần theo thời gian.', en: 'A growing list of fun mini games — starting with Gold Digger.', ja: '楽しいミニゲーム集 — 金採りからスタート！', zh: '有趣的迷你游戏合集，从挖金子开始，逐渐增加。', ar: 'قائمة متنامية من الألعاب المصغرة — بدءًا من حفر الذهب.' },
+    'card.gamemini.chip1':      { vi: 'Nhiều trò nhỏ',                      en: 'Growing list',                         ja: 'ぞくぞく追加',                      zh: '持续更新',                      ar: 'قائمة متنامية' },
     'card.pika.title':          { vi: 'Pikachu · Onet',                     en: 'Pikachu · Onet Connect',               ja: '四川省（二角取り）',                 zh: '连连看',                        ar: 'أونيت (توصيل الأزواج)' },
     'card.pika.desc':           { vi: 'Nối 2 hình giống nhau bằng đường ≤2 lần gấp khúc. 7 level với luật dồn ô khác nhau, combo, gợi ý.', en: 'Match identical tiles with a path of ≤2 turns. 7 levels with shifting rules, combos, hints.', ja: '2回まで曲がれる線で同じ絵柄を繋ぐ。7レベル、コンボ、ヒント付き。', zh: '用不超过两次转弯的线连接相同图案。7 个关卡、连击、提示。', ar: 'صل الصور المتطابقة بمسار لا يزيد عن انعطافين. 7 مستويات.' },
     'pika.btn.new':             { vi: 'MỚI',                                en: 'NEW',                                  ja: '新規',                              zh: '新游戏',                        ar: 'جديد' },
@@ -246,6 +249,7 @@
     'pika.btn.top':             { vi: 'TOP',                                en: 'TOP',                                  ja: 'ランキング',                        zh: '排行榜',                        ar: 'الأفضل' },
     'pika.btn.pause':           { vi: 'Tạm dừng (Esc)',                     en: 'Pause (Esc)',                          ja: '一時停止 (Esc)',                    zh: '暂停 (Esc)',                    ar: 'إيقاف مؤقت (Esc)' },
     'pika.btn.sound':           { vi: 'Âm thanh',                           en: 'Sound',                                ja: 'サウンド',                          zh: '声音',                          ar: 'الصوت' },
+    'pika.btn.help':            { vi: 'Cách chơi',                          en: 'How to play',                          ja: 'あそびかた',                        zh: '玩法说明',                      ar: 'طريقة اللعب' },
     'pika.btn.icons':           { vi: 'Đổi bộ hình',                        en: 'Change tile set',                      ja: '絵柄を変更',                        zh: '更换图案',                      ar: 'تغيير مجموعة الصور' },
     'pika.btn.home':            { vi: 'TRANG CHỦ',                          en: 'HOME',                                 ja: 'ホーム',                            zh: '主页',                          ar: 'الرئيسية' },
     'pika.hints.title':         { vi: 'Lượt gợi ý còn lại',                 en: 'Hints remaining',                      ja: '残りヒント数',                      zh: '剩余提示次数',                  ar: 'التلميحات المتبقية' },
@@ -468,6 +472,7 @@
     'card.troxua.title':        { vi: 'Trò Xưa — Sân Chơi Ngày Bé',         en: 'Old-School Playground',                ja: 'なつかしの遊び場',                  zh: '怀旧游乐场',                    ar: 'ملعب الزمن الجميل' },
     'card.troxua.desc':         { vi: '3 trò hội chợ tuổi thơ: oẳn tù tì đấu máy, bắn bi văng khỏi vòng, ném bóng đổ lon — kéo thả căng lực như thật.', en: '3 childhood fair games: rock-paper-scissors vs computer, marble shooting, can knockdown — drag to aim with real physics.', ja: 'じゃんけん、ビー玉、缶倒し — 引っぱって狙う本格物理。', zh: '猜拳、弹珠、砸罐子 — 拖拽瞄准真实物理。', ar: 'حجر ورقة مقص، البلي، إسقاط العلب — بفيزياء حقيقية.' },
     'troxua.title':             { vi: '🪀 Trò Xưa',                         en: '🪀 Old-School Games',                  ja: '🪀 なつかし遊び',                   zh: '🪀 怀旧游戏',                   ar: '🪀 ألعاب قديمة' },
+    'troxua.help.home':         { vi: 'Chọn một trò chơi: Oẳn tù tì, Bắn bi, Ném lon, hoặc Nhảy dây!', en: 'Pick a game: rock-paper-scissors, marbles, can knockdown, or jump rope!', ja: 'あそびをえらんでね：じゃんけん、ビー玉、缶倒し、なわとび！', zh: '选一个游戏：猜拳、弹珠、砸罐子或跳绳！', ar: 'اختر لعبة: حجر ورقة مقص، البلي، إسقاط العلب، أو نط الحبل!' },
     'troxua.rps':               { vi: 'Oẳn tù tì',                          en: 'Rock–paper–scissors',                  ja: 'じゃんけん',                        zh: '猜拳',                          ar: 'حجر ورقة مقص' },
     'troxua.marble':            { vi: 'Bắn bi',                             en: 'Marbles',                              ja: 'ビー玉',                            zh: '弹珠',                          ar: 'البلي' },
     'troxua.cans':              { vi: 'Ném lon',                            en: 'Can knockdown',                        ja: '缶倒し',                            zh: '砸罐子',                        ar: 'إسقاط العلب' },
@@ -494,6 +499,25 @@
     'troxua.rope':              { vi: 'Nhảy dây',                           en: 'Jump rope',                            ja: 'なわとび',                          zh: '跳绳',                          ar: 'نط الحبل' },
     'troxua.rope.count':        { vi: 'Nhảy được',                          en: 'Jumps',                                ja: 'ジャンプ',                          zh: '跳了',                          ar: 'قفزات' },
     'troxua.rope.times':        { vi: 'cái',                                en: 'times',                                ja: '回',                                zh: '下',                            ar: 'مرة' },
+    'daovang.title':            { vi: '⛏️ Đào Vàng',                        en: '⛏️ Gold Digger',                       ja: '⛏️ 金採り',                         zh: '⛏️ 挖金子',                     ar: '⛏️ حفر الذهب' },
+    'daovang.mode.classic':     { vi: 'Đào Vàng',                           en: 'Gold Digger',                          ja: '金採り',                            zh: '挖金子',                        ar: 'حفر الذهب' },
+    'daovang.mode.mice':        { vi: 'Cuộc Săn Vàng',                      en: 'Gold Chase',                           ja: '金のおいかけっこ',                  zh: '追金大战',                      ar: 'مطاردة الذهب' },
+    'daovang.mode.hard':        { vi: 'Thợ Mỏ Liều Lĩnh',                   en: 'Daring Miner',                         ja: '勇気ある鉱夫',                      zh: '勇敢矿工',                      ar: 'عامل منجم جريء' },
+    'daovang.level':            { vi: 'Màn',                                en: 'Level',                                 ja: 'ステージ',                          zh: '关卡',                          ar: 'المستوى' },
+    'daovang.win':              { vi: 'Đủ tiền qua màn!',                   en: 'Goal reached!',                        ja: '目標達成！',                        zh: '达到目标！',                    ar: 'تم بلوغ الهدف!' },
+    'daovang.lose':             { vi: 'Chưa đủ tiền rồi!',                  en: 'Not enough gold!',                     ja: '目標に届かなかった！',              zh: '还不够钱！',                    ar: 'لم يكفِ الذهب!' },
+    'daovang.shop.title':       { vi: 'Cửa hàng',                           en: 'Shop',                                 ja: 'おみせ',                            zh: '商店',                          ar: 'المتجر' },
+    'daovang.shop.next':        { vi: 'MÀN TIẾP ▶',                         en: 'NEXT LEVEL ▶',                         ja: 'つぎへ ▶',                          zh: '下一关 ▶',                      ar: 'المستوى التالي ▶' },
+    'daovang.shop.go':          { vi: 'ĐI MUA ĐỒ ▶',                        en: 'GO SHOPPING ▶',                        ja: 'おかいもの ▶',                      zh: '去购物 ▶',                      ar: 'اذهب للتسوق ▶' },
+    'daovang.shop.owned':       { vi: 'Đã có',                              en: 'Owned',                                ja: 'もってる',                          zh: '已拥有',                        ar: 'لديك' },
+    'daovang.shop.dynamite':    { vi: 'Thuốc nổ',                           en: 'Dynamite',                             ja: 'ダイナマイト',                      zh: '炸药',                          ar: 'ديناميت' },
+    'daovang.shop.strength':    { vi: 'Nước tăng lực',                      en: 'Strength drink',                       ja: 'げんきドリンク',                    zh: '能量饮料',                      ar: 'مشروب الطاقة' },
+    'daovang.shop.clover':      { vi: 'Cỏ 3 lá may mắn',                    en: 'Lucky clover',                         ja: 'よつばのクローバー',                zh: '幸运草',                        ar: 'نبتة الحظ' },
+    'daovang.shop.book':        { vi: 'Sách sưu tầm đá',                    en: 'Rock collector book',                  ja: 'いしのずかん',                      zh: 'collector 石头图鉴',            ar: 'كتاب جامع الصخور' },
+    'daovang.shop.polish':      { vi: 'Đánh bóng kim cương',                en: 'Diamond polish',                       ja: 'ダイヤのつやだし',                  zh: '钻石抛光',                      ar: 'تلميع الألماس' },
+    'daovang.help.home':        { vi: 'Chọn kiểu chơi: Đào Vàng, Cuộc Săn Vàng, hoặc Thợ Mỏ Liều Lĩnh!', en: 'Pick a mode: Gold Digger, Gold Chase, or Daring Miner!', ja: 'モードをえらんでね：金採り、金のおいかけっこ、勇気ある鉱夫！', zh: '选一个模式：挖金子、追金大战或勇敢矿工！', ar: 'اختر نمطًا: حفر الذهب، مطاردة الذهب، أو عامل منجم جريء!' },
+    'daovang.help.play':        { vi: 'Chờ cần câu đu tới chỗ muốn thả rồi bấm vào sân để thả mỏ xuống nhé! Mỏ chạm vật gì sẽ tự cuốn về.', en: 'Wait for the hook to swing where you want, then tap to drop it! It reels back automatically once it grabs something.', ja: 'フックがほしい場所にきたら画面をタップして落とそう！', zh: '等钩子摆到想要的位置再点一下放下！勾到东西会自动收回来。', ar: 'انتظر حتى يتأرجح الخطاف للمكان المطلوب ثم اضغط لإسقاطه!' },
+    'daovang.help.shop':        { vi: 'Dùng tiền vừa đào được để mua đồ giúp màn sau dễ hơn nhé!', en: 'Spend your gold on upgrades to make the next level easier!', ja: 'あつめたお金でつぎのステージをらくにしよう！', zh: '用刚赚到的钱买道具，让下一关更轻松！', ar: 'استخدم الذهب لشراء ترقيات تسهّل المستوى التالي!' },
 
     /* ============================================================
        ĐIỆN TỬ XƯA
@@ -526,6 +550,7 @@
     'kynang.q.e2s':             { vi: 'Cảm xúc này hợp với tình huống nào?', en: 'Which situation fits this feeling?',  ja: 'この気持ちに合うのは？',            zh: '这种情绪对应哪种情况？',        ar: 'أي موقف يناسب هذا الشعور؟' },
     'kynang.q.order':           { vi: 'Sắp đúng thứ tự nhé!',               en: 'Put the steps in order!',              ja: 'じゅんばんに並べよう！',            zh: '按顺序排好！',                  ar: 'رتّب الخطوات!' },
     'kynang.q.safety':          { vi: 'Việc này AN TOÀN hay NGUY HIỂM?',    en: 'Is this SAFE or DANGEROUS?',           ja: 'これは あんぜん？あぶない？',       zh: '这是安全还是危险？',            ar: 'هل هذا آمن أم خطير؟' },
+    'kynang.q.choices':         { vi: 'Chọn',                               en: 'Choose',                                ja: 'えらんでね',                        zh: '请选择',                        ar: 'اختر' },
     'kynang.safe':              { vi: 'An toàn',                            en: 'Safe',                                 ja: 'あんぜん',                          zh: '安全',                          ar: 'آمن' },
     'kynang.danger':            { vi: 'Nguy hiểm',                          en: 'Dangerous',                            ja: 'あぶない',                          zh: '危险',                          ar: 'خطير' },
 
