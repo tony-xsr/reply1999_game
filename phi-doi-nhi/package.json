@@ -1,0 +1,8 @@
+{
+  "name": "phi-doi-nhi",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/phidoinhi.test.js"
+  }
+}
