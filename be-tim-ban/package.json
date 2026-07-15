@@ -1,0 +1,8 @@
+{
+  "name": "be-tim-ban",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/betimban.test.js"
+  }
+}
