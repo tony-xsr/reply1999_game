@@ -100,9 +100,12 @@ body {
 .item {
   position: absolute;
   transform: translate(-50%, -50%);
-  width: 52px; height: 52px;
+  /* % thay vì px cố định — vùng chạm phải co giãn đúng theo kích thước bàn thật (đổi theo
+     màn hình) để luôn khớp với toạ độ 2×ITEM_R tính trong hệ logic 640×640, không thì trên
+     màn nhỏ vùng chạm sẽ tương đối to hơn và dễ đè lên vật bên cạnh. */
+  width: 8.125%; height: 8.125%;
   border: none; background: transparent;
-  font-size: 2.2rem;
+  font-size: 1.9rem;
   line-height: 1;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;

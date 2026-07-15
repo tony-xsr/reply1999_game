@@ -27,7 +27,9 @@ function placeItem(items, emoji, isTarget, rng) {
     x = ITEM_R + rng() * (FIELD_W - ITEM_R * 2);
     y = ITEM_R + rng() * (FIELD_H - ITEM_R * 2);
     tries++;
-  } while (tries < 30 && items.some((it) => Math.hypot(it.x - x, it.y - y) < ITEM_R * 1.7));
+    // Khoảng cách tối thiểu phải LỚN HƠN đường kính vùng chạm (2×ITEM_R) — nếu không, 2 vật
+    // sát nhau sẽ có vùng chạm đè lên nhau, chạm vào 1 vật có thể vô tình trúng vật bên cạnh.
+  } while (tries < 30 && items.some((it) => Math.hypot(it.x - x, it.y - y) < ITEM_R * 2.15));
   items.push({ id: items.length, emoji, x, y, isTarget, found: false });
 }
 
