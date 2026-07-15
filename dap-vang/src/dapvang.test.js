@@ -77,7 +77,7 @@ check('cụm <2 viên: không đập được, bàn giữ nguyên', (() => {
   return result === null && JSON.stringify(grid) === before;
 })());
 
-check('đập cụm hợp lệ: các viên biến mất, đá phía trên rơi xuống lấp, bàn luôn đầy trở lại', (() => {
+check('đập cụm hợp lệ: các viên biến mất, phần chưa đập giữ nguyên vị trí, đỉnh cột được lấp đá mới', (() => {
   const grid = [
     ['blue', 'blue', 'blue'],
     ['red', 'red', 'green'],
@@ -85,9 +85,11 @@ check('đập cụm hợp lệ: các viên biến mất, đá phía trên rơi x
   ];
   const result = popAt(grid, COLORS.slice(0, 5), 0, 0, seeded());
   const stillFull = grid.every((row) => row.every((cell) => cell != null));
-  // cột 0-1 vừa mất 2 viên "blue" ở hàng trên cùng → đá cũ tụt xuống đáy cột, đỉnh cột được lấp đá mới
+  // chỉ hàng trên cùng (toàn "blue") bị đập — 2 hàng dưới không có khoảng trống bên dưới nên đứng yên,
+  // chỉ hàng 0 (vừa trống) được lấp đá mới
   return result.popped === 3 && result.score === clusterScore(3) && stillFull
-    && grid[2][0] === 'red' && grid[2][1] === 'red'; // đá "red" cũ giờ nằm ở đáy cột sau khi rơi
+    && grid[1][0] === 'red' && grid[1][1] === 'red' && grid[1][2] === 'green'
+    && grid[2][0] === 'yellow' && grid[2][1] === 'purple' && grid[2][2] === 'green';
 })());
 
 check('đập nhiều lần liên tiếp trừ đúng số nước đi + cộng dồn điểm', (() => {
@@ -123,11 +125,18 @@ check('bàn luôn còn nước đi sau mỗi lần đập (tự xào lại nếu
 
 console.log('— Kết thúc màn —');
 
-check('đủ điểm mục tiêu → thắng ngay dù còn nước đi', (() => {
+check('vừa đủ điểm mục tiêu ngay sau 1 nước đập → thắng, dù còn nước đi', (() => {
   const g = makeLevel(0, seeded());
-  g.score = g.goal;
-  const result = pop(g, 0, 0, seeded()); // vẫn cho phép gọi, nhưng game đã over nên trả null
-  return result === null && g.over === true && g.won === true;
+  g.score = g.goal - 1; // chỉ còn thiếu 1 điểm
+  let result = null;
+  outer:
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      result = pop(g, r, c, seeded(r * 10 + c));
+      if (result) break outer;
+    }
+  }
+  return result !== null && g.over === true && g.won === true && g.movesLeft === 19;
 })());
 
 check('hết nước đi mà chưa đủ điểm → thua', (() => {
