@@ -5,7 +5,9 @@
 export const ROWS = 5;
 export const COLS = 8;
 export const START_LIVES = 3;
-export const START_WATER = 50;
+// Đủ để trồng ngay 2 cây bắn (Đậu Xanh, mỗi cây chỉ bắn được côn trùng CÙNG HÀNG với nó) —
+// tránh tình trạng bé mới vào đã không đủ nước tưới phòng thủ nổi 1 hàng nào.
+export const START_WATER = 90;
 
 export const PLANTS = {
   hoa_nang: { name: 'Hoa Mặt Trời', emoji: '🌻', cost: 25, hp: 20, kind: 'generator', cooldownMs: 6000, genAmount: 20 },

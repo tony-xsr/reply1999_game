@@ -7,17 +7,44 @@ export const TYPES = ['fire', 'water', 'grass'];
 const BEATS = { fire: 'grass', grass: 'water', water: 'fire' };
 
 export const CREATURES = {
+  // Hệ Lửa
   ga_lua: {
     name: 'Gà Lửa', type: 'fire', emoji: '🐓', maxHp: 42,
     moves: [{ name: 'Mổ Lửa', power: 11 }, { name: 'Hỏa Cầu', power: 19 }],
   },
+  cao_lua: {
+    name: 'Cáo Lửa', type: 'fire', emoji: '🦊', maxHp: 40,
+    moves: [{ name: 'Cào Lửa', power: 12 }, { name: 'Vòng Lửa', power: 18 }],
+  },
+  rong_lua: {
+    name: 'Rồng Lửa', type: 'fire', emoji: '🐉', maxHp: 48,
+    moves: [{ name: 'Cắn Lửa', power: 10 }, { name: 'Phun Lửa', power: 21 }],
+  },
+  // Hệ Nước
   ca_nuoc: {
     name: 'Cá Chép Nước', type: 'water', emoji: '🐟', maxHp: 44,
     moves: [{ name: 'Vẫy Đuôi', power: 11 }, { name: 'Vòi Nước', power: 19 }],
   },
+  rua_bien: {
+    name: 'Rùa Biển', type: 'water', emoji: '🐢', maxHp: 50,
+    moves: [{ name: 'Mai Chắn', power: 9 }, { name: 'Sóng Thần', power: 20 }],
+  },
+  bach_tuoc: {
+    name: 'Bạch Tuộc Nước', type: 'water', emoji: '🐙', maxHp: 40,
+    moves: [{ name: 'Quấn Tay', power: 13 }, { name: 'Phun Mực', power: 17 }],
+  },
+  // Hệ Cỏ
   trau_co: {
     name: 'Trâu Cỏ', type: 'grass', emoji: '🐃', maxHp: 46,
     moves: [{ name: 'Húc Đầu', power: 11 }, { name: 'Dây Leo', power: 19 }],
+  },
+  tho_co: {
+    name: 'Thỏ Cỏ', type: 'grass', emoji: '🐰', maxHp: 38,
+    moves: [{ name: 'Đá Nhanh', power: 13 }, { name: 'Nhảy Vồ', power: 17 }],
+  },
+  gau_truc: {
+    name: 'Gấu Trúc Cỏ', type: 'grass', emoji: '🐼', maxHp: 45,
+    moves: [{ name: 'Ôm Ghì', power: 12 }, { name: 'Lá Tre Bay', power: 18 }],
   },
 };
 
