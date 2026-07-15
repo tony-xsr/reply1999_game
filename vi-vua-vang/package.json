@@ -1,0 +1,8 @@
+{
+  "name": "vi-vua-vang",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/vivuavang.test.js"
+  }
+}
