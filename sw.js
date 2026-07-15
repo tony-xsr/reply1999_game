@@ -1,6 +1,6 @@
 /* Reply1999 Games — root service worker.
    Scope = '/'. Cache hub + các game khi truy cập lần đầu. */
-const CACHE = 'reply1999-v27';
+const CACHE = 'reply1999-v33';
 const PRECACHE = [
   './', './index.html', './manifest.json', './i18n.js',
   './pokemon/index.html',
@@ -140,6 +140,26 @@ const PRECACHE = [
   './dao-ham-vang/style.css',
   './dao-ham-vang/src/daohamvang.js',
   './dao-ham-vang/src/app.js',
+  './phi-doi-nhi/index.html',
+  './phi-doi-nhi/style.css',
+  './phi-doi-nhi/src/phidoinhi.js',
+  './phi-doi-nhi/src/app.js',
+  './thu-cung-dai-chien/index.html',
+  './thu-cung-dai-chien/style.css',
+  './thu-cung-dai-chien/src/thucung.js',
+  './thu-cung-dai-chien/src/app.js',
+  './gop-so-vui/index.html',
+  './gop-so-vui/style.css',
+  './gop-so-vui/src/gopsovui.js',
+  './gop-so-vui/src/app.js',
+  './vuon-rau-than-ky/index.html',
+  './vuon-rau-than-ky/style.css',
+  './vuon-rau-than-ky/src/vuonrau.js',
+  './vuon-rau-than-ky/src/app.js',
+  './be-tim-ban/index.html',
+  './be-tim-ban/style.css',
+  './be-tim-ban/src/betimban.js',
+  './be-tim-ban/src/app.js',
   './pokemon/images/trimmed/pm0025_00_00_00_big.png',
   './pokemon/images/trimmed/pm0001_00_00_00_big.png',
   './pokemon/images/trimmed/pm0004_00_00_00_big.png',

@@ -29,10 +29,13 @@ check('cùng hệ hoặc không khắc nhau thì hệ số bình thường (x1)'
   typeMultiplier('fire', 'fire') === 1
 )));
 
-check('mỗi hệ đều có đúng 3 con thú tương ứng, đủ 2 chiêu mỗi con', (() => (
-  TYPES.every((ty) => Object.values(CREATURES).some((c) => c.type === ty))
-  && Object.values(CREATURES).every((c) => c.moves.length === 2)
-)));
+check('mỗi hệ có đúng 3 con thú (tổng 9 con), đủ 2 chiêu mỗi con', (() => {
+  const perType = {};
+  for (const c of Object.values(CREATURES)) perType[c.type] = (perType[c.type] || 0) + 1;
+  return TYPES.every((ty) => perType[ty] === 3)
+    && Object.keys(CREATURES).length === 9
+    && Object.values(CREATURES).every((c) => c.moves.length === 2);
+})());
 
 console.log('— 1 trận đấu —');
 

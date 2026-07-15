@@ -52,7 +52,7 @@ body {
 .round-btn:active { transform: scale(0.93); }
 .round-btn[hidden] { display: none; }
 
-.screen { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px; justify-content: center; align-items: center; }
+.screen { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px; justify-content: center; align-items: center; overflow-y: auto; padding: 8px 0; }
 .screen.hidden { display: none; }
 
 .pick-title { font-size: 1.15rem; font-weight: 900; }
