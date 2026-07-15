@@ -1,0 +1,8 @@
+{
+  "name": "gop-so-vui",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/gopsovui.test.js"
+  }
+}
