@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#fff6e8">
+  <title>Thú Cưng Đại Chiến</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <a class="round-btn" href="/game-mini/" data-i18n-title="hocvui.back" title="Chọn trò khác">◀</a>
+      <h1 data-i18n="thucung.title">🐉 Thú Cưng Đại Chiến</h1>
+      <button class="round-btn" id="btnBack" title="Chọn thú khác" hidden>◀</button>
+      <button class="round-btn" id="btnHelp" data-i18n-title="pika.btn.help" title="Cách chơi">❓</button>
+      <button class="round-btn" id="btnSound" data-i18n-title="pika.btn.sound" title="Âm thanh">🔊</button>
+    </header>
+
+    <main class="screen" id="homeScreen">
+      <div class="pick-title" data-i18n="thucung.pick">Chọn thú cưng của bé!</div>
+      <div class="pick-row" id="pickRow"></div>
+      <div class="type-hint" data-i18n="thucung.hint">🔥 Lửa khắc 🌿 Cỏ · 🌿 Cỏ khắc 💧 Nước · 💧 Nước khắc 🔥 Lửa</div>
+    </main>
+
+    <main class="screen hidden" id="battleScreen">
+      <div class="fighter enemy">
+        <div class="f-name" id="enemyName">?</div>
+        <div class="hp-bar"><div class="hp-fill" id="enemyHpFill"></div></div>
+        <div class="f-emoji" id="enemyEmoji">🐉</div>
+      </div>
+      <div class="vs">VS</div>
+      <div class="fighter player">
+        <div class="f-emoji" id="playerEmoji">🐉</div>
+        <div class="hp-bar"><div class="hp-fill good" id="playerHpFill"></div></div>
+        <div class="f-name" id="playerName">?</div>
+      </div>
+      <div class="battle-log" id="battleLog"></div>
+      <div class="move-row" id="moveRow"></div>
+      <div class="round-chip" id="roundChip"></div>
+    </main>
+
+    <div class="cheer hidden" id="cheer">
+      <div class="cheer-emoji" id="cheerEmoji">🏆</div>
+      <div class="cheer-text" id="cheerText"></div>
+      <button class="big-btn" id="btnCheerGo">CHƠI LẠI ▶</button>
+      <a class="big-btn big-btn--ghost" href="/game-mini/" data-i18n="hocvui.pick">CHỌN TRÒ KHÁC</a>
+    </div>
+  </div>
+
+  <script src="/i18n.js"></script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

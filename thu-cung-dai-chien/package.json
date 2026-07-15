@@ -1,0 +1,8 @@
+{
+  "name": "thu-cung-dai-chien",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/thucung.test.js"
+  }
+}
