@@ -518,6 +518,63 @@
     'daovang.help.home':        { vi: 'Chọn kiểu chơi: Đào Vàng, Cuộc Săn Vàng, hoặc Thợ Mỏ Liều Lĩnh!', en: 'Pick a mode: Gold Digger, Gold Chase, or Daring Miner!', ja: 'モードをえらんでね：金採り、金のおいかけっこ、勇気ある鉱夫！', zh: '选一个模式：挖金子、追金大战或勇敢矿工！', ar: 'اختر نمطًا: حفر الذهب، مطاردة الذهب، أو عامل منجم جريء!' },
     'daovang.help.play':        { vi: 'Chờ cần câu đu tới chỗ muốn thả rồi bấm vào sân để thả mỏ xuống nhé! Mỏ chạm vật gì sẽ tự cuốn về.', en: 'Wait for the hook to swing where you want, then tap to drop it! It reels back automatically once it grabs something.', ja: 'フックがほしい場所にきたら画面をタップして落とそう！', zh: '等钩子摆到想要的位置再点一下放下！勾到东西会自动收回来。', ar: 'انتظر حتى يتأرجح الخطاف للمكان المطلوب ثم اضغط لإسقاطه!' },
     'daovang.help.shop':        { vi: 'Dùng tiền vừa đào được để mua đồ giúp màn sau dễ hơn nhé!', en: 'Spend your gold on upgrades to make the next level easier!', ja: 'あつめたお金でつぎのステージをらくにしよう！', zh: '用刚赚到的钱买道具，让下一关更轻松！', ar: 'استخدم الذهب لشراء ترقيات تسهّل المستوى التالي!' },
+    'dapvang.title':            { vi: '🪓 Đập Vàng',                         en: '🪓 Rock Smash',                        ja: '🪓 いわわり',                        zh: '🪓 砸石头',                      ar: '🪓 تحطيم الصخور' },
+    'dapvang.help':             { vi: 'Bấm vào cụm từ 2 viên đá cùng màu liền kề trở lên để đập vỡ — cụm càng to càng nhiều điểm!', en: 'Tap a group of 2 or more same-colored rocks touching each other to smash them — bigger groups score more!', ja: '同じ色の石が2つ以上つながっているところをタップして割ろう！大きいほど高得点！', zh: '点击2个以上相邻同色的石头就能砸碎——组合越大分数越高！', ar: 'اضغط على مجموعة من صخرتين أو أكثر متجاورتين بنفس اللون لتحطيمها!' },
+    'dapvang.big':              { vi: 'Cụm to quá, giỏi ghê!',               en: 'Huge group, amazing!',                 ja: 'おおきい！すごいね！',              zh: '好大一组，真厉害！',            ar: 'مجموعة كبيرة، رائع!' },
+    'dapvang.win':              { vi: 'Đủ điểm qua màn!',                   en: 'Goal reached!',                        ja: 'もくひょうたっせい！',              zh: '达到目标！',                    ar: 'تم بلوغ الهدف!' },
+    'dapvang.lose':             { vi: 'Hết nước đập rồi!',                  en: 'Out of moves!',                        ja: 'てがなくなった！',                  zh: '没有次数了！',                  ar: 'نفدت المحاولات!' },
+    'dapvang.next':             { vi: 'MÀN TIẾP ▶',                         en: 'NEXT LEVEL ▶',                         ja: 'つぎへ ▶',                          zh: '下一关 ▶',                      ar: 'المستوى التالي ▶' },
+    'vivua.title':              { vi: '👑 Vị Vua Vàng',                     en: '👑 Gold King',                         ja: '👑 きんのおうさま',                 zh: '👑 黄金国王',                    ar: '👑 ملك الذهب' },
+    'vivua.help':               { vi: 'Chạm 1 hũ rồi chạm hũ bên cạnh để đổi chỗ — tạo được hàng 3 hũ cùng màu là ăn điểm!', en: 'Tap a pot, then tap a neighbor to swap — line up 3 same-colored pots to score!', ja: 'つぼをタップしてから、となりのつぼをタップして入れかえよう！同じ色を3つならべてね！', zh: '点一个罐子，再点旁边的罐子交换位置——排成3个同色就能得分！', ar: 'المس جرة ثم المس المجاورة لتبديلهما — رتّب 3 جرار بنفس اللون لتسجيل نقاط!' },
+    'vivua.combo':              { vi: 'Combo!',                              en: 'Combo!',                                ja: 'コンボ！',                          zh: '连击！',                        ar: 'مزدوج!' },
+    'vivua.win':                { vi: 'Đủ điểm qua màn!',                   en: 'Goal reached!',                        ja: 'もくひょうたっせい！',              zh: '达到目标！',                    ar: 'تم بلوغ الهدف!' },
+    'vivua.lose':               { vi: 'Hết nước đi rồi!',                   en: 'Out of moves!',                        ja: 'てがなくなった！',                  zh: '没有次数了！',                  ar: 'نفدت المحاولات!' },
+    'vivua.next':               { vi: 'MÀN TIẾP ▶',                         en: 'NEXT LEVEL ▶',                         ja: 'つぎへ ▶',                          zh: '下一关 ▶',                      ar: 'المستوى التالي ▶' },
+    'hamvang.title':            { vi: '⛏️ Đường Hầm Săn Vàng',              en: '⛏️ Gold Tunnel',                       ja: '⛏️ きんのトンネル',                 zh: '⛏️ 黄金隧道',                    ar: '⛏️ نفق الذهب' },
+    'hamvang.help':             { vi: 'Bấm ô đá kề bên để đập lấy vàng, bấm ô trống để di chuyển. Đá phía trên có thể rơi xuống — nhớ tránh ra chỗ khác nhé!', en: 'Tap a neighboring rock to dig for gold, tap an empty cell to move. Rocks above can fall — dodge out of the way!', ja: 'となりの岩をタップしてほろう、空いているマスをタップして進もう。上から岩がおちてくるから気をつけてね！', zh: '点相邻的石头挖金子，点空格子就能移动。上面的石头可能会掉下来——记得躲开！', ar: 'المس صخرة مجاورة للحفر، أو خانة فارغة للتحرك. قد تسقط الصخور من الأعلى — تجنبها!' },
+    'hamvang.hit':              { vi: 'Á, đá rơi trúng rồi!',               en: 'Ouch, a rock hit you!',                 ja: 'あっ、岩があたった！',              zh: '哎呀，被石头砸到了！',          ar: 'أوه، أصابتك صخرة!' },
+    'hamvang.win':              { vi: 'Đủ vàng qua màn!',                   en: 'Goal reached!',                        ja: 'もくひょうたっせい！',              zh: '达到目标！',                    ar: 'تم بلوغ الهدف!' },
+    'hamvang.lose':             { vi: 'Đá rơi trúng hết rồi!',              en: 'Out of lives!',                        ja: 'ライフがなくなった！',              zh: '生命值用完了！',                ar: 'نفدت المحاولات!' },
+    'hamvang.next':             { vi: 'MÀN TIẾP ▶',                         en: 'NEXT LEVEL ▶',                         ja: 'つぎへ ▶',                          zh: '下一关 ▶',                      ar: 'المستوى التالي ▶' },
+    'hamvang2.title':           { vi: '🎳 Đào Hầm Vàng',                    en: '🎳 Rolling Gold Tunnel',                ja: '🎳 ボールでたんけん',               zh: '🎳 滚球寻宝',                    ar: '🎳 نفق الذهب المتدحرج' },
+    'hamvang2.help':            { vi: 'Kéo tay từ quả bóng qua các ô liền kề để vẽ đường — bóng sẽ lăn theo, nhặt vàng và né chỗ có đá xám, cố về tới lá cờ nhé!', en: 'Drag from the ball through neighboring cells to draw a path — the ball rolls along it, collects gold, and avoids gray rocks. Try to reach the flag!', ja: 'ボールから となりのマスへ指をなぞって道をかこう！ボールはその道をころがって金をあつめ、灰色の岩をさけて旗をめざすよ！', zh: '从球开始拖动经过相邻格子画出路线——球会沿着路线滚动、捡金币、避开灰色石头，试着到达旗子吧！', ar: 'اسحب من الكرة عبر الخانات المجاورة لرسم مسار — تتدحرج الكرة وتجمع الذهب وتتجنب الصخور!' },
+    'hamvang2.win':             { vi: 'Bóng về đích rồi!',                  en: 'The ball made it!',                    ja: 'ゴールできた！',                    zh: '球到达终点了！',                ar: 'وصلت الكرة!' },
+    'hamvang2.allcoins':        { vi: 'Nhặt hết vàng luôn!',                en: 'Collected all the gold too!',          ja: '金貨も全部あつめた！',              zh: '还捡光了所有金币！',            ar: 'وجمعت كل الذهب أيضًا!' },
+    'hamvang2.lose':            { vi: 'Hết bước rồi, bóng chưa về đích!',   en: 'Out of steps, the ball didn\'t make it!', ja: 'あるくかいすうがなくなった！',    zh: '步数用完了，球还没到终点！',    ar: 'نفدت الخطوات، لم تصل الكرة!' },
+    'hamvang2.next':            { vi: 'MÀN TIẾP ▶',                         en: 'NEXT LEVEL ▶',                         ja: 'つぎへ ▶',                          zh: '下一关 ▶',                      ar: 'المستوى التالي ▶' },
+    'phinhi.title':             { vi: '✈️ Phi Đội Nhí',                     en: '✈️ Little Squadron',                   ja: '✈️ ちびひこうたい',                 zh: '✈️ 小小飞行队',                  ar: '✈️ السرب الصغير' },
+    'phinhi.start':             { vi: 'Kéo tay để bay, máy bay tự động bắn!', en: 'Drag to fly, the plane auto-fires!', ja: 'ゆびでうごかそう、ひこうきは自動ではっしゃするよ！', zh: '拖动飞行，飞机会自动开火！', ar: 'اسحب للتحليق، تطلق الطائرة تلقائيًا!' },
+    'phinhi.play':              { vi: 'BAY LÊN ▶',                          en: 'TAKE OFF ▶',                           ja: 'とびたつ ▶',                        zh: '起飞 ▶',                        ar: 'أقلع ▶' },
+    'phinhi.help':              { vi: 'Kéo tay để máy bay bay trái phải né thiên thạch — máy bay tự động bắn giúp bé rồi, cứ nhặt sao vàng để được thêm điểm nhé!', en: 'Drag to move the plane left and right to dodge meteors — it auto-fires for you, just collect stars for bonus points!', ja: 'ゆびでひこうきをうごかしていんせきをよけよう。じどうではっしゃするから、ほしをあつめてね！', zh: '拖动飞机左右躲避陨石——飞机会自动开火，收集星星加分吧！', ar: 'اسحب لتحريك الطائرة يمينًا ويسارًا لتفادي النيازك — تطلق تلقائيًا، فقط اجمع النجوم!' },
+    'phinhi.win':               { vi: 'Bay qua màn rồi!',                   en: 'Level cleared!',                       ja: 'クリアした！',                      zh: '过关了！',                      ar: 'اجتزت المستوى!' },
+    'phinhi.lose':              { vi: 'Máy bay hết xăng rồi!',              en: 'Out of lives!',                        ja: 'ライフがなくなった！',              zh: '生命值用完了！',                ar: 'نفدت المحاولات!' },
+    'phinhi.next':              { vi: 'MÀN TIẾP ▶',                         en: 'NEXT LEVEL ▶',                         ja: 'つぎへ ▶',                          zh: '下一关 ▶',                      ar: 'المستوى التالي ▶' },
+    'thucung.title':            { vi: '🐉 Thú Cưng Đại Chiến',              en: '🐉 Pet Battle',                        ja: '🐉 ペットたいけつ',                 zh: '🐉 宠物大对战',                  ar: '🐉 معركة الحيوانات الأليفة' },
+    'thucung.pick':             { vi: 'Chọn thú cưng của bé!',              en: 'Pick your pet!',                       ja: 'ペットをえらんでね！',              zh: '选择你的宠物！',                ar: 'اختر حيوانك الأليف!' },
+    'thucung.hint':             { vi: '🔥 Lửa khắc 🌿 Cỏ · 🌿 Cỏ khắc 💧 Nước · 💧 Nước khắc 🔥 Lửa', en: '🔥 Fire beats 🌿 Grass · 🌿 Grass beats 💧 Water · 💧 Water beats 🔥 Fire', ja: '🔥 ほのおは🌿くさに強い・🌿くさは💧みずに強い・💧みずは🔥ほのおに強い', zh: '🔥 火克🌿草 · 🌿草克💧水 · 💧水克🔥火', ar: '🔥 النار تهزم 🌿 العشب · 🌿 العشب يهزم 💧 الماء · 💧 الماء يهزم 🔥 النار' },
+    'thucung.round':            { vi: 'Trận',                               en: 'Round',                                ja: 'たいせん',                          zh: '回合',                          ar: 'الجولة' },
+    'thucung.nextfoe':          { vi: 'Thắng rồi! Đối thủ tiếp theo xuất hiện!', en: 'Victory! The next opponent appears!', ja: 'かった！つぎのあいてがあらわれた！', zh: '胜利了！下一个对手出现了！', ar: 'فزت! ظهر الخصم التالي!' },
+    'thucung.win':              { vi: 'Đại thắng! Bé đã hạ hết đối thủ!',   en: 'Total victory! You defeated every opponent!', ja: 'だいしょうり！ぜんいんにかった！', zh: '大获全胜！打败了所有对手！',    ar: 'انتصار كامل! هزمت جميع الخصوم!' },
+    'thucung.lose':             { vi: 'Thua rồi, thử lại nhé!',             en: 'You lost, try again!',                 ja: 'まけちゃった、またちょうせん！',    zh: '输了，再试一次吧！',            ar: 'خسرت، حاول مجددًا!' },
+    'thucung.next':             { vi: 'ĐẤU TIẾP MÀN MỚI ▶',                 en: 'NEXT LEVEL ▶',                         ja: 'つぎのステージへ ▶',                zh: '挑战下一关 ▶',                  ar: 'المستوى التالي ▶' },
+    'thucung.help.home':        { vi: 'Chọn 1 thú cưng của bé để bắt đầu đại chiến!', en: 'Pick one of your pets to start the battle!', ja: 'ペットをえらんでたいけつをはじめよう！', zh: '选一只宠物开始对战吧！', ar: 'اختر حيوانًا أليفًا لبدء المعركة!' },
+    'thucung.help.battle':      { vi: 'Bấm vào 1 chiêu để tấn công — nhớ hệ khắc chế: Lửa khắc Cỏ, Cỏ khắc Nước, Nước khắc Lửa!', en: 'Tap a move to attack — remember the type triangle: Fire beats Grass, Grass beats Water, Water beats Fire!', ja: 'わざをタップしてこうげき！ほのお→くさ→みず→ほのおのじゃんけんをおぼえてね！', zh: '点一个招式进行攻击——记住相克关系：火克草、草克水、水克火！', ar: 'اضغط حركة للهجوم — تذكّر: النار تهزم العشب، العشب يهزم الماء، الماء يهزم النار!' },
+    'gopso.title':              { vi: '🔢 Gộp Số Vui',                       en: '🔢 Merge Fun',                          ja: '🔢 かずをがっちゃん',                zh: '🔢 数字合并',                    ar: '🔢 دمج الأرقام' },
+    'gopso.help':               { vi: 'Vuốt tay theo 4 hướng để đẩy các ô số — 2 ô cùng số chạm nhau sẽ gộp thành 1 ô gấp đôi. Gộp đủ tới số mục tiêu để qua màn nhé!', en: 'Swipe in any of 4 directions to push the number tiles — two matching tiles merge into double! Reach the target number to win the level!', ja: 'ゆびで4ほうこうにスワイプしてすうじをおそう！おなじすうじがくっつくと2ばいになるよ！もくひょうのすうじにとどけばクリア！', zh: '向4个方向滑动推动数字方块——两个相同的数字碰到一起会合并成2倍！凑到目标数字就能过关！', ar: 'اسحب في أي من الاتجاهات الأربعة لدفع المربعات — يندمج رقمان متطابقان مضاعِفَين القيمة! صل إلى الرقم المستهدف للفوز!' },
+    'gopso.win':                { vi: 'Gộp được số mục tiêu rồi!',          en: 'Reached the target number!',           ja: 'もくひょうたっせい！',              zh: '达到目标数字了！',              ar: 'وصلت إلى الرقم المستهدف!' },
+    'gopso.lose':               { vi: 'Bàn đầy rồi, hết cách gộp nữa!',     en: 'Board full, no more merges possible!', ja: 'ばんがいっぱいでもうがっちゃんできない！', zh: '棋盘满了，没法再合并了！',      ar: 'امتلأت اللوحة، لا مزيد من الدمج!' },
+    'gopso.next':               { vi: 'MÀN TIẾP ▶',                         en: 'NEXT LEVEL ▶',                         ja: 'つぎへ ▶',                          zh: '下一关 ▶',                      ar: 'المستوى التالي ▶' },
+    'vuonrau.title':            { vi: '🌻 Vườn Rau Thần Kỳ',                en: '🌻 Magic Garden',                      ja: '🌻 まほうのはたけ',                 zh: '🌻 神奇菜园',                    ar: '🌻 الحديقة السحرية' },
+    'vuonrau.help':             { vi: 'Chọn 1 loại cây rồi bấm vào ô trống để trồng. Đậu Xanh mới bắn được côn trùng — nhưng chỉ bắn trúng côn trùng ĐI CÙNG HÀNG với nó thôi, nên mỗi hàng cần có ít nhất 1 cây Đậu Xanh mới an toàn! Hoa Mặt Trời tạo thêm nước tưới, Xương Rồng chắn đường không bắn được.', en: 'Pick a plant then tap an empty cell to plant it. Only Pea Shooter attacks — but it only hits bugs in ITS OWN ROW, so every row needs at least one to stay safe! Sunflower makes water, Cactus blocks the path but can\'t attack.', ja: 'しょくぶつをえらんでからマスをタップしてうえよう。こうげきできるのはまめだけ、しかもおなじれつのこんちゅうにしかあたらないよ！れつごとにまめをうえてね！ひまわりはみずをつくる、サボテンはみちをふさぐだけだよ。', zh: '选一种植物再点空格种下。只有豆豆射手能攻击——但只能打中和它同一行的虫子，所以每一行都要种至少一株才安全！向日葵产水，仙人掌只能挡路不能攻击。', ar: 'اختر نباتًا ثم اضغط على خانة فارغة. فقط بازلاء يهاجم — لكن فقط الحشرات في نفس صفه! ازرع واحدًا في كل صف. عباد الشمس ينتج الماء، والصبار يسد الطريق فقط.' },
+    'vuonrau.win':              { vi: 'Vườn rau an toàn rồi!',              en: 'The garden is safe!',                  ja: 'はたけをまもりきった！',            zh: '菜园安全了！',                  ar: 'الحديقة آمنة!' },
+    'vuonrau.lose':             { vi: 'Côn trùng tràn vào vườn rồi!',       en: 'Bugs got into the garden!',            ja: 'こんちゅうにやられちゃった！',      zh: '虫子闯进菜园了！',              ar: 'اقتحمت الحشرات الحديقة!' },
+    'vuonrau.next':             { vi: 'MÀN TIẾP ▶',                         en: 'NEXT LEVEL ▶',                         ja: 'つぎへ ▶',                          zh: '下一关 ▶',                      ar: 'المستوى التالي ▶' },
+    'betimban.title':           { vi: '🙈 Bé Tìm Bạn',                      en: '🙈 Find My Friends',                   ja: '🙈 おともだちさがし',              zh: '🙈 找朋友',                      ar: '🙈 ابحث عن أصدقائي' },
+    'betimban.help':            { vi: 'Nhìn hàng trên cùng xem cần tìm những bạn nào — rồi chạm đúng bạn đó lẫn trong đám đồ vật để tìm ra hết trước khi hết giờ nhé!', en: 'Look at the top row to see who to find — tap them among the clutter before time runs out!', ja: 'いちばんうえのれつをみて、だれをさがすかチェック！じかんがなくなるまえにみつけよう！', zh: '看看最上面一行要找谁——在杂物中点出他们，赶在时间用完前找齐！', ar: 'انظر إلى الصف العلوي لمعرفة من تبحث عنه — المسهم بين الأغراض قبل انتهاء الوقت!' },
+    'betimban.findhint':        { vi: 'Tìm cho đủ các bạn ở hàng trên nhé!', en: 'Find everyone shown at the top!',      ja: 'うえにいるおともだちをぜんぶさがそう！', zh: '找齐上面显示的朋友吧！',        ar: 'ابحث عن جميع من في الأعلى!' },
+    'betimban.win':             { vi: 'Tìm hết bạn rồi!',                   en: 'Found everyone!',                      ja: 'ぜんいんみつけた！',                zh: '全部找到了！',                  ar: 'وجدت الجميع!' },
+    'betimban.lose':            { vi: 'Hết giờ rồi, còn bạn chưa tìm ra!',  en: 'Out of time, some friends are still hiding!', ja: 'じかんぎれ、まだかくれているおともだちがいるよ！', zh: '时间到了，还有朋友没找到！', ar: 'انتهى الوقت، ما زال هناك أصدقاء مختبئون!' },
+    'betimban.next':            { vi: 'MÀN TIẾP ▶',                         en: 'NEXT LEVEL ▶',                         ja: 'つぎへ ▶',                          zh: '下一关 ▶',                      ar: 'المستوى التالي ▶' },
 
     /* ============================================================
        ĐIỆN TỬ XƯA
@@ -750,4 +807,54 @@
   } else {
     bootstrap();
   }
+})();
+
+/* ===== Service worker: đăng ký + tự phát hiện bản mới + tự tải lại =====
+   Chạy trên MỌI trang (file này được nhúng ở mọi game) nên bé đang chơi ở bất kỳ
+   game con nào cũng được kiểm tra & cập nhật, không chỉ ở trang chủ.
+   localStorage (hồ sơ/điểm số/cài đặt) hoàn toàn KHÔNG bị service worker đụng tới —
+   nó chỉ cache file HTML/CSS/JS/ảnh, nên dữ liệu bé đã lưu luôn được giữ nguyên
+   qua mỗi lần cập nhật, không cần "merge" thủ công gì thêm. */
+(function(){
+  'use strict';
+  if (!('serviceWorker' in navigator)) return;
+  if (!(location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) return;
+
+  // Nếu trang này đang tải mà ĐÃ có 1 service worker điều khiển sẵn (không phải lần
+  // đầu cài đặt), thì sau này nếu có bản mới "chiếm quyền" (nhờ skipWaiting), tự tải
+  // lại ngay để lấy code mới — bỏ qua trường hợp lần đầu để không bị tải lại vô ích.
+  const hadControllerBefore = !!navigator.serviceWorker.controller;
+  let reloading = false;
+
+  function showUpdateToast(){
+    try {
+      const toast = document.createElement('div');
+      toast.textContent = '🔄 Đang cập nhật phiên bản mới…';
+      toast.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);' +
+        'background:#241e2e;color:#fff;padding:10px 18px;border-radius:999px;font-size:13px;' +
+        'font-weight:600;z-index:99999;box-shadow:0 4px 14px rgba(0,0,0,.3);' +
+        'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;';
+      document.body.appendChild(toast);
+    } catch { /* không quan trọng bằng việc tải lại trang */ }
+  }
+
+  if (hadControllerBefore){
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (reloading) return;
+      reloading = true;
+      showUpdateToast();
+      setTimeout(() => location.reload(), 500);
+    });
+  }
+
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then((reg) => {
+      // Chủ động kiểm tra bản mới ngay khi vào trang, không đợi trình duyệt tự canh theo lịch riêng.
+      reg.update().catch(() => {});
+      // Mỗi lần bé quay lại tab (mở app lên lại) cũng kiểm tra lại 1 lần.
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') reg.update().catch(() => {});
+      });
+    }).catch(() => {});
+  });
 })();

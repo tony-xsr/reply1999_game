@@ -508,12 +508,7 @@ footer a{color:var(--gold2)}
 
 <script src="/i18n.js"></script>
 <script>
-// Register root service worker — caches hub + all games
-if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')){
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
-  });
-}
+// Đăng ký service worker + tự kiểm tra bản mới giờ đã chuyển vào i18n.js (chạy trên mọi trang).
 
 // Wire language selector
 (function(){
