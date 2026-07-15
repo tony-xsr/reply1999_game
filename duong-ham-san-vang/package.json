@@ -1,0 +1,8 @@
+{
+  "name": "duong-ham-san-vang",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/duonghham.test.js"
+  }
+}
