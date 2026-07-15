@@ -1,0 +1,8 @@
+{
+  "name": "vuon-rau-than-ky",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/vuonrau.test.js"
+  }
+}
