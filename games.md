@@ -718,6 +718,27 @@ B4. **Nâng cấp Vườn Rau Thần Kỳ** ✅ ĐÃ XONG (`vuon-rau-than-ky/` �
 
 Quy trình mỗi game giữ nguyên chuẩn repo: **logic thuần + unit test trước → giao diện → đăng ký hub/i18n/sw.js → chạy `npm test` toàn bộ**; mỗi game có giọng đọc hướng dẫn tiếng Việt (nút ❓) và song ngữ khi có yếu tố học.
 
+---
+
+## Đợt sửa lỗi + mở rộng (sau khi test tay B1–B4)
+
+- **Fix Xây Thị Trấn Vàng**: xe goòng cũ màu nâu chìm vào nền hầm tối (khó thấy), đèn hang vẽ mờ nhạt gây rối mắt. Đã sửa: xe cam rực có viền sáng + đổ bóng + nhún nhẹ khi chạy, đèn lồng vẽ bằng radial-gradient ấm có nhấp nháy lửa, thêm lấp lánh khi hứng vàng + rung màn khi trúng đá.
+- **Fix Cơn Sốt Tìm Vàng**: game vốn thiết kế kiểu "bấm cụm" (giống Đập Vàng) chứ không phải "đổi chỗ" — đã bổ sung thêm cơ chế **KÉO ngón tay lướt qua nhiều viên đá cùng màu liền kề** để gom đúng đường kéo đó (khác với bấm 1 viên tự gom cả cụm dính liền), có vệt sáng kéo tay + viền vàng quanh ô đã chọn. Cả 2 cách chơi (bấm và kéo) dùng chung 1 hàm tính điểm/combo (`applyClear`) — 17 unit test (thêm 5 test cho `dragTo`).
+- **Pokémon Đại Chiến mở rộng thêm**: roster 40+ → **65+ Pokémon**, 12 → **18 bạn khởi đầu** (thêm Bellsprout/Magnemite/Tentacool/Drowzee/Doduo/Shellder — đều có tiến hóa), pool đối thủ 22 → 33, **10 trùm** (thêm Lugia + Ho-Oh trước Mewtwo); tuyệt chiêu bay theo **quỹ đạo cong parabol** (rAF, không còn đường thẳng CSS transition) + **vòng sóng va chạm** lan ra tại điểm trúng đòn (to hơn khi hiệu quả cực mạnh); mỗi nút chiêu hiện **ước tính sát thương thật** (`💥 lực · thấp-cao`) tính đúng theo công thức atk/def/hệ so với đối thủ đang gặp.
+- **Phòng Xinh mở rộng thêm**: 28 → **39 món đồ** (thêm kệ sách, bể cá, máy ảnh, hộp quà, quả địa cầu, hố cát, nến, dù, ván trượt, nhà búp bê, kính thiên văn), 3 → **5 phòng riêng** (tab 1️⃣–5️⃣, mỗi phòng lưu độc lập); tách hàng nút phòng ra khỏi header thành `.room-toolbar` riêng cho đỡ chật trên di động.
+- **Xếp Chữ Tiếng Anh** ✅ MỚI (`xep-chu-tieng-anh/`, 9 unit test) — game đánh vần tiếng Anh: nhìn hình + nghe từ (giọng en-US thật), chạm các ô chữ cái xáo trộn (có lẫn vài chữ GÂY NHIỄU từ màn 3 trở đi) theo đúng thứ tự để ghép vào ô trống; không mất mạng khi bấm sai — giữ tinh thần "học mà chơi" nhẹ nhàng như Học Vần. 30 từ vựng 3–8 chữ cái xếp theo độ dài, chọn theo cửa sổ trượt kiểu OPPONENT_POOL đã dùng ở các game khác.
+- **Hub "Góc Tiếng Anh"** ✅ MỚI (`goc-tieng-anh/`) — trang tổng hợp mọi game có yếu tố học tiếng Anh: Xếp Chữ Tiếng Anh (mới), Tiếng Anh Nâng Cao, Học Vui, Bé Làm Stylist, Phòng Xinh, Bé Hái Trái Cây — thêm 1 thẻ trên trang chủ, không gỡ các game này khỏi vị trí gốc (game-mini/trang chủ) để tránh phá liên kết cũ.
+- **Sửa giọng đọc tiếng Anh bị đọc kiểu tiếng Việt**: `speak()` hỗ trợ sẵn tham số `lang` nhưng 3 game (Bé Hái Trái Cây, Bé Làm Stylist, Phòng Xinh) quên truyền vào nên từ tiếng Anh bị phát bằng giọng vi-VN mặc định — đã sửa cả 3 dùng `{ lang: 'en-US', rate: 0.85 }`.
+- **Fix bug kẹt lượt "Trận 1/2" không đánh tiếp được** (Pokémon Đại Chiến + Thú Cưng Đại Chiến): sau đòn phản công của địch, `renderBattle()` chạy lúc `busy=true` khiến nút chiêu bị khóa (`disabled`), nhưng sau đó `busy` được đặt lại `false` mà KHÔNG render lại — nút bị khóa vĩnh viễn từ trận thứ 2. Đã sửa: mọi chỗ mở khóa `busy` đều gọi lại `renderBattle()`. Đồng thời thêm animation tuyệt chiêu đầy đủ (lao tới, chiêu bay theo hệ, nổ + rung màn khi hiệu quả) cho cả 2 game.
+
+**Về yêu cầu "1000×5 từ vựng tiếng Anh theo chủ đề" bên dưới:** đã đọc kỹ — đây là dự án rất lớn (5 mảng × ~1000 từ = quy mô từ điển hình ảnh, không phải 1 game nhỏ). Hiểu đúng ý: mỗi từ nên có **1 icon/hình + 1 câu ngắn hoặc cụm từ đi kèm** để bé nhớ theo ngữ cảnh giao tiếp, không học từ đơn lẻ. Đề xuất chia giai đoạn thay vì làm 1 lần:
+- **Giai đoạn 1 (đã có nền)**: Xếp Chữ Tiếng Anh (30 từ) + Góc Tiếng Anh hub — hạ tầng để mở rộng dần.
+- **Giai đoạn 2**: chọn 1 mảng chủ đề trước (đề xuất: *trái cây – thực phẩm – ăn uống*, vì đã có sẵn Bé Hái Trái Cây làm nền) để làm ~100–150 từ + câu mẫu, dựng 1-2 cơ chế chơi mới quanh chủ đề đó (ví dụ: "nghe câu → chọn đúng tranh", "ghép cụm từ với hình"), coi là bản mẫu (template) cho các mảng còn lại.
+- **Giai đoạn 3+**: lặp lại khuôn mẫu cho 4 mảng còn lại (giao thông/địa lý; động vật/vũ trụ; gia đình/trường học/nghề nghiệp; vật dụng/mua sắm/thiết bị), mỗi mảng ước tính vài trăm từ khả thi hơn 1000 để giữ chất lượng (mỗi từ đều cần icon phù hợp + câu mẫu đúng ngữ pháp — làm ẩu 1000 từ sẽ kém hơn làm kỹ 300 từ).
+- **Nguồn hình ảnh**: tiếp tục dùng Twemoji (CC-BY, đã dùng xuyên suốt repo) cho phần lớn danh từ cụ thể; một số khái niệm trừu tượng (địa lý, thiết bị công nghiệp...) có thể cần icon set khác (vd. Kenney UI icons hoặc tự vẽ SVG đơn giản) — sẽ khảo sát khi vào từng mảng cụ thể.
+
+Nếu bạn đồng ý hướng đi trên, xác nhận **mảng nào làm giai đoạn 2 trước** (đề xuất trái cây/thực phẩm) để tôi bắt tay nghiên cứu từ vựng + tải icon + thiết kế cơ chế chi tiết trước khi code.
+
 
 # Thêm menu game để học từ vựng tiếng Anh 
 Hãy thiết kế  thêm các game để học tiếng Anh từ vựng ? nhiều game càng tốt .
