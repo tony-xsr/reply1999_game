@@ -1,0 +1,8 @@
+{
+  "name": "giai-cuu-khung-long",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/khunglong.test.js"
+  }
+}
