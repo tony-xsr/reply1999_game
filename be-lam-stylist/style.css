@@ -1,0 +1,145 @@
+/* Bé Làm Stylist — thay đồ búp bê SVG tự vẽ, học từ vựng tiếng Anh, không chấm điểm. */
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #fff6e8;
+  --panel: #fffaf2;
+  --ink: #241e2e;
+  --muted: #5d5370;
+  --accent: #ff8a3d;
+  --accent-deep: #c2410c;
+  --line: #a8834a;
+}
+
+html, body { height: 100%; }
+body {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, #ffe4f0 0%, transparent 70%),
+    var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.shell {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px max(12px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.top { display: flex; align-items: center; gap: 8px; }
+.top h1 { font-size: 1rem; flex: 1; }
+
+.round-btn {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: var(--panel);
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 2px 5px rgba(90, 60, 20, 0.12);
+}
+.round-btn:active { transform: scale(0.93); }
+
+/* Bong bóng lời thoại — hiện từ tiếng Anh vừa đọc */
+.say-bubble {
+  align-self: center;
+  background: var(--panel);
+  border: 2px solid #d6669e;
+  color: #a61e6e;
+  border-radius: 999px;
+  padding: 7px 18px;
+  font-weight: 900;
+  font-size: 1.05rem;
+  min-height: 2.2em;
+  display: flex; align-items: center;
+  transition: transform 0.15s;
+}
+.say-bubble.pop { transform: scale(1.12); }
+
+.stage { flex: 1; min-height: 0; display: flex; gap: 10px; }
+.doll-panel {
+  flex: 1;
+  min-width: 0;
+  background:
+    radial-gradient(ellipse 90% 45% at 50% 100%, #f8d8ea 0%, transparent 70%),
+    linear-gradient(180deg, #fdeef7, #fbe3f1);
+  border: 3px solid #d6669e;
+  border-radius: 18px;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+#dollBox { width: 100%; max-width: 300px; height: 100%; display: flex; align-items: center; }
+#dollBox svg { width: 100%; height: auto; max-height: 100%; }
+#dollBox .hit { cursor: pointer; }
+
+.wardrobe {
+  width: 46%;
+  max-width: 270px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+.slot-tabs { display: flex; gap: 5px; flex-wrap: wrap; }
+.slot-tab {
+  flex: 1;
+  min-width: 44px; height: 44px;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  background: var(--panel);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.slot-tab.active { border-color: #d6669e; background: #fdeef7; box-shadow: 0 0 0 2px rgba(214, 102, 158, 0.35); }
+
+.item-grid {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 2px;
+}
+.item-btn {
+  display: flex; align-items: center; gap: 9px;
+  border: 2px solid var(--line);
+  background: var(--panel);
+  border-radius: 12px;
+  padding: 9px 10px;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 0.92rem;
+  text-align: left;
+  color: var(--ink);
+}
+.item-btn.active { border-color: #d6669e; background: #fdeef7; }
+.item-btn:active { transform: scale(0.97); }
+.item-btn .en { display: block; font-size: 0.78rem; color: #a61e6e; font-weight: 900; }
+
+.color-row { display: flex; gap: 7px; justify-content: center; flex-wrap: wrap; }
+.color-dot {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 3px solid rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+.color-dot.active { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(214, 102, 158, 0.5); }
+.color-dot:active { transform: scale(0.9); }
+
+@media (max-width: 520px) {
+  .stage { flex-direction: column; }
+  .wardrobe { width: 100%; max-width: none; flex: 1; }
+  .doll-panel { flex: 1.2; }
+  .item-grid { flex-direction: row; flex-wrap: wrap; }
+  .item-btn { flex: 1 1 45%; }
+}

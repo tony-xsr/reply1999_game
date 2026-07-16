@@ -1,0 +1,8 @@
+{
+  "name": "be-lam-stylist",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/stylist.test.js"
+  }
+}
