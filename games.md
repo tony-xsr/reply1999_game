@@ -513,4 +513,221 @@ Nguồn hình ảnh đề xuất chung cho cả 7 game, theo đúng 2 cách đã
 
 ---
 
-Cả 7 game trên đều mới ở mức **nghiên cứu/lên ý tưởng**, chưa bắt tay code. Khi quyết định làm game nào, nên làm theo đúng quy trình đã áp dụng cho các game trong nhóm "Game Mini" (Đào Vàng, Đập Vàng, Vị Vua Vàng...): viết logic thuần (pure function) kèm unit test trước, rồi mới tới giao diện, và luôn tự vẽ/dùng icon nguồn mở thay vì sao chép asset của game thương mại gốc.
+**Trạng thái: cả 7 game đã làm xong** ✅ — đều theo đúng quy trình của nhóm "Game Mini" (logic thuần + unit test trước, giao diện sau, tự vẽ bằng canvas/CSS + emoji thay vì sao chép asset game gốc):
+
+1. **Phi Đội Nhí** ✅ (`phi-doi-nhi/`) — kéo tay lái máy bay, tự động bắn, né thiên thạch/ong/mây giông, nhặt sao, có trùm cuối màn.
+2. **Thú Cưng Đại Chiến** ✅ (`thu-cung-dai-chien/`) — đấu theo lượt, hệ khắc chế Lửa/Cỏ/Nước, thú cưng thiết kế gốc (không dùng nhân vật Pokémon).
+3. **Gộp Số Vui** ✅ (`gop-so-vui/`) — trượt & gộp kiểu 2048, mục tiêu tăng dần theo màn, đọc to số lớn khi gộp được.
+4. **Vườn Rau Thần Kỳ** ✅ (`vuon-rau-than-ky/`) — tower-defense 5 làn chủ đề vườn rau vs côn trùng (không zombie): Hoa Mặt Trời/Đậu Xanh/Xương Rồng.
+5. **Bé Tìm Bạn** ✅ (`be-tim-ban/`) — hidden object: tìm các bạn nhỏ trốn lẫn trong đám đồ vật trước khi hết giờ.
+6. **Kim Cương Lấp Lánh** ✅ (`kim-cuong-lap-lanh/`) — chọn hướng "kim cương nối đường" (kiểu Flow Free) để KHÔNG trùng cơ chế với Vị Vua Vàng/Đập Vàng: kéo nối 2 viên cùng màu, các đường không cắt nhau; màn sinh tự động luôn có lời giải (chia kín bàn thành các đường rồi đặt kim cương ở 2 đầu).
+7. **Bé Hái Trái Cây** ✅ (`be-hai-trai-cay/`) — vuốt hái trái cây bay parabol (tái dùng công thức trọng lực kiểu Ném Lon), vệt tay lấp lánh thay lưỡi kiếm, vật cấm là chú ong (không bom), combo khi vuốt trúng nhiều trái, đọc to tên trái cây song ngữ khi hái trúng.
+
+**Bổ sung sau (theo yêu cầu):**
+
+8. **Pokémon Đại Chiến** ✅ (`pokemon-dai-chien/`) — bản "đại chiến" dùng **sprite Pokémon thật** tái dụng từ kho `/pokemon/images/` có sẵn trong repo (cùng nguồn ảnh với game Onet và Ghép Hình Trượt — chỉ chạy offline/local): 5 bạn khởi đầu (Pikachu/Charmander/Squirtle/Bulbasaur/Eevee), 6 hệ khắc chế (thêm ⚡ Điện khắc 💧 Nước), **tiến hóa** sau trận thắng thứ 1 và thứ 3 (Eevee tiến hóa ngẫu nhiên 1 trong 3 nhánh), trùm chốt màn mạnh dần (Gyarados → Gengar → Snorlax → Dragonite → Mewtwo). Game Thú Cưng Đại Chiến (bộ thú tự vẽ) vẫn giữ nguyên song song.
+
+**Nâng cấp đồ họa (thay emoji chữ bằng icon SVG Twemoji CC-BY, cùng cách làm với Đào Vàng):** Phi Đội Nhí (máy bay, thiên thạch, ong, mây giông, sao, trùm UFO), Bé Hái Trái Cây (8 trái cây + ong, trái xoay khi bay, nửa trái văng ra cũng bằng SVG), Vườn Rau Thần Kỳ (hoa mặt trời, mầm đậu, xương rồng, sâu, bọ). Mỗi thư mục `images/` có kèm `CREDITS.md` ghi nguồn giấy phép.
+
+
+## Tiếp tục với games mới : 
+ Cá lớn nuốt cá bé, Beach Head 2000, Bắn trứng khủng long (Dynamite), Thời trang/Trang điểm: Các mini game thiết kế quần áo, trang điểm cho búp bê. (bé có thể học tiếng anh nghe tiếng anh khi chọn các items để trang trí hay các phần của cơ thể khi bấm vào ...) , Bounce, Diamond Rush, Angry Birds, PVZ, Flappy Bird, trang trí phòng ,mario , Cadillacs and Dinosaurs , The King of Fighters , The Last Blade ., Dynomite Deluxe , Feeding Frenzy , Need For Speed - Underground , Road Rash , Bloody Roar , Chicken Invaders , Audition , Samurai Shodown .
+ Ghi đầy đủ chiến thuật để hoàn thành các game này , tải resource từ trên mạng về hình ảnh , icon, ... hỗ trợ tốt chơi trên ipad,tablet... 
+ - Hỗ trợ 2D build tốt giao diện đẹp , không cần phải nhẹ .
+ - Làm càng giống bản gốc càng tốt .
+
+---
+
+# ĐỢT 5 — Nghiên cứu chi tiết & kho asset (đã tải sẵn)
+
+## 0. Nguyên tắc chung cho cả đợt
+
+**"Giống bản gốc" hiểu thế nào cho đúng:** giống về **cơ chế – nhịp độ – cảm giác chơi** (làm được và nên làm), KHÔNG sao chép **asset/tên gọi/nhân vật** của bản gốc. Mario (Nintendo), Angry Birds (Rovio), KOF/Samurai Shodown/The Last Blade (SNK), Bloody Roar (Hudson/Eighting), Dynomite & PVZ (PopCap/EA), Feeding Frenzy (PopCap), NFS (EA), Chicken Invaders (InterAction) — tất cả đều được bảo hộ và nhiều hãng (đặc biệt Nintendo, SNK) truy quét rất gắt. Cách của repo từ trước tới nay: **cơ chế giữ nguyên, đề xuất tên + nhân vật + hình ảnh riêng.**
+
+**Kho asset đã tải về `assets/kenney/` (26MB, giấy phép CC0 — dùng tự do, chất lượng chuyên nghiệp, xem `assets/kenney/CREDITS.md`):**
+
+| Pack | Nội dung | Dùng cho |
+|---|---|---|
+| `fish-pack` | ~20 loài cá đủ cỡ + bong bóng, 2 cỡ ảnh | Cá Lớn Biển Xanh |
+| `physics-assets` | Khối gỗ/đá/kính vỡ được + quái tròn + nền | Ném Banh Đổ Tháp |
+| `puzzle-pack-2` | Bóng màu, gạch, ống, paddle, hạt lấp lánh | Rồng Con Bắn Trứng, Bóng Đỏ Phiêu Lưu |
+| `pixel-platformer` | Tilemap + nhân vật pixel + Tiled maps | Nhà Thám Hiểm Tí Hon |
+| `racing-pack` | Xe hơi/mô tô nhiều màu, đường đua, cây, vạch | Tay Đua Nhí |
+| `alien-ufo-pack` | UFO + quái xâm lăng dễ thương | Gà Vũ Trụ |
+| `ui-pack` | Nút/panel/thanh máu đẹp + âm click | Dùng chung mọi game đợt này |
+| `game-icons` | Icon pause/play/loa/mũi tên/home trắng | Dùng chung mọi game đợt này |
+
+Quy tắc dùng: **chỉ copy đúng file cần** từ `assets/kenney/<pack>/PNG/` vào `<game>/images/` (kèm 1 dòng CREDITS) — giữ `assets/` làm kho ngoài, KHÔNG precache cả kho vào service worker. Icon lẻ vẫn dùng Twemoji (CC-BY) như cũ.
+
+**Chuẩn hỗ trợ iPad/tablet cho mọi game đợt này (quan trọng — bản gốc nhiều game là PC/console):**
+- Pointer Events thống nhất chuột + cảm ứng (repo đã theo chuẩn này), `touch-action: none` trên vùng chơi, `manipulation` ngoài vùng chơi (chặn double-tap zoom).
+- Canvas vẽ theo tọa độ trường cố định (như FIELD_W/H hiện tại), scale bằng CSS `aspect-ratio` + `max-height: 100dvh` — chạy đẹp cả dọc lẫn ngang; game nào cần ngang (đua xe, platformer) thì hiện màn "xoay máy để chơi" khi đang ở thế dọc (CSS `@media (orientation: portrait)`).
+- Mọi nút chạm ≥ 44×44px; điều khiển ảo (d-pad/nút nhảy) đặt 2 góc dưới, tránh vùng vuốt hệ thống của iPad (mép dưới ~20px, dùng `env(safe-area-inset-*)`).
+- Không dựa vào hover/bàn phím; bàn phím chỉ là phụ trợ desktop.
+- Asset đẹp thoải mái dung lượng ("không cần nhẹ") nhưng: precache SW chỉ file thật sự dùng; ảnh to (nền) cho cache runtime tự nhặt.
+- Âm thanh: iOS chỉ phát sau chạm đầu tiên — mọi game đã có nút ▶ bắt đầu, gắn unlock audio ở đó.
+
+**Trùng lặp trong danh sách yêu cầu, đã gộp:** Feeding Frenzy = Cá lớn nuốt cá bé (1 game). Dynomite Deluxe = Bắn trứng khủng long (1 game). PVZ = đã có Vườn Rau Thần Kỳ (chỉ nâng cấp thêm). Road Rash gộp vào game đua xe (bỏ yếu tố đánh nhau trên xe — không hợp trẻ em).
+
+---
+
+## Nhóm A — Cơ chế thuộc thể loại phổ biến, hợp trẻ em, làm được ngay
+
+### A1. Cá Lớn Nuốt Cá Bé / Feeding Frenzy (đề xuất tên: "Cá Lớn Biển Xanh") 🐟
+- **Cách chơi gốc:** điều khiển 1 con cá bơi tự do trong màn nước; **ăn được cá nhỏ hơn mình, bị cá to hơn ăn**; ăn đủ số cá thì lớn lên 1 cỡ (3–4 cỡ mỗi màn), lớn tối đa thì qua màn; càng về sau cá dữ càng đông, xuất hiện cá mập/sứa cần né tuyệt đối.
+- **Chiến thuật hoàn thành:** logic thuần `calon.js`: thế giới 2D (FIELD 960×640), cá người chơi theo con trỏ (lerp tới điểm chạm — hợp tablet: bé đặt ngón đâu cá bơi tới đó), đàn cá AI spawn 2 mép trái/phải với cỡ 1–5 bơi ngang + lượn sin nhẹ; va chạm = tròn-tròn; luật `ăn được nếu size mình > size nó`, ngược lại mất 1 mạng + bất tử nhấp nháy 2 giây; thanh tiến độ lớn lên; test: luật ăn/bị ăn, lớn cấp, spawn trong biên, thắng/thua.
+- **Asset:** `fish-pack` có sẵn đủ loài đủ cỡ + bong bóng; nền biển gradient + rong vẽ CSS/canvas.
+- **Bản quyền:** cơ chế "big fish eat small fish" là thể loại cực phổ biến (Fishdom, Hungry Shark, hàng nghìn clone) — an toàn; không dùng tên "Feeding Frenzy" và nhân vật của PopCap.
+- **Effort: nhỏ** (1 phiên). Ưu tiên làm ĐẦU TIÊN — dễ, đẹp ngay nhờ fish-pack, cảm ứng tự nhiên.
+
+### A2. Bắn Trứng Khủng Long / Dynomite Deluxe (đề xuất tên: "Rồng Con Bắn Trứng") 🥚
+- **Cách chơi gốc (Puzzle Bobble/Bust-a-Move lineage):** khẩu pháo dưới đáy xoay ngắm, bắn trứng màu lên lưới trứng treo phía trên; trứng dính vào lưới; **cụm ≥3 cùng màu thì rơi**, kéo theo các trứng bị hở chân; lưới tụt dần xuống theo thời gian; thua khi lưới chạm vạch dưới.
+- **Chiến thuật hoàn thành:** lưới lục giác so le (hàng chẵn/lẻ lệch nửa ô) — phần khó nhất là **snap trứng bay vào ô lục giác gần nhất** và **flood-fill tìm cụm cùng màu + tìm trứng mồ côi** (BFS từ hàng nóc, trứng không nối về nóc = rơi). Logic thuần: `grid`, `shoot(angle)` mô phỏng đường bay + nảy tường, `attach`, `popMatches`, `dropOrphans`, `lowerCeiling`. Điều khiển tablet: kéo tay để ngắm (vẽ đường ngắm chấm chấm có nảy tường — bản gốc Dynomite có aim guide), thả tay để bắn. Test: snap đúng ô, cụm 3 nổ, mồ côi rơi, nảy tường đối xứng, thua khi chạm vạch.
+- **Asset:** `puzzle-pack-2` (bóng màu tròn làm trứng), thêm 1 chú rồng con tự vẽ/Twemoji 🐲 ngồi cạnh pháo.
+- **Bản quyền:** cơ chế bubble-shooter đã genre-generic từ Puzzle Bobble (Taito 1994) và bị clone vô hạn; tránh tên "Dynomite" + hình khủng long PopCap.
+- **Effort: vừa** (1–2 phiên, phần lưới lục giác cần test kỹ).
+
+### A3. Flappy Bird (đề xuất tên: "Chim Non Vượt Ống") 🐤
+- **Cách chơi gốc:** chạm để chim vỗ cánh bay vụt lên, thả thì rơi theo trọng lực; bay qua khe giữa các cặp ống; chạm ống/đất là thua; mỗi ống qua được +1 điểm.
+- **Chiến thuật hoàn thành:** game 1 nút — hợp trẻ em nhất quả đất; logic thuần ~80 dòng: `vy += G; nếu tap thì vy = -FLAP`, ống spawn cách đều với khe ngẫu nhiên (khe RỘNG hơn bản gốc cho bé: 30–35% chiều cao, thu nhỏ dần theo điểm), va chạm hộp-tròn. Chế độ học thêm: mỗi 5 ống hiện 1 chữ cái to giữa khe, bay qua thì đọc to chữ đó. Test: trọng lực/vỗ cánh, va chạm ống, tính điểm, độ khó tăng.
+- **Asset:** chim vàng tự vẽ canvas (thân tròn + cánh 3 khung hình vỗ) hoặc bird trong `pixel-platformer`; ống xanh vẽ gradient CSS — bản gốc cũng chỉ có vậy.
+- **Bản quyền:** cơ chế 1-tap đã bị clone hàng chục nghìn lần; tránh tên "Flappy Bird" và sprite gốc (.GEARS).
+- **Effort: rất nhỏ** (nửa phiên). Làm sớm lấy đà.
+
+### A4. Bounce (Nokia) (đề xuất tên: "Bóng Đỏ Phiêu Lưu") 🔴
+- **Cách chơi gốc:** quả bóng đỏ nảy liên tục, người chơi lái trái/phải (bóng TỰ nảy, không điều khiển nhảy trực tiếp), vượt chướng ngại vòng gai/ống, chui qua các **vòng tròn** để mở cổng qua màn; ăn bóng phồng to (nảy cao, nổi nước) hoặc xì hơi nhỏ lại (chui khe hẹp).
+- **Chiến thuật hoàn thành:** platformer cuộn ngang ô lưới (tile 32px): bóng có `vx, vy`, nảy tự động khi chạm đất (`vy = -BOUNCE`), 2 nút ◀▶ to 2 góc dưới màn hình cho tablet; màn thiết kế tĩnh bằng mảng chuỗi ký tự (`'#'` tường, `'^'` gai, `'o'` vòng, `'+'` phồng to...) — dễ thêm màn, dễ test; qua màn khi chui đủ vòng rồi chạm cờ. Test: nảy chuẩn, ăn vòng, gai chết -1 mạng về checkpoint, phồng/xì đổi bán kính + độ nảy.
+- **Asset:** bóng + vòng + gai trong `puzzle-pack-2` (Balls, Pipes) và `physics-assets`; nền trời `pixel-platformer`.
+- **Bản quyền:** "Bounce" của Nokia nhưng cơ chế bóng-nảy-platformer rất generic; tránh đúng tên + level layout gốc.
+- **Effort: vừa** (1–2 phiên do phải thiết kế ~6 màn).
+
+### A5. Angry Birds (đề xuất tên: "Ném Banh Đổ Tháp") 🏰
+- **Cách chơi gốc:** kéo ná cao su ngắm — thả để phóng vật bay theo parabol vào công trình gỗ/đá/kính, làm sập đè trúng mục tiêu; số đạn giới hạn; tính sao theo đạn thừa.
+- **Chiến thuật hoàn thành:** ĐÃ CÓ SẴN 70% engine trong repo: vật lý parabol (Ném Lon/Bé Hái) + kéo-thả căng lực (Trò Xưa). Phần mới là **physics khối 2D đơn giản**: mỗi khối là hình chữ nhật có `hp` theo vật liệu (kính 1 gỗ 2 đá 3), đạn va vào trừ hp theo động năng (`0.5*m*v²`), khối mất đỡ thì rơi thẳng (không cần full rigid-body xoay — các clone casual đều làm vậy, đủ "đã"); quái tròn (physics-assets có sẵn mặt cười) nổ khi trúng/bị đè. Màn = mảng khai báo vị trí khối. Tablet: kéo ná bằng 1 ngón, vẽ quỹ đạo chấm mờ của phát trước (như bản gốc). Test: quỹ đạo, sát thương theo vận tốc, sập dây chuyền, đếm sao.
+- **Asset:** `physics-assets` sinh ra ĐÚNG cho thể loại này (khối gỗ/đá/kính nguyên + nứt + vỡ, quái tròn nhiều màu, nền); đạn là quả banh — không chim, khỏi đụng Rovio.
+- **Bản quyền:** cơ chế slingshot có trước Angry Birds (Crush the Castle 2009); tuyệt đối không dùng chim/heo xanh/tên gốc.
+- **Effort: vừa-lớn** (2 phiên). Điểm nhấn của đợt — rất "đã tay" trên tablet.
+
+### A6. Mario / platformer (đề xuất tên: "Nhà Thám Hiểm Tí Hon") 🍄
+- **Cách chơi gốc:** chạy-nhảy cuộn ngang: dậm đầu quái, ăn xu, khối ?, hầm bí mật, cờ cuối màn; chết khi chạm quái ngang hông/rơi hố.
+- **Chiến thuật hoàn thành:** platformer tile-based chuẩn: AABB va chạm tách trục X rồi Y (kinh nghiệm: xử lý từng trục một tránh kẹt góc), coyote-time 100ms + jump-buffer 120ms (bắt buộc để trẻ em thấy "dễ chịu"), quái tuần tra đổi hướng mép vực; dậm đầu = va chạm từ trên + vy>0. Màn = chuỗi ký tự như A4. Tablet: 2 nút ◀▶ góc trái + nút NHẢY to góc phải (bố cục console cầm tay). Test: va chạm 2 trục, coyote/buffer, dậm quái, ăn xu, cờ đích. KHÔNG làm: power-up biến hình phức tạp (để bản 2).
+- **Asset:** `pixel-platformer` có đủ tileset + nhân vật + quái + Tiled maps mẫu; nhân vật là nhà thám hiểm nhí — không mũ đỏ, không ống xanh lá đặc trưng, không nấm đỏ chấm trắng (dấu hiệu Nintendo).
+- **Bản quyền:** Nintendo là hãng kiện gắt nhất thế giới — cơ chế platformer thì generic hoàn toàn, chỉ cần tránh MỌI dấu hiệu nhận diện (tên, mũ đỏ M, nấm, ống, rùa mai xanh).
+- **Effort: lớn** (2–3 phiên). Làm sau khi có đà từ A3/A4.
+
+### A7. Diamond Rush (đề xuất tên: "Hang Kim Cương Bí Ẩn") ⛏️
+- **Cách chơi gốc (dòng Boulder Dash):** đi trong hang ô lưới, đào đất, nhặt đủ kim cương để mở cửa; **tảng đá lăn theo trọng lực** — đào ô dưới đá thì đá rơi, đè chết mình/quái; có cạm bẫy, nút bấm, cửa khóa cần chìa.
+- **Chiến thuật hoàn thành:** thuần ô lưới turn-step (mỗi bước đi = 1 tick vật lý đá) — RẤT hợp logic thuần + test: `step(dir)` → di chuyển nếu ô trống/đất/kim cương → sau đó quét đá từ dưới lên: đá có ô dưới trống thì rơi, đá trên đá tròn thì lăn chéo; chết nếu đá rơi trúng đầu. Màn tĩnh bằng chuỗi ký tự. Tablet: vuốt 4 hướng hoặc d-pad ảo. Test: đá rơi/lăn chéo, đào đất, đủ kim cương mở cửa, chết do đá, chìa-cửa.
+- **Asset:** tái dùng `gem.svg` Đào Vàng + tile đất/đá từ `pixel-platformer`; nhân vật tự vẽ.
+- **Bản quyền:** Diamond Rush là của Gameloft nhưng cơ chế Boulder Dash (1984) đã thành thể loại; tránh tên + nhân vật gốc.
+- **Effort: vừa** (1–2 phiên).
+
+### A8. Chicken Invaders (đề xuất tên: "Gà Vũ Trụ Xâm Lăng") 🐔🛸
+- **Cách chơi gốc:** shoot-em-up hài: đàn gà bay đội hình theo sóng, thả trứng xuống, mình bắn hạ nhặt đùi gà nâng cấp súng; trùm gà khổng lồ.
+- **Chiến thuật hoàn thành:** repo ĐÃ CÓ Phi Đội Nhí cùng thể loại — bản này nâng cấp: **đội hình bay theo waypoint/formation** (đàn lượn vòng, xếp hàng ngang lắc lư — khác spawn rơi thẳng của Phi Đội Nhí), vũ khí nâng cấp 3 mức khi nhặt vật phẩm, trùm to có thanh máu. Tái dùng ~70% engine phidoinhi (stepGame/va chạm tròn). Tablet: kéo tay lái, tự bắn. Test: formation di chuyển đúng pha, nâng cấp súng, trùm.
+- **Asset:** `alien-ufo-pack` (quái + UFO thay gà — hoặc gà Twemoji 🐔 cưỡi UFO cho hài đúng chất), đạn/nổ tự vẽ.
+- **Bản quyền:** thể loại Space Invaders/Galaga genre-generic; tránh tên + gà hoạt hình đặc trưng của InterAction Studios.
+- **Effort: vừa** (1 phiên nhờ tái dùng engine).
+
+### A9. Đua xe: NFS Underground + Road Rash (gộp — đề xuất tên: "Tay Đua Nhí") 🏎️
+- **Cách chơi gốc:** NFS-U: đua đêm nitro; Road Rash: đua mô tô + đánh nhau (phần đánh nhau BỎ — không hợp trẻ em).
+- **Chiến thuật hoàn thành:** chọn kiểu **pseudo-3D lane racer** (như Road Fighter/Out Run mini): đường cuộn từ xa lại theo projection đơn giản (`scale = 1/z`), xe mình 3 làn, né xe ngược chiều, nhặt nitro tăng tốc có hiệu ứng vệt sáng; HOẶC đơn giản hơn: top-down cuộn dọc (dễ hơn nhiều, `racing-pack` nhìn top-down là đẹp nhất). ĐỀ XUẤT: **top-down 3 làn** trước (repo đã có Đua Xe Né Chướng Ngại trong Điện Tử Xưa — bản này to đẹp hơn: nhiều làn, vượt xe tính điểm, nitro, vạch đích theo màn). Tablet: nghiêng? KHÔNG — kéo/chạm làn là chuẩn nhất. Test: đổi làn, va chạm, nitro, tính vòng/đích.
+- **Asset:** `racing-pack` (xe nhiều màu, mô tô, đường, cây, vạch — top-down chuẩn).
+- **Bản quyền:** đua xe là thể loại; tránh tên NFS/EA, không logo hãng xe thật.
+- **Effort: vừa** (1–2 phiên).
+
+### A10. Audition (đề xuất tên: "Vũ Điệu Theo Nhịp") 💃
+- **Cách chơi gốc:** chuỗi mũi tên hiện ra, bấm đúng thứ tự rồi chốt bằng phím space ĐÚNG NHỊP nhạc; đúng đẹp thì nhân vật nhảy đẹp, combo.
+- **Chiến thuật hoàn thành:** phiên bản trẻ em: mỗi câu nhạc hiện 3–5 mũi tên to (◀▲▶▼), bé bấm theo thứ tự trong ô cửa sổ thời gian; chốt nhịp bằng vòng tròn co lại — bấm khi vòng chạm viền (dễ nhìn hơn đếm nhịp). Nhạc: dùng WebAudio tự sinh giai điệu vui (repo có sfx engine sẵn) — KHÔNG nhúng nhạc bản quyền; tempo tăng theo màn. Nhân vật nhảy: hình que dễ thương 4–6 pose tự vẽ, đổi pose theo combo. Test: chuỗi đúng/sai, cửa sổ nhịp ±ms, combo/điểm.
+- **Asset:** mũi tên `game-icons` + `ui-pack`; nhân vật tự vẽ canvas.
+- **Bản quyền:** cơ chế rhythm-arrow generic (DDR 1998); tránh tên Audition/VTC và nhạc có bản quyền.
+- **Effort: vừa** (1–2 phiên; phần "cảm giác nhịp" cần tinh chỉnh tay).
+
+### A11. Thời Trang / Trang Điểm (đề xuất tên: "Bé Làm Stylist") 👗 — HỌC TIẾNG ANH
+- **Cách chơi:** búp bê vector đứng giữa; kệ đồ 2 bên theo tab (tóc/áo/quần/váy/giày/phụ kiện/màu son...); bé chạm item → mặc ngay lên búp bê + **đọc to tên tiếng Anh** ("red dress!", "blue shoes!"); chạm vào bộ phận cơ thể búp bê → đọc tên bộ phận ("hair", "eyes", "hand"...). Có nút 📷 "chụp" lưu bộ đồ (canvas → localStorage gallery).
+- **Chiến thuật hoàn thành:** búp bê = SVG nhiều layer (tự vẽ 1 lần: thân + các slot tóc/áo/quần/giày là `<g>` thay nội dung); item = data thuần `{slot, tenVi, tenEn, mau}`; không có thắng thua — thuộc nhóm "chơi để chơi" như Vẽ Tự Do (không chấm điểm, chỉ ghi thời gian chơi). Đây là game HỌC hiệu quả nhất đợt — từ vựng quần áo + bộ phận cơ thể + màu sắc là chương trình mẫu giáo/lớp 1. Test: đổi slot đúng, phát đúng từ EN theo item, lưu/khôi phục bộ đồ.
+- **Asset:** tự vẽ SVG (phong cách phẳng dễ thương) — item quần áo vẽ đơn giản, mỗi item 1 path + đổi màu bằng fill; KHÔNG cần asset ngoài.
+- **Bản quyền:** thể loại dress-up hoàn toàn generic. **Effort: vừa** (1–2 phiên, chủ yếu vẽ SVG).
+
+### A12. Trang Trí Phòng (đề xuất tên: "Phòng Xinh Của Bé") 🛋️ — HỌC TIẾNG ANH
+- **Cách chơi:** căn phòng trống (tường + sàn đổi được màu); kéo-thả đồ nội thất từ kệ vào phòng (giường, bàn, đèn, cây, tranh, thảm, mèo...); chạm đồ vật đã đặt → đọc to tên tiếng Anh; xoay/lật/xếp lớp trước-sau; nút chụp lưu như A11.
+- **Chiến thuật hoàn thành:** cùng khung "chơi để chơi" với A11 — nên làm CÙNG 1 phiên, chung engine kéo-thả + speak-EN + gallery; đồ vật = SVG/PNG đặt tự do (translate + scale + flip), z-index theo tọa độ y (đồ thấp hơn che đồ cao hơn — tạo chiều sâu). Test: kéo thả snap trong biên phòng, lưu/khôi phục layout, đọc đúng từ.
+- **Asset:** tự vẽ SVG bộ ~20 món; hoặc trích vài hình từ `ui-pack`/Twemoji (🛏️🪑🖼️ dạng SVG). **Effort: vừa** (gộp A11+A12 = 2 phiên).
+
+---
+
+## Nhóm B — Cần "hiền hóa" mạnh hoặc hoãn (độ tuổi + bản quyền)
+
+### B1. Beach Head 2000 → đề xuất chuyển thể "Pháo Nước Giữ Đảo" 💦
+Bản gốc là bắn súng phòng thủ **quân sự tả thực** (súng máy, lính, máu) — không hợp bộ sưu tập mẫu giáo/tiểu học. Giữ đúng cảm giác "ngồi ụ pháo xoay 360° bắn mục tiêu ập vào từ mọi hướng" nhưng đổi hết chất liệu: **pháo nước/bong bóng** bắn robot đồ chơi + thuyền giấy tiến vào bãi biển; trúng thì ướt sũng/bung thành kẹo. Kỹ thuật: tâm ngắm theo ngón kéo, mục tiêu có `hp`, sóng (wave) tăng dần, nạp đạn bằng nút to. Effort vừa. **Chỉ nên làm sau khi xong nhóm A.**
+
+### B2. Nhóm đối kháng: KOF / The Last Blade / Samurai Shodown / Bloody Roar → gộp 1 game "Võ Đài Thú Nhí" 🥊
+4 tựa này cùng thể loại fighting — **sprite đều của SNK/Hudson (bảo hộ gắt), và chặt chém/máu me không hợp trẻ nhỏ**. Đề xuất 1 game đại diện giữ cái lõi vui của thể loại (đọc đòn – ra đòn – né đòn theo nhịp): 2 thú bông đứng 2 bên võ đài, 3 nút to **ĐẤM / ĐỠ / NÉ** kiểu oẳn tù tì có nhịp (đấm thắng né, né thắng vồ, đỡ chặn đấm...), đòn trúng thì thú bông văng lộn nhào tưng tưng như đồ chơi, không máu — thắng 3 hiệp. Tái dùng được khung Thú Cưng Đại Chiến + thêm yếu tố thời gian thực (cửa sổ phản ứng ngắn dần theo màn). Bloody Roar có nét "biến hình thú" → cho nhân vật **biến hình khi đầy nộ khí** (gấu bông → gấu to) là đủ chất mà vẫn hiền. Effort vừa.
+
+### B3. Cadillacs and Dinosaurs (beat-em-up) → hoãn hoặc chuyển "Giải Cứu Khủng Long Con" 🦖
+Beat-em-up đi cảnh đánh đấm liên tục — khó hiền hóa mà vẫn giữ chất; sprite Capcom bảo hộ. Nếu vẫn muốn giữ tinh thần "đi cảnh + khủng long": chuyển thành **runner đi cảnh giải cứu khủng long con** (chạy, nhảy né bẫy, ôm khủng long con về chuồng — không đánh nhau). Đề xuất: ưu tiên THẤP NHẤT đợt này, quyết sau khi xong nhóm A.
+
+### B4. PVZ — không làm game mới, NÂNG CẤP Vườn Rau Thần Kỳ 🌻
+Đã có sẵn game cùng cơ chế. Việc đáng làm: thêm 2–3 loại cây mới (bí ngô chắn 2 ô, ớt nổ cả hàng, bắp cải ném cầu vồng), 2 loại côn trùng mới (bọ đội mũ trâu máu, ong bay qua đầu xương rồng), chọn cây trước trận (deck 4/6 loại), và chế độ "sóng cuối" dồn dập có kèn báo — đúng chất PVZ mà không cần game mới. Effort nhỏ-vừa.
+
+---
+
+## Lộ trình đề xuất đợt 5 (theo thứ tự bắt tay)
+
+1. **Cá Lớn Biển Xanh** (A1) ✅ ĐÃ XONG (`ca-lon-bien-xanh/`, 14 unit test) — cá bơi theo ngón tay, 65/35 cá mồi/cá dữ, bất tử 2s sau khi bị cắn, lớn 3 cấp thắng màn, sprite Kenney Fish Pack + đáy biển tia nắng/rong/bong bóng vẽ canvas.
+2. **Rồng Con Bắn Trứng** (A2) ✅ ĐÃ XONG (`rong-con-ban-trung/`, 18 unit test) — lưới lục giác parity đổi khi trần tụt, đường ngắm chấm chấm nảy tường dùng chung mô phỏng với phát bắn thật, nổ cụm ≥3 + rơi trứng hở chân, trứng màu vẽ sẵn canvas (gradient + đốm), rồng con Twemoji.
+3. **Chim Non Vượt Ống** (A3) ✅ ĐÃ XONG (`chim-non-vuot-ong/`, 13 unit test) — 1 chạm vỗ cánh, khe rộng cho bé hẹp dần theo điểm, trần chặn không chết, mỗi 5 ống 1 chữ cái đọc to khi bay qua, chim + ống + nền parallax tự vẽ canvas, lưu kỷ lục localStorage.
+4. **Bóng Đỏ Phiêu Lưu** (A4) ✅ ĐÃ XONG (`bong-do-phieu-luu/`, 18 unit test) — bóng TỰ nảy chỉ lái ◀▶ (2 nút to góc dưới cho tablet), 4 màn thiết kế bằng chuỗi ký tự, vòng vàng + cờ đích, phồng to/xì nhỏ đổi bán kính & lực nảy (hầm 1 ô chỉ bóng nhỏ lọt), gai + hố mất mạng về điểm xuất phát (vòng đã nhặt giữ nguyên), camera cuộn ngang.
+5. **Ném Banh Đổ Tháp** (A5) ✅ ĐÃ XONG (`nem-banh-do-thap/`, 15 unit test) — kéo ná phóng banh parabol (chấm ngắm dự kiến + vệt phát trước), khối gỗ/đá/kính có máu theo vật liệu, sát thương theo tốc độ banh, khối mất chỗ đỡ RƠI đè quái, quái ngã từ cao cũng bụp, 5 màn + tính sao theo banh dư; sprite Kenney Physics Assets (CC0), banh tự vẽ — không dùng chim/heo của game gốc.
+
+6. **Nhà Thám Hiểm Tí Hon** (A6) ✅ ĐÃ XONG (`nha-tham-hiem-ti-hon/`, 16 unit test) — platformer AABB tách trục + coyote-time 100ms + jump-buffer 120ms, dậm đầu quái/đụng hông đau, xu + cờ đích, 4 màn chuỗi ký tự, nút ◀▶ + NHẢY to kiểu console; sprite Kenney Pixel Platformer (CC0), không dấu hiệu nhận diện của game thương mại nào.
+7. **Hang Kim Cương Bí Ẩn** (A7) ✅ ĐÃ XONG (`hang-kim-cuong/`, 16 unit test) — đào hang ô lưới theo nhịp tick 130ms: đá RƠI khi hụt chân, LĂN chéo khi chồng nhau, chỉ đá "đang rơi" mới đè chết (đứng dưới đá đứng yên thì không sao), đẩy đá ngang, cửa mở khi gom đủ kim cương; 4 màn có test "mở màn không gì tự rơi"; vuốt 4 hướng, icon rock/gem Twemoji tái dùng.
+8. **Gà Vũ Trụ Xâm Lăng** (A8) ✅ ĐÃ XONG (`ga-vu-tru/`, 14 unit test) — bắn đội hình: gà cưỡi UFO BAY VÀO SLOT rồi lắc lư thả trứng (khác hẳn Phi Đội Nhí), hàng đầu 2 máu, sao nâng cấp súng 3 nòng (trúng đòn tụt cấp), trùm gà chúa có thanh máu; UFO Kenney (CC0) + gà Twemoji, nền vũ trụ sao rơi tự vẽ.
+9. **Tay Đua Nhí** (A9) ✅ ĐÃ XONG (`tay-dua-nhi/`, 15 unit test) — đua né 4 làn nhìn từ trên xuống: chạm làn nào lách sang làn đó (lerp mượt), sinh xe luôn chừa ≥2 làn trống, nitro 2.2s có vệt sáng, vượt xe +điểm, vạch đích ca-rô ló ra khi đủ quãng đường; xe Kenney Racing Pack (CC0), gộp cả ý Road Rash (bỏ yếu tố đánh nhau).
+
+10. **Vũ Điệu Theo Nhịp** (A10) ✅ ĐÃ XONG (`vu-dieu-nhip/`, 11 unit test) — 2 pha mỗi câu: bấm chuỗi 3–5 mũi tên đúng thứ tự (có giới hạn giờ) rồi CHỐT NHỊP bằng vòng tròn co (perfect ±140ms / good ±320ms / miss mất tim); nhân vật nhảy đổi 4 tư thế theo combo + hào quang; nhạc nền vòng lặp ngũ cung TỰ SINH bằng WebAudio (không nhúng nhạc ngoài); sàn ca-rô + đèn sân khấu tự vẽ.
+11. **Bé Làm Stylist** (A11) ✅ ĐÃ XONG (`be-lam-stylist/`, 13 unit test) — thay đồ búp bê SVG tự vẽ 5 slot (tóc/áo/quần/giày/phụ kiện) × 6 màu, chạm món đồ là mặc + **đọc to tiếng Anh** ("purple dress!"), chạm người búp bê đọc tên bộ phận (head/eyes/hands...), nút 🎲 trộn đồ + 📷 lưu bộ sưu tập localStorage; **không chấm điểm** (nhóm "chơi để chơi"), chỉ ghi thời gian chơi.
+
+12. **Phòng Xinh Của Bé** (A12) ✅ ĐÃ XONG (`phong-xinh/`, 13 unit test) — kéo-thả 15 món nội thất (Twemoji CC-BY) vào phòng: đồ tường (tranh/cửa sổ/đồng hồ/gương) tự kẹp vùng tường, đồ sàn kẹp vùng sàn + che khuất theo chiều sâu (y tăng dần); chạm món **đọc to tiếng Anh** ("bed", "lamp"...), đổi 5 màu tường × 4 màu sàn cũng đọc ("pink wall"); chọn món để lật ⇄ / cất 🗑; 🎲 trang trí ngẫu nhiên + 📷 lưu; **không chấm điểm**, cùng engine tinh thần Bé Làm Stylist.
+
+🎉 **NHÓM A HOÀN THÀNH 12/12** — toàn bộ game nhóm A của đợt 5 đã lên kệ.
+
+**Nhóm B:**
+
+B1. **Pháo Nước Giữ Đảo** ✅ ĐÃ XONG (`phao-nuoc-giu-dao/`, 14 unit test) — "hiền hóa" thể loại phòng thủ ụ súng cố định: pháo NƯỚC giữa đảo cát, thuyền giấy/robot đồ chơi ập vào từ 360°, chạm đâu phun bóng nước tới đó (nổ nước AoE ướt cả cụm), trúng bung thành kẹo; bình 8 phát + nút NẠP NƯỚC 1.5s (đang nạp không bắn được — dạy canh thời điểm); nhiều đợt sóng/màn, đợt đầu chỉ thuyền giấy cho bé làm quen; lâu đài cát 3 tim, rung màn khi bị quậy. Toàn bộ hình tự vẽ canvas — không súng thật, không phe quân sự.
+
+B2. **Võ Đài Thú Nhí** ✅ ĐÃ XONG (`vo-dai-thu-nhi/`, 14 unit test) — lấy cái lõi "đọc đòn – phản đòn theo nhịp" của thể loại đối kháng, hiền hóa hoàn toàn: 4 bạn thú bông Twemoji (Gấu/Thỏ/Hổ/Rồng, tên + dạng biến hình tự đặt), đối thủ ra TÍN HIỆU (găng tay = đòn cao → ĐỠ, gió = vồ thấp → NÉ, sao = sơ hở → ĐẤM) với thanh thời gian co ngắn dần theo màn; đúng 5 lần tích đầy nộ khí → BIẾN HÌNH to đùng có hào quang, hồi bông + đấm đau gấp đôi; sai/trễ chỉ rung lắc như đồ chơi, không máu me; chuỗi 2–3 hiệp mỗi màn, hồi 40% giữa hiệp.
+B3. **Giải Cứu Khủng Long Con** ✅ ĐÃ XONG (`giai-cuu-khung-long/`, 13 unit test) — chuyển thể beat-em-up đi cảnh thành runner KHÔNG đánh nhau: chạy tự động + 1 chạm nhảy qua đá/hố, chặng sinh ngẫu nhiên nhưng có test "công bằng" (chướng ngại cách nhau ≥260px luôn nhảy kịp), bế bé khủng long 🦕 kêu cứu chạy lũn cũn theo sau, về tổ với mẹ 🦖 + trứng ở cuối chặng; nhân vật Kenney (CC0) + khủng long Twemoji (CC-BY), rừng dừa parallax.
+B4. **Nâng cấp Vườn Rau Thần Kỳ** ✅ ĐÃ XONG (`vuon-rau-than-ky/` — 20 unit test, thêm 6) — thêm 2 cây: **Ớt Đỏ Nổ** 🌶️ (kíp 0.6s → quét sạch côn trùng CẢ HÀNG, dùng 1 lần, có vệt lửa) + **Bắp Cải Ném** 🥬 (đau gấp 3 Đậu Xanh, hồi chiêu lâu); thêm 2 côn trùng: **Bọ Giáp** 🐞 (110 máu lì đòn, từ màn 3) + **Bướm Tinh Nghịch** 🦋 (BAY QUA đầu xương rồng — tường không chặn được, từ màn 2, bay nhấp nhô); **SÓNG CUỐI**: sinh đủ 70% thì nhịp sinh dồn dập gấp đôi + giọng báo "Sóng cuối tới rồi!".
+
+**Bổ sung theo yêu cầu (hoàn thiện 2 thẻ "Sắp ra mắt" cũ + 2 nâng cấp lớn):**
+
+- **Cơn Sốt Tìm Vàng** ✅ (`con-sot-tim-vang/`, 12 unit test) — khác hẳn Đập Vàng (theo lượt, không lấp): chơi THỜI GIAN THỰC 60 giây, bấm cụm ≥2 đá cùng màu (điểm n²), đá mới RƠI LẤP ĐẦY liên tục, gom cụm ≥4 nhanh liên tiếp nối combo → combo 3 bùng CƠN SỐT VÀNG nhân đôi điểm 6 giây (nền rực vàng); đạt mục tiêu trước khi hết giờ + thưởng giây dư; 5 màu đá quý vẽ canvas đa giác có vân + ánh kim.
+- **Xây Thị Trấn Vàng** ✅ (`xay-thi-tran-vang/`, 13 unit test) — 2 pha xen kẽ: lái XE GOÒNG 45 giây hứng xu/túi vàng/kim cương rơi (icon Đào Vàng tái dùng), đá rơi trúng văng 30% vàng đang chở + choáng; về XÂY 6 công trình nhiều cấp (nhà→biệt thự có cờ, cửa hàng mái sọc, đài phun nước tia động, tháp đồng hồ kim quay, vườn cây Kenny tiny-town, cổng thành vàng) — công trình ĐẸP DẦN theo cấp, vẽ canvas; xây đủ hết mở thị trấn mới giá cao hơn; **tiến độ lưu localStorage chơi tiếp mãi**.
+- **Phòng Xinh mở rộng** ✅ — 15 → **28 món đồ** (thêm TV, piano, ghi ta, tàu hỏa, bóng, tên lửa, cún, robot, bồn tắm, bóng bay + treo tường: cầu vồng, đèn trăng, cánh diều), 7 màu tường × 6 màu sàn, và **3 PHÒNG RIÊNG** (tab 1️⃣2️⃣3️⃣, mỗi phòng lưu riêng — bé trang trí cả "căn nhà").
+- **Pokémon Đại Chiến mở rộng lớn** ✅ (22 unit test) — roster 16 → **40+ Pokémon**: 12 bạn khởi đầu (thêm Vulpix/Growlithe/Oddish/Psyduck/Magikarp/Jigglypuff/Dratini — dòng nào cũng tiến hóa, Magikarp → Gyarados!), pool 22 đối thủ, **8 trùm** mạnh dần (thêm bộ 3 chim huyền thoại); **bộ lọc theo hệ** ở màn chọn (Tất cả/Lửa/Nước/Cỏ/Điện/Thường/Rồng); **chỉ số ⚔️ATK 🛡️DEF** ảnh hưởng sát thương (lực × atk/def × hệ), hiện trên thẻ chọn + khung máu; nút chiêu hiện **lực đánh 💥**; hệ **Đá 🪨** mới (khắc Lửa+Điện, sợ Nước+Cỏ); hiệu ứng chiêu "sát tên gọi": chiêu mạnh bắn LOẠT 2–3 viên, nổ đúng chất hệ (💦🍃⚡🪨), chiêu Điện chớp sáng cả sân, đòn khắc hệ rung đấu trường.
+
+**Sắp xếp lại trang chủ (cùng đợt):** 3 hub mới kiểu game-mini — `tro-choi-xua/` (Sân Chơi Ngày Bé + Bắt Vịt + Cờ Cá Ngựa + Cờ Gánh + Ô Ăn Quan + Nhảy Lò Cò), `dien-tu-xua/` (Máy Điện Tử 3 Trò + Rắn + Xếp Gạch + Lật Hình + Ghép Hình + Ca-rô), `hoc-va-choi/` (Tô Màu + Tập Viết + Học Vần + Toán Lớp 1). Trang chủ từ 24 thẻ gọn còn 11; nút back của 16 game trỏ về đúng hub.
+3. **Ném Banh Đổ Tháp** (A5) — điểm nhấn physics, "đã" nhất trên tablet.
+4. **Bé Làm Stylist** (A11) + **Phòng Xinh Của Bé** (A12) — cặp học tiếng Anh, chung engine.
+5. **Gà Vũ Trụ** (A8) + **Tay Đua Nhí** (A9) — tái dùng engine sẵn.
+6. **Hang Kim Cương Bí Ẩn** (A7) + **Bóng Đỏ Phiêu Lưu** (A4) — puzzle/platformer ô lưới.
+7. **Nhà Thám Hiểm Tí Hon** (A6) — platformer đầy đủ, làm khi đã quen tay.
+8. **Vũ Điệu Theo Nhịp** (A10) + nâng cấp **Vườn Rau** (B4).
+9. Nhóm B còn lại (B1/B2/B3) — quyết sau khi nhìn lại độ tuổi người chơi thật.
+
+Quy trình mỗi game giữ nguyên chuẩn repo: **logic thuần + unit test trước → giao diện → đăng ký hub/i18n/sw.js → chạy `npm test` toàn bộ**; mỗi game có giọng đọc hướng dẫn tiếng Việt (nút ❓) và song ngữ khi có yếu tố học.
+
+
+# Thêm menu game để học từ vựng tiếng Anh 
+Hãy thiết kế  thêm các game để học tiếng Anh từ vựng ? nhiều game càng tốt .
+Mục đích cho bé có nguồn từ vựng sớm trong khi vui chơi 
+Mục tiêu học từ vựng , quen các câu ngắn , cụm từ thường dùng 
++ 1000 từ vựng liên quan tới trái cây, thực phẩm, ăn uống , nhà hàng, quán ăn , shoping, ngày lễ , món ăn truyền thống , vui chơi giải trí , phim ảnh ...
++ 1000 từ vựng về giao thông, phương tiện , tiện ích công cộng , môi trường ,đô thị , thôn quê, địa lý , địa hình ...
++ 1000 từ vựng về thế giới động vật , động vật hoang dã, sở thú , nơi vui chơi giải trí , hoạt động giải trí , thế giới, hàng không, vũ trụ ,toán học , ...
++ 1000 từ vựng về gia đình ,bạn bè, người thân, trường học, lớp học , nghề nghiệp , chức vụ, hoạt động thể thao, cuộc thi , các hoạt động, thiét bị nghề nghiệp  ...
++ 1000 từ vựng về vật dụng hằng ngày , vật dụng gia đình ,quần áo  , giày dép , mua bán , shoping , máy tính , máy in , các thiết bị gia dụng , thiết bị công nghiệp , các bộ phận cơ thể, hoạt động hằng ngày ,  
++ Bên cạnh từ vựng luôn có 1 câu ngắn đi kèm hoặc các cụm từ đi kèm ...để bé nhớ cả câu hoặc cụm từ vựng vẫn tốt hơn trong giao tiếp hằng ngày 
+- Nguồn hình ảnh/ icon liên quân tới từ vựng rất nhiều và miễn phí cho mục đích giáo dục . hãy tải nhiều nhất và tạo nhiều nhất từ vựng và câu , có thể chia làm nhiều giai đoạn .
+hãy đọc kỹ và ghi lại đầy đủ bên dưới để tôi có thể xem xét bạn có hiểu và ghi nhiều bổ sung sau đó chúng tôi sẽ xem xét.    
