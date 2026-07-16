@@ -1,6 +1,6 @@
 /* Reply1999 Games — root service worker.
    Scope = '/'. Cache hub + các game khi truy cập lần đầu. */
-const CACHE = 'reply1999-v47';
+const CACHE = 'reply1999-v51';
 const PRECACHE = [
   './', './index.html', './manifest.json', './i18n.js',
   './pokemon/index.html',
@@ -327,6 +327,23 @@ const PRECACHE = [
   './nghe-doan-tieng-anh/style.css',
   './nghe-doan-tieng-anh/src/nghedoan.js',
   './nghe-doan-tieng-anh/src/app.js',
+  './nghe-doan-tieng-anh/images/pho.jpg',
+  './nghe-doan-tieng-anh/images/banh-mi.jpg',
+  './nghe-doan-tieng-anh/images/banh-chung.jpg',
+  './nghe-doan-giao-thong/index.html',
+  './nghe-doan-giao-thong/style.css',
+  './nghe-doan-giao-thong/src/giaothong.js',
+  './nghe-doan-giao-thong/src/app.js',
+  './nghe-doan-giao-thong/images/xe-cau.jpg',
+  './nghe-doan-giao-thong/images/con-trau.jpg',
+  './nghe-doan-dong-vat-vu-tru/index.html',
+  './nghe-doan-dong-vat-vu-tru/style.css',
+  './nghe-doan-dong-vat-vu-tru/src/dongvat.js',
+  './nghe-doan-dong-vat-vu-tru/src/app.js',
+  './nghe-doan-gia-dinh-nghe-nghiep/index.html',
+  './nghe-doan-gia-dinh-nghe-nghiep/style.css',
+  './nghe-doan-gia-dinh-nghe-nghiep/src/giadinh.js',
+  './nghe-doan-gia-dinh-nghe-nghiep/src/app.js',
   './phao-nuoc-giu-dao/index.html',
   './phao-nuoc-giu-dao/style.css',
   './phao-nuoc-giu-dao/src/phaonuoc.js',
