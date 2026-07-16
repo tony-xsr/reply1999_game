@@ -739,6 +739,13 @@ Quy trình mỗi game giữ nguyên chuẩn repo: **logic thuần + unit test tr
 
 Nếu bạn đồng ý hướng đi trên, xác nhận **mảng nào làm giai đoạn 2 trước** (đề xuất trái cây/thực phẩm) để tôi bắt tay nghiên cứu từ vựng + tải icon + thiết kế cơ chế chi tiết trước khi code.
 
+**✅ Đã xác nhận và LÀM XONG "Giai đoạn 1" (mảng 1/5 — trái cây, thực phẩm, ăn uống, nhà hàng, quán ăn, shopping, ngày lễ, vui chơi giải trí, phim ảnh):**
+
+- **Nghe & Đoán Tiếng Anh** ✅ MỚI (`nghe-doan-tieng-anh/`, 15 unit test) — 100 mục từ vựng chia 5 chủ đề con (🍎 Trái cây 18 từ · 🍜 Món ăn 22 từ · 🛍️ Quán ăn & Mua sắm 20 từ · 🎉 Ngày lễ 20 từ · 🎬 Giải trí 20 từ), MỖI TỪ đi kèm **1 câu tiếng Anh ngắn thật** (không chỉ từ đơn) — ví dụ "I am hungry.", "Let's watch a movie.", "Happy New Year!" — đúng yêu cầu "học cả câu/cụm từ để nhớ tốt hơn trong giao tiếp". Cách chơi: máy đọc to 1 câu bằng giọng en-US, bé nghe rồi chạm đúng hình trong 4 lựa chọn; đúng liên tiếp 3 lần được điểm thưởng combo; sau khi chọn luôn hiện lại **câu tiếng Anh + nghĩa tiếng Việt** để củng cố. Có **bộ lọc theo chủ đề** (giống filter hệ của Pokémon Đại Chiến) hoặc chơi lẫn "Tất cả". Toàn bộ hình dùng emoji (không cần tải icon rời) — giữ nhẹ, nhất quán với Xếp Chữ Tiếng Anh.
+- Đăng ký đầy đủ: thẻ trong `goc-tieng-anh/` (hub 6→7 game) + `game-mini/`, 8 khóa i18n mới (5 ngôn ngữ), precache `sw.js` v46→v47, thêm vào chuỗi test gốc — `npm test` toàn bộ: **747 ✅, 0 ❌**.
+
+**Giai đoạn 2 tiếp theo** (chưa làm — chờ xác nhận): chọn 1 trong 4 mảng còn lại để lặp lại khuôn mẫu này (giao thông/tiện ích công cộng/môi trường/đô thị/địa lý · động vật/vũ trụ/toán học · gia đình/trường học/nghề nghiệp/thể thao · vật dụng hằng ngày/quần áo/thiết bị/bộ phận cơ thể).
+
 
 # Thêm menu game để học từ vựng tiếng Anh 
 Hãy thiết kế  thêm các game để học tiếng Anh từ vựng ? nhiều game càng tốt .
