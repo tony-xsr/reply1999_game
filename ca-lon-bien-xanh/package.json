@@ -1,0 +1,8 @@
+{
+  "name": "ca-lon-bien-xanh",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/calon.test.js"
+  }
+}
