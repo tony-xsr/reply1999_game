@@ -1,6 +1,10 @@
-// Hồ sơ người chơi + thống kê thắng/thua & thời gian chơi (localStorage).
-// Danh tính gắn với trình duyệt qua device id; mỗi hồ sơ chỉ cần nhập tên,
-// lần sau mở app trên cùng thiết bị là dùng lại được.
+// Hồ sơ người chơi + thống kê thắng/thua & thời gian chơi.
+// Kiến trúc đã chốt (07/2026): SERVER là nguồn sự thật — mỗi ván chơi được gửi
+// lên Supabase (kèm sao thưởng) khi thiết bị đã liên kết và đã chọn bé trong
+// /chon-be/. Bản ghi localStorage bên dưới giữ vai trò sổ tạm trên thiết bị
+// (các game cũ đọc trực tiếp) — không phải bản đối chiếu chính.
+
+import { ready as serverReady, recordSessionServer } from '../../shared/api.js';
 
 const DEVICE_KEY = 'pika.device';
 const PROFILES_KEY = 'pika.profiles';
@@ -108,6 +112,9 @@ export function recordSession(s) {
     date: s.date || dateKey(),
   });
   writeJSON(statsKey(profile.id), list.slice(-MAX_SESSIONS));
+  // Gửi lên server (kèm tự cộng sao theo luật thưởng) — mất mạng/chưa cấu hình
+  // thì bỏ qua im lặng, không được làm hỏng ván chơi của bé.
+  serverReady().then((ok) => (ok ? recordSessionServer(s) : null)).catch(() => {});
 }
 
 /** @returns {object[]} các ván đã ghi của 1 hồ sơ */
