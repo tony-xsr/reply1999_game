@@ -99,14 +99,36 @@ function showLimitOverlay(minutes) {
   speakVi(`Hôm nay bé đã chơi đủ ${minutes} phút rồi. Bé nghỉ mắt, mai mình học tiếp nhé!`);
 }
 
+/** Throttle 1 việc theo phút (đỡ tốn request Supabase mỗi lần mở game). */
+function throttled(key, minutes) {
+  try {
+    const last = Number(localStorage.getItem(key)) || 0;
+    if (Date.now() - last < minutes * 60000) return true;
+    localStorage.setItem(key, String(Date.now()));
+  } catch { /* ignore */ }
+  return false;
+}
+
 async function checkDailyLimit() {
   const kid = api.getCurrentKidId();
   if (!kid || !(await api.ready())) return;
-  let limitMin = api.cachedSettings()?.daily_limit_min ?? 45;
+  // Giới hạn RIÊNG của bé (profiles.settings) thắng giới hạn chung của gia đình.
+  const kidOverride = api.currentKidInfo()?.settings?.daily_limit_min;
+  // Tiết kiệm request: chỉ hỏi server tối đa 3 phút/lần; giữa các lần dùng kết quả cũ.
+  if (throttled(`r99-limit-check:${kid}`, 3)) {
+    try {
+      const cached = JSON.parse(localStorage.getItem(`r99-limit-state:${kid}`));
+      if (cached?.over) showLimitOverlay(cached.limitMin);
+    } catch { /* ignore */ }
+    return;
+  }
   try {
-    const [settings, playedSec] = await Promise.all([api.getSettings(), api.todayPlaySeconds(kid)]);
-    limitMin = settings.daily_limit_min;
-    if (limitMin > 0 && playedSec >= limitMin * 60) showLimitOverlay(limitMin);
+    const settings = api.cachedSettings() || await api.getSettings();
+    const limitMin = kidOverride ?? settings.daily_limit_min ?? 45;
+    const playedSec = await api.todayPlaySeconds(kid);
+    const over = limitMin > 0 && playedSec >= limitMin * 60;
+    try { localStorage.setItem(`r99-limit-state:${kid}`, JSON.stringify({ over, limitMin })); } catch { /* ignore */ }
+    if (over) showLimitOverlay(limitMin);
   } catch { /* mất mạng: không chặn */ }
 }
 
@@ -143,6 +165,7 @@ function showParentGift(gift) {
 async function checkParentGifts() {
   const kid = api.getCurrentKidId();
   if (!kid || !(await api.ready())) return;
+  if (throttled(`r99-gift-check:${kid}`, 2)) return; // tối đa 1 lần / 2 phút
   try {
     const gifts = await api.unopenedRewards(kid);
     if (gifts.length) showParentGift(gifts[0]);

@@ -19,8 +19,11 @@ create table if not exists profiles (
   name       text not null,
   avatar     text not null default '🐰',
   color      text not null default '#ff8a3d',
+  -- cai dat RIENG cua be, de len cai dat chung: {"daily_limit_min":30,"tts_rate":0.8}
+  settings   jsonb not null default '{}',
   created_at timestamptz not null default now()
 );
+alter table profiles add column if not exists settings jsonb not null default '{}';
 
 -- Moi van choi 1 dong. id sinh PHIA CLIENT (uuid) -> gui trung khong tao ban sao.
 create table if not exists sessions (
@@ -43,7 +46,8 @@ create table if not exists miss_events (
   family_id  uuid not null references families(id) on delete cascade,
   profile_id uuid not null references profiles(id) on delete cascade,
   word       text not null,
-  delta      int  not null check (delta in (-1, 1)),
+  -- ±1 khi choi; dòng GỘP khi dọn dẹp có thể lớn hơn (xem tidy_my_family)
+  delta      int  not null check (delta between -999 and 999 and delta <> 0),
   ts         timestamptz not null default now()
 );
 create index if not exists miss_events_profile_word on miss_events (profile_id, word);
@@ -152,4 +156,45 @@ create or replace function delete_my_family() returns void
 language plpgsql security definer set search_path = public as $$
 begin
   delete from families where owner = auth.uid();
+end $$;
+
+-- ===== Don dep dinh ky (trang Phu Huynh tu goi ~1 lan/tuan) ==================
+-- Gop miss_events cu (>30 ngay) thanh 1 dong/tu; giu 300 van moi nhat moi be;
+-- gop reward_ledger cu (>60 ngay) thanh 1 dong "so du cu" (tong SAO khong doi).
+create or replace function tidy_my_family() returns void
+language plpgsql security definer set search_path = public as $$
+declare fam uuid;
+begin
+  select id into fam from families where owner = auth.uid();
+  if fam is null then return; end if;
+
+  with old as (
+    delete from miss_events
+    where family_id = fam and ts < now() - interval '30 days'
+    returning profile_id, word, delta
+  )
+  insert into miss_events (family_id, profile_id, word, delta, ts)
+  select fam, profile_id, word, sum(delta), now() - interval '30 days'
+  from old
+  group by profile_id, word
+  having sum(delta) <> 0 and sum(delta) between -999 and 999;
+
+  delete from sessions s
+  where s.family_id = fam and s.id in (
+    select id from (
+      select id, row_number() over (partition by profile_id order by played_at desc) as rn
+      from sessions where family_id = fam
+    ) t where t.rn > 300
+  );
+
+  with old as (
+    delete from reward_ledger
+    where family_id = fam and ts < now() - interval '60 days'
+    returning profile_id, delta
+  )
+  insert into reward_ledger (id, family_id, profile_id, delta, reason, ts)
+  select gen_random_uuid(), fam, profile_id, sum(delta), 'so-du-cu', now() - interval '60 days'
+  from old
+  group by profile_id
+  having sum(delta) <> 0;
 end $$;

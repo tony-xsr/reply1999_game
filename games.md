@@ -1360,3 +1360,27 @@ Bạn đã dựng project Supabase + tắt Confirm email. Kết quả kiểm th�
 - `npm test` local sau cùng: **974 ✅, 0 ❌**.
 
 **Hệ thống sẵn sàng dùng thật.** Các bước cho bạn: (1) mở `/phu-huynh/` đăng ký tài khoản thật của bạn → tạo hồ sơ bé; (2) máy của bé mở `/chon-be/` chạm avatar; (3) chơi 1 ván Nghe & Đoán rồi xem dashboard nhảy số. Còn mở: câu hỏi 3 (quy đổi quà thật) + cân nhắc bật lại Confirm email khi deploy công khai (an toàn hơn, chỉ thêm 1 bước bấm link khi đăng ký).
+
+## 11. ĐỢT TỐI ƯU TÀI NGUYÊN SUPABASE + HỒ SƠ BÉ NÂNG CAO (07/2026)
+
+Yêu cầu: "tiết kiệm dữ liệu lưu trên Supabase, hạn chế dùng tài nguyên — chỉ cần đủ là được" + tiếp tục hồ sơ bé/admin/cài đặt riêng.
+
+**Tiết kiệm SỐ REQUEST** (tài nguyên quý nhất của free tier cùng egress):
+- **Gộp lô sự kiện sai/đúng**: trước đây MỖI CÂU trả lời = 1 POST; nay gom hàng đợi, đẩy 1 POST khi đủ 10 sự kiện / sau 8 giây / khi rời trang (pagehide + visibilitychange) — giảm ~10 lần số request nặng nhất. E2E xác nhận 12 sự kiện/1 POST cộng dồn đúng.
+- **Throttle kid-bar**: kiểm tra giới hạn phút/ngày tối đa 3 phút/lần (giữa các lần dùng kết quả đã lưu), kiểm tra quà bố mẹ tối đa 2 phút/lần — thay vì mỗi lần mở game đều gọi 3-4 request.
+- **Sửa 1 chỗ LÃNG PHÍ THẬT trong trang Phụ Huynh**: sổ sao từng bé trước đây tải bằng `exportAll()` (kéo TOÀN BỘ database về chỉ để lọc 25 dòng!) → thay bằng `kidLedger(profileId, 30)` đúng bảng đúng bé đúng 3 cột.
+- **Cắt egress**: `kidSessions` chỉ SELECT 4 cột dashboard cần (bỏ id/mode/level/family_id).
+
+**Tiết kiệm DUNG LƯỢNG DB — dọn định kỳ** (`server/migrate-01-tiet-kiem.sql`, trang Phụ Huynh tự gọi ~1 lần/tuần):
+- `miss_events` cũ hơn 30 ngày → GỘP thành 1 dòng/từ (tổng không đổi — sổ từ yếu không sai);
+- `sessions` giữ 300 ván mới nhất mỗi bé;
+- `reward_ledger` cũ hơn 60 ngày → gộp thành 1 dòng "số dư cũ"/bé (tổng SAO không đổi).
+
+**Tính năng hồ sơ bé nâng cao** (trang Phụ Huynh, thẻ "✏️ Hồ sơ & cài đặt riêng của bé"):
+- Đổi tên + avatar bé; **giới hạn phút/ngày RIÊNG từng bé** (cột `profiles.settings` jsonb — bé lớn 60 phút, bé nhỏ 30 phút; bỏ trống = dùng chung; kid-bar ưu tiên giới hạn riêng); nút xóa bé (xác nhận bằng cách gõ đúng tên bé).
+
+**Bảo mật/khác**: `server/README.md` (chứa ghi chú riêng của bạn) đã `git rm --cached` + vào `.gitignore` — không bao giờ bị commit nữa (file vẫn nằm trên đĩa).
+
+**Kiểm thử**: E2E đợt 2 với server thật — batch/kidLedger/updateKid **4/4 PASS**; 2 mục chờ bạn dán `server/migrate-01-tiet-kiem.sql` (per-kid settings + tidy) — script tự phát hiện và báo "PEND". Suite local: **974 ✅, 0 ❌**.
+
+**Việc của bạn (30 giây)**: Supabase → SQL Editor → dán `server/migrate-01-tiet-kiem.sql` → Run, rồi báo tôi chạy lại E2E xác nhận 2 mục còn lại. (Ai cài mới từ `schema.sql` bản hiện tại thì không cần migrate.)

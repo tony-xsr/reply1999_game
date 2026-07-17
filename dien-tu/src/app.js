@@ -18,13 +18,24 @@ const t = (key, fallback) => {
 const $ = (id) => document.getElementById(id);
 const els = {
   subLine: $('subLine'), home: $('homeScreen'), play: $('playScreen'),
-  btnBack: $('btnBack'), btnNew: $('btnNew'), btnSound: $('btnSound'),
+  btnBack: $('btnBack'), btnNew: $('btnNew'), btnHelp: $('btnHelp'), btnSound: $('btnSound'),
   cheer: $('cheer'), cheerEmoji: $('cheerEmoji'), cheerText: $('cheerText'),
   btnAgain: $('btnAgain'), btnHome2: $('btnHome2'),
 };
 
-const state = { game: null, startedAt: Date.now(), ctx: {}, raf: 0, timers: [] };
+const state = { game: null, startedAt: Date.now(), ctx: {}, raf: 0, timers: [], instruction: '' };
 bindMute(() => sfx.muted);
+
+function sayInstruction(text) {
+  state.instruction = text;
+  speak(text);
+}
+
+const HELP_TEXT = {
+  ducks: 'Chạm vào con vịt bay qua màn hình để bắn hạ! Chọn chế độ "Chỉ số chẵn" nếu muốn chỉ bắn vịt mang số chẵn thôi.',
+  bricks: 'Kéo thanh trượt để đỡ quả bóng nảy lên, phá hết các viên gạch phía trên nhé! Đừng để bóng rơi xuống dưới.',
+  racer: 'Vuốt trái phải hoặc chạm vào làn đường để né các xe khác, đi được càng xa càng nhiều điểm!',
+};
 
 /* ===== Khung chung ===== */
 
@@ -73,6 +84,7 @@ function showHome() {
   els.cheer.classList.add('hidden');
   els.btnBack.hidden = true;
   els.btnNew.hidden = true;
+  els.btnHelp.hidden = true;
   els.subLine.textContent = '';
 }
 
@@ -85,8 +97,10 @@ function startGame(game) {
   els.cheer.classList.add('hidden');
   els.btnBack.hidden = false;
   els.btnNew.hidden = false;
+  els.btnHelp.hidden = false;
   els.play.innerHTML = '';
   GAMES[game]();
+  sayInstruction(t(`dientu.help.${game}`, HELP_TEXT[game]));
 }
 
 function makeCanvas() {
@@ -438,6 +452,7 @@ for (const card of document.querySelectorAll('.mode-card')) {
 els.btnBack.addEventListener('click', showHome);
 els.btnHome2.addEventListener('click', showHome);
 els.btnNew.addEventListener('click', () => { sfx.shuffle(); startGame(state.game); });
+els.btnHelp.addEventListener('click', () => { sfx.select(); speak(state.instruction); });
 els.btnAgain.addEventListener('click', () => { sfx.select(); startGame(state.game); });
 els.btnSound.addEventListener('click', () => {
   sfx.toggleMute();

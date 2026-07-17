@@ -181,6 +181,12 @@ export async function deleteKid(profileId) {
   await del(`profiles?id=eq.${profileId}`);
 }
 
+/** Sửa hồ sơ bé: tên/avatar/màu/cài đặt riêng (patch: {name?, avatar?, color?, settings?}). */
+export async function updateKid(profileId, patchBody) {
+  const rows = await patch(`profiles?id=eq.${profileId}`, patchBody);
+  return rows?.[0] || null;
+}
+
 /** Bé đang chơi trên THIẾT BỊ này (con trỏ cục bộ — dữ liệu thật ở server). */
 export function getCurrentKidId() {
   try { return localStorage.getItem(KID_KEY) || null; } catch { return null; }
@@ -255,7 +261,13 @@ export async function recordSessionServer({ mode, result, score = 0, level = 1, 
 }
 
 export async function kidSessions(profileId, limit = 400) {
-  return get(`sessions?select=*&profile_id=eq.${profileId}&order=played_at.desc&limit=${limit}`);
+  // Chỉ lấy đúng cột dashboard cần — tiết kiệm băng thông egress của Supabase.
+  return get(`sessions?select=played_at,seconds,result,score&profile_id=eq.${profileId}&order=played_at.desc&limit=${limit}`);
+}
+
+/** Sổ sao gần nhất của 1 bé (thay cho việc tải cả exportAll — tiết kiệm egress). */
+export async function kidLedger(profileId, limit = 30) {
+  return get(`reward_ledger?select=delta,reason,ts&profile_id=eq.${profileId}&order=ts.desc&limit=${limit}`);
 }
 
 /* ===== Sổ "từ hay sai" ===== */
@@ -267,6 +279,25 @@ export async function recordMissServer(word, delta) {
   await post('miss_events', {
     family_id: fam.id, profile_id: profileId, word, delta: delta >= 0 ? 1 : -1,
   }, { Prefer: 'return=minimal' });
+}
+
+/**
+ * Ghi 1 LÔ sự kiện sai/đúng trong 1 request duy nhất (tiết kiệm số request
+ * Supabase — thay vì mỗi câu trả lời 1 POST). events: [{word, delta, ts}].
+ */
+export async function recordMissBatch(events) {
+  const profileId = getCurrentKidId();
+  if (!profileId || !events?.length) return;
+  const fam = await ensureFamily();
+  await post('miss_events', events.map((e) => ({
+    family_id: fam.id, profile_id: profileId,
+    word: e.word, delta: e.delta >= 0 ? 1 : -1, ts: e.ts,
+  })), { Prefer: 'return=minimal' });
+}
+
+/** Dọn dữ liệu cũ định kỳ (rpc tidy_my_family — cần chạy migrate-01 trước). */
+export async function tidyFamily() {
+  await rest('POST', 'rpc/tidy_my_family', {});
 }
 
 export async function weakWordsServer(profileId) {
