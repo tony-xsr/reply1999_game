@@ -19,7 +19,7 @@ const els = {
   board: $('board'), turnChip: $('turnChip'), btnDie: $('btnDie'), note: $('note'),
   tab2: $('tab2'), tab4: $('tab4'), tab2p: $('tab2p'),
   cheer: $('cheer'), cheerEmoji: $('cheerEmoji'), cheerText: $('cheerText'), btnAgain: $('btnAgain'),
-  btnNew: $('btnNew'), btnSound: $('btnSound'),
+  btnNew: $('btnNew'), btnHelp: $('btnHelp'), btnSound: $('btnSound'),
 };
 
 const MODES = {
@@ -36,9 +36,15 @@ const state = {
   busy: false,
   cellEls: null,    // Map "r,c" → element
   startedAt: Date.now(),
+  instruction: '',
 };
 
 bindMute(() => sfx.muted);
+
+function sayInstruction(text) {
+  state.instruction = text;
+  speak(text);
+}
 
 /* ===== Dựng bàn tĩnh 15×15 ===== */
 
@@ -263,6 +269,7 @@ els.tab2p.addEventListener('click', () => selectMode('2p', els.tab2p));
 els.btnDie.addEventListener('click', humanRoll);
 els.btnNew.addEventListener('click', () => { sfx.shuffle(); newGame(); });
 els.btnAgain.addEventListener('click', () => { sfx.select(); newGame(); });
+els.btnHelp.addEventListener('click', () => { sfx.select(); speak(state.instruction); });
 els.btnSound.addEventListener('click', () => {
   sfx.toggleMute();
   els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
@@ -271,6 +278,7 @@ els.btnSound.addEventListener('click', () => {
 
 els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
 buildBoard();
+sayInstruction(t('cangua.help', 'Bấm xúc xắc để gieo, rồi chạm vào con ngựa của bé (màu đỏ) để đi theo số vừa gieo. Gieo được 6 thì được đi thêm 1 lượt và có thể đưa ngựa ra khỏi chuồng. Về đích trước là thắng!'));
 newGame();
 
 // Hook cho e2e test
