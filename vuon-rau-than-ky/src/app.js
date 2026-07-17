@@ -17,6 +17,25 @@ const FIELD_H = 400;
 const CELL_W = FIELD_W / COLS;
 const CELL_H = FIELD_H / ROWS;
 
+/* ===== Icon SVG (Twemoji — xem images/CREDITS.md) thay cho emoji chữ, nét hơn hẳn ===== */
+const ICON_OF = {
+  hoa_nang: 'sunflower', dau_xanh: 'seedling', xuong_rong: 'cactus',
+  bap_cai: 'cabbage', ot_do: 'pepper', // cây mới
+  small: 'bug', big: 'cricket', armor: 'beetle', flyer: 'butterfly', // côn trùng
+};
+const ICONS = {};
+for (const name of ['sunflower', 'seedling', 'cactus', 'cabbage', 'pepper', 'bug', 'cricket', 'beetle', 'butterfly', 'droplet']) {
+  const img = new Image();
+  img.src = `images/${name}.svg`;
+  ICONS[name] = img;
+}
+function drawIcon(ctx2d, name, cx, cy, size) {
+  const img = ICONS[name];
+  if (img.complete && img.naturalWidth !== 0) {
+    ctx2d.drawImage(img, cx - size / 2, cy - size / 2, size, size);
+  }
+}
+
 const $ = (id) => document.getElementById(id);
 const els = {
   wrap: $('boardWrap'), canvas: $('gameCanvas'), plantBar: $('plantBar'),
@@ -26,7 +45,11 @@ const els = {
 };
 const ctx = els.canvas.getContext('2d');
 
-const state = { level: 0, game: null, raf: 0, last: 0, selectedPlant: 'hoa_nang', startedAt: Date.now(), instruction: '' };
+const state = {
+  level: 0, game: null, raf: 0, last: 0, selectedPlant: 'hoa_nang', startedAt: Date.now(), instruction: '',
+  boomFx: [], // vệt nổ ớt: {row, life}
+  surgeSaid: false,
+};
 bindMute(() => sfx.muted);
 
 /** Đọc hướng dẫn + lưu lại để bấm ❓ nghe lại được (bé chưa đọc chữ vẫn chơi được). */
@@ -42,7 +65,7 @@ function buildPlantBar() {
     const btn = document.createElement('button');
     btn.className = 'plant-btn';
     btn.dataset.type = type;
-    btn.innerHTML = `<span class="pb-emoji">${def.emoji}</span><span class="pb-cost">💧${def.cost}</span>`;
+    btn.innerHTML = `<img class="pb-icon" src="images/${ICON_OF[type]}.svg" alt="${def.name}" draggable="false"><span class="pb-cost">💧${def.cost}</span>`;
     btn.addEventListener('click', () => { state.selectedPlant = type; sfx.select(); renderPlantBar(); });
     els.plantBar.appendChild(btn);
   }
@@ -73,17 +96,13 @@ function draw() {
   }
   if (!g) return;
 
-  ctx.font = `${CELL_H * 0.6}px sans-serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       const cell = g.grid[r][c];
       if (!cell) continue;
       const cx = c * CELL_W + CELL_W / 2;
       const cy = r * CELL_H + CELL_H / 2;
-      ctx.fillText(PLANTS[cell.type].emoji, cx, cy);
+      drawIcon(ctx, ICON_OF[cell.type], cx, cy, CELL_H * 0.68);
       // thanh máu cây
       const maxHp = PLANTS[cell.type].hp;
       const pct = Math.max(0, cell.hp / maxHp);
@@ -94,10 +113,21 @@ function draw() {
     }
   }
 
+  // vệt nổ ớt quét ngang hàng
+  for (const fx of state.boomFx) {
+    fx.life -= 1;
+    ctx.fillStyle = `rgba(255, 120, 40, ${Math.max(0, fx.life / 20) * 0.55})`;
+    ctx.fillRect(0, fx.row * CELL_H + 4, FIELD_W, CELL_H - 8);
+    ctx.fillStyle = `rgba(255, 220, 120, ${Math.max(0, fx.life / 20) * 0.8})`;
+    ctx.fillRect(0, fx.row * CELL_H + CELL_H / 2 - 6, FIELD_W, 12);
+  }
+  state.boomFx = state.boomFx.filter((fx) => fx.life > 0);
+
   for (const bug of g.bugs) {
     const cx = bug.x * CELL_W;
-    const cy = bug.row * CELL_H + CELL_H / 2;
-    ctx.fillText(BUGS[bug.type].emoji, cx, cy);
+    const flyBob = BUGS[bug.type].flying ? Math.sin(performance.now() / 180 + bug.x * 2) * 6 - 10 : 0;
+    const cy = bug.row * CELL_H + CELL_H / 2 + flyBob;
+    drawIcon(ctx, ICON_OF[bug.type], cx, cy, CELL_H * 0.62);
     const maxHp = BUGS[bug.type].hp;
     const pct = Math.max(0, bug.hp / maxHp);
     ctx.fillStyle = 'rgba(0,0,0,0.15)';
@@ -128,6 +158,18 @@ function loop(now) {
   stepGame(g, dt, Math.random);
   if (g.lives < livesBefore) sfx.fail();
   else if (g.score > scoreBefore) sfx.match(2);
+  // ớt vừa nổ → vệt lửa quét hàng + tiếng nổ
+  while (g.booms.length) {
+    const boom = g.booms.pop();
+    state.boomFx.push({ row: boom.row, life: 20 });
+    sfx.match(3);
+  }
+  // sóng cuối ập vào → báo 1 lần
+  if (g.surged && !state.surgeSaid) {
+    state.surgeSaid = true;
+    sfx.shuffle();
+    speak(t('vuonrau.surge', 'Sóng cuối tới rồi, giữ vững vườn rau!'));
+  }
   updateHud();
   draw();
   if (g.over) return endLevel();
@@ -180,6 +222,8 @@ function endLevel() {
 
 function startLevel() {
   els.cheer.classList.add('hidden');
+  state.boomFx = [];
+  state.surgeSaid = false;
   state.game = makeLevel(state.level, Math.random);
   state.startedAt = Date.now();
   state.last = performance.now();

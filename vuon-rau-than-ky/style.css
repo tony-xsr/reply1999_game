@@ -76,6 +76,7 @@ body {
   min-width: 66px;
 }
 .plant-btn .pb-emoji { font-size: 1.6rem; }
+.plant-btn .pb-icon { width: 30px; height: 30px; }
 .plant-btn .pb-cost { font-size: 0.78rem; font-weight: 900; color: var(--accent-deep); }
 .plant-btn.selected { border-color: var(--accent-deep); background: #ffe9c8; }
 .plant-btn.disabled { opacity: 0.4; }

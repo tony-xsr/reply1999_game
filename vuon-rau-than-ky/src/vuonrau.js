@@ -13,11 +13,16 @@ export const PLANTS = {
   hoa_nang: { name: 'Hoa Mặt Trời', emoji: '🌻', cost: 25, hp: 20, kind: 'generator', cooldownMs: 6000, genAmount: 20 },
   dau_xanh: { name: 'Đậu Xanh', emoji: '🌱', cost: 40, hp: 25, kind: 'shooter', cooldownMs: 1400, damage: 8 },
   xuong_rong: { name: 'Xương Rồng Gai', emoji: '🌵', cost: 60, hp: 90, kind: 'wall' },
+  bap_cai: { name: 'Bắp Cải Ném', emoji: '🥬', cost: 55, hp: 30, kind: 'shooter', cooldownMs: 2600, damage: 24 },
+  ot_do: { name: 'Ớt Đỏ Nổ', emoji: '🌶️', cost: 75, hp: 1, kind: 'bomb', fuseMs: 600 },
 };
 
 export const BUGS = {
   small: { name: 'Sâu Nhỏ', emoji: '🐛', hp: 20, speed: 0.5, dmgToPlant: 4 },
   big: { name: 'Bọ To', emoji: '🦗', hp: 50, speed: 0.3, dmgToPlant: 8 },
+  armor: { name: 'Bọ Giáp', emoji: '🐞', hp: 110, speed: 0.22, dmgToPlant: 8 },
+  // bướm BAY QUA ĐẦU cây — tường xương rồng không chặn được, chỉ cây bắn mới hạ nổi
+  flyer: { name: 'Bướm Tinh Nghịch', emoji: '🦋', hp: 26, speed: 0.65, dmgToPlant: 0, flying: true },
 };
 
 export function makeLevel(levelIndex, rng = Math.random) {
@@ -31,6 +36,10 @@ export function makeLevel(levelIndex, rng = Math.random) {
     spawnedThisWave: 0,
     spawnEveryMs: Math.max(900, 2200 - levelIndex * 80),
     spawnTimer: 0,
+    // SÓNG CUỐI: sinh đủ 70% số côn trùng thì đợt còn lại ập vào dồn dập gấp đôi
+    surgeAt: Math.ceil((8 + levelIndex * 2) * 0.7),
+    surged: false,
+    booms: [], // ớt vừa nổ ở hàng nào — giao diện đọc rồi tự xóa
     score: 0,
     over: false,
     won: false,
@@ -44,7 +53,8 @@ export function plantAt(game, row, col, type) {
   const def = PLANTS[type];
   if (!def || game.water < def.cost) return false;
   game.water -= def.cost;
-  game.grid[row][col] = { type, hp: def.hp, cooldown: 0 };
+  // ớt nổ: đếm ngược kíp nổ từ lúc trồng; các cây khác vào việc ngay
+  game.grid[row][col] = { type, hp: def.hp, cooldown: def.kind === 'bomb' ? def.fuseMs : 0 };
   return true;
 }
 
@@ -72,20 +82,45 @@ export function stepGame(game, dtMs, rng = Math.random) {
     }
   }
 
-  // Sinh côn trùng theo đợt (mỗi hàng ngẫu nhiên)
+  // Ớt Đỏ: kíp cháy hết → NỔ cả hàng, quét sạch côn trùng trên hàng đó rồi biến mất
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const cell = game.grid[r][c];
+      if (!cell || PLANTS[cell.type].kind !== 'bomb') continue;
+      cell.cooldown -= dtMs;
+      if (cell.cooldown <= 0) {
+        for (const bug of game.bugs) if (bug.row === r) bug.hp = 0;
+        game.grid[r][c] = null;
+        game.booms.push({ row: r, col: c });
+      }
+    }
+  }
+
+  // Sinh côn trùng theo đợt (mỗi hàng ngẫu nhiên); màn cao dần có bướm bay + bọ giáp
   game.spawnTimer += dtMs;
   if (game.spawnedThisWave < game.bugsPerWave && game.spawnTimer >= game.spawnEveryMs) {
     game.spawnTimer = 0;
     const row = Math.floor(rng() * ROWS);
-    const type = rng() < 0.7 ? 'small' : 'big';
+    const roll = rng();
+    let type;
+    if (game.level >= 2 && roll < 0.15) type = 'armor';
+    else if (game.level >= 1 && roll < 0.35) type = 'flyer';
+    else if (roll < 0.7) type = 'small';
+    else type = 'big';
     game.bugs.push({ row, x: COLS, hp: BUGS[type].hp, type, attackCooldown: 0 });
     game.spawnedThisWave++;
+    // sóng cuối ập vào dồn dập
+    if (!game.surged && game.spawnedThisWave >= game.surgeAt) {
+      game.surged = true;
+      game.spawnEveryMs = Math.max(450, Math.round(game.spawnEveryMs / 2));
+    }
   }
 
-  // Côn trùng: bò sang trái, hoặc cắn phá cây đang chắn đường
+  // Côn trùng: bò sang trái, hoặc cắn phá cây đang chắn đường (bướm BAY QUA không bị chặn)
   for (const bug of game.bugs) {
     const blockCol = Math.floor(bug.x);
-    const blocking = blockCol >= 0 && blockCol < COLS ? game.grid[bug.row][blockCol] : null;
+    const blocking = !BUGS[bug.type].flying && blockCol >= 0 && blockCol < COLS
+      ? game.grid[bug.row][blockCol] : null;
     if (blocking) {
       bug.attackCooldown -= dtMs;
       if (bug.attackCooldown <= 0) {

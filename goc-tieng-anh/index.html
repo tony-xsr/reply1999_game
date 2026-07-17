@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#fff6e8" />
+<title>Góc Tiếng Anh</title>
+<link rel="manifest" href="/manifest.json" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<style>
+:root{
+  --bg:#fff6e8; --bg2:#ffe9c8;
+  --gold:#ff8a3d; --gold2:#c2410c;
+  --ink:#241e2e; --ink-dim:#5d5370; --line:#a8834a;
+  --panel:#fffaf2; --panel2:#fff3df;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+body{
+  background:
+    radial-gradient(ellipse 90% 55% at 50% 0%, #ffe9c8 0%, transparent 70%),
+    var(--bg);
+  min-height:100vh;
+}
+.wrap{
+  max-width:1100px;margin:0 auto;
+  padding:
+    max(24px, calc(env(safe-area-inset-top, 0px) + 12px))
+    max(18px, env(safe-area-inset-right, 0px))
+    max(48px, calc(env(safe-area-inset-bottom, 0px) + 32px))
+    max(18px, env(safe-area-inset-left, 0px));
+}
+header{display:flex;align-items:center;gap:14px;padding:18px 6px 26px;border-bottom:1px solid #e9d3ad;margin-bottom:24px}
+header .back{
+  width:44px;height:44px;border-radius:50%;
+  border:2px solid var(--line);background:var(--panel);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;text-decoration:none;color:var(--ink);
+  box-shadow:0 2px 5px rgba(90,60,20,.12);
+}
+header .logo{
+  width:54px;height:54px;border-radius:14px;
+  background:linear-gradient(135deg,#ffe1b0,#ff8a3d);
+  border:1px solid rgba(194,65,12,.25);
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;
+  box-shadow:0 4px 12px rgba(194,65,12,.18), inset 0 1px 0 rgba(255,255,255,.4);
+}
+header h1{margin:0;font-size:22px;font-weight:800;letter-spacing:.5px;color:var(--gold2)}
+header .sub{margin:0;color:var(--ink-dim);font-size:13px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:16px}
+@media (max-width:480px){.grid{grid-template-columns:1fr;gap:12px}}
+
+.game-card{
+  position:relative;background:var(--panel);
+  border:1px solid var(--line);border-radius:16px;
+  padding:18px 18px 16px;display:flex;flex-direction:column;gap:10px;
+  box-shadow:0 4px 14px rgba(194,65,12,.08);
+  transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  text-decoration:none;color:inherit;
+  cursor:pointer;overflow:hidden;
+}
+.game-card:hover{
+  transform:translateY(-4px);
+  border-color:var(--gold);
+  box-shadow:0 10px 24px rgba(194,65,12,.14), 0 0 0 3px rgba(255,138,61,.12);
+}
+.game-card:active{transform:translateY(-1px)}
+
+.gc-art{
+  height:130px;border-radius:12px;
+  background:linear-gradient(135deg, #fff3df, #ffe1b0);
+  border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.gc-title{font-size:18px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:8px}
+.gc-desc{color:var(--ink-dim);font-size:13px;line-height:1.45;min-height:36px}
+.gc-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.chip{
+  display:inline-block;padding:2px 8px;border-radius:999px;
+  background:var(--panel2);border:1px solid var(--line);
+  font-size:11px;color:var(--ink-dim);font-weight:600;
+}
+.chip.gold{background:rgba(255,138,61,.18);border-color:rgba(194,65,12,.4);color:var(--gold2)}
+.gc-cta{margin-top:auto;display:flex;justify-content:flex-end;align-items:center;padding-top:6px}
+.gc-cta .play{
+  background:linear-gradient(180deg,#ff9d5c,#c2410c);color:#fff;
+  padding:9px 16px;border-radius:10px;font-weight:800;font-size:14px;
+  box-shadow:0 3px 10px rgba(194,65,12,.3), inset 0 1px 0 rgba(255,255,255,.25);
+}
+footer{margin-top:36px;color:var(--ink-dim);font-size:12px;text-align:center;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <a class="back" href="/" title="Trang chủ">🏠</a>
+    <div class="logo">🇬🇧</div>
+    <div style="flex:1">
+      <h1>Góc Tiếng Anh</h1>
+      <p class="sub">Học từ vựng &amp; câu tiếng Anh qua trò chơi — giọng đọc en-US thật</p>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <a class="game-card" href="/nghe-doan-on-tap/">
+      <div class="gc-art"><div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.15)">🎓📚🏆</div></div>
+      <div class="gc-title">Nghe & Đoán: Ôn Tập Tổng Hợp <span class="chip gold">Mới</span></div>
+      <div class="gc-desc">Trộn toàn bộ ~825 từ vựng của cả 9 game Nghe & Đoán vào 1 màn ôn tập — lọc theo từng game gốc hoặc trộn tất cả. Không dạy từ mới, chỉ ôn cho nhớ lâu.</div>
+      <div class="gc-meta">
+        <span class="chip">Ôn luyện tổng hợp</span>
+        <span class="chip">Offline</span>
+      </div>
+      <div class="gc-cta"><span class="play">Chơi ▶</span></div>
+    </a>
+
+    <a class="game-card" href="/nghe-doan-nha-bep-cong-nghe/">
+      <div class="gc-art"><div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.15)">🍳🥕💻</div></div>
+      <div class="gc-title">Nghe & Đoán: Nhà Bếp & Công Nghệ</div>
+      <div class="gc-desc">~54 từ vựng về chế biến món ăn & nhà bếp, hương vị, rau củ, thiết bị công nghệ — nghe rồi chạm đúng hình, lọc theo chủ đề.</div>
+      <div class="gc-meta">
+        <span class="chip">Nghe hiểu + câu mẫu</span>
+        <span class="chip">Offline</span>
+      </div>
+      <div class="gc-cta"><span class="play">Chơi ▶</span></div>
+    </a>
+
+    <a class="game-card" href="/nghe-doan-hoat-dong-do-choi/">
+      <div class="gc-art"><div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.15)">🏃🧸🏛️</div></div>
+      <div class="gc-title">Nghe & Đoán: Hoạt Động, Đồ Chơi & Nơi Vui Chơi</div>
+      <div class="gc-desc">~77 từ vựng về hoạt động thể chất, đồ chơi, sở thích ngoài trời, địa điểm công cộng, nhạc cụ, giới từ vị trí — nghe rồi chạm đúng hình, lọc theo chủ đề.</div>
+      <div class="gc-meta">
+        <span class="chip">Nghe hiểu + câu mẫu</span>
+        <span class="chip">Offline</span>
+      </div>
+      <div class="gc-cta"><span class="play">Chơi ▶</span></div>
+    </a>
+
+    <a class="game-card" href="/nghe-doan-quoc-gia-nghe-nghiep/">
+      <div class="gc-art"><div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.15)">🌍🔢💼</div></div>
+      <div class="gc-title">Nghe & Đoán: Quốc Gia, Số Đếm & Nghề Nghiệp</div>
+      <div class="gc-desc">~93 từ vựng về quốc gia & quốc kỳ, số đếm & thứ tự, môn học, nghề nghiệp mở rộng, dụng cụ & văn phòng — nghe rồi chạm đúng hình, lọc theo chủ đề.</div>
+      <div class="gc-meta">
+        <span class="chip">Nghe hiểu + câu mẫu</span>
+        <span class="chip">Offline</span>
+      </div>
+      <div class="gc-cta"><span class="play">Chơi ▶</span></div>
+    </a>
+
+    <a class="game-card" href="/nghe-doan-thoi-tiet-cam-xuc/">
+      <div class="gc-art"><div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.15)">🌦️🎨😊</div></div>
+      <div class="gc-title">Nghe & Đoán: Thời Tiết, Màu Sắc & Cảm Xúc <span class="chip gold">Mới</span></div>
+      <div class="gc-desc">~84 từ vựng về thời tiết & mùa, màu sắc, cảm xúc, tính từ đối lập — nghe rồi chạm đúng hình, lọc theo chủ đề.</div>
+      <div class="gc-meta">
+        <span class="chip">Nghe hiểu + câu mẫu</span>
+        <span class="chip">Offline</span>
+      </div>
+      <div class="gc-cta"><span class="play">Chơi ▶</span></div>
+    </a>
+
+    <a class="game-card" href="/nghe-doan-do-dung-hang-ngay/">
+      <div class="gc-art"><div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.15)">👕💻✋</div></div>
+      <div class="gc-title">Nghe & Đoán: Đồ Dùng & Cơ Thể <span class="chip gold">Mới</span></div>
+      <div class="gc-desc">~101 từ vựng về quần áo & giày dép, đồ dùng gia đình, thiết bị điện tử, bộ phận cơ thể, hoạt động hằng ngày — nghe rồi chạm đúng hình, lọc theo chủ đề.</div>
+      <div class="gc-meta">
+        <span class="chip">Nghe hiểu + câu mẫu</span>
+        <span class="chip">Offline</span>
+      </div>
+      <div class="gc-cta"><span class="play">Chơi ▶</span></div>
+    </a>
+
+    <a class="game-card" href="/nghe-doan-gia-dinh-nghe-nghiep/">
+      <div class="gc-art"><div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.15)">👪💼⚽</div></div>
+      <div class="gc-title">Nghe & Đoán: Gia Đình & Nghề Nghiệp <span class="chip gold">Mới</span></div>
+      <div class="gc-desc">~99 từ vựng về gia đình & bạn bè, trường học, nghề nghiệp, thể thao, thi đấu & hoạt động — nghe rồi chạm đúng hình, lọc theo chủ đề.</div>
+      <div class="gc-meta">
+        <span class="chip">Nghe hiểu + câu mẫu</span>
+        <span class="chip">Offline</span>
+      </div>
+      <div class="gc-cta"><span class="play">Chơi ▶</span></div>
+    </a>
+
+    <a class="game-card" href="/nghe-doan-dong-vat-vu-tru/">
+      <div class="gc-art"><div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.15)">🦁🚀🔢</div></div>
+      <div class="gc-title">Nghe & Đoán: Muôn Loài & Vũ Trụ <span class="chip gold">Mới</span></div>
+      <div class="gc-desc">~103 từ vựng về động vật hoang dã, sinh vật biển & côn trùng, hàng không & vũ trụ, toán học & hình khối, loài chim — nghe rồi chạm đúng hình, lọc theo chủ đề.</div>
+      <div class="gc-meta">
+        <span class="chip">Nghe hiểu + câu mẫu</span>
+        <span class="chip">Offline</span>
+      </div>
+      <div class="gc-cta"><span class="play">Chơi ▶</span></div>
+    </a>
+
+    <a class="game-card" href="/nghe-doan-giao-thong/">
+      <div class="gc-art"><div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.15)">🚗🗺️👂</div></div>
+      <div class="gc-title">Nghe & Đoán: Giao Thông & Địa Lý <span class="chip gold">Mới</span></div>
+      <div class="gc-desc">~99 từ vựng về phương tiện, tiện ích công cộng, môi trường, đô thị &amp; thôn quê, địa lý &amp; địa hình — nghe rồi chạm đúng hình, lọc theo chủ đề.</div>
+      <div class="gc-meta">
+        <span class="chip">Nghe hiểu + câu mẫu</span>
+        <span class="chip">Offline</span>
+      </div>
+      <div class="gc-cta"><span class="play">Chơi ▶</span></div>
+    </a>
+
+    <a class="game-card" href="/nghe-doan-tieng-anh/">
+      <div class="gc-art"><div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.15)">👂🍎🍽️</div></div>
+      <div class="gc-title">Nghe &amp; Đoán Tiếng Anh <span class="chip gold">Mới</span></div>
+      <div class="gc-desc">~115 từ vựng kèm CÂU NGẮN tiếng Anh thật (trái cây, món ăn, quán ăn &amp; mua sắm, ngày lễ, giải trí) — nghe câu rồi chạm đúng hình, lọc được theo chủ đề.</div>
+      <div class="gc-meta">
+        <span class="chip">Nghe hiểu + câu mẫu</span>
+        <span class="chip">Offline</span>
+      </div>
+      <div class="gc-cta"><span class="play">Chơi ▶</span></div>
+    </a>
+
+    <a class="game-card" href="/xep-chu-tieng-anh/">
+      <div class="gc-art"><div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.15)">🔤🐱🔊</div></div>
+      <div class="gc-title">Xếp Chữ Tiếng Anh <span class="chip gold">Mới</span></div>
+      <div class="gc-desc">Nhìn hình, nghe từ tiếng Anh, rồi chạm đúng thứ tự các chữ cái để ghép lại — coi chừng có chữ gây nhiễu trộn vào!</div>
+      <div class="gc-meta">
+        <span class="chip">Đánh vần</span>
+        <span class="chip">Offline</span>
+      </div>
+      <div class="gc-cta"><span class="play">Chơi ▶</span></div>
+    </a>
+
+    <a class="game-card" href="/tieng-anh/">
+      <div class="gc-art"><div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.15)">🇬🇧📝🗣️</div></div>
+      <div class="gc-title">Tiếng Anh Nâng Cao</div>
+      <div class="gc-desc">2 trò trong 1: ghép câu tiếng Anh đơn giản (I like cats), luyện phát âm 26 từ — bé bấm ghi âm giọng mình để tự nghe so sánh.</div>
+      <div class="gc-meta">
+        <span class="chip">Lớp lá – lớp 1</span>
+        <span class="chip">Offline</span>
+      </div>
+      <div class="gc-cta"><span class="play">Chơi ▶</span></div>
+    </a>
+
+    <a class="game-card" href="/hoc-vui/">
+      <div class="gc-art"><div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.15)">🧩🍎👂</div></div>
+      <div class="gc-title">Học Vui — Từ Vựng &amp; Con Số</div>
+      <div class="gc-desc">3 trò trong 1: ghép chữ với hình, đếm &amp; so sánh &amp; cộng trừ, nghe &amp; tìm. Học song ngữ Việt–Anh.</div>
+      <div class="gc-meta">
+        <span class="chip">Song ngữ VI–EN</span>
+        <span class="chip">Offline</span>
+      </div>
+      <div class="gc-cta"><span class="play">Chơi ▶</span></div>
+    </a>
+
+    <a class="game-card" href="/be-lam-stylist/">
+      <div class="gc-art"><div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.15)">👗🎀🗣️</div></div>
+      <div class="gc-title">Bé Làm Stylist</div>
+      <div class="gc-desc">Thay đồ đổi màu cho bạn búp bê — máy đọc to tên món đồ bằng TIẾNG ANH ("red dress!"), chạm người búp bê nghe tên bộ phận cơ thể.</div>
+      <div class="gc-meta">
+        <span class="chip">Không chấm điểm</span>
+        <span class="chip">Offline</span>
+      </div>
+      <div class="gc-cta"><span class="play">Chơi ▶</span></div>
+    </a>
+
+    <a class="game-card" href="/phong-xinh/">
+      <div class="gc-art"><div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.15)">🛏️🪴🖼️</div></div>
+      <div class="gc-title">Phòng Xinh Của Bé</div>
+      <div class="gc-desc">Kéo-thả gần 30 món nội thất trang trí căn phòng — máy đọc tên món đồ bằng TIẾNG ANH, 5 phòng riêng để bé thỏa sức bày biện.</div>
+      <div class="gc-meta">
+        <span class="chip">Không chấm điểm</span>
+        <span class="chip">Offline</span>
+      </div>
+      <div class="gc-cta"><span class="play">Chơi ▶</span></div>
+    </a>
+
+    <a class="game-card" href="/be-hai-trai-cay/">
+      <div class="gc-art"><div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.15)">🍉🍎✋</div></div>
+      <div class="gc-title">Bé Hái Trái Cây</div>
+      <div class="gc-desc">Vuốt tay hái trái cây bay theo đường vòng cung — hái trúng trái nào, máy đọc to tên trái đó bằng TIẾNG ANH.</div>
+      <div class="gc-meta">
+        <span class="chip">Vuốt hái + từ vựng</span>
+        <span class="chip">Offline</span>
+      </div>
+      <div class="gc-cta"><span class="play">Chơi ▶</span></div>
+    </a>
+
+  </div>
+
+  <footer>Mỗi game chạy hoàn toàn offline trong trình duyệt.</footer>
+
+</div>
+
+<script src="/i18n.js"></script>
+</body>
+</html>

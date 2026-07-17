@@ -152,5 +152,83 @@ check('game đã kết thúc thì stepGame()/plantAt() không làm gì thêm', (
   return planted === false && JSON.stringify(g) === before;
 })());
 
+console.log('— Nâng cấp: ớt nổ, bắp cải, bọ giáp, bướm bay, sóng cuối —');
+
+check('Ớt Đỏ: trồng xong kíp cháy → NỔ quét sạch côn trùng CÙNG HÀNG, ô trống lại, có báo nổ', (() => {
+  const g = makeLevel(0, seeded());
+  g.water = 200;
+  g.bugs = [
+    { row: 1, x: 5, hp: BUGS.armor.hp, type: 'armor', attackCooldown: 0 },
+    { row: 1, x: 7, hp: BUGS.big.hp, type: 'big', attackCooldown: 0 },
+    { row: 3, x: 5, hp: BUGS.small.hp, type: 'small', attackCooldown: 0 }, // khác hàng — không sao
+  ];
+  plantAt(g, 1, 0, 'ot_do');
+  stepGame(g, PLANTS.ot_do.fuseMs + 50, seeded());
+  return g.bugs.length === 1 && g.bugs[0].row === 3
+    && g.grid[1][0] === null && g.booms.length === 1 && g.booms[0].row === 1;
+})());
+
+check('Bắp Cải Ném: đánh đau hơn Đậu Xanh nhưng hồi chiêu lâu hơn', (() => {
+  const g = makeLevel(0, seeded());
+  g.water = 200;
+  plantAt(g, 2, 0, 'bap_cai');
+  g.bugs = [{ row: 2, x: 5, hp: BUGS.armor.hp, type: 'armor', attackCooldown: 0 }];
+  stepGame(g, 16, seeded());
+  return PLANTS.bap_cai.damage > PLANTS.dau_xanh.damage
+    && PLANTS.bap_cai.cooldownMs > PLANTS.dau_xanh.cooldownMs
+    && g.bugs[0].hp === BUGS.armor.hp - PLANTS.bap_cai.damage;
+})());
+
+check('Bướm BAY QUA xương rồng: không bị chặn, bò xuyên qua ô có cây', (() => {
+  const g = makeLevel(0, seeded());
+  g.water = 200;
+  plantAt(g, 0, 3, 'xuong_rong');
+  g.bugs = [{ row: 0, x: 3.5, hp: BUGS.flyer.hp, type: 'flyer', attackCooldown: 0 }];
+  const hpBefore = g.grid[0][3].hp;
+  stepGame(g, 1000, seeded());
+  return g.bugs[0].x < 3.5 && g.grid[0][3].hp === hpBefore; // bay tiếp, cây không bị cắn
+})());
+
+check('Bọ Giáp lì đòn nhất đám và vẫn bị cây bắn hạ dần', (() => {
+  const g = makeLevel(0, seeded());
+  g.water = 200;
+  plantAt(g, 4, 0, 'dau_xanh');
+  g.bugs = [{ row: 4, x: 6, hp: BUGS.armor.hp, type: 'armor', attackCooldown: 0 }];
+  stepGame(g, 16, seeded());
+  return BUGS.armor.hp > BUGS.big.hp && g.bugs[0].hp === BUGS.armor.hp - PLANTS.dau_xanh.damage;
+})());
+
+check('SÓNG CUỐI: sinh đủ 70% côn trùng thì nhịp sinh dồn dập gấp đôi', (() => {
+  const g = makeLevel(0, seeded());
+  const before = g.spawnEveryMs;
+  g.spawnedThisWave = g.surgeAt - 1;
+  g.spawnTimer = g.spawnEveryMs; // ép sinh ngay con chạm mốc
+  stepGame(g, 16, seeded());
+  return g.surged === true && g.spawnEveryMs <= Math.round(before / 2) + 1;
+})());
+
+check('màn 0 chưa có bướm/bọ giáp (spawn chỉ ra sâu nhỏ/bọ to)', (() => {
+  const g = makeLevel(0, seeded(7));
+  for (let i = 0; i < 40; i++) {
+    g.spawnTimer = g.spawnEveryMs;
+    g.bugsPerWave = 999;
+    stepGame(g, 16, seeded(i + 1));
+    g.bugs = [];
+    g.lives = 3;
+  }
+  return true; // không văng lỗi + kiểm tra loại bên dưới
+})() && (() => {
+  const g = makeLevel(0, seeded(7));
+  g.bugsPerWave = 999;
+  const seen = new Set();
+  for (let i = 0; i < 60; i++) {
+    g.spawnTimer = g.spawnEveryMs;
+    stepGame(g, 16, seeded(i + 1));
+    for (const b of g.bugs) seen.add(b.type);
+    g.bugs = [];
+  }
+  return !seen.has('flyer') && !seen.has('armor');
+})());
+
 console.log(`\nKết quả: ${passed} pass, ${failed} fail`);
 if (failed > 0) process.exit(1);
