@@ -1,0 +1,8 @@
+{
+  "name": "be-hai-trai-cay",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/behai.test.js"
+  }
+}

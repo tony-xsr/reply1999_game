@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#fff6e8">
+  <title>Bé Hái Trái Cây</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <a class="round-btn" href="/game-mini/" data-i18n-title="hocvui.back" title="Chọn trò khác">◀</a>
+      <h1 data-i18n="behai.title">🍉 Bé Hái Trái Cây</h1>
+      <button class="round-btn" id="btnNew" data-i18n-title="pika.btn.new" title="Chơi lại">🔄</button>
+      <button class="round-btn" id="btnHelp" data-i18n-title="pika.btn.help" title="Cách chơi">❓</button>
+      <button class="round-btn" id="btnSound" data-i18n-title="pika.btn.sound" title="Âm thanh">🔊</button>
+    </header>
+
+    <div class="hud">
+      <div class="hud-chip money"><span>⭐</span><b id="hudScore">0</b></div>
+      <div class="hud-chip target"><span>🎯</span><b id="hudTarget">120</b></div>
+      <div class="hud-chip lives" id="hudLives">❤️❤️❤️</div>
+      <div class="hud-chip level" id="hudLevel">Màn 1</div>
+    </div>
+
+    <main class="stage">
+      <div class="board-wrap" id="boardWrap">
+        <canvas id="gameCanvas" width="640" height="640"></canvas>
+        <div class="overlay" id="overlay">
+          <div class="ov-emoji" id="ovEmoji">🍉</div>
+          <div class="ov-text" id="ovText" data-i18n="behai.start">Vuốt tay ngang qua trái cây đang bay để hái — né chú ong nhé!</div>
+          <button class="big-btn" id="btnPlay" data-i18n="behai.play">HÁI THÔI ▶</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/i18n.js"></script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

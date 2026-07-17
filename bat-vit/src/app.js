@@ -17,7 +17,7 @@ const els = {
   tabClassic: $('tabClassic'), tabLetter: $('tabLetter'),
   targetLine: $('targetLine'), targetCh: $('targetCh'),
   overlay: $('overlay'), ovEmoji: $('ovEmoji'), ovText: $('ovText'), btnPlay: $('btnPlay'),
-  btnSound: $('btnSound'),
+  btnHelp: $('btnHelp'), btnSound: $('btnSound'),
 };
 
 const state = {
@@ -31,9 +31,15 @@ const state = {
   timers: { clock: null, spawn: null },
   startedAt: Date.now(),
   holes: [], // {el, duckEl, tagEl, up, letter, hideTimer}
+  instruction: '',
 };
 
 bindMute(() => sfx.muted);
+
+function sayInstruction(text) {
+  state.instruction = text;
+  speak(text);
+}
 
 /* ===== Dựng ao ===== */
 
@@ -189,6 +195,7 @@ function selectMode(mode) {
 els.tabClassic.addEventListener('click', () => selectMode('classic'));
 els.tabLetter.addEventListener('click', () => selectMode('letter'));
 els.btnPlay.addEventListener('click', start);
+els.btnHelp.addEventListener('click', () => { sfx.select(); speak(state.instruction); });
 els.btnSound.addEventListener('click', () => {
   sfx.toggleMute();
   els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
@@ -207,6 +214,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
+sayInstruction(t('batvit.help', 'Vịt sẽ ngoi lên ở các hố, chạm thật nhanh để bắt điểm! Chọn "Đập theo chữ" để chỉ đập đúng con vịt mang chữ cái được yêu cầu.'));
 
 // Hook cho e2e test
 window.__batvit = { state, start, selectMode, whack };
