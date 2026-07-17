@@ -1,0 +1,8 @@
+{
+  "name": "nem-banh-do-thap",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/nembanh.test.js"
+  }
+}

@@ -15,7 +15,7 @@ const $ = (id) => document.getElementById(id);
 const els = {
   grid: $('grid'), moves: $('moves'),
   tabs: { classic: $('tabClassic'), letter: $('tabLetter'), number: $('tabNumber') },
-  btnNew: $('btnNew'), btnSound: $('btnSound'),
+  btnNew: $('btnNew'), btnHelp: $('btnHelp'), btnSound: $('btnSound'),
   cheer: $('cheer'), cheerStars: $('cheerStars'), cheerText: $('cheerText'), btnAgain: $('btnAgain'),
 };
 
@@ -29,9 +29,15 @@ const state = {
   moves: 0,
   busy: false,
   startedAt: Date.now(),
+  instruction: '',
 };
 
 bindMute(() => sfx.muted);
+
+function sayInstruction(text) {
+  state.instruction = text;
+  speak(text);
+}
 
 function newGame() {
   state.deck = makeDeck(state.mode, PAIRS);
@@ -138,6 +144,7 @@ els.tabs.letter.addEventListener('click', () => selectMode('letter'));
 els.tabs.number.addEventListener('click', () => selectMode('number'));
 els.btnNew.addEventListener('click', () => { sfx.shuffle(); newGame(); });
 els.btnAgain.addEventListener('click', () => { sfx.select(); newGame(); });
+els.btnHelp.addEventListener('click', () => { sfx.select(); speak(state.instruction); });
 els.btnSound.addEventListener('click', () => {
   sfx.toggleMute();
   els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
@@ -145,6 +152,7 @@ els.btnSound.addEventListener('click', () => {
 });
 
 els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
+sayInstruction(t('lathinh.help', 'Chạm 2 thẻ hình úp để lật lên. Giống nhau thì được điểm và 2 thẻ đó biến mất, khác nhau thì lại úp xuống. Cố nhớ vị trí để ghép được nhiều cặp giống nhau nhất nhé!'));
 newGame();
 
 // Hook cho e2e test
