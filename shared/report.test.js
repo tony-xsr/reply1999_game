@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
-import { weekStart, buildWeeklyReport, formatReportVi } from './report.js';
+import {
+  weekStart, buildWeeklyReport, formatReportVi,
+  groupOfMode, minutesByGroup, minutesByTimeOfDay, dailyMinutes, weeklyWinRate,
+} from './report.js';
 
 let passed = 0;
 function check(name, fn) {
@@ -90,6 +93,63 @@ check('formatReportVi: lists top weak words when present', () => {
   }, NOW));
   assert.ok(text.includes('1 từ cần ôn'));
   assert.ok(text.includes('zero'));
+});
+
+check('groupOfMode: English games / learning games / fun games sorted correctly', () => {
+  assert.equal(groupOfMode('nghedoan9'), 'Tiếng Anh');
+  assert.equal(groupOfMode('nghedoanontap'), 'Tiếng Anh');
+  assert.equal(groupOfMode('xepchu'), 'Tiếng Anh');
+  assert.equal(groupOfMode('toan-lop-1'), 'Học & tư duy');
+  assert.equal(groupOfMode('tuduy'), 'Học & tư duy');
+  assert.equal(groupOfMode('pika'), 'Game vui');
+  assert.equal(groupOfMode(undefined), 'Game vui');
+});
+
+check('minutesByGroup: sums seconds into minutes per group, descending, drops zero', () => {
+  const rows = minutesByGroup([
+    { mode: 'nghedoan1', seconds: 300 },
+    { mode: 'nghedoan2', seconds: 300 },
+    { mode: 'toan', seconds: 120 },
+    { mode: 'pika', seconds: 10 }, // 10s ~ 0 phút -> bị loại
+  ]);
+  assert.deepEqual(rows, [
+    { group: 'Tiếng Anh', minutes: 10 },
+    { group: 'Học & tư duy', minutes: 2 },
+  ]);
+});
+
+check('minutesByTimeOfDay: buckets by local hour incl. the wrap-around late-night bucket', () => {
+  const mk = (h) => new Date(new Date('2026-07-15T00:00:00').setHours(h, 30)).toISOString();
+  const rows = minutesByTimeOfDay([
+    { played_at: mk(8), seconds: 600 },   // sáng
+    { played_at: mk(19), seconds: 300 },  // tối
+    { played_at: mk(23), seconds: 300 },  // khuya
+    { played_at: mk(2), seconds: 300 },   // khuya (sau nửa đêm)
+  ]);
+  const get = (label) => rows.find((r) => r.label.includes(label)).minutes;
+  assert.equal(get('Sáng'), 10);
+  assert.equal(get('Tối'), 5);
+  assert.equal(get('Khuya'), 10);
+});
+
+check('dailyMinutes: exactly N entries, old to new, zero-filled', () => {
+  const rows = dailyMinutes([{ played_at: iso(0), seconds: 600 }], 14, NOW);
+  assert.equal(rows.length, 14);
+  assert.equal(rows[13].minutes, 10);
+  assert.equal(rows[0].minutes, 0);
+});
+
+check('weeklyWinRate: 4 weeks old to new, null when no decided games', () => {
+  const rows = weeklyWinRate([
+    { played_at: iso(1), result: 'win' },
+    { played_at: iso(2), result: 'loss' },
+    { played_at: iso(10), result: 'win' },
+  ], 4, NOW);
+  assert.equal(rows.length, 4);
+  assert.equal(rows[3].label, 'Tuần này');
+  assert.equal(rows[3].rate, 0.5);
+  assert.equal(rows[2].rate, 1, 'ván 10 ngày trước thuộc tuần thứ 2');
+  assert.equal(rows[0].rate, null);
 });
 
 console.log(`\n${passed} checks passed`);

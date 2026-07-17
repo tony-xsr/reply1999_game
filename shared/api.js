@@ -262,7 +262,28 @@ export async function recordSessionServer({ mode, result, score = 0, level = 1, 
 
 export async function kidSessions(profileId, limit = 400) {
   // Chỉ lấy đúng cột dashboard cần — tiết kiệm băng thông egress của Supabase.
-  return get(`sessions?select=played_at,seconds,result,score&profile_id=eq.${profileId}&order=played_at.desc&limit=${limit}`);
+  return get(`sessions?select=played_at,seconds,result,score,mode&profile_id=eq.${profileId}&order=played_at.desc&limit=${limit}`);
+}
+
+/* ===== Truy vấn GỘP CẢ NHÀ — 1 request cho mọi bé (cho màn so sánh) ===== */
+
+/** Số dư sao của TẤT CẢ các bé trong 1 request. @returns Map profileId→stars */
+export async function familyStarBalances() {
+  const rows = await get('star_balance?select=profile_id,stars');
+  return new Map(rows.map((r) => [r.profile_id, r.stars]));
+}
+
+/** Số từ cần ôn của TẤT CẢ các bé trong 1 request. @returns Map profileId→count */
+export async function familyWeakCounts() {
+  const rows = await get('weak_words?select=profile_id,word');
+  const map = new Map();
+  for (const r of rows) map.set(r.profile_id, (map.get(r.profile_id) || 0) + 1);
+  return map;
+}
+
+/** Ván chơi của CẢ NHÀ từ mốc thời gian (1 request, cho so sánh tuần). */
+export async function familySessionsSince(sinceISO) {
+  return get(`sessions?select=profile_id,played_at,seconds,result&played_at=gte.${sinceISO}&order=played_at.desc&limit=1000`);
 }
 
 /** Sổ sao gần nhất của 1 bé (thay cho việc tải cả exportAll — tiết kiệm egress). */

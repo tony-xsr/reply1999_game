@@ -1,0 +1,8 @@
+{
+  "name": "bong-do-phieu-luu",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/bongdo.test.js"
+  }
+}
