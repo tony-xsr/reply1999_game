@@ -5,7 +5,7 @@ import {
   makeAddSub, makeCompare, makeClock, makeShape, makePattern,
   makeShopping, payState, BILLS, SHAPES,
 } from './toan.js';
-import { speak, bindMute } from '../../to-mau/src/speech.js';
+import { speak, speakSequence, bindMute } from '../../to-mau/src/speech.js';
 import { viNumber } from '../../nhay-lo-co/src/loco.js';
 import { sfx } from '../../pokemon/src/sfx.js';
 import { currentProfile, recordSession } from '../../pokemon/src/stats.js';
@@ -22,11 +22,19 @@ const els = {
     shape: $('tabShape'), shop: $('tabShop'),
   },
   dots: $('dots'), question: $('question'), field: $('field'), tray: $('tray'),
-  btnSay: $('btnSay'), btnSound: $('btnSound'),
+  btnSay: $('btnSay'), btnHelp: $('btnHelp'), btnSound: $('btnSound'),
   cheer: $('cheer'), cheerText: $('cheerText'), btnAgain: $('btnAgain'),
 };
 
 const QUESTIONS = 8;
+
+const HELP_TEXT = {
+  add: 'Điền hoặc chọn đáp án đúng cho phép tính cộng trừ hiện trên màn hình.',
+  compare: 'Chạm vào dấu lớn hơn, bé hơn hoặc bằng cho phù hợp giữa 2 bên.',
+  clock: 'Nhìn đồng hồ rồi chọn đúng giờ, hoặc xoay kim đồng hồ cho đúng giờ được yêu cầu.',
+  shape: 'Chọn hình khối giống mẫu, hoặc tìm hình tiếp theo đúng quy luật.',
+  shop: 'Chạm vào các tờ tiền để trả đúng số tiền cần mua hàng.',
+};
 
 const state = {
   mode: 'add',
@@ -36,6 +44,7 @@ const state = {
   wrongThisQ: false,
   saySentence: '',
   startedAt: Date.now(),
+  instruction: '',
 };
 
 bindMute(() => sfx.muted);
@@ -108,7 +117,8 @@ function startSet(mode) {
   els.cheer.classList.add('hidden');
   for (const [k, el] of Object.entries(els.tabs)) el.classList.toggle('active', k === mode);
   renderDots();
-  nextQuestion();
+  state.instruction = t(`toan.help.${mode}`, HELP_TEXT[mode]);
+  speakSequence([{ text: state.instruction, lang: 'vi-VN', rate: 0.92 }], nextQuestion);
 }
 
 const RENDER = {};
@@ -352,6 +362,7 @@ for (const [mode, el] of Object.entries(els.tabs)) {
   el.addEventListener('click', () => { sfx.select(); startSet(mode); });
 }
 els.btnSay.addEventListener('click', () => speak(state.saySentence));
+els.btnHelp.addEventListener('click', () => { sfx.select(); speak(state.instruction); });
 els.btnAgain.addEventListener('click', () => { sfx.select(); startSet(state.mode); });
 els.btnSound.addEventListener('click', () => {
   sfx.toggleMute();

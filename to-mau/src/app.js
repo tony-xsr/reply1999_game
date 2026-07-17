@@ -15,7 +15,7 @@ const t = (key, fallback) => {
 const $ = (id) => document.getElementById(id);
 const els = {
   tabLetters: $('tabLetters'), tabDigits: $('tabDigits'),
-  btnMode: $('btnMode'), btnSay: $('btnSay'), btnSound: $('btnSound'),
+  btnMode: $('btnMode'), btnSay: $('btnSay'), btnHelp: $('btnHelp'), btnSound: $('btnSound'),
   modeLabel: $('modeLabel'), picker: $('picker'),
   wrap: $('canvasWrap'), canvas: $('paintCanvas'), labels: $('labelCanvas'),
   cheer: $('cheer'), cheerEmoji: $('cheerEmoji'), cheerText: $('cheerText'),
@@ -30,11 +30,17 @@ const state = {
   colorIdx: 0,        // màu đang chọn trong khay
   done: false,        // chữ hiện tại đã tô xong (đang hiện khen thưởng)
   startedAt: Date.now(),
+  instruction: '',
 };
 
 const painter = new Painter(els.canvas);
 const labelCtx = els.labels.getContext('2d');
 bindMute(() => sfx.muted);
+
+function sayInstruction(text) {
+  state.instruction = text;
+  speak(text);
+}
 
 const items = () => (state.tab === 'letters' ? LETTERS : DIGITS);
 const current = () => items()[state.index];
@@ -266,6 +272,7 @@ els.btnMode.addEventListener('click', () => {
   sfx.select();
 });
 els.btnSay.addEventListener('click', () => speak(introSpeech(current())));
+els.btnHelp.addEventListener('click', () => { sfx.select(); speak(state.instruction); });
 els.btnSound.addEventListener('click', () => {
   sfx.toggleMute();
   refreshSoundIcon();
@@ -276,6 +283,7 @@ els.canvas.addEventListener('pointerdown', onCanvasTap);
 
 refreshModeLabel();
 refreshSoundIcon();
+sayInstruction(t('tomau.help', 'Chạm vào 1 màu ở khay bên dưới, rồi chạm vào vùng trên hình để tô màu đó vào. Tô kín cả chữ hoặc số là xong! Bấm nút cây cọ để đổi sang tô theo số, mỗi vùng có 1 con số ứng với 1 màu.'));
 buildCurrent();
 
 // Hook cho e2e test
