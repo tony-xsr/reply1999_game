@@ -47,7 +47,7 @@ function announce(phrase) {
   els.sayBubble.classList.remove('pop');
   void els.sayBubble.offsetWidth;
   els.sayBubble.classList.add('pop');
-  speak(phrase.en, { lang: 'en-US', rate: 0.85 });
+  speak(phrase.en, { lang: 'en-US', rate: 0.68 });
 }
 
 /* ===== Búp bê SVG tự vẽ — từng slot là 1 nhóm thay nội dung được ===== */
