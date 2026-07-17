@@ -1,0 +1,8 @@
+{
+  "name": "chim-non-vuot-ong",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/chimnon.test.js"
+  }
+}

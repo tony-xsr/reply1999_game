@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#fff6e8" />
+<title>Bé nào đang chơi?</title>
+<style>
+:root{--bg:#fff6e8;--gold:#ff8a3d;--gold2:#c2410c;--ink:#241e2e;--ink-dim:#5d5370;--line:#a8834a;--panel:#fffaf2}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:radial-gradient(ellipse 90% 55% at 50% 0%, #ffe9c8 0%, transparent 70%),var(--bg);
+  color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh}
+.wrap{max-width:640px;margin:0 auto;padding:24px 16px 60px;text-align:center}
+h1{color:var(--gold2);font-size:26px;margin:20px 0 6px}
+.sub{color:var(--ink-dim);font-size:14px;margin-bottom:26px}
+.kids{display:flex;flex-wrap:wrap;gap:16px;justify-content:center}
+.kid{width:150px;padding:18px 10px;background:var(--panel);border:3px solid var(--line);border-radius:20px;
+  cursor:pointer;transition:transform .15s;box-shadow:0 4px 14px rgba(194,65,12,.1)}
+.kid:hover{transform:translateY(-4px);border-color:var(--gold)}
+.kid.current{border-color:var(--gold2);background:#ffe9c8}
+.kid .face{font-size:56px;line-height:1.2}
+.kid .name{font-weight:900;font-size:17px;margin-top:6px}
+.kid .tag{font-size:11px;color:var(--gold2);font-weight:700;min-height:1.2em}
+.note{margin-top:26px;font-size:13px;color:var(--ink-dim);line-height:1.7}
+.note a{color:var(--gold2)}
+a.home{display:inline-block;margin-top:20px;font-size:14px;color:var(--gold2);font-weight:800;text-decoration:none}
+/* Hộp quà */
+.gift-overlay{position:fixed;inset:0;background:rgba(36,30,46,.8);display:flex;align-items:center;justify-content:center;z-index:50}
+.gift-box{background:var(--panel);border:3px solid var(--gold);border-radius:20px;padding:26px;max-width:340px;text-align:center}
+.gift-box .big{font-size:64px;animation:pop .6s ease-out}
+@keyframes pop{from{transform:scale(.4)}60%{transform:scale(1.2)}to{transform:scale(1)}}
+.gift-box p{font-size:15px;line-height:1.6}
+.gift-box button{background:linear-gradient(180deg,#34b566,#1e7a45);color:#fff;border:none;border-radius:12px;
+  padding:11px 26px;font-weight:900;font-size:15px;cursor:pointer;margin-top:8px}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🐰 Bé nào đang chơi?</h1>
+  <p class="sub">Chạm vào hình của con để bắt đầu — điểm, sao và quà sẽ được lưu đúng cho từng bé</p>
+  <div class="kids" id="kids"><i style="color:var(--ink-dim)">Đang tải…</i></div>
+  <p class="note" id="note"></p>
+  <a class="home" href="/">🏠 Về trang chủ chọn game ▶</a>
+</div>
+<div class="gift-overlay hidden" id="codeOverlay">
+  <div class="gift-box" style="max-width:320px">
+    <div class="big" id="codeAvatar">🐰</div>
+    <p id="codeTitle" style="margin:4px 0 10px">Nhập mã số của bé</p>
+    <div id="codeDots" style="font-size:26px;letter-spacing:8px;min-height:1.3em;margin-bottom:10px">••••••</div>
+    <div id="codePad" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
+    <button id="codeCancel" style="background:none;border:none;color:#c2410c;font-weight:800;margin-top:12px;cursor:pointer;font-size:14px">✖ Thôi, quay lại</button>
+  </div>
+</div>
+<div class="gift-overlay hidden" id="giftOverlay">
+  <div class="gift-box">
+    <div class="big" id="giftIcon">🎁</div>
+    <p id="giftText"></p>
+    <button id="btnOpenGift">MỞ QUÀ ▶</button>
+  </div>
+</div>
+<script src="/server-config.js"></script>
+<script type="module" src="src/app.js"></script>
+</body>
+</html>
