@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {
-  TOPICS, WORD_BANK, wordsForTopic, tuningFor, pickRound, makeGame, currentRound, chooseOption,
+  TOPICS, WORD_BANK, wordsForTopic, tuningFor, rateFor, promptFor, pickRound, makeGame, currentRound, chooseOption,
 } from './nghedoan.js';
 
 let passed = 0;
@@ -32,15 +32,31 @@ check('WORD_BANK ids are unique', () => {
   assert.equal(ids.size, WORD_BANK.length);
 });
 
+check('WORD_BANK emojis are unique (avoid confusing 2 near-identical pictures in a 4-choice round)', () => {
+  const emojis = new Set(WORD_BANK.map((w) => w.emoji));
+  assert.equal(emojis.size, WORD_BANK.length, 'duplicate emoji found across entries');
+});
+
 check('every WORD_BANK entry has required non-empty fields + valid topic', () => {
   const topicIds = new Set(TOPICS.map((t) => t.id));
   for (const w of WORD_BANK) {
     assert.ok(w.id && typeof w.id === 'string', `bad id: ${JSON.stringify(w)}`);
+    assert.ok(w.word && w.word.length > 0, `bad word for ${w.id}`);
     assert.ok(w.emoji && w.emoji.length > 0, `bad emoji for ${w.id}`);
     assert.ok(w.vi && w.vi.length > 0, `bad vi for ${w.id}`);
     assert.ok(w.sentence && w.sentence.length > 3, `bad sentence for ${w.id}`);
     assert.ok(w.sentenceVi && w.sentenceVi.length > 3, `bad sentenceVi for ${w.id}`);
     assert.ok(topicIds.has(w.topic), `unknown topic "${w.topic}" for ${w.id}`);
+    if (w.img !== undefined) assert.ok(typeof w.img === 'string' && w.img.startsWith('images/'), `bad img path for ${w.id}`);
+  }
+});
+
+check('real-photo entries (pho, banh mi, banh chung, 4 qua nhiet doi) are wired with a local images/ path', () => {
+  const withPhoto = ['pho', 'banhmi', 'banhchung', 'dragonfruit', 'rambutan', 'durian', 'lychee', 'papaya', 'jackfruit', 'starfruit'];
+  for (const id of withPhoto) {
+    const w = WORD_BANK.find((e) => e.id === id);
+    assert.ok(w, `expected entry ${id} to exist`);
+    assert.ok(w.img, `expected entry ${id} to have a real photo`);
   }
 });
 
@@ -60,6 +76,36 @@ check('tuningFor: rounds count grows with level, capped at 10', () => {
   assert.equal(tuningFor(2).rounds, 7);
   assert.equal(tuningFor(20).rounds, 10);
   assert.equal(tuningFor(0).choices, 4);
+});
+
+check('tuningFor: sentenceChance starts low and stays capped so word-only rounds dominate', () => {
+  assert.equal(tuningFor(0).sentenceChance, 0.2);
+  assert.ok(tuningFor(20).sentenceChance <= 0.45, 'sentenceChance must stay capped at high levels');
+  assert.ok(tuningFor(0).sentenceChance < tuningFor(10).sentenceChance, 'sentenceChance should grow with level');
+});
+
+check('rateFor: sentence mode reads noticeably slower than word mode', () => {
+  assert.ok(rateFor('sentence') < rateFor('word'), 'long sentences must be read slower than single words');
+});
+
+check('promptFor: reads the plain word in "word" mode, the full sentence in "sentence" mode', () => {
+  const target = WORD_BANK.find((w) => w.id === 'apple');
+  assert.equal(promptFor({ target, mode: 'word' }), 'apple');
+  assert.equal(promptFor({ target, mode: 'sentence' }), 'I eat an apple.');
+});
+
+check('makeGame: mixes "word" and "sentence" rounds — word mode dominates on average at level 0', () => {
+  let wordTotal = 0;
+  let total = 0;
+  for (let seed = 1; seed <= 30; seed++) {
+    const g = makeGame('all', 0, seeded(seed));
+    for (const r of g.rounds) {
+      assert.ok(r.mode === 'word' || r.mode === 'sentence', 'every round must have a valid mode');
+      total++;
+      if (r.mode === 'word') wordTotal++;
+    }
+  }
+  assert.ok(wordTotal / total >= 0.6, `expected word-mode rounds to dominate at level 0, got ${wordTotal}/${total}`);
 });
 
 check('pickRound: target is included among options, options has no duplicate ids', () => {
@@ -106,12 +152,40 @@ check('chooseOption: correct answer increases score and streak', () => {
   assert.equal(g.roundIndex, 1);
 });
 
-check('chooseOption: wrong answer resets streak to 0, still advances round', () => {
+check('chooseOption: first wrong answer gives a retry — streak resets, round does NOT advance', () => {
   const g = makeGame('fruit', 0, seeded(2));
   const r = currentRound(g);
   const wrong = r.options.find((o) => o.id !== r.target.id);
   const ev = chooseOption(g, wrong.id);
   assert.equal(ev.correct, false);
+  assert.equal(ev.retry, true);
+  assert.equal(ev.roundDone, false);
+  assert.equal(g.streak, 0);
+  assert.equal(g.roundIndex, 0);
+});
+
+check('chooseOption: correct on the retry earns reduced points, no streak, round advances', () => {
+  const g = makeGame('fruit', 0, seeded(2));
+  const r = currentRound(g);
+  const wrong = r.options.find((o) => o.id !== r.target.id);
+  chooseOption(g, wrong.id);
+  const ev = chooseOption(g, r.target.id);
+  assert.equal(ev.correct, true);
+  assert.equal(ev.gain, 5);
+  assert.equal(g.streak, 0);
+  assert.equal(g.correctCount, 1);
+  assert.equal(g.roundIndex, 1);
+});
+
+check('chooseOption: second wrong answer reveals the result and advances the round', () => {
+  const g = makeGame('fruit', 0, seeded(2));
+  const r = currentRound(g);
+  const wrongs = r.options.filter((o) => o.id !== r.target.id);
+  chooseOption(g, wrongs[0].id);
+  const ev = chooseOption(g, wrongs[1].id);
+  assert.equal(ev.correct, false);
+  assert.equal(ev.retry, false);
+  assert.equal(ev.roundDone, true);
   assert.equal(g.streak, 0);
   assert.equal(g.roundIndex, 1);
 });

@@ -3,10 +3,12 @@
 // quán ăn & mua sắm / ngày lễ / giải trí) hoặc chơi lẫn cả 5 chủ đề ("Tất cả").
 
 import {
-  TOPICS, tuningFor, makeGame, currentRound, chooseOption,
+  TOPICS, makeGame, currentRound, chooseOption, promptFor, rateFor,
 } from './nghedoan.js';
-import { speak, bindMute } from '../../to-mau/src/speech.js';
+import { speak, speakSequence, bindMute } from '../../to-mau/src/speech.js';
+import { recordMiss, recordHit } from '../../nghe-doan-on-tap/src/misses.js';
 import { sfx } from '../../pokemon/src/sfx.js';
+import { mountKidFeatures, answeredOne } from '../../shared/kid-bar.js';
 import { currentProfile, recordSession } from '../../pokemon/src/stats.js';
 
 const t = (key, fallback) => {
@@ -30,9 +32,63 @@ function sayInstruction(text) {
   speak(text);
 }
 
-/** Đọc câu/từ TIẾNG ANH bằng giọng en-US thật (không đọc kiểu giọng Việt). */
-function speakEn(text, rate = 0.85) {
+/** Đọc câu/từ TIẾNG ANH bằng giọng en-US thật — CÂU DÀI đọc chậm hơn hẳn TỪ ĐƠN. */
+function speakEn(text, rate) {
   speak(text, { lang: 'en-US', rate });
+}
+
+/** Đọc đúng nội dung của 1 vòng (từ đơn hoặc câu) với tốc độ phù hợp theo mode. */
+function speakRound(round) {
+  if (!round) return;
+  speakEn(promptFor(round), rateFor(round.mode));
+}
+
+/** Chú thích hiện sau khi trả lời: chỉ hiện đúng những gì bé vừa NGHE, không lẫn thêm câu dài nếu vòng đó là "word". */
+function captionFor(round) {
+  if (round.mode === 'sentence') return `${round.target.sentence}  —  ${round.target.sentenceVi}`;
+  return `${round.target.word}  —  ${round.target.vi}`;
+}
+
+/**
+ * Đáp đúng: khen bé bằng tiếng Việt, đọc lại từ (giọng Anh thật), rồi giải
+ * nghĩa + đọc câu ví dụ + dịch nghĩa câu — TOÀN BỘ bằng lời để bé vừa nghe
+ * đúng âm tiếng Anh vừa hiểu rõ nghĩa tiếng Việt, nhớ lâu hơn là chỉ nghe lặp
+ * lại đúng mỗi từ tiếng Anh.
+ */
+function buildCorrectSequence(round) {
+  const { word, vi, sentence, sentenceVi } = round.target;
+  return [
+    { text: 'Bé giỏi quá, đúng rồi!', lang: 'vi-VN', rate: 0.92 },
+    { text: word, lang: 'en-US', rate: rateFor('word') },
+    { text: `có nghĩa là ${vi}.`, lang: 'vi-VN', rate: 0.88 },
+    { text: sentence, lang: 'en-US', rate: rateFor('sentence') },
+    { text: `nghĩa là ${sentenceVi}. Bé nhớ nhé!`, lang: 'vi-VN', rate: 0.88 },
+  ];
+}
+
+/**
+ * Sai lần ĐẦU (được chọn lại): gợi ý — đọc từ đúng (giọng Anh thật) + nghĩa
+ * tiếng Việt rồi mời bé chọn lại. Chưa lộ đáp án trên màn hình.
+ */
+function buildHintSequence(round) {
+  const { word, vi } = round.target;
+  return [
+    { text: 'Sai rồi.', lang: 'vi-VN', rate: 0.92 },
+    { text: word, lang: 'en-US', rate: rateFor('word') },
+    { text: `là ${vi}. Bé hãy chọn lại nhé!`, lang: 'vi-VN', rate: 0.88 },
+  ];
+}
+
+/** Sai lần 2: lộ đáp án, đọc giải thích đầy đủ (từ + nghĩa + câu ví dụ) rồi qua câu mới. */
+function buildRevealSequence(round) {
+  const { word, vi, sentence, sentenceVi } = round.target;
+  return [
+    { text: 'Chưa đúng rồi. Đáp án là', lang: 'vi-VN', rate: 0.92 },
+    { text: word, lang: 'en-US', rate: rateFor('word') },
+    { text: `nghĩa là ${vi}.`, lang: 'vi-VN', rate: 0.88 },
+    { text: sentence, lang: 'en-US', rate: rateFor('sentence') },
+    { text: `nghĩa là ${sentenceVi}. Lần sau bé sẽ làm được!`, lang: 'vi-VN', rate: 0.88 },
+  ];
 }
 
 /* ===== Bộ lọc chủ đề ===== */
@@ -69,7 +125,14 @@ function renderRound() {
   for (const opt of round.options) {
     const btn = document.createElement('button');
     btn.className = 'opt-btn';
-    btn.textContent = opt.emoji;
+    if (opt.img) {
+      const img = document.createElement('img');
+      img.src = opt.img;
+      img.alt = opt.word;
+      btn.appendChild(img);
+    } else {
+      btn.textContent = opt.emoji;
+    }
     btn.dataset.id = opt.id;
     btn.addEventListener('click', () => onPick(opt, btn));
     els.options.appendChild(btn);
@@ -94,6 +157,20 @@ function onPick(opt, btn) {
   state.busy = true;
 
   const ev = chooseOption(g, opt.id);
+
+  if (ev.retry) {
+    // Sai lần ĐẦU: chưa lộ đáp án — làm mờ nút vừa chọn, đọc gợi ý (từ +
+    // nghĩa tiếng Việt) rồi mở khóa cho bé chọn lại đúng 1 lần.
+    recordMiss(round.target.word);
+    btn.classList.add('wrong');
+    btn.disabled = true;
+    els.sentenceCap.textContent = `${round.target.word}  —  ${round.target.vi}`;
+    sfx.fail();
+    updateHud();
+    speakSequence(buildHintSequence(round), () => { state.busy = false; });
+    return;
+  }
+
   const buttons = [...els.options.querySelectorAll('.opt-btn')];
   for (const b of buttons) {
     if (b.dataset.id === round.target.id) b.classList.add('correct');
@@ -104,32 +181,32 @@ function onPick(opt, btn) {
     btn.classList.add('wrong');
   }
 
-  if (ev.correct) {
-    sfx.match(1);
-    els.sentenceCap.textContent = `${round.target.sentence}  —  ${round.target.sentenceVi}`;
-    speakEn(round.target.sentence);
-  } else {
-    sfx.fail();
-    els.sentenceCap.textContent = `${round.target.sentence}  —  ${round.target.sentenceVi}`;
-    setTimeout(() => speakEn(round.target.sentence), 250);
-  }
+  // Ghi so "tu hay sai" dung chung: dung ngay lan dau -> bot can on;
+  // sai lan 2 -> them 1 diem can on (lan sai dau da ghi o nhanh retry).
+  if (ev.correct && ev.gain >= 10) recordHit(round.target.word);
+  else if (!ev.correct) recordMiss(round.target.word);
+
+  els.sentenceCap.textContent = captionFor(round);
+  if (ev.correct) sfx.match(1);
+  else sfx.fail();
   updateHud();
 
-  setTimeout(() => {
+  answeredOne(); // 1 câu đã xong — đủ 15 câu/ngày bé được hộp quà nhỏ
+  const seq = ev.correct ? buildCorrectSequence(round) : buildRevealSequence(round);
+  speakSequence(seq, () => {
     state.busy = false;
     if (ev.gameDone) endRound();
     else {
       renderRound();
       updateHud();
-      setTimeout(() => speakEn(currentRound(g).target.sentence), 200);
+      setTimeout(() => speakRound(currentRound(g)), 200);
     }
-  }, 1300);
+  });
 }
 
 els.btnListen.addEventListener('click', () => {
   sfx.select();
-  const round = currentRound(state.game);
-  if (round) speakEn(round.target.sentence);
+  speakRound(currentRound(state.game));
 });
 
 /* ===== Vòng đời màn chơi ===== */
@@ -183,7 +260,7 @@ function startRound() {
   state.startedAt = Date.now();
   renderRound();
   updateHud();
-  setTimeout(() => speakEn(currentRound(state.game).target.sentence), 300);
+  setTimeout(() => speakRound(currentRound(state.game)), 300);
 }
 
 /* ===== Nút ===== */
@@ -203,6 +280,7 @@ els.btnSound.addEventListener('click', () => {
 
 els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
 buildFilterRow();
+mountKidFeatures(); // thanh avatar bé + kiểm tra giới hạn phút/ngày
 sayInstruction(t('nghedoan.help', 'Máy sẽ đọc một câu tiếng Anh ngắn — bé nghe thật kỹ rồi chạm vào hình đúng trong 4 hình bên dưới nhé! Chọn đúng liên tiếp 3 lần sẽ được điểm thưởng đó. Có thể lọc theo chủ đề trái cây, món ăn, quán ăn, ngày lễ hoặc giải trí ở hàng nút trên cùng.'));
 startRound();
 

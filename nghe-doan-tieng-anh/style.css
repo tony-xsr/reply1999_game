@@ -134,6 +134,7 @@ body {
   display: flex; align-items: center; justify-content: center;
 }
 .opt-btn:active { transform: translateY(2px); }
+.opt-btn img { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; pointer-events: none; }
 .opt-btn.correct { border-color: var(--good); background: linear-gradient(180deg, #d3f5df, #a8e6bc); animation: opt-pop 0.35s ease-out; }
 .opt-btn.wrong { border-color: var(--bad); background: linear-gradient(180deg, #f9d5d5, #f0a8a8); animation: opt-shake 0.35s; }
 .opt-btn.dim { opacity: 0.45; }
