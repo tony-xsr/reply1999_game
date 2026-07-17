@@ -1,6 +1,6 @@
 /* Reply1999 Games — root service worker.
    Scope = '/'. Cache hub + các game khi truy cập lần đầu. */
-const CACHE = 'reply1999-v69';
+const CACHE = 'reply1999-v72';
 const PRECACHE = [
   './', './index.html', './manifest.json', './i18n.js', './server-config.js',
   './shared/api.js',
@@ -13,6 +13,7 @@ const PRECACHE = [
   './phu-huynh/src/app.js',
   './chon-be/index.html',
   './chon-be/src/app.js',
+  './gioi-thieu/index.html',
   './pokemon/index.html',
   './pokemon/style.css',
   './pokemon/src/pathfinder.js',

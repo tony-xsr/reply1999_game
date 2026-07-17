@@ -15,7 +15,7 @@ const $ = (id) => document.getElementById(id);
 const els = {
   court: $('court'), frog: $('frog'), prompt: $('prompt'),
   tabs: { step1: $('tabStep1'), step2: $('tabStep2'), step5: $('tabStep5') },
-  btnSay: $('btnSay'), btnSound: $('btnSound'),
+  btnSay: $('btnSay'), btnHelp: $('btnHelp'), btnSound: $('btnSound'),
   cheer: $('cheer'), cheerText: $('cheerText'), btnAgain: $('btnAgain'),
 };
 
@@ -26,9 +26,15 @@ const state = {
   wrongs: 0,
   squares: [],     // element theo chỉ số ô
   startedAt: Date.now(),
+  instruction: '',
 };
 
 bindMute(() => sfx.muted);
+
+function sayInstruction(text) {
+  state.instruction = text;
+  speak(text);
+}
 
 const target = () => state.course[state.pos];
 
@@ -166,6 +172,7 @@ els.tabs.step1.addEventListener('click', () => selectMode('step1'));
 els.tabs.step2.addEventListener('click', () => selectMode('step2'));
 els.tabs.step5.addEventListener('click', () => selectMode('step5'));
 els.btnSay.addEventListener('click', sayTarget);
+els.btnHelp.addEventListener('click', () => { sfx.select(); speak(state.instruction); });
 els.btnAgain.addEventListener('click', () => { sfx.select(); newGame(); });
 els.btnSound.addEventListener('click', () => {
   sfx.toggleMute();
@@ -175,6 +182,7 @@ els.btnSound.addEventListener('click', () => {
 window.addEventListener('resize', () => moveFrogTo(state.pos > 0 ? state.course.indexOf(state.course[state.pos - 1]) : -1, true));
 
 els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
+sayInstruction(t('loco.help', 'Chạm vào các ô theo đúng thứ tự số để chú ếch nhảy qua! Bấm sai không sao, máy sẽ nhắc lại số cần tìm. Có 3 chế độ: đếm từ 1, đếm cách 2, đếm cách 5.'));
 newGame();
 
 // Hook cho e2e test

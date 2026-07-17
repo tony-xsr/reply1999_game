@@ -55,6 +55,27 @@ td,th{padding:6px 8px;border-bottom:1px solid #eadbbe;text-align:left}
 .avatars{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
 .avatars button{margin:0;font-size:22px;background:var(--panel2);border:2px solid var(--line);border-radius:10px;padding:6px 9px}
 .avatars button.sel{border-color:var(--gold2);background:#ffe1b0}
+/* Biểu đồ phân tích */
+.mini-h{font-size:13px;color:var(--ink-dim);margin:0 0 8px;font-weight:700}
+.donut-row{display:flex;align-items:center;gap:14px}
+.legend{font-size:12.5px;line-height:1.9}
+.legend .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.hbars .row{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12.5px}
+.hbars .lab{width:74px;flex:none;font-weight:700}
+.hbars .track{flex:1;background:var(--panel2);border-radius:999px;height:16px;overflow:hidden}
+.hbars .fill{height:100%;background:linear-gradient(90deg,#ff9d5c,#c2410c);border-radius:999px;min-width:2px}
+.hbars .val{width:44px;flex:none;text-align:right;color:var(--ink-dim)}
+.trend{display:flex;gap:10px;align-items:flex-end;height:86px}
+.trend .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.trend .tbar{width:70%;background:linear-gradient(180deg,#34b566,#1e7a45);border-radius:6px 6px 0 0;min-height:3px}
+.trend .pct{font-size:12px;font-weight:800;color:var(--good)}
+.trend .tlab{font-size:10.5px;color:var(--ink-dim);margin-top:3px;text-align:center}
+/* So sánh các bé */
+.cmp{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:6px 12px;font-size:13px;align-items:center}
+.cmp .head{font-weight:700;color:var(--ink-dim);font-size:11.5px}
+.cmp .kname{font-weight:800;white-space:nowrap}
+.cmp .track{background:var(--panel2);border-radius:999px;height:14px;overflow:hidden;min-width:60px}
+.cmp .fill{height:100%;border-radius:999px;min-width:2px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:560px){.grid2{grid-template-columns:1fr}}
 code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
@@ -106,12 +127,34 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
       </details>
     </div>
 
+    <div class="card hidden" id="compareCard">
+      <h2>👀 So sánh các bé (7 ngày qua)</h2>
+      <div id="compareBox"></div>
+    </div>
+
     <div id="kidPanel" class="hidden">
       <div class="card">
         <h2 id="kidTitle"></h2>
         <div class="stats-row" id="statsRow"></div>
         <div class="bars" id="bars"></div>
         <div class="bar-labels" id="barLabels"></div>
+      </div>
+
+      <div class="card">
+        <h2>📊 Phân tích chi tiết</h2>
+        <div class="grid2">
+          <div>
+            <h3 class="mini-h">Bé chơi gì nhiều nhất? (30 ngày)</h3>
+            <div class="donut-row"><svg id="donut" viewBox="0 0 42 42" width="110" height="110"></svg>
+              <div id="donutLegend" class="legend"></div></div>
+          </div>
+          <div>
+            <h3 class="mini-h">Bé hay chơi lúc nào? (30 ngày)</h3>
+            <div id="todBars" class="hbars"></div>
+          </div>
+        </div>
+        <h3 class="mini-h" style="margin-top:14px">Tiến bộ: tỷ lệ trả lời thắng 4 tuần gần đây</h3>
+        <div id="trendBars" class="trend"></div>
       </div>
 
       <div class="card">
@@ -135,6 +178,12 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
           <h2>✏️ Hồ sơ & cài đặt riêng của bé</h2>
           <label>Tên bé</label><input id="editKidName" maxlength="20" />
           <label>Avatar</label><div class="avatars" id="editAvatarPick"></div>
+          <label>Màu yêu thích</label><div class="avatars" id="editColorPick"></div>
+          <label>Mã đăng nhập 6 số (bé nhập khi chọn hồ sơ ở máy khác — bỏ trống = chạm avatar là vào)</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="editKidCode" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="ví dụ 123456" style="flex:1" />
+            <button id="btnGenCode" class="ghost" style="margin:0;white-space:nowrap">🎲 Tạo mã</button>
+          </div>
           <label>Giới hạn phút/ngày RIÊNG (bỏ trống = dùng chung)</label>
           <input id="editKidLimit" type="number" min="0" max="480" placeholder="dùng cài đặt chung" />
           <div class="ok" id="editKidOk"></div>

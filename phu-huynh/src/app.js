@@ -3,7 +3,9 @@
 // xuất/xóa dữ liệu. Toàn bộ dữ liệu đọc/ghi qua shared/api.js (server thuần).
 
 import * as api from '../../shared/api.js';
-import { buildWeeklyReport, formatReportVi } from '../../shared/report.js';
+import {
+  buildWeeklyReport, formatReportVi, minutesByGroup, minutesByTimeOfDay, weeklyWinRate, weekStart,
+} from '../../shared/report.js';
 
 const $ = (id) => document.getElementById(id);
 const AVATARS = ['🐰', '🐯', '🐸', '🦄', '🐼', '🐥', '🦊', '🐨', '🐷', '🦁', '🐳', '🦖'];
@@ -116,6 +118,7 @@ async function loadKids() {
     b.addEventListener('click', () => selectKid(k));
     tabs.appendChild(b);
   }
+  renderCompare();
   if (!state.kid) selectKid(state.kids[0]);
 }
 
@@ -142,13 +145,34 @@ async function selectKid(k) {
 
 /* ===== Sửa hồ sơ + cài đặt riêng của bé ===== */
 
+const KID_COLORS = ['#ff8a3d', '#e5484d', '#2f9e60', '#2f6bd8', '#9b59d0', '#d9720c', '#0ea5b7', '#e04f9c'];
+
 function fillEditKid(k) {
   $('editKidName').value = k.name;
   state.editAvatar = k.avatar;
+  state.editColor = k.color || KID_COLORS[0];
   buildEditAvatarPick();
+  buildEditColorPick();
+  $('editKidCode').value = k.settings?.code || '';
   $('editKidLimit').value = k.settings?.daily_limit_min ?? '';
   $('editKidOk').textContent = '';
 }
+
+function buildEditColorPick() {
+  const box = $('editColorPick');
+  box.innerHTML = '';
+  for (const c of KID_COLORS) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.style.cssText = `background:${c};width:34px;height:34px;border-radius:50%;border:3px solid ${c === state.editColor ? '#241e2e' : 'transparent'}`;
+    b.addEventListener('click', () => { state.editColor = c; buildEditColorPick(); });
+    box.appendChild(b);
+  }
+}
+
+$('btnGenCode').addEventListener('click', () => {
+  $('editKidCode').value = String(Math.floor(100000 + Math.random() * 900000));
+});
 
 function buildEditAvatarPick() {
   const box = $('editAvatarPick');
@@ -169,11 +193,18 @@ $('btnSaveKid').addEventListener('click', async () => {
   const name = $('editKidName').value.trim();
   if (!name) { $('editKidOk').textContent = 'Tên bé không được để trống.'; return; }
   const limitRaw = $('editKidLimit').value.trim();
+  const codeRaw = $('editKidCode').value.trim();
+  if (codeRaw && !/^\d{6}$/.test(codeRaw)) {
+    $('editKidOk').textContent = 'Mã đăng nhập phải đúng 6 chữ số (hoặc bỏ trống).';
+    return;
+  }
   const settings = { ...(state.kid.settings || {}) };
   if (limitRaw === '') delete settings.daily_limit_min;
   else settings.daily_limit_min = Math.max(0, Number(limitRaw) | 0);
+  if (codeRaw === '') delete settings.code;
+  else settings.code = codeRaw;
   try {
-    const updated = await api.updateKid(state.kid.id, { name, avatar: state.editAvatar, settings });
+    const updated = await api.updateKid(state.kid.id, { name, avatar: state.editAvatar, color: state.editColor, settings });
     $('editKidOk').textContent = 'Đã lưu. (Máy của bé sẽ nhận giới hạn mới khi bé chọn lại avatar ở /chon-be/.)';
     state.kid = updated || { ...state.kid, name, avatar: state.editAvatar, settings };
     await loadKids();
@@ -273,6 +304,8 @@ async function renderKidStats(k) {
     box.appendChild(chip);
   }
 
+  renderAnalytics(sessions);
+
   // Sổ sao gần nhất
   $('rewardLog').innerHTML = ledger.length
     ? `<table>${ledger.slice(0, 25).map((r) =>
@@ -292,6 +325,95 @@ function viReason(reason) {
   if (reason === 'bo-me-thuong') return 'Bố mẹ thưởng 🎁';
   if (reason === 'qua-hoc-cham') return 'Quà chăm học';
   return reason;
+}
+
+/* ===== Biểu đồ phân tích chi tiết (thuần CSS/SVG, không thư viện) ===== */
+
+const GROUP_COLORS = { 'Tiếng Anh': '#c2410c', 'Học & tư duy': '#1e7a45', 'Game vui': '#2f6bd8' };
+
+function renderAnalytics(sessions) {
+  const cutoff = Date.now() - 30 * 86400000;
+  const recent = sessions.filter((s) => s.played_at && new Date(s.played_at).getTime() >= cutoff);
+
+  // 1) Donut: bé chơi gì nhiều nhất (30 ngày)
+  const groups = minutesByGroup(recent);
+  const total = groups.reduce((sum, g) => sum + g.minutes, 0);
+  const svg = $('donut');
+  const legend = $('donutLegend');
+  svg.innerHTML = '';
+  legend.innerHTML = '';
+  if (!total) {
+    legend.innerHTML = '<i style="color:var(--ink-dim)">Chưa có dữ liệu 30 ngày qua.</i>';
+  } else {
+    // vòng nền + từng cung bằng stroke-dasharray (chu vi r=15.915 ≈ 100)
+    svg.innerHTML = '<circle cx="21" cy="21" r="15.915" fill="none" stroke="#fff3df" stroke-width="7"></circle>';
+    let offset = 25; // bắt đầu từ đỉnh
+    for (const g of groups) {
+      const pct = (g.minutes / total) * 100;
+      const c = GROUP_COLORS[g.group] || '#a8834a';
+      const seg = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      seg.setAttribute('cx', '21'); seg.setAttribute('cy', '21'); seg.setAttribute('r', '15.915');
+      seg.setAttribute('fill', 'none'); seg.setAttribute('stroke', c); seg.setAttribute('stroke-width', '7');
+      seg.setAttribute('stroke-dasharray', `${pct} ${100 - pct}`);
+      seg.setAttribute('stroke-dashoffset', String(offset));
+      svg.appendChild(seg);
+      offset -= pct;
+      legend.innerHTML += `<div><span class="dot" style="background:${c}"></span>${g.group}: <b>${g.minutes} phút</b> (${Math.round(pct)}%)</div>`;
+    }
+  }
+
+  // 2) Khung giờ chơi (thanh ngang)
+  const tod = minutesByTimeOfDay(recent);
+  const maxTod = Math.max(1, ...tod.map((b) => b.minutes));
+  $('todBars').innerHTML = tod.map((b) => `
+    <div class="row"><div class="lab">${b.label}</div>
+      <div class="track"><div class="fill" style="width:${Math.round((b.minutes / maxTod) * 100)}%"></div></div>
+      <div class="val">${b.minutes}p</div></div>`).join('');
+
+  // 3) Tiến bộ 4 tuần (cột tỷ lệ thắng)
+  const trend = weeklyWinRate(sessions);
+  $('trendBars').innerHTML = trend.map((w) => {
+    const pct = w.rate === null ? 0 : Math.round(w.rate * 100);
+    return `<div class="col">
+      <div class="pct">${w.rate === null ? '—' : pct + '%'}</div>
+      <div class="tbar" style="height:${w.rate === null ? 3 : Math.max(4, pct * 0.6)}px;${w.rate === null ? 'background:#d8cdb6' : ''}"></div>
+      <div class="tlab">${w.label}</div></div>`;
+  }).join('');
+}
+
+/* ===== So sánh các bé (1 request/bảng nhờ truy vấn gộp cả nhà) ===== */
+
+let compareRenderedAt = 0;
+
+async function renderCompare() {
+  if (state.kids.length < 2) { $('compareCard').classList.add('hidden'); return; }
+  $('compareCard').classList.remove('hidden');
+  if (Date.now() - compareRenderedAt < 30000) return; // loadKids gọi nhiều lần — chỉ tải lại sau 30s
+  compareRenderedAt = Date.now();
+  try {
+    const [stars, weak, sessions] = await Promise.all([
+      api.familyStarBalances(), api.familyWeakCounts(),
+      api.familySessionsSince(weekStart().toISOString()),
+    ]);
+    const perKid = state.kids.map((k) => {
+      const mine = sessions.filter((s) => s.profile_id === k.id);
+      const minutes = Math.round(mine.reduce((sum, s) => sum + (s.seconds || 0), 0) / 60);
+      const days = new Set(mine.map((s) => (s.played_at || '').slice(0, 10))).size;
+      return { k, minutes, days, stars: stars.get(k.id) || 0, weak: weak.get(k.id) || 0 };
+    });
+    const maxMin = Math.max(1, ...perKid.map((r) => r.minutes));
+    $('compareBox').innerHTML = `<div class="cmp">
+      <div class="head"></div><div class="head">Phút chơi tuần</div><div class="head">Ngày học</div><div class="head">⭐ Sao</div><div class="head">🎯 Từ cần ôn</div>
+      ${perKid.map((r) => `
+        <div class="kname">${r.k.avatar} ${r.k.name}</div>
+        <div class="track"><div class="fill" style="width:${Math.round((r.minutes / maxMin) * 100)}%;background:${r.k.color || '#ff8a3d'}"></div></div>
+        <div>${r.days}/7 <span style="color:var(--ink-dim)">(${r.minutes}p)</span></div>
+        <div><b>${r.stars}</b></div>
+        <div>${r.weak ? `<b style="color:var(--bad)">${r.weak}</b>` : '<span style="color:var(--good)">0 🎉</span>'}</div>`).join('')}
+    </div>`;
+  } catch (e) {
+    $('compareBox').innerHTML = `<i style="font-size:13px;color:var(--ink-dim)">Không tải được (${e.message})</i>`;
+  }
 }
 
 /* ===== Sao chép báo cáo + chế độ trực tiếp ===== */

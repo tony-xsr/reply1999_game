@@ -17,7 +17,7 @@ const els = {
   tabAi: $('tabAi'), tab2p: $('tab2p'),
   dirPick: $('dirPick'), dirLeft: $('dirLeft'), dirRight: $('dirRight'),
   cheer: $('cheer'), cheerEmoji: $('cheerEmoji'), cheerText: $('cheerText'), btnAgain: $('btnAgain'),
-  btnNew: $('btnNew'), btnSound: $('btnSound'),
+  btnNew: $('btnNew'), btnHelp: $('btnHelp'), btnSound: $('btnSound'),
 };
 
 const state = {
@@ -27,9 +27,15 @@ const state = {
   selected: null,
   cellEls: [],   // theo chỉ số ô 0..11
   startedAt: Date.now(),
+  instruction: '',
 };
 
 bindMute(() => sfx.muted);
+
+function sayInstruction(text) {
+  state.instruction = text;
+  speak(text);
+}
 const MARKS = { A: '🔵', B: '🔴' };
 
 /* ===== Dựng bàn ===== */
@@ -215,6 +221,7 @@ els.dirPick.addEventListener('click', (e) => {
 });
 els.btnNew.addEventListener('click', () => { sfx.shuffle(); newGame(); });
 els.btnAgain.addEventListener('click', () => { sfx.select(); newGame(); });
+els.btnHelp.addEventListener('click', () => { sfx.select(); speak(state.instruction); });
 els.btnSound.addEventListener('click', () => {
   sfx.toggleMute();
   els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
@@ -222,6 +229,7 @@ els.btnSound.addEventListener('click', () => {
 });
 
 els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
+sayInstruction(t('oanquan.help', 'Chạm vào 1 ô dân của mình rồi chọn hướng rải trái hoặc phải. Quân sẽ rải dần từng ô một. Nếu ô kế tiếp sau khi rải hết là ô trống mà ô liền sau đó có quân, bé sẽ ăn được hết quân ở ô đó!'));
 buildBoard();
 newGame();
 
