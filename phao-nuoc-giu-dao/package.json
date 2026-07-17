@@ -1,0 +1,8 @@
+{
+  "name": "phao-nuoc-giu-dao",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/phaonuoc.test.js"
+  }
+}
