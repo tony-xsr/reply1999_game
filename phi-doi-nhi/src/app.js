@@ -22,7 +22,20 @@ const els = {
 };
 const ctx = els.canvas.getContext('2d');
 
-const OBSTACLE_ICON = { meteor: '🌑', wasp: '🐝', cloud: '🌩️', boss: '☄️' };
+/* ===== Icon SVG (Twemoji — xem images/CREDITS.md) thay cho emoji chữ, nét hơn hẳn ===== */
+const OBSTACLE_ICON = { meteor: 'meteor', wasp: 'wasp', cloud: 'storm', boss: 'boss' };
+const ICONS = {};
+for (const name of ['plane', 'meteor', 'wasp', 'storm', 'boss', 'star', 'cloud']) {
+  const img = new Image();
+  img.src = `images/${name}.svg`;
+  ICONS[name] = img;
+}
+function drawIcon(name, cx, cy, size) {
+  const img = ICONS[name];
+  if (img.complete && img.naturalWidth !== 0) {
+    ctx.drawImage(img, cx - size / 2, cy - size / 2, size, size);
+  }
+}
 
 const state = {
   level: 0, game: null, raf: 0, last: 0, startedAt: Date.now(), instruction: '', skyOffset: 0,
@@ -45,21 +58,16 @@ function draw() {
   sky.addColorStop(1, '#cfe9fa');
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, FIELD_W, FIELD_H);
-  ctx.font = '46px sans-serif';
-  ctx.textAlign = 'center';
   ctx.globalAlpha = 0.55;
   for (let i = 0; i < 4; i++) {
     const y = ((state.skyOffset * 0.6 + i * 190) % (FIELD_H + 100)) - 50;
-    ctx.fillText('☁️', 90 + (i % 2) * 420, y);
+    drawIcon('cloud', 90 + (i % 2) * 420, y, 64);
   }
   ctx.globalAlpha = 1;
   if (!g) return;
 
   // vật phẩm thưởng
-  ctx.font = '30px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  for (const p of g.powerups) ctx.fillText('⭐', p.x, p.y);
+  for (const p of g.powerups) drawIcon('star', p.x, p.y, 32);
 
   // đạn
   ctx.fillStyle = '#ffd93d';
@@ -70,14 +78,10 @@ function draw() {
   }
 
   // vật cản
-  for (const o of g.obstacles) {
-    ctx.font = `${o.r * 1.8}px sans-serif`;
-    ctx.fillText(OBSTACLE_ICON[o.type], o.x, o.y);
-  }
+  for (const o of g.obstacles) drawIcon(OBSTACLE_ICON[o.type], o.x, o.y, o.r * 2);
 
   // máy bay
-  ctx.font = '44px sans-serif';
-  ctx.fillText('✈️', g.plane.x, PLANE_Y);
+  drawIcon('plane', g.plane.x, PLANE_Y, 52);
 }
 
 /* ===== HUD ===== */
