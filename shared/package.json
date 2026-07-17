@@ -1,0 +1,8 @@
+{
+  "name": "reply1999-shared",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node rewards.test.js"
+  }
+}
