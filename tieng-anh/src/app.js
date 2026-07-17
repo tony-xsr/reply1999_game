@@ -158,7 +158,7 @@ RENDER.cau = () => {
       sfx.match(2);
       round.next++;
       if (round.next >= round.sentence.words.length) {
-        speak(round.sentence.words.join(' '), { lang: 'en-US' });
+        speak(round.sentence.words.join(' '), { lang: 'en-US', rate: 0.66 });
         questionDone(1700);
       }
       return null;
@@ -166,7 +166,7 @@ RENDER.cau = () => {
     els.tray.appendChild(btn);
   }
   state.saySentence = round.sentence.words.join(' ');
-  speak(state.saySentence, { lang: 'en-US' });
+  speak(state.saySentence, { lang: 'en-US', rate: 0.66 });
 };
 
 /* ===== 2. Phát Âm Theo Tôi ===== */
@@ -201,7 +201,7 @@ RENDER['phat-am'] = () => {
   hearBtn.className = 'hear-round-btn';
   hearBtn.textContent = '🔊';
   hearBtn.title = t('tomau.say', 'Đọc lại');
-  hearBtn.addEventListener('click', () => speak(item.word, { lang: 'en-US' }));
+  hearBtn.addEventListener('click', () => speak(item.word, { lang: 'en-US', rate: 0.75 }));
 
   const micBtn = document.createElement('button');
   micBtn.className = 'mic-btn';
@@ -277,7 +277,7 @@ RENDER['phat-am'] = () => {
   els.tray.appendChild(nextBtn);
 
   state.saySentence = item.word;
-  speak(item.word, { lang: 'en-US' });
+  speak(item.word, { lang: 'en-US', rate: 0.75 });
 };
 
 /* ===== Nút ===== */

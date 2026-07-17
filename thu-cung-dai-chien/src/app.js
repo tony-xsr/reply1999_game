@@ -15,7 +15,7 @@ const TYPE_NAME = { fire: 'Lửa', water: 'Nước', grass: 'Cỏ' };
 
 const $ = (id) => document.getElementById(id);
 const els = {
-  home: $('homeScreen'), battle: $('battleScreen'), pickRow: $('pickRow'),
+  home: $('homeScreen'), battle: $('battleScreen'), pickRow: $('pickRow'), fxLayer: $('fxLayer'),
   btnBack: $('btnBack'), btnHelp: $('btnHelp'), btnSound: $('btnSound'),
   enemyName: $('enemyName'), enemyHpFill: $('enemyHpFill'), enemyEmoji: $('enemyEmoji'),
   playerName: $('playerName'), playerHpFill: $('playerHpFill'), playerEmoji: $('playerEmoji'),
@@ -83,6 +83,52 @@ function renderBattle() {
   });
 }
 
+/** Tâm 1 phần tử theo tọa độ px bên trong màn đấu. */
+function centerOf(el) {
+  const a = els.battle.getBoundingClientRect();
+  const r = el.getBoundingClientRect();
+  return { x: r.left + r.width / 2 - a.left, y: r.top + r.height / 2 - a.top };
+}
+
+/** Thú ra đòn lao tới + chiêu hệ bay sang đối thủ → nổ 💥 + số sát thương bay lên. */
+function playAttackFx(fromEl, toEl, type, dmg, done) {
+  fromEl.classList.remove('lunge-r', 'lunge-l');
+  void fromEl.offsetWidth;
+  fromEl.classList.add(fromEl === els.playerEmoji ? 'lunge-r' : 'lunge-l');
+
+  const from = centerOf(fromEl);
+  const to = centerOf(toEl);
+  const proj = document.createElement('div');
+  proj.className = 'fx-proj';
+  proj.textContent = TYPE_EMOJI[type] || '✨';
+  proj.style.left = `${from.x}px`;
+  proj.style.top = `${from.y}px`;
+  els.fxLayer.appendChild(proj);
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    proj.style.left = `${to.x}px`;
+    proj.style.top = `${to.y}px`;
+  }));
+
+  setTimeout(() => {
+    proj.remove();
+    const burst = document.createElement('div');
+    burst.className = 'fx-burst';
+    burst.textContent = '💥';
+    burst.style.left = `${to.x}px`;
+    burst.style.top = `${to.y}px`;
+    els.fxLayer.appendChild(burst);
+    setTimeout(() => burst.remove(), 500);
+    const dmgEl = document.createElement('div');
+    dmgEl.className = 'dmg-float';
+    dmgEl.textContent = `-${dmg}`;
+    dmgEl.style.left = `${to.x}px`;
+    dmgEl.style.top = `${to.y - 26}px`;
+    els.fxLayer.appendChild(dmgEl);
+    setTimeout(() => dmgEl.remove(), 900);
+    done();
+  }, 420);
+}
+
 function confetti() {
   const colors = ['#ff5aa8', '#f5c542', '#35d435', '#42c5f5', '#b06af5'];
   for (let i = 0; i < 36; i++) {
@@ -130,23 +176,15 @@ function onMove(idx) {
   const c = state.campaign;
   if (state.busy || c.battle.over) return;
   state.busy = true;
+  renderBattle(); // khóa nút ngay khi vào lượt
   const result = useMove(c.battle, idx, Math.random);
-  if (!result) { state.busy = false; return; }
+  if (!result) { state.busy = false; renderBattle(); return; }
 
   const [playerTurn, enemyTurn] = result.log;
-  sfx.match(2);
-  els.battleLog.textContent = `${CREATURES[c.battle.player.id].name} dùng ${playerTurn.move}! -${playerTurn.dmg} máu`;
-  els.enemyEmoji.classList.remove('hit'); void els.enemyEmoji.offsetWidth; els.enemyEmoji.classList.add('hit');
-  renderBattle();
-  speak(`${playerTurn.move}!`);
+  const atkDef = CREATURES[c.battle.player.id];
+  const defDef = CREATURES[c.battle.enemy.id];
 
-  setTimeout(() => {
-    if (enemyTurn) {
-      els.battleLog.textContent = `${CREATURES[c.battle.enemy.id].name} dùng ${enemyTurn.move}! -${enemyTurn.dmg} máu`;
-      els.playerEmoji.classList.remove('hit'); void els.playerEmoji.offsetWidth; els.playerEmoji.classList.add('hit');
-      if (c.battle.player.hp <= 0) sfx.fail();
-      renderBattle();
-    }
+  const finishTurn = () => {
     if (c.battle.over) {
       setTimeout(() => {
         if (c.battle.won && !enemyTurn) speak('Hạ gục!');
@@ -161,9 +199,35 @@ function onMove(idx) {
         }
       }, 700);
     } else {
+      // QUAN TRỌNG: render lại sau khi mở khóa — không thì nút bị disabled mãi
       state.busy = false;
+      renderBattle();
     }
-  }, 700);
+  };
+
+  // Lượt của bé: lao tới + chiêu hệ bay + nổ + số sát thương
+  els.battleLog.textContent = `${atkDef.name} dùng ${playerTurn.move}!`;
+  speak(`${playerTurn.move}!`);
+  playAttackFx(els.playerEmoji, els.enemyEmoji, atkDef.type, playerTurn.dmg, () => {
+    sfx.match(2);
+    els.battleLog.textContent = `${atkDef.name} dùng ${playerTurn.move}! -${playerTurn.dmg} máu`;
+    els.enemyEmoji.classList.remove('hit'); void els.enemyEmoji.offsetWidth; els.enemyEmoji.classList.add('hit');
+    renderBattle();
+
+    setTimeout(() => {
+      if (!enemyTurn) { finishTurn(); return; }
+      // Lượt phản đòn của đối thủ
+      els.battleLog.textContent = `${defDef.name} dùng ${enemyTurn.move}!`;
+      playAttackFx(els.enemyEmoji, els.playerEmoji, defDef.type, enemyTurn.dmg, () => {
+        sfx.match(1);
+        els.battleLog.textContent = `${defDef.name} dùng ${enemyTurn.move}! -${enemyTurn.dmg} máu`;
+        els.playerEmoji.classList.remove('hit'); void els.playerEmoji.offsetWidth; els.playerEmoji.classList.add('hit');
+        if (c.battle.player.hp <= 0) sfx.fail();
+        renderBattle();
+        setTimeout(finishTurn, 350);
+      });
+    }, 550);
+  });
 }
 
 function startCampaign(creatureId) {

@@ -1347,3 +1347,16 @@ hãy đọc kỹ và ghi lại đầy đủ bên dưới để tôi có thể xe
 - `sw.js` v68→**v69**; chuỗi test thêm `report.test.js` — `npm test` toàn bộ: **974 ✅, 0 ❌**; smoke test các trang đều 200.
 
 **Toàn bộ lộ trình mục 5 (P1→P5) đã CODE XONG.** Chờ duy nhất: bạn dựng Supabase theo `server/README.md` rồi báo để kiểm thử đầu-cuối. Câu hỏi còn mở: số 3 (quy đổi quà ảo ↔ quà thật ngoài đời).
+
+## 10. KIỂM THỬ ĐẦU-CUỐI VỚI SUPABASE THẬT (07/2026) — ✅ XANH TOÀN BỘ
+
+Bạn đã dựng project Supabase + tắt Confirm email. Kết quả kiểm thử 2 tầng:
+
+- **Tầng REST thô (21/21 PASS)**: schema vào đúng; **RLS chặn anon chuẩn** (chưa đăng nhập không đọc được dòng nào); đăng ký trả session ngay; tạo gia đình/bé; ghi ván chơi **idempotent** (gửi trùng uuid không nhân đôi); view `weak_words` cộng dồn đúng (sai 2 lần − đúng 1 lần = còn 1 điểm, về 0 thì biến mất); view `star_balance` đúng; gửi quà → bé thấy → mở → không hiện lại; upsert settings đè đúng; `delete_my_family()` xóa cascade sạch.
+- **Tầng api.js (24/24 PASS — chạy qua CHÍNH module các game dùng)**: toàn bộ vòng đời qua `shared/api.js`, đặc biệt **luật sao tự động chính xác từng sao**: ván 80 điểm → +8; ván 999 điểm → trần ván +15; các ván sau +15, +12 rồi **+0 khi chạm đúng trần 50 sao/ngày**; đổi quà trừ sao đúng, chặn `NOT_ENOUGH_STARS`; quà miễn phí cost 0; mở quà bố mẹ cộng đúng sao; `todayPlaySeconds` đếm đúng 330 giây.
+- **🐛 Bug thật bị bắt và đã sửa nhờ E2E tầng 2**: `rest()` trong api.js gọi `res.json()` trên body RỖNG (PostgREST trả 201 không body khi `Prefer: return=minimal`) → nổ "Unexpected end of JSON input" — nghĩa là nếu không có đợt test này, **ghi ván chơi sẽ hỏng trên trình duyệt thật**. Đã sửa thành đọc text rồi parse an toàn.
+- **Xử lý bảo mật**: bạn lỡ dán mật khẩu database vào `server/README.md` — đã xóa ngay + thêm cảnh báo; `git log -S` xác nhận mật khẩu CHƯA từng bị commit (repo có remote GitHub public nên điều này quan trọng).
+- Dọn dẹp: dữ liệu test đã tự xóa bằng `delete_my_family()`; còn sót 2 tài khoản auth test rỗng (`e2e.reply1999.*@gmail.com`, `e2e.api.*@gmail.com`) — xóa tay trong Supabase → Authentication nếu muốn.
+- `npm test` local sau cùng: **974 ✅, 0 ❌**.
+
+**Hệ thống sẵn sàng dùng thật.** Các bước cho bạn: (1) mở `/phu-huynh/` đăng ký tài khoản thật của bạn → tạo hồ sơ bé; (2) máy của bé mở `/chon-be/` chạm avatar; (3) chơi 1 ván Nghe & Đoán rồi xem dashboard nhảy số. Còn mở: câu hỏi 3 (quy đổi quà thật) + cân nhắc bật lại Confirm email khi deploy công khai (an toàn hơn, chỉ thêm 1 bước bấm link khi đăng ký).

@@ -74,7 +74,51 @@ body {
 .type-hint { font-size: 0.85rem; color: var(--muted); text-align: center; font-weight: 700; }
 
 /* Màn đấu */
-#battleScreen { gap: 8px; padding: 6px 0; }
+#battleScreen { gap: 8px; padding: 6px 0; position: relative; }
+
+/* ===== Hiệu ứng tuyệt chiêu ===== */
+.fx-layer {
+  position: absolute; inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+.fx-proj {
+  position: absolute;
+  font-size: 30px;
+  transform: translate(-50%, -50%);
+  transition: left 0.38s ease-in, top 0.38s ease-in;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.9));
+}
+.fx-burst {
+  position: absolute;
+  font-size: 36px;
+  transform: translate(-50%, -50%);
+  animation: fx-burst 0.45s ease-out forwards;
+}
+@keyframes fx-burst {
+  from { opacity: 1; scale: 0.5; }
+  to { opacity: 0; scale: 2.1; }
+}
+.dmg-float {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 1.4rem; font-weight: 900;
+  color: #e03131;
+  -webkit-text-stroke: 1px #fff;
+  animation: dmg-float 0.85s ease-out forwards;
+}
+.dmg-float.super { color: #f08c00; font-size: 1.8rem; }
+@keyframes dmg-float {
+  to { translate: 0 -42px; opacity: 0; }
+}
+@keyframes lunge-r {
+  30%, 55% { translate: 30px -16px; }
+}
+@keyframes lunge-l {
+  30%, 55% { translate: -30px 16px; }
+}
+.f-emoji.lunge-r { animation: lunge-r 0.5s ease-out; }
+.f-emoji.lunge-l { animation: lunge-l 0.5s ease-out; }
 .fighter { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 380px; }
 .fighter.enemy { flex-direction: row; }
 .fighter.player { flex-direction: row-reverse; }
