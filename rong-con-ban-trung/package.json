@@ -1,0 +1,8 @@
+{
+  "name": "rong-con-ban-trung",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/rongcon.test.js"
+  }
+}
