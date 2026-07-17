@@ -2,7 +2,7 @@
 // Tốc độ khởi đầu chậm (900ms/nhịp) — thân thiện với trẻ em.
 
 import { createGame, tick, move, rotate, hardDrop, COLS, ROWS } from './tetris.js';
-import { bindMute } from '../../to-mau/src/speech.js';
+import { speak, bindMute } from '../../to-mau/src/speech.js';
 import { sfx } from '../../pokemon/src/sfx.js';
 import { currentProfile, recordSession } from '../../pokemon/src/stats.js';
 
@@ -16,16 +16,21 @@ const els = {
   canvas: $('gameCanvas'), next: $('nextCanvas'),
   score: $('score'), lines: $('lines'),
   overlay: $('overlay'), ovEmoji: $('ovEmoji'), ovText: $('ovText'), btnPlay: $('btnPlay'),
-  btnSound: $('btnSound'),
+  btnHelp: $('btnHelp'), btnSound: $('btnSound'),
 };
 
 const TICK_START = 900;
 const TICK_MIN = 250;
 
-const state = { game: null, timer: null, running: false, startedAt: Date.now() };
+const state = { game: null, timer: null, running: false, startedAt: Date.now(), instruction: '' };
 const ctx = els.canvas.getContext('2d');
 const nctx = els.next.getContext('2d');
 bindMute(() => sfx.muted);
+
+function sayInstruction(text) {
+  state.instruction = text;
+  speak(text);
+}
 
 /* ===== Vẽ ===== */
 
@@ -165,9 +170,11 @@ els.canvas.addEventListener('pointerup', (e) => {
 });
 
 els.btnPlay.addEventListener('click', start);
+els.btnHelp.addEventListener('click', () => { sfx.select(); speak(state.instruction); });
 els.btnSound.addEventListener('click', () => {
   sfx.toggleMute();
   els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
+  if (sfx.muted) { try { speechSynthesis.cancel(); } catch { /* ignore */ } }
 });
 
 document.addEventListener('visibilitychange', () => {
@@ -191,6 +198,7 @@ els.btnPlay.addEventListener('click', (e) => {
 }, { capture: true });
 
 els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
+sayInstruction(t('xepgach.help', 'Các khối gạch rơi xuống, dùng nút mũi tên để di chuyển, nút xoay để đổi hướng khối, và nút mũi tên xuống nhanh để thả gấp! Xếp kín một hàng ngang là hàng đó biến mất, được điểm.'));
 draw();
 
 // Hook cho e2e test
