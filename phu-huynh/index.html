@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#fff6e8" />
+<title>Trang Phụ Huynh — Reply1999 Games</title>
+<style>
+:root{
+  --bg:#fff6e8; --gold:#ff8a3d; --gold2:#c2410c; --ink:#241e2e; --ink-dim:#5d5370;
+  --line:#a8834a; --panel:#fffaf2; --panel2:#fff3df; --good:#15803d; --bad:#c02a2a;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:radial-gradient(ellipse 90% 55% at 50% 0%, #ffe9c8 0%, transparent 70%),var(--bg);
+  color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh}
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;align-items:center;gap:12px;padding:8px 0 18px;border-bottom:1px solid #e9d3ad;margin-bottom:18px}
+header .back{width:44px;height:44px;border-radius:50%;border:2px solid var(--line);background:var(--panel);
+  display:flex;align-items:center;justify-content:center;font-size:20px;text-decoration:none;color:var(--ink)}
+h1{margin:0;font-size:20px;color:var(--gold2)}
+.sub{color:var(--ink-dim);font-size:13px;margin:2px 0 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;
+  box-shadow:0 4px 14px rgba(194,65,12,.08)}
+.card h2{margin:0 0 10px;font-size:16px;color:var(--gold2)}
+label{display:block;font-size:13px;color:var(--ink-dim);margin:8px 0 4px;font-weight:600}
+input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;background:#fff;
+  font-size:14px;color:var(--ink)}
+button{background:linear-gradient(180deg,#ff9d5c,#c2410c);color:#fff;border:none;border-radius:10px;
+  padding:10px 18px;font-weight:800;font-size:14px;cursor:pointer;margin-top:10px}
+button.ghost{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+button.danger{background:linear-gradient(180deg,#e06464,#a12832)}
+button:disabled{opacity:.5;cursor:default}
+.err{color:var(--bad);font-size:13px;min-height:1.2em;margin-top:8px;white-space:pre-wrap}
+.ok{color:var(--good);font-size:13px;min-height:1.2em;margin-top:8px}
+.hidden{display:none!important}
+.kid-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.kid-tab{border:2px solid var(--line);background:var(--panel);border-radius:999px;padding:7px 14px;
+  font-weight:800;font-size:14px;cursor:pointer;color:var(--ink);margin-top:0}
+.kid-tab.active{background:var(--gold2);color:#fff;border-color:transparent}
+.stats-row{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 10px}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-size:13px}
+.stat b{display:block;font-size:19px;color:var(--gold2)}
+.bars{display:flex;align-items:flex-end;gap:6px;height:90px;padding:6px 2px;border-bottom:2px solid var(--line)}
+.bar{flex:1;background:linear-gradient(180deg,#ff9d5c,#c2410c);border-radius:4px 4px 0 0;min-height:2px;position:relative}
+.bar span{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:10px;color:var(--ink-dim)}
+.bar-labels{display:flex;gap:6px}
+.bar-labels div{flex:1;text-align:center;font-size:10px;color:var(--ink-dim);padding-top:3px}
+.words{display:flex;flex-wrap:wrap;gap:6px}
+.word-chip{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);
+  border-radius:999px;padding:4px 10px;font-size:13px}
+.word-chip button{margin:0;padding:1px 7px;font-size:12px;border-radius:999px}
+.word-chip .n{color:var(--bad);font-weight:800}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:6px 8px;border-bottom:1px solid #eadbbe;text-align:left}
+.avatars{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
+.avatars button{margin:0;font-size:22px;background:var(--panel2);border:2px solid var(--line);border-radius:10px;padding:6px 9px}
+.avatars button.sel{border-color:var(--gold2);background:#ffe1b0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.grid2{grid-template-columns:1fr}}
+code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="back" href="/" title="Trang chủ">🏠</a>
+    <div>
+      <h1>🔒 Trang Phụ Huynh</h1>
+      <p class="sub">Theo dõi từng bé · phát thưởng · cài đặt — dữ liệu lưu trên server, xem được từ mọi máy</p>
+    </div>
+  </header>
+
+  <!-- Chưa cấu hình server -->
+  <div id="viewSetup" class="card hidden">
+    <h2>⚙️ Chưa kết nối server</h2>
+    <p style="font-size:14px;line-height:1.6">Hệ thống quản lý bé cần một project <b>Supabase</b> (miễn phí, ~10 phút cài 1 lần):</p>
+    <ol style="font-size:14px;line-height:1.8">
+      <li>Làm theo hướng dẫn trong <code>server/README.md</code> của repo (tạo project → dán <code>server/schema.sql</code>).</li>
+      <li>Điền <b>Project URL</b> + <b>anon key</b> vào file <code>/server-config.js</code>.</li>
+      <li>Tải lại trang này để đăng ký tài khoản phụ huynh.</li>
+    </ol>
+  </div>
+
+  <!-- Đăng nhập / đăng ký -->
+  <div id="viewAuth" class="card hidden">
+    <h2 id="authTitle">Đăng nhập phụ huynh</h2>
+    <label>Email</label><input id="email" type="email" autocomplete="username" />
+    <label>Mật khẩu</label><input id="password" type="password" autocomplete="current-password" />
+    <div class="err" id="authErr"></div>
+    <button id="btnSignIn">Đăng nhập</button>
+    <button id="btnSignUp" class="ghost">Tạo tài khoản mới</button>
+  </div>
+
+  <!-- Bảng điều khiển -->
+  <div id="viewMain" class="hidden">
+    <div class="card">
+      <h2>👨‍👩‍👧 Các bé <span id="who" style="font-weight:400;font-size:12px;color:var(--ink-dim)"></span>
+        <button id="btnSignOut" class="ghost" style="float:right;margin:0;padding:5px 12px;font-size:12px">Đăng xuất</button></h2>
+      <div class="kid-tabs" id="kidTabs"></div>
+      <details id="addKidBox">
+        <summary style="cursor:pointer;font-size:13px;color:var(--gold2);font-weight:700">➕ Thêm bé mới</summary>
+        <label>Tên bé (biệt danh)</label><input id="kidName" maxlength="20" />
+        <label>Chọn avatar</label><div class="avatars" id="avatarPick"></div>
+        <div class="err" id="kidErr"></div>
+        <button id="btnAddKid">Tạo hồ sơ bé</button>
+      </details>
+    </div>
+
+    <div id="kidPanel" class="hidden">
+      <div class="card">
+        <h2 id="kidTitle"></h2>
+        <div class="stats-row" id="statsRow"></div>
+        <div class="bars" id="bars"></div>
+        <div class="bar-labels" id="barLabels"></div>
+      </div>
+
+      <div class="card">
+        <h2>🎯 Từ hay sai (bấm 🔊 để nghe)</h2>
+        <div class="words" id="weakWords"><i style="font-size:13px;color:var(--ink-dim)">Đang tải…</i></div>
+      </div>
+
+      <div class="card">
+        <h2>📈 Báo cáo tuần
+          <button id="btnCopyReport" class="ghost" style="float:right;margin:0;padding:4px 10px;font-size:12px">📋 Sao chép</button>
+          <label style="float:right;margin:4px 10px 0 0;font-size:12px;font-weight:600;color:var(--ink-dim);cursor:pointer"
+                 title="Tự tải lại số liệu mỗi 15 giây — xem bé học 'trực tiếp' từ máy khác">
+            <input type="checkbox" id="liveToggle" style="width:auto;vertical-align:middle"> 🔴 Trực tiếp
+          </label></h2>
+        <pre id="weeklyReport" style="white-space:pre-wrap;font:inherit;font-size:14px;line-height:1.8;margin:0">Đang tải…</pre>
+        <div class="ok" id="copyOk"></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h2>✏️ Hồ sơ & cài đặt riêng của bé</h2>
+          <label>Tên bé</label><input id="editKidName" maxlength="20" />
+          <label>Avatar</label><div class="avatars" id="editAvatarPick"></div>
+          <label>Giới hạn phút/ngày RIÊNG (bỏ trống = dùng chung)</label>
+          <input id="editKidLimit" type="number" min="0" max="480" placeholder="dùng cài đặt chung" />
+          <div class="ok" id="editKidOk"></div>
+          <button id="btnSaveKid">Lưu hồ sơ bé</button>
+          <button id="btnDeleteKid" class="danger">🗑️ Xóa bé này</button>
+        </div>
+        <div class="card">
+          <h2>🎁 Thưởng cho bé</h2>
+          <label>Số sao tặng kèm</label><input id="giftStars" type="number" min="0" max="100" value="10" />
+          <label>Lời nhắn (máy sẽ đọc cho bé nghe)</label>
+          <textarea id="giftMsg" rows="2" placeholder="Mẹ thưởng vì con tự giác học!"></textarea>
+          <div class="ok" id="giftOk"></div>
+          <button id="btnGift">Gửi quà 🎁</button>
+        </div>
+        <div class="card">
+          <h2>🧾 Sổ quà & sao</h2>
+          <div id="rewardLog" style="font-size:13px;max-height:220px;overflow:auto">Đang tải…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h2>⚙️ Cài đặt (áp dụng mọi máy)</h2>
+        <label>Giới hạn chơi mỗi ngày (phút)</label><input id="setLimit" type="number" min="5" max="480" value="45" />
+        <label>Tốc độ đọc TTS (0.6 chậm — 1.4 nhanh)</label><input id="setRate" type="number" min="0.6" max="1.4" step="0.1" value="1.0" />
+        <div class="ok" id="setOk"></div>
+        <button id="btnSaveSettings">Lưu cài đặt</button>
+      </div>
+      <div class="card">
+        <h2>💾 Dữ liệu & thiết bị</h2>
+        <div id="deviceList" style="font-size:13px;margin-bottom:8px">…</div>
+        <button id="btnImportLegacy" class="ghost hidden">📥 Nhập dữ liệu cũ trên máy này</button>
+        <button id="btnExport" class="ghost">⬇️ Xuất toàn bộ (JSON)</button>
+        <button id="btnDeleteAll" class="danger">🗑️ Xóa toàn bộ dữ liệu gia đình</button>
+        <div class="err" id="adminErr"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/server-config.js"></script>
+<script type="module" src="src/app.js"></script>
+</body>
+</html>

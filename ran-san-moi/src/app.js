@@ -17,7 +17,7 @@ const els = {
   target: $('target'), score: $('score'),
   tabs: { classic: $('tabClassic'), abc: $('tabAbc'), num: $('tabNum') },
   overlay: $('overlay'), ovEmoji: $('ovEmoji'), ovText: $('ovText'), btnPlay: $('btnPlay'),
-  btnSound: $('btnSound'),
+  btnHelp: $('btnHelp'), btnSound: $('btnSound'),
 };
 
 const COLS = 17;
@@ -32,7 +32,13 @@ const state = {
   running: false,
   paused: false,
   startedAt: Date.now(),
+  instruction: '',
 };
+
+function sayInstruction(text) {
+  state.instruction = text;
+  speak(text);
+}
 
 const ctx = els.canvas.getContext('2d');
 bindMute(() => sfx.muted);
@@ -255,6 +261,7 @@ els.tabs.classic.addEventListener('click', () => selectMode('classic'));
 els.tabs.abc.addEventListener('click', () => selectMode('abc'));
 els.tabs.num.addEventListener('click', () => selectMode('num'));
 els.btnPlay.addEventListener('click', start);
+els.btnHelp.addEventListener('click', () => { sfx.select(); speak(state.instruction); });
 els.btnSound.addEventListener('click', () => {
   sfx.toggleMute();
   els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
@@ -275,6 +282,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
+sayInstruction(t('ran.help', 'Dùng nút mũi tên hoặc vuốt để dẫn rắn đi ăn mồi — ăn xong rắn dài thêm ra! Đừng để rắn đụng tường hay đụng chính mình nhé. Có 3 chế độ: Cổ điển ăn táo, A tới Z ăn đúng thứ tự chữ cái, 1 tới 9 ăn đúng thứ tự số.'));
 draw();
 
 // Hook cho e2e test

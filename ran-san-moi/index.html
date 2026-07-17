@@ -10,10 +10,11 @@
 <body>
   <div class="shell">
     <header class="top">
-      <a class="round-btn" href="/" data-i18n-title="pika.btn.home" title="TRANG CHỦ">🏠</a>
+      <a class="round-btn" href="/dien-tu-xua/" data-i18n-title="pika.btn.home" title="TRANG CHỦ">🏠</a>
       <h1 data-i18n="ran.title">🐍 Rắn Săn Mồi</h1>
       <div class="target" id="target">🍎</div>
       <div class="score" id="score">0</div>
+      <button class="round-btn" id="btnHelp" data-i18n-title="pika.btn.help" title="Cách chơi">❓</button>
       <button class="round-btn" id="btnSound" data-i18n-title="pika.btn.sound" title="Âm thanh">🔊</button>
     </header>
 
@@ -29,7 +30,7 @@
         <!-- Màn bắt đầu / thua / thắng -->
         <div class="overlay" id="overlay">
           <div class="ov-emoji" id="ovEmoji">🐍</div>
-          <div class="ov-text" id="ovText" data-i18n="ran.start">Bấm để chơi!</div>
+          <div class="ov-text" id="ovText" data-i18n="ran.help">Dùng nút mũi tên hoặc vuốt để dẫn rắn đi ăn mồi — ăn xong rắn dài thêm ra! Đừng để rắn đụng tường hay đụng chính mình nhé. Có 3 chế độ: Cổ điển ăn táo, A→Z ăn đúng thứ tự chữ cái, 1→9 ăn đúng thứ tự số.</div>
           <button class="big-btn" id="btnPlay" data-i18n="ran.play">CHƠI ▶</button>
         </div>
       </div>
