@@ -20,13 +20,18 @@ const $ = (id) => document.getElementById(id);
 const els = {
   title: $('title'), subLine: $('subLine'),
   home: $('homeScreen'), play: $('playScreen'),
-  btnBack: $('btnBack'), btnNew: $('btnNew'), btnSound: $('btnSound'),
+  btnBack: $('btnBack'), btnNew: $('btnNew'), btnHelp: $('btnHelp'), btnSound: $('btnSound'),
   cheer: $('cheer'), cheerEmoji: $('cheerEmoji'), cheerText: $('cheerText'),
   btnAgain: $('btnAgain'), btnHome2: $('btnHome2'),
 };
 
-const state = { game: null, startedAt: Date.now(), ctx: {} };
+const state = { game: null, startedAt: Date.now(), ctx: {}, instruction: '' };
 bindMute(() => sfx.muted);
+
+function sayInstruction(text) {
+  state.instruction = text;
+  speak(text);
+}
 
 /* ===== Khung chung ===== */
 
@@ -75,6 +80,7 @@ function showHome() {
   els.cheer.classList.add('hidden');
   els.btnBack.hidden = true;
   els.btnNew.hidden = true;
+  els.btnHelp.hidden = true;
   els.subLine.textContent = '';
 }
 
@@ -86,6 +92,7 @@ function startGame(game) {
   els.cheer.classList.add('hidden');
   els.btnBack.hidden = false;
   els.btnNew.hidden = false;
+  els.btnHelp.hidden = false;
   els.play.innerHTML = '';
   els.subLine.textContent = '';
   GAMES[game]();
@@ -209,7 +216,7 @@ function startMaze() {
   canvas.addEventListener('pointerup', () => { dragging = false; });
 
   els.subLine.textContent = t('tuduy.maze.hint', 'Rê tay dắt chuột 🐭 đến miếng phô mai 🧀');
-  speak('Dắt chuột đến miếng phô mai nhé!');
+  sayInstruction('Dắt chuột đến miếng phô mai nhé!');
   draw();
   state.ctx.maze = { maze, mouse, tryStep: (x, y) => { tryStep(x, y); draw(); } };
 }
@@ -287,7 +294,7 @@ function startSudoku() {
   els.play.appendChild(palette);
 
   els.subLine.textContent = t('tuduy.sudoku.hint', 'Mỗi hàng, cột, ô vuông: mỗi con vật đúng 1 lần');
-  speak('Chọn con vật rồi đặt vào ô trống nhé!');
+  sayInstruction('Chọn con vật rồi đặt vào ô trống nhé!');
   state.ctx.sudoku = { size, solution, puzzle, cells, setSelected: (v) => { selected = v; } };
 }
 
@@ -327,7 +334,7 @@ function startSpot() {
   wrap.append(...grids);
   els.play.appendChild(wrap);
   els.subLine.innerHTML = `${t('tuduy.spot.hint', 'Tìm chỗ khác nhau')}: <b>0/4</b>`;
-  speak('Hai bức tranh có 4 chỗ khác nhau. Tìm đi nào!');
+  sayInstruction('Hai bức tranh có 4 chỗ khác nhau. Tìm đi nào!');
   state.ctx.spot = { q, grids };
 }
 
@@ -411,7 +418,7 @@ function startDots() {
   });
 
   els.subLine.innerHTML = `${t('tuduy.dots.hint', 'Chạm các chấm theo thứ tự')} <b>1 → ${pts.length}</b>`;
-  speak('Chạm các chấm theo thứ tự từ một nhé!');
+  sayInstruction('Chạm các chấm theo thứ tự từ một nhé!');
   draw();
   state.ctx.dots = { shape, pts, getNext: () => next };
 }
@@ -424,6 +431,7 @@ function startOdd() {
   const ctx = state.ctx;
   ctx.oddIndex = 0;
   ctx.oddFirstTry = 0;
+  sayInstruction('Trong các hình, hãy tìm hình nào không cùng nhóm với các hình còn lại!');
   nextOdd();
 }
 
@@ -551,7 +559,7 @@ function startHanoi() {
   });
 
   els.subLine.textContent = t('tuduy.hanoi.hint', 'Chuyển cả chồng bánh sang đĩa 🍽️ — bánh to không đè bánh nhỏ');
-  speak('Giúp gấu chuyển chồng bánh sang đĩa bên phải nhé! Bánh to không để lên bánh nhỏ đâu!');
+  sayInstruction('Giúp gấu chuyển chồng bánh sang đĩa bên phải nhé! Bánh to không để lên bánh nhỏ đâu!');
   render();
   state.ctx.hanoi = { h, render, pick: (i) => pegEls[i].click() };
 }
@@ -569,6 +577,7 @@ for (const card of document.querySelectorAll('.mode-card')) {
 els.btnBack.addEventListener('click', showHome);
 els.btnHome2.addEventListener('click', showHome);
 els.btnNew.addEventListener('click', () => { sfx.shuffle(); startGame(state.game); });
+els.btnHelp.addEventListener('click', () => { sfx.select(); speak(state.instruction); });
 els.btnAgain.addEventListener('click', () => { sfx.select(); startGame(state.game); });
 els.btnSound.addEventListener('click', () => {
   sfx.toggleMute();
