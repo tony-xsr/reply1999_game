@@ -746,6 +746,465 @@ Nếu bạn đồng ý hướng đi trên, xác nhận **mảng nào làm giai �
 
 **Giai đoạn 2 tiếp theo** (chưa làm — chờ xác nhận): chọn 1 trong 4 mảng còn lại để lặp lại khuôn mẫu này (giao thông/tiện ích công cộng/môi trường/đô thị/địa lý · động vật/vũ trụ/toán học · gia đình/trường học/nghề nghiệp/thể thao · vật dụng hằng ngày/quần áo/thiết bị/bộ phận cơ thể).
 
+**✅ Đã sửa lỗi giọng đọc tiếng Anh (phản hồi tay từ B1–B4): "đọc quá nhanh, không nghe kịp, khó nghe"** — nguyên nhân kép: (1) tốc độ đọc câu dài quá nhanh, (2) MỖI vòng chơi đều bắt bé nghe hiểu 1 câu tiếng Anh trọn vẹn — với bé chưa quen câu dài, tần suất này dễ gây nản. Đã sửa 2 lớp:
+- **Trộn lẫn 2 kiểu vòng chơi**: mỗi mục từ vựng giờ có cả `word` (từ đơn) lẫn `sentence` (câu ngắn) — mỗi VÒNG chỉ ngẫu nhiên chọn 1 trong 2 kiểu để nghe/đoán, ưu tiên từ đơn nhiều hơn hẳn (~80% ở màn đầu, tối đa ~55% câu ở màn cao) để bé không bị "ngợp" vì câu dài xuất hiện dày đặc.
+- **Tốc độ đọc phân theo độ dài**: từ đơn đọc `rate 0.78` (gần tự nhiên), câu dài đọc chậm hẳn `rate 0.64` — áp dụng cho `nghe-doan-tieng-anh` và `nghe-doan-giao-thong`; đồng thời hạ tốc độ đọc tiếng Anh ở `xep-chu-tieng-anh`, `be-hai-trai-cay`, `be-lam-stylist`, `phong-xinh` (từ đơn, `rate 0.68`), `tap-viet` và `tieng-anh` (câu dài `rate 0.66`, từ đơn `rate 0.75`) cho đồng bộ toàn bộ các game có giọng đọc tiếng Anh.
+- Test bổ sung: `tuningFor.sentenceChance` tăng dần nhưng luôn bị chặn trần; `rateFor('sentence') < rateFor('word')`; thống kê tỉ lệ word/sentence qua 30 seed khác nhau để tránh test bị "may rủi" theo 1 seed cụ thể.
+
+**✅ Đã làm xong "Giai đoạn 2" (mảng 2/5 — giao thông, phương tiện, tiện ích công cộng, môi trường, đô thị & thôn quê, địa lý & địa hình):**
+
+- **Nghe & Đoán: Giao Thông & Địa Lý** ✅ MỚI (`nghe-doan-giao-thong/`, 20 unit test) — lặp lại đúng khuôn mẫu đã kiểm chứng ở Giai đoạn 1, 93 mục từ vựng chia 5 chủ đề con (🚗 Phương tiện 20 · 🚦 Tiện ích công cộng 20 · 🌳 Môi trường 18 · 🏙️ Đô thị & Thôn quê 18 · 🗺️ Địa lý & Địa hình 17), mỗi mục có từ đơn + câu ngắn, trộn 2 kiểu vòng chơi + tốc độ đọc phân theo độ dài như bản sửa lỗi ở trên. Có test riêng kiểm tra **emoji không trùng nhau trong toàn bộ ngân hàng từ** (tránh 2 hình gần giống nhau xuất hiện cùng lúc trong 4 lựa chọn gây nhầm lẫn cho bé) — việc này lộ ra khi thiết kế thủ công (ví dụ suýt dùng cả 🌍 "Earth", 🌎 "world", 🌐 "globe" cùng lúc — 3 icon quả địa cầu rất giống nhau — đã bỏ bớt "world"/"globe", chỉ giữ "Earth" duy nhất để tránh gây rối mắt).
+- Đăng ký đầy đủ: thẻ trong `goc-tieng-anh/` (hub 7→8 game) + `game-mini/`, 5 khóa i18n mới (5 ngôn ngữ), precache `sw.js` v47→v48, thêm vào chuỗi test gốc — `npm test` toàn bộ: **771 ✅, 0 ❌**.
+
+**Giai đoạn 3 tiếp theo** (chưa làm): động vật/động vật hoang dã/sở thú/hàng không/vũ trụ/toán học · gia đình/bạn bè/trường học/nghề nghiệp/thể thao/cuộc thi · vật dụng hằng ngày/quần áo/giày dép/máy tính/thiết bị gia dụng/bộ phận cơ thể/hoạt động hằng ngày.
+
+**✅ Đã bổ sung ảnh THẬT (không phải emoji) cho các từ mà emoji không diễn tả đủ rõ/đủ thật** — theo yêu cầu, dùng nguồn ảnh miễn phí có giấy phép rõ ràng (Wikimedia Commons: CC0/CC BY/CC BY-SA — mục đích giáo dục phi lợi nhuận, có ghi công tác giả đầy đủ theo đúng yêu cầu giấy phép, cùng cách làm đã dùng với Twemoji/Kenney trong suốt repo). Đã thêm 5 ảnh thật + 5 từ vựng mới:
+- **Giai đoạn 2** (`nghe-doan-giao-thong/images/`): **xe cẩu** (crane truck — không có emoji phù hợp) ảnh của Tbatb, CC BY-SA 4.0; **con trâu** (buffalo) ảnh của Basile Morin, CC BY-SA 4.0 — dù 🐃 đã có emoji nhưng ảnh thật "trông real hơn" đúng như bạn mong muốn.
+- **Giai đoạn 1** (`nghe-doan-tieng-anh/images/`): 3 món ăn truyền thống Việt Nam chưa có emoji riêng — **phở** (ảnh Vyacheslav Argenberg, CC BY 4.0), **bánh mì** (ảnh HungryHuy, CC BY 2.0), **bánh chưng** (ảnh Syced, CC0/Public Domain).
+- Cơ chế: mỗi mục từ vựng có thêm trường `img` tùy chọn (đường dẫn ảnh cục bộ) — khi có, giao diện hiển thị ẢNH THẬT thay vì emoji trong 4 lựa chọn; vẫn giữ emoji dự phòng cho các nơi khác cần hiển thị nhanh. Có `CREDITS.md` trong mỗi thư mục `images/` ghi rõ tác giả + giấy phép + nguồn cho từng ảnh.
+- Test bổ sung: kiểm tra mọi trường `img` (khi có) trỏ đúng vào thư mục `images/` cục bộ; kiểm tra 5 mục ảnh thật đã được gắn đúng.
+
+**✅ Đã làm xong "Giai đoạn 3" (mảng 3/5 — động vật hoang dã, sinh vật biển & côn trùng, hàng không & vũ trụ, toán học & hình khối, loài chim):**
+
+- **Nghe & Đoán: Muôn Loài & Vũ Trụ** ✅ MỚI (`nghe-doan-dong-vat-vu-tru/`, 20 unit test) — lặp lại đúng khuôn mẫu đã kiểm chứng ở Giai đoạn 1–2, 91 mục từ vựng chia 5 chủ đề con (🦁 Động vật hoang dã 20 · 🐠 Sinh vật biển & Côn trùng 20 · 🚀 Hàng không & Vũ trụ 20 · 🔢 Toán học & Hình khối 20 · 🦅 Loài chim 11), cùng cơ chế trộn từ đơn/câu ngắn + tốc độ đọc phân theo độ dài đã áp dụng xuyên suốt cả 3 giai đoạn. Test emoji-uniqueness xác nhận cả 91 icon không trùng nhau.
+- Đăng ký đầy đủ: thẻ trong `goc-tieng-anh/` (hub 8→9 game) + `game-mini/`, 4 khóa i18n mới (5 ngôn ngữ), precache `sw.js` v49→v50, thêm vào chuỗi test gốc — `npm test` toàn bộ: **794 ✅, 0 ❌**.
+
+**✅ Đã làm xong "Giai đoạn 4" (mảng 4/5 — gia đình & bạn bè, trường học, nghề nghiệp, thể thao, thi đấu & hoạt động):**
+
+- **Nghe & Đoán: Gia Đình & Nghề Nghiệp** ✅ MỚI (`nghe-doan-gia-dinh-nghe-nghiep/`, 20 unit test) — lặp lại đúng khuôn mẫu đã kiểm chứng ở Giai đoạn 1–3, 85 mục từ vựng chia 5 chủ đề con (👪 Gia đình & Bạn bè 14 · 🏫 Trường học 20 · 💼 Nghề nghiệp 16 · ⚽ Thể thao 20 · 🏆 Thi đấu & Hoạt động 15). **Lưu ý thiết kế riêng cho mảng này**: từ vựng quan hệ gia đình (mẹ/bố/dì/cậu/anh/chị...) phần lớn KHÔNG có emoji riêng biệt — nếu thêm đủ sẽ khiến nhiều mục trùng hình, gây nhầm lẫn nghiêm trọng trong màn 4 lựa chọn (2 nút giống hệt nhau nhưng khác đáp án đúng). Chủ đề "Gia đình & Bạn bè" vì vậy **chủ động chỉ giữ 14 từ có icon thật sự riêng biệt** (gia đình, em bé, bà, ông, đám cưới, cặp đôi...) thay vì cố nhồi cho đủ 20 — đúng nguyên tắc "làm kỹ hơn làm ẩu" đã thống nhất từ đầu dự án. Test emoji-uniqueness xác nhận cả 85 icon không trùng nhau.
+- Đăng ký đầy đủ: thẻ trong `goc-tieng-anh/` (hub 9→10 game) + `game-mini/`, 4 khóa i18n mới (5 ngôn ngữ), precache `sw.js` v50→v51, thêm vào chuỗi test gốc — `npm test` toàn bộ: **814 ✅, 0 ❌**.
+
+**🎉 Đã làm xong "Giai đoạn 5" — MẢNG CUỐI CÙNG, HOÀN THÀNH TRỌN VẸN KẾ HOẠCH 5×1000 (quần áo & giày dép, đồ dùng gia đình, thiết bị điện tử, bộ phận cơ thể, hoạt động hằng ngày):**
+
+- **Nghe & Đoán: Đồ Dùng & Cơ Thể** ✅ MỚI (`nghe-doan-do-dung-hang-ngay/`, 20 unit test) — lặp lại đúng khuôn mẫu đã kiểm chứng ở Giai đoạn 1–4, 92 mục từ vựng chia 5 chủ đề con (👕 Quần áo & Giày dép 20 · 🛏️ Đồ dùng gia đình 20 · 💻 Thiết bị điện tử 20 · ✋ Bộ phận cơ thể 16 · 😴 Hoạt động hằng ngày 16). Test emoji-uniqueness xác nhận cả 92 icon không trùng nhau — kiểm tra kỹ đặc biệt ở các cặp dễ nhầm (ví dụ tắm 🛀 người-trong-bồn vs bồn tắm 🛁 vật thể — 2 icon khác nhau dù cùng chủ đề "tắm").
+- Đăng ký đầy đủ: thẻ trong `goc-tieng-anh/` (hub 10→11 game) + `game-mini/`, 4 khóa i18n mới (5 ngôn ngữ), precache `sw.js` v51→v52, thêm vào chuỗi test gốc — `npm test` toàn bộ: **834 ✅, 0 ❌**.
+
+---
+
+### 🏆 TỔNG KẾT DỰ ÁN "5×1000 TỪ VỰNG TIẾNG ANH" — HOÀN THÀNH CẢ 5 GIAI ĐOẠN
+
+| Giai đoạn | Chủ đề | Game | Số từ | Unit test |
+|---|---|---|---|---|
+| 1 | Trái cây, món ăn, quán ăn & mua sắm, ngày lễ, giải trí & phim ảnh | `nghe-doan-tieng-anh/` | 103 | 21 |
+| 2 | Phương tiện, tiện ích công cộng, môi trường, đô thị & thôn quê, địa lý & địa hình | `nghe-doan-giao-thong/` | 95 | 21 |
+| 3 | Động vật hoang dã, sinh vật biển & côn trùng, hàng không & vũ trụ, toán học & hình khối, loài chim | `nghe-doan-dong-vat-vu-tru/` | 91 | 20 |
+| 4 | Gia đình & bạn bè, trường học, nghề nghiệp, thể thao, thi đấu & hoạt động | `nghe-doan-gia-dinh-nghe-nghiep/` | 85 | 20 |
+| 5 | Quần áo & giày dép, đồ dùng gia đình, thiết bị điện tử, bộ phận cơ thể, hoạt động hằng ngày | `nghe-doan-do-dung-hang-ngay/` | 92 | 20 |
+
+**Tổng cộng: 466 mục từ vựng tiếng Anh** (mỗi mục có cả từ đơn + câu ngắn thật đi kèm — không chỉ học từ rời rạc), phủ khắp 25 chủ đề con, đều dùng chung 1 cơ chế đã kiểm chứng xuyên suốt:
+- Mỗi vòng chơi **trộn ngẫu nhiên 2 kiểu** (nghe từ đơn / nghe câu ngắn), ưu tiên từ đơn nhiều hơn để không làm bé nản vì câu dài xuất hiện quá dày — sửa trực tiếp từ phản hồi tay của bạn ("đọc quá nhanh, không nghe kịp").
+- Tốc độ đọc phân theo độ dài (từ đơn nhanh hơn, câu dài chậm hơn hẳn).
+- Lọc theo chủ đề con hoặc chơi lẫn "Tất cả".
+- Test tự động cho **tính duy nhất của emoji** trong mỗi ngân hàng từ — tránh 2 hình gần giống nhau xuất hiện cùng lúc trong màn 4 lựa chọn gây nhầm lẫn cho bé (phát hiện và né được vài trường hợp rủi ro trong lúc thiết kế, ví dụ bộ 3 icon quả địa cầu 🌍🌎🌐 hay việc dồn quá nhiều icon tòa nhà giống nhau).
+- 5 ảnh THẬT (không phải emoji) bổ sung cho các từ mà icon không diễn tả đủ — nguồn Wikimedia Commons giấy phép tự do (CC0/CC BY/CC BY-SA), có ghi công đầy đủ: xe cẩu, con trâu, phở, bánh mì, bánh chưng.
+
+Cả 5 game đều lên hub **Góc Tiếng Anh** (`goc-tieng-anh/`, 11 game) và `game-mini/`, đăng ký đầy đủ i18n 5 ngôn ngữ + service worker + chuỗi test gốc. `npm test` cuối cùng: **834 ✅, 0 ❌**.
+
+---
+
+### Đợt cải thiện sau khi chơi thử cả 5 game "Nghe & Đoán"
+
+**✅ Giải thích SONG NGỮ sau mỗi câu trả lời (đúng lẫn sai) — áp dụng cho cả 5 game:**
+
+Trước đây trả lời xong chỉ đọc lại đúng mỗi từ/câu tiếng Anh — bé nghe tiếng Anh không thôi rất khó nhớ nghĩa. Theo đúng ví dụ bạn đưa ("bé chọn sai → đọc *drink là uống, chọn đúng nhé bé*; bé chọn đúng → *bé giỏi quá đúng rồi, drink có nghĩa là uống, i drink water nghĩa là tôi uống nước, bé nhớ nhé*"), đã đổi hẳn sang lời giải thích song ngữ:
+- **Chọn SAI**: đọc từ đúng bằng giọng Anh thật ("Drink") → rồi đọc tiếp bằng tiếng Việt "là uống. Chọn đúng nhé bé!".
+- **Chọn ĐÚNG**: khen tiếng Việt ("Bé giỏi quá, đúng rồi!") → đọc từ tiếng Anh ("Drink") → giải nghĩa tiếng Việt ("có nghĩa là uống.") → đọc câu ví dụ tiếng Anh ("I drink water.") → dịch nghĩa câu ("nghĩa là tôi uống nước. Bé nhớ nhé!").
+- **Chỉ chuyển sang từ mới SAU KHI đọc xong toàn bộ** — không còn đoán 1 khoảng chờ cố định (trước là `setTimeout` 2.1 giây bất kể câu dài ngắn) mà chờ đúng lúc giọng đọc kết thúc thật sự.
+
+Kỹ thuật: thêm hàm `speakSequence(parts, onDone)` vào `to-mau/src/speech.js` — đọc lần lượt nhiều đoạn xen kẽ ngôn ngữ/tốc độ khác nhau (mỗi đoạn có `{text, lang, rate}` riêng), dùng sự kiện `onend` của Web Speech API để nối tiếp từng đoạn, gọi `onDone` khi đọc xong TOÀN BỘ chuỗi. Có chốt an toàn: nếu tắt tiếng/trình duyệt không hỗ trợ/giọng lỗi thì `onDone` vẫn được gọi ngay (không bao giờ bị kẹt màn chờ mãi mãi vì lỡ mất tiếng đọc).
+
+**✅ Sửa 4 emoji không hợp với từ vựng, thay bằng ẢNH THẬT (cùng nguồn Wikimedia Commons, giấy phép tự do):**
+- **black hole** (`nghe-doan-dong-vat-vu-tru`): emoji 🕳️ chỉ là "cái lỗ" thường, không phải hố đen thiên văn — đổi sang đúng tấm ảnh hố đen thật đầu tiên loài người chụp được (thiên hà M87, Event Horizon Telescope Collaboration, CC BY 4.0).
+- **calculator** (`nghe-doan-gia-dinh-nghe-nghiep`): emoji 🧮 thực chất tên Unicode là "abacus" (bàn tính), không phải máy tính điện tử — dễ dạy sai cho bé — đổi sang ảnh máy tính bỏ túi thật (LoMit, CC BY-SA 4.0).
+- **cave** (`nghe-doan-giao-thong`): emoji 🕳️ chỉ là "cái lỗ", không giống hang động — đổi sang ảnh hang Postojna thật (Szilas, CC0).
+- **coral reef** (`nghe-doan-giao-thong`): emoji 🐠 chỉ là 1 con cá, không phải cả rạn san hô — đổi sang ảnh rạn san hô Flynn Reef thật (Toby Hudson, CC BY-SA 3.0).
+- Đổi thêm 1 emoji không cần ảnh: **comb hair** (`nghe-doan-do-dung-hang-ngay`) từ 💇 (cảnh cắt tóc ở tiệm — sai ngữ cảnh cho hành động tự chải tóc ở nhà) sang 🪮 (cây lược — đúng nghĩa hơn).
+- Mỗi game có `images/CREDITS.md` cập nhật đầy đủ tác giả + giấy phép + nguồn cho từng ảnh mới.
+
+Test bổ sung: kiểm tra trường `img` (khi có) luôn trỏ đúng `images/` cục bộ, cho cả 3 game trước đó chưa có ảnh thật (Giai đoạn 3, 4). `npm test` toàn bộ sau đợt này: **836 ✅, 0 ❌**.
+
+**✅ Đợt rà soát emoji lần 2 — soát lại toàn bộ 466 mục, tìm thêm 3 trường hợp emoji sai/lệch nghĩa:**
+
+- **helmet** (`nghe-doan-giao-thong`, chủ đề tiện ích công cộng): emoji ⛑️ thực chất là mũ nhân viên cứu hộ/y tế (có chữ thập đỏ), KHÔNG phải mũ bảo hiểm xe đạp/xe máy thông thường mà câu ví dụ đang nói tới ("Wear a helmet, please" — ngữ cảnh giao thông) — đổi sang ảnh mũ bảo hiểm xe đạp trẻ em thật (Staff Sgt. Jim Araos, không quân Mỹ, Public Domain).
+- **fisherman** (`nghe-doan-gia-dinh-nghe-nghiep`, chủ đề nghề nghiệp): emoji 🎣 chỉ là CẦN CÂU (đồ vật), trong khi mọi nghề khác cùng chủ đề đều dùng icon NGƯỜI (🧑‍⚕️🧑‍🌾🧑‍🍳...) — gây thiếu nhất quán, bé có thể hiểu nhầm từ này nghĩa là "cần câu" chứ không phải "ngư dân" — đổi sang ảnh người ngư dân thật đang câu cá kiểu cà kheo truyền thống Sri Lanka (Jakub Hałun, CC BY 4.0).
+- **barber** (`nghe-doan-gia-dinh-nghe-nghiep`, chủ đề nghề nghiệp): emoji 💇 thật ra vẽ NGƯỜI ĐƯỢC cắt tóc (khách hàng), không phải người thợ đang cầm kéo/tông đơ — ngược hẳn ý nghĩa của từ "barber" (thợ cắt tóc) — đổi sang ảnh người thợ thật đang cắt tóc (Nenad Stojkovic, CC BY 2.0).
+- Cả 3 ảnh đều xác minh giấy phép qua Wikimedia API trước khi tải (không đoán URL), có `CREDITS.md` ghi công đầy đủ. Test cập nhật để xác nhận cả 3 mục đã gắn đúng đường dẫn ảnh cục bộ.
+- Rà soát các mục còn lại (466 - các mục đã sửa) không phát hiện thêm sai lệch rõ ràng nào khác — phần lớn emoji còn lại tuy có vài chỗ hơi trừu tượng (ví dụ "order" 📝, "scoreboard" 📋, "abc" 🔤 dùng icon tượng trưng thay vì tả thực) nhưng KHÔNG sai nghĩa, nên giữ nguyên để tránh phình quá nhiều ảnh ngoài không cần thiết.
+
+`npm test` sau đợt này vẫn **836 ✅, 0 ❌** (mở rộng phạm vi assertion trong các test đã có, không cần thêm check mới).
+
+**Việc còn để ngỏ**: cân nhắc thêm 1 mảng chủ đề mới hoàn toàn (ngoài 5 giai đoạn đã hoàn thành của kế hoạch 5×1000) nếu bạn muốn mở rộng xa hơn — báo mảng nào bạn quan tâm (ví dụ: thời tiết & mùa trong năm, màu sắc nâng cao, cảm xúc mở rộng, hoặc chủ đề tự chọn khác).
+
+---
+---
+
+## Đợt cập nhật số liệu + "Giai đoạn 6" — mảng chủ đề MỚI ngoài kế hoạch 5×1000 ban đầu
+
+**✅ Cập nhật số từ vựng hiển thị bị lệch so với thực tế** (bạn phản hồi: số hiển thị "chưa được cập nhật") — do đã âm thầm thêm vài từ mới (xe cẩu, con trâu, phở, bánh mì, bánh chưng...) trong các đợt sửa emoji trước mà quên cập nhật con số hiển thị ở thẻ hub:
+- **Giai đoạn 1** (`nghe-doan-tieng-anh`): 100 → **103** từ (thêm phở/bánh mì/bánh chưng).
+- **Giai đoạn 2** (`nghe-doan-giao-thong`): 93 → **95** từ (thêm xe cẩu/con trâu).
+- Đã sửa ở cả 2 nơi hiển thị (`goc-tieng-anh/index.html`, `game-mini/index.html`) VÀ trong chính comment đầu file `.js` của từng game — để lần sau đọc code cũng không bị nhầm số liệu cũ.
+- Giai đoạn 3/4/5 số liệu vẫn đúng (không có từ mới thêm vào, chỉ gắn thêm ảnh cho từ đã có sẵn).
+
+**✅ Đã làm xong "Giai đoạn 6" — MẢNG CHỦ ĐỀ HOÀN TOÀN MỚI (ngoài kế hoạch 5×1000 ban đầu), theo đúng gợi ý đã đề xuất (thời tiết & mùa, màu sắc, cảm xúc mở rộng):**
+
+- **Nghe & Đoán: Thời Tiết, Màu Sắc & Cảm Xúc** ✅ MỚI (`nghe-doan-thoi-tiet-cam-xuc/`, 20 unit test) — 78 mục từ vựng chia 5 chủ đề con (🌦️ Thời tiết 17 · 📅 Mùa & Thời gian 14 · 🎨 Màu sắc 10 · 😊 Cảm xúc 18 · ⚖️ Tính từ đối lập 19), cùng cơ chế đã kiểm chứng xuyên suốt (trộn từ đơn/câu ngắn, tốc độ đọc phù hợp, giải thích song ngữ sau mỗi câu trả lời, lọc theo chủ đề).
+- **Quyết định thiết kế đáng chú ý**: chủ động **BỎ HẲN** 2 từ "tomorrow" và "yesterday" dù đã có ý tưởng dùng mũi tên ⏮️⏭️ để biểu diễn — vì bé KHÔNG THỂ đoán ra khái niệm thời gian trừu tượng này chỉ từ 1 mũi tên, sẽ phá vỡ đúng mục đích của trò "nghe rồi đoán hình". Thà thiếu 2 từ còn hơn nhồi vào 2 mục không thể đoán được bằng hình ảnh — đúng tinh thần "chất lượng hơn số lượng" đã giữ xuyên suốt cả dự án.
+- **Chủ đề Màu sắc** dùng icon hình vuông/tròn màu Unicode có sẵn (🔴🟠🟡🟢🔵🟣🟤⚫⚪🩷) — đây là nhóm từ vựng có độ khớp CHÍNH XÁC NHẤT trong toàn bộ 6 giai đoạn (mỗi icon là chính xác màu đó, không cần suy diễn như các chủ đề khác).
+- Test emoji-uniqueness xác nhận cả 78 icon không trùng nhau (kiểm tra kỹ các cặp dễ nhầm: 🌅 bình minh vs 🌇 hoàng hôn, ☀️ mặt trời vs 🌞 mặt trời cười (buổi chiều) — đều là glyph khác nhau).
+- Đăng ký đầy đủ: thẻ trong `goc-tieng-anh/` (hub 11→12 game) + `game-mini/`, 4 khóa i18n mới (5 ngôn ngữ), precache `sw.js` v55→v56, thêm vào chuỗi test gốc — `npm test` toàn bộ: **856 ✅, 0 ❌**.
+
+### 📊 Tổng kết 6 giai đoạn "Nghe & Đoán" (5 giai đoạn kế hoạch gốc + 1 giai đoạn mở rộng)
+
+| Giai đoạn | Chủ đề | Game | Số từ |
+|---|---|---|---|
+| 1 | Trái cây, món ăn, quán ăn & mua sắm, ngày lễ, giải trí & phim ảnh | `nghe-doan-tieng-anh/` | 103 |
+| 2 | Phương tiện, tiện ích công cộng, môi trường, đô thị & thôn quê, địa lý & địa hình | `nghe-doan-giao-thong/` | 95 |
+| 3 | Động vật hoang dã, sinh vật biển & côn trùng, hàng không & vũ trụ, toán học & hình khối, loài chim | `nghe-doan-dong-vat-vu-tru/` | 91 |
+| 4 | Gia đình & bạn bè, trường học, nghề nghiệp, thể thao, thi đấu & hoạt động | `nghe-doan-gia-dinh-nghe-nghiep/` | 85 |
+| 5 | Quần áo & giày dép, đồ dùng gia đình, thiết bị điện tử, bộ phận cơ thể, hoạt động hằng ngày | `nghe-doan-do-dung-hang-ngay/` | 92 |
+| 6 (mở rộng) | Thời tiết & mùa, mùa & thời gian, màu sắc, cảm xúc, tính từ đối lập | `nghe-doan-thoi-tiet-cam-xuc/` | 78 |
+
+**Tổng cộng: 544 mục từ vựng tiếng Anh** trên **6 game**, đều lên hub **Góc Tiếng Anh** (12 game) + `game-mini/`.
+
+**Việc còn để ngỏ**: mở rộng thêm nữa nếu muốn — vài chủ đề còn trống chưa khai thác: **nghề nghiệp mở rộng** (thêm chức vụ/cấp bậc), **hoạt động thể thao/cuộc thi chi tiết hơn**, hoặc **chủ đề hoàn toàn khác** do bạn đề xuất. Báo khi bạn muốn tiếp tục.
+
+---
+---
+
+## Giai đoạn 7 — mảng MỚI thứ 2 ngoài kế hoạch 5×1000 gốc
+
+**✅ Đã làm xong "Giai đoạn 7"**, lấp đúng khoảng trống đã nêu ở "Việc còn để ngỏ" phía trên (nghề nghiệp mở rộng/chức vụ, thiết bị nghề nghiệp — 2 ý mà bản kế hoạch gốc có nhắc tới nhưng 5 giai đoạn đầu chưa khai thác hết), cộng thêm 3 chủ đề mới hoàn toàn chưa từng có trong cả bộ sưu tập:
+
+- **Nghe & Đoán: Quốc Gia, Số Đếm & Nghề Nghiệp** ✅ MỚI (`nghe-doan-quoc-gia-nghe-nghiep/`, 20 unit test) — 61 mục từ vựng chia 5 chủ đề con (🌍 Quốc gia & Quốc kỳ 18 · 🔢 Số đếm & Thứ tự 14 · 📚 Môn học 10 · 💼 Nghề nghiệp mở rộng 11 · 🧰 Dụng cụ & Văn phòng 8), cùng cơ chế đã kiểm chứng xuyên suốt (trộn từ đơn/câu ngắn, tốc độ đọc phù hợp, giải thích song ngữ sau mỗi câu trả lời, lọc theo chủ đề).
+- **Chủ đề Quốc gia & Quốc kỳ** dùng cờ quốc gia (🇻🇳🇺🇸🇬🇧🇯🇵...) — cùng hạng với chủ đề Màu sắc (giai đoạn 6) là nhóm từ vựng có độ khớp hình ảnh CHÍNH XÁC TUYỆT ĐỐI, mỗi lá cờ chỉ ứng với đúng 1 quốc gia, không có chỗ cho suy diễn.
+- **Chủ đề Số đếm & Thứ tự** dùng keycap số Unicode (0️⃣-🔟) + huy chương cho thứ hạng (🥇🥈🥉) — cũng là nhóm cực kỳ chuẩn xác.
+- Test emoji-uniqueness xác nhận cả 61 icon không trùng nhau.
+- Đăng ký đầy đủ: thẻ trong `goc-tieng-anh/` (hub 12→13 game) + `game-mini/`, 4 khóa i18n mới (5 ngôn ngữ), precache `sw.js` v56→v57, thêm vào chuỗi test gốc — `npm test` toàn bộ: **876 ✅, 0 ❌**.
+
+### 📊 Tổng kết 7 giai đoạn "Nghe & Đoán" (5 giai đoạn kế hoạch gốc + 2 giai đoạn mở rộng)
+
+| Giai đoạn | Chủ đề | Game | Số từ |
+|---|---|---|---|
+| 1 | Trái cây, món ăn, quán ăn & mua sắm, ngày lễ, giải trí & phim ảnh | `nghe-doan-tieng-anh/` | 103 |
+| 2 | Phương tiện, tiện ích công cộng, môi trường, đô thị & thôn quê, địa lý & địa hình | `nghe-doan-giao-thong/` | 95 |
+| 3 | Động vật hoang dã, sinh vật biển & côn trùng, hàng không & vũ trụ, toán học & hình khối, loài chim | `nghe-doan-dong-vat-vu-tru/` | 91 |
+| 4 | Gia đình & bạn bè, trường học, nghề nghiệp, thể thao, thi đấu & hoạt động | `nghe-doan-gia-dinh-nghe-nghiep/` | 85 |
+| 5 | Quần áo & giày dép, đồ dùng gia đình, thiết bị điện tử, bộ phận cơ thể, hoạt động hằng ngày | `nghe-doan-do-dung-hang-ngay/` | 92 |
+| 6 (mở rộng) | Thời tiết & mùa, mùa & thời gian, màu sắc, cảm xúc, tính từ đối lập | `nghe-doan-thoi-tiet-cam-xuc/` | 78 |
+| 7 (mở rộng) | Quốc gia & quốc kỳ, số đếm & thứ tự, môn học, nghề nghiệp mở rộng, dụng cụ & văn phòng | `nghe-doan-quoc-gia-nghe-nghiep/` | 61 |
+
+**Tổng cộng: 605 mục từ vựng tiếng Anh** trên **7 game**, đều lên hub **Góc Tiếng Anh** (13 game) + `game-mini/`.
+
+**Việc còn để ngỏ**: các mảng khả dĩ tiếp theo nếu muốn mở rộng xa hơn nữa — **hoạt động hằng ngày mở rộng** (động từ hành động cụ thể hơn), **hình dạng & không gian** (trên/dưới/trong/ngoài — giới từ chỉ vị trí, rất hữu ích cho giao tiếp), hoặc **chủ đề tự chọn khác** từ bạn.
+
+---
+---
+
+## Giai đoạn 8 — mảng MỚI thứ 3 ngoài kế hoạch 5×1000 gốc
+
+**✅ Đã làm xong "Giai đoạn 8"**, lấp đúng khoảng trống "hoạt động hằng ngày mở rộng" đã nêu ở "Việc còn để ngỏ" phía trên, cộng thêm 3 chủ đề mới hoàn toàn (đồ chơi, sở thích ngoài trời, địa điểm công cộng):
+
+- **Nghe & Đoán: Hoạt Động, Đồ Chơi & Nơi Vui Chơi** ✅ MỚI (`nghe-doan-hoat-dong-do-choi/`, 20 unit test) — 51 mục từ vựng chia **4** chủ đề con (🏃 Hoạt động thể chất 18 · 🧸 Đồ chơi 13 · 🏕️ Sở thích ngoài trời 10 · 🏛️ Địa điểm công cộng 10), cùng cơ chế đã kiểm chứng xuyên suốt (trộn từ đơn/câu ngắn, tốc độ đọc phù hợp, giải thích song ngữ sau mỗi câu trả lời, lọc theo chủ đề).
+- **Chỉ 4 chủ đề thay vì 5**: sau khi rà soát kỹ, không tìm được chủ đề con thứ 5 vừa không trùng lặp với 7 giai đoạn trước, vừa đủ số lượng từ có thể minh hoạ rõ ràng bằng 1 emoji/hình — quyết định giữ 4 chủ đề chất lượng thay vì nhồi thêm 1 chủ đề yếu.
+- **Quyết định thiết kế đáng chú ý**: chủ động **BỎ HẲN** nhóm giới từ chỉ vị trí (in/on/under/behind...) dù đã cân nhắc đưa vào — vì đây là khái niệm QUAN HỆ giữa 2 vật thể trong 1 khung cảnh, không thể gói gọn trong 1 emoji duy nhất như format "nghe 1 từ → đoán 1 hình" đang dùng xuyên suốt dự án (khác với danh từ/động từ đơn có thể quy về 1 icon). Giữ nguyên tinh thần "chất lượng hơn số lượng".
+- **Phát hiện & xử lý xung đột emoji ngay trong lúc thiết kế**: từ "build" (hoạt động thể chất) ban đầu dùng 🧱 trùng với "blocks" (đồ chơi) cũng dùng 🧱 — phát hiện qua rà soát thủ công trước khi viết test, đổi "build" sang 🏗️ (cần cẩu xây dựng) để tránh nhầm lẫn, giữ 🧱 riêng cho "blocks".
+- Test emoji-uniqueness xác nhận cả 51 icon không trùng nhau.
+- Đăng ký đầy đủ: thẻ trong `goc-tieng-anh/` (hub 13→14 game) + `game-mini/`, 4 khóa i18n mới (5 ngôn ngữ), precache `sw.js` v57→v58, thêm vào chuỗi test gốc — `npm test` toàn bộ: **896 ✅, 0 ❌**.
+
+### 📊 Tổng kết 8 giai đoạn "Nghe & Đoán" (5 giai đoạn kế hoạch gốc + 3 giai đoạn mở rộng)
+
+| Giai đoạn | Chủ đề | Game | Số từ |
+|---|---|---|---|
+| 1 | Trái cây, món ăn, quán ăn & mua sắm, ngày lễ, giải trí & phim ảnh | `nghe-doan-tieng-anh/` | 103 |
+| 2 | Phương tiện, tiện ích công cộng, môi trường, đô thị & thôn quê, địa lý & địa hình | `nghe-doan-giao-thong/` | 95 |
+| 3 | Động vật hoang dã, sinh vật biển & côn trùng, hàng không & vũ trụ, toán học & hình khối, loài chim | `nghe-doan-dong-vat-vu-tru/` | 91 |
+| 4 | Gia đình & bạn bè, trường học, nghề nghiệp, thể thao, thi đấu & hoạt động | `nghe-doan-gia-dinh-nghe-nghiep/` | 85 |
+| 5 | Quần áo & giày dép, đồ dùng gia đình, thiết bị điện tử, bộ phận cơ thể, hoạt động hằng ngày | `nghe-doan-do-dung-hang-ngay/` | 92 |
+| 6 (mở rộng) | Thời tiết & mùa, mùa & thời gian, màu sắc, cảm xúc, tính từ đối lập | `nghe-doan-thoi-tiet-cam-xuc/` | 78 |
+| 7 (mở rộng) | Quốc gia & quốc kỳ, số đếm & thứ tự, môn học, nghề nghiệp mở rộng, dụng cụ & văn phòng | `nghe-doan-quoc-gia-nghe-nghiep/` | 61 |
+| 8 (mở rộng) | Hoạt động thể chất, đồ chơi, sở thích ngoài trời, địa điểm công cộng | `nghe-doan-hoat-dong-do-choi/` | 51 |
+
+**Tổng cộng: 656 mục từ vựng tiếng Anh** trên **8 game**, đều lên hub **Góc Tiếng Anh** (14 game) + `game-mini/`.
+
+**Việc còn để ngỏ**: các mảng khả dĩ tiếp theo nếu muốn mở rộng xa hơn nữa — **thức ăn nâng cao** (cách chế biến, hương vị, dụng cụ bếp), **công nghệ & thiết bị hiện đại** (điện thoại, máy tính bảng, mạng internet — mảng chưa khai thác sâu), hoặc **chủ đề tự chọn khác** từ bạn.
+
+---
+---
+
+## Đợt "luật CHỌN LẠI" cho cả 8 game Nghe & Đoán + mở rộng từ vựng giai đoạn 7 & 8
+
+**✅ Luật chọn lại (áp dụng đồng loạt cho CẢ 8 game Nghe & Đoán)** — theo đúng yêu cầu: bé chọn sai thì được gợi ý và chọn lại 1 lần, sai lần 2 mới lộ đáp án:
+
+- **Sai lần ĐẦU**: câu hỏi KHÔNG qua — chỉ làm mờ + khóa nút bé vừa chọn sai, máy đọc gợi ý *"Sai rồi. {word} là {nghĩa tiếng Việt}. Bé hãy chọn lại nhé!"* (đúng ví dụ mẫu: *"sai rồi, zero là số 0, bé hãy chọn lại nhé"*), rồi mở khóa cho bé chọn lại trong các hình còn lại.
+- **Đúng sau gợi ý**: vẫn khen + giải thích đầy đủ như đáp đúng bình thường (*"Bé giỏi quá, đúng rồi! {word} có nghĩa là..."*), được **5 điểm** (một nửa so với 10 điểm đúng ngay lần đầu, vì đã được gợi ý) — không tính vào chuỗi 🔥.
+- **Sai lần 2**: lộ đáp án trên màn hình + đọc giải thích đầy đủ (*"Chưa đúng rồi. Đáp án là {word}, nghĩa là {nghĩa}..."* + câu ví dụ + dịch nghĩa + *"Lần sau bé sẽ làm được!"*) rồi mới qua câu mới.
+- Kỹ thuật: cả 8 module logic có `chooseOption` giống hệt nhau từng byte (xác minh bằng checksum) nên vá đồng loạt bằng script thay-thế-chính-xác; tương tự với `onPick` + speech sequence trong 8 file `app.js`. Mỗi game thay 1 test cũ ("sai là qua câu luôn") bằng **3 test mới** (sai lần 1 → retry + câu không qua; đúng sau retry → 5 điểm; sai lần 2 → qua câu): 8 game × +2 test = **912 ✅, 0 ❌** toàn repo.
+- Lời hướng dẫn (nút ❓) của game giai đoạn 8 đã cập nhật để nhắc luật mới; các game cũ giữ lời hướng dẫn ngắn gọn sẵn có (luật mới tự thể hiện rõ khi chơi).
+
+**✅ Mở rộng từ vựng** (kiểm tra trùng lặp TỪ giữa cả 8 game bằng grep trước khi thêm — chỉ thêm từ chưa từng dạy ở bất kỳ game nào):
+
+- **Giai đoạn 8** (`nghe-doan-hoat-dong-do-choi`): 51 → **70 từ**, thêm chủ đề con thứ 5 hoàn toàn mới **🎵 Nhạc cụ (12)**: piano🎹, guitar🎸, violin🎻, trumpet🎺, saxophone🎷, accordion🪗, banjo🪕, flute🪈, maracas🪇, bell🔔, microphone🎤, headphones🎧 — nhóm khớp hình rất chuẩn (mỗi nhạc cụ có đúng 1 emoji riêng). Đồng thời bổ sung các chủ đề sẵn có: hoạt động +2 (clap👏, lift🏋️), đồ chơi +2 (toy train🚂, dinosaur toy🦖), sở thích +1 (kayaking🛶), địa điểm +2 (hotel🏨, bakery🥐).
+- **Giai đoạn 7** (`nghe-doan-quoc-gia-nghe-nghiep`): 61 → **73 từ**, chủ đề Quốc gia 18 → 30 quốc kỳ — ưu tiên các nước láng giềng/Đông Nam Á trước (Lào🇱🇦, Cam-pu-chia🇰🇭, Ma-lai-xi-a🇲🇾, In-đô-nê-xi-a🇮🇩, Phi-líp-pin🇵🇭) rồi tới Mê-hi-cô🇲🇽, Hà Lan🇳🇱, Thụy Sĩ🇨🇭, Hy Lạp🇬🇷, Thổ Nhĩ Kỳ🇹🇷, Ác-hen-ti-na🇦🇷, Niu Di-lân🇳🇿.
+- Nhiều từ ứng viên bị LOẠI vì đã dạy ở game khác (dance/sing ở giai đoạn 4, walk/sleep/hammer ở giai đoạn 5, library/castle/stadium ở giai đoạn 2, circus ở giai đoạn 1...) — tránh dạy trùng 1 từ ở 2 game.
+- Số từ hiển thị trên thẻ hub (`goc-tieng-anh/`, `game-mini/`) và comment đầu file `.js` đã cập nhật theo (~70 và ~73); ngưỡng test tối thiểu nâng lên tương ứng (≥65 và ≥70); `sw.js` v58→v59 để thiết bị cũ nhận bản mới.
+
+### 📊 Tổng kết 8 giai đoạn (sau đợt mở rộng)
+
+| Giai đoạn | Game | Số từ |
+|---|---|---|
+| 1 | `nghe-doan-tieng-anh/` | 103 |
+| 2 | `nghe-doan-giao-thong/` | 95 |
+| 3 | `nghe-doan-dong-vat-vu-tru/` | 91 |
+| 4 | `nghe-doan-gia-dinh-nghe-nghiep/` | 85 |
+| 5 | `nghe-doan-do-dung-hang-ngay/` | 92 |
+| 6 (mở rộng) | `nghe-doan-thoi-tiet-cam-xuc/` | 78 |
+| 7 (mở rộng) | `nghe-doan-quoc-gia-nghe-nghiep/` | 73 |
+| 8 (mở rộng) | `nghe-doan-hoat-dong-do-choi/` | 70 |
+
+**Tổng cộng: 687 mục từ vựng tiếng Anh** trên **8 game** — tất cả cùng chung luật chọn-lại mới.
+
+**Việc còn để ngỏ**: tiếp tục "nở" thêm các chủ đề còn mỏng ở giai đoạn 1–6 (mỗi lần thêm phải kiểm tra trùng từ giữa các game), hoặc mở giai đoạn 9 với mảng mới (thức ăn nâng cao — cách chế biến/hương vị/dụng cụ bếp; công nghệ & thiết bị hiện đại).
+
+---
+---
+
+## Giai đoạn 9 — mảng MỚI thứ 4 ngoài kế hoạch 5×1000 gốc
+
+**✅ Đã làm xong "Giai đoạn 9"**, gộp cả 2 gợi ý ở "Việc còn để ngỏ" phía trên (thức ăn nâng cao + công nghệ) vào 1 game:
+
+- **Nghe & Đoán: Nhà Bếp & Công Nghệ** ✅ MỚI (`nghe-doan-nha-bep-cong-nghe/`, 22 unit test — nhiều hơn 2 test so với khuôn cũ vì sinh ra SAU đợt luật chọn-lại nên có sẵn 3 test retry) — 45 mục từ vựng chia 4 chủ đề con (🍳 Chế biến & nhà bếp 13 · 😋 Hương vị & cảm nhận 8 · 🥕 Rau củ 15 · 💻 Công nghệ 9), luật chọn-lại tích hợp ngay từ đầu.
+- **Đối chiếu trùng từ nghiêm ngặt**: toàn bộ ứng viên được grep qua cả 8 game trước khi thêm — LOẠI cook/delicious/hungry/tomato/avocado/honey/butter (giai đoạn 1), phone/laptop/camera/battery/keyboard/printer/flashlight/magnet (giai đoạn 5), satellite/telescope (giai đoạn 3), microscope (giai đoạn 4)... — 45 từ được giữ đều CHƯA từng dạy ở bất kỳ game nào.
+- **Chủ đề Rau củ** là nhóm khớp hình chuẩn xác (mỗi loại rau củ có đúng 1 emoji riêng: 🥕🥔🍠🌽🧅🧄🍄🎃🥒🥦🍆🫛🫑🥬🫘); chủ đề Chế biến dạy ĐỘNG TỪ nấu nướng (cut/mix/pour/boil/bake/fry/grill/stir/freeze/heat) — nhóm động từ sinh hoạt rất hay dùng trong giao tiếp mà 8 giai đoạn trước còn thiếu.
+- Đăng ký đầy đủ: thẻ trong `goc-tieng-anh/` (hub 14→15 game, đã sửa cả fallback tĩnh "13 game" còn sót ở `index.html` gốc) + `game-mini/`, 4 khóa i18n mới (5 ngôn ngữ), precache `sw.js` v59→v60, thêm vào chuỗi test gốc — `npm test` toàn bộ: **934 ✅, 0 ❌**.
+
+### 📊 Tổng kết 9 giai đoạn "Nghe & Đoán"
+
+| Giai đoạn | Chủ đề | Game | Số từ |
+|---|---|---|---|
+| 1 | Trái cây, món ăn, quán ăn & mua sắm, ngày lễ, giải trí & phim ảnh | `nghe-doan-tieng-anh/` | 103 |
+| 2 | Phương tiện, tiện ích công cộng, môi trường, đô thị & thôn quê, địa lý & địa hình | `nghe-doan-giao-thong/` | 95 |
+| 3 | Động vật hoang dã, sinh vật biển & côn trùng, hàng không & vũ trụ, toán học & hình khối, loài chim | `nghe-doan-dong-vat-vu-tru/` | 91 |
+| 4 | Gia đình & bạn bè, trường học, nghề nghiệp, thể thao, thi đấu & hoạt động | `nghe-doan-gia-dinh-nghe-nghiep/` | 85 |
+| 5 | Quần áo & giày dép, đồ dùng gia đình, thiết bị điện tử, bộ phận cơ thể, hoạt động hằng ngày | `nghe-doan-do-dung-hang-ngay/` | 92 |
+| 6 (mở rộng) | Thời tiết & mùa, mùa & thời gian, màu sắc, cảm xúc, tính từ đối lập | `nghe-doan-thoi-tiet-cam-xuc/` | 78 |
+| 7 (mở rộng) | Quốc gia & quốc kỳ (30 cờ), số đếm & thứ tự, môn học, nghề nghiệp, dụng cụ & văn phòng | `nghe-doan-quoc-gia-nghe-nghiep/` | 73 |
+| 8 (mở rộng) | Hoạt động thể chất, đồ chơi, sở thích ngoài trời, địa điểm công cộng, nhạc cụ | `nghe-doan-hoat-dong-do-choi/` | 70 |
+| 9 (mở rộng) | Chế biến & nhà bếp, hương vị & cảm nhận, rau củ, công nghệ | `nghe-doan-nha-bep-cong-nghe/` | 45 |
+
+**Tổng cộng: 732 mục từ vựng tiếng Anh** trên **9 game** — tất cả cùng luật chọn-lại (sai lần 1 được gợi ý chọn lại, sai lần 2 mới lộ đáp án + giải thích song ngữ đầy đủ).
+
+**Việc còn để ngỏ**: kho từ "vừa mới + vừa minh họa được bằng 1 emoji" đang cạn dần — các đợt sau nên ưu tiên (a) "nở" từ từ các chủ đề mỏng ở giai đoạn 1–6, (b) dùng ảnh thật (Wikimedia/Openverse, quy trình CREDITS.md sẵn có) để mở những nhóm từ không có emoji (dụng cụ bếp chi tiết, thiết bị hiện đại...), hoặc (c) mảng ôn tập tổng hợp trộn câu hỏi từ cả 9 game.
+
+---
+---
+
+## Đợt "nở chủ đề mỏng bằng ảnh thật" — giai đoạn 1/2/3/6 (+13 từ, 10 ảnh mới)
+
+Đo số từ từng chủ đề trên cả 6 giai đoạn đầu để tìm chủ đề MỎNG nhất (loài chim 11, màu sắc 10, địa lý 17, trái cây 18), rồi bổ sung bằng từ chưa dạy ở bất kỳ game nào (grep đối chiếu cả 9 game) — ưu tiên ẢNH THẬT cho những từ không có emoji đúng nghĩa:
+
+- **Loài chim** (giai đoạn 3): 11 → **16** — goose 🪿 (emoji) + 4 ảnh thật: **pelican** (bồ nông — Mike Baird, CC BY 2.0), **woodpecker** (gõ kiến — Joe080808, CC BY-SA 4.0), **hummingbird** (chim ruồi — Amaury Laporte, CC BY 2.0), **kingfisher** (bói cá — Andreas Trepte, CC BY-SA 2.5). Các loài chim này hoàn toàn KHÔNG có emoji riêng — đúng trường hợp ảnh thật phát huy tác dụng.
+- **Trái cây** (giai đoạn 1): 18 → **22** — 4 trái cây nhiệt đới quen thuộc với bé Việt Nam mà không có emoji: **thanh long** (Webysther Nunes, CC BY-SA 4.0), **chôm chôm** (Ivar Leidus, CC BY-SA 4.0), **sầu riêng** (Kalai, CC BY-SA 3.0), **vải** (Ivar Leidus, CC BY-SA 4.0).
+- **Địa lý** (giai đoạn 2): 17 → **19** — **waterfall** dùng đúng ảnh **thác Bản Giốc, Cao Bằng, Việt Nam** (jankgo, CC BY 2.0) và **cliff** dùng ảnh Cliffs of Moher, Ireland (Berthold Werner, CC BY-SA 4.0).
+- **Màu sắc** (giai đoạn 6): 10 → **12** — gray 🩶 + light blue 🩵 (emoji trái tim màu Unicode 15, cùng họ với 🩷 đã dùng).
+- **Kiểm định ảnh bằng mắt trước khi dùng** (bài học đắt giá của đợt này): mở xem TỪNG ảnh tải về — nhờ đó loại được 5 ảnh sai: durian đợt 1 dính chữ viết + màng bọc chợ, đợt 2 ra CÂY sầu riêng thay vì quả (đợt 3 mới chuẩn); còn nhóm bộ phận cơ thể qua Openverse thì thảm họa: "knee" ra infographic răng miệng, "elbow" ra tượng La Mã, "shoulder" ra bìa sách → **HỦY toàn bộ hướng ảnh cho bộ phận cơ thể** (ảnh khuôn mặt/cơ thể luôn chứa nhiều bộ phận cùng lúc nên vốn dĩ khó đoán đơn nghĩa; các từ bone/brain/lungs/heart hóa ra đã có sẵn trong game từ trước).
+- Ghi công đầy đủ trong `CREDITS.md` của 3 game (đúng format bảng sẵn có), precache 10 ảnh mới vào `sw.js` v60→v61, cập nhật số từ hiển thị ở thẻ hub + comment đầu file, mở rộng test "real-photo entries" của 3 game — `npm test` toàn bộ: **934 ✅, 0 ❌**.
+
+### 📊 Bảng tổng sau đợt nở chủ đề
+
+| Giai đoạn | Game | Số từ |
+|---|---|---|
+| 1 | `nghe-doan-tieng-anh/` | 107 |
+| 2 | `nghe-doan-giao-thong/` | 97 |
+| 3 | `nghe-doan-dong-vat-vu-tru/` | 96 |
+| 4 | `nghe-doan-gia-dinh-nghe-nghiep/` | 85 |
+| 5 | `nghe-doan-do-dung-hang-ngay/` | 92 |
+| 6 | `nghe-doan-thoi-tiet-cam-xuc/` | 80 |
+| 7 | `nghe-doan-quoc-gia-nghe-nghiep/` | 73 |
+| 8 | `nghe-doan-hoat-dong-do-choi/` | 70 |
+| 9 | `nghe-doan-nha-bep-cong-nghe/` | 45 |
+
+**Tổng cộng: 745 mục từ vựng** trên **9 game**, trong đó **23 mục dùng ảnh thật** có ghi công giấy phép đầy đủ.
+
+**Việc còn để ngỏ**: chủ đề gia đình (14 từ) và thi đấu (15 từ) ở giai đoạn 4 vẫn hơi mỏng nhưng từ mới thuộc nhóm QUAN HỆ (cousin, nephew...) khó minh họa đơn nghĩa kể cả bằng ảnh — cần cân nhắc kỹ hoặc bỏ qua; hoặc làm màn ôn tập tổng hợp trộn câu hỏi cả 9 game.
+
+---
+---
+
+## Đợt "cây gia đình SVG" — từ quan hệ họ hàng + 25 từ mới (gđ 1/3/4)
+
+Bạn chốt hướng: từ quan hệ (cousin, aunt, uncle...) NÊN thêm, minh họa bằng **cây gia đình**. Đã làm bằng **SVG tự vẽ** (5 file `tree-*.svg`, mỗi file ~1KB, offline hoàn toàn, không cần ghi công nguồn ngoài):
+
+- **Thiết kế cây**: 3 thế hệ — ông bà 👴👵 trên cùng; bố 👨 + mẹ 👩 và cô 👱‍♀️ + chú 🧔 ở giữa (bố và cô là con của ông bà, nét nối rõ ràng); **Bé 🧒 (viền xanh nét đứt + nhãn "Bé")** và anh/em họ 🧑 ở dưới. Node "Bé" là MỐC THAM CHIẾU cố định xuất hiện trong cả 5 hình, người thân cần đoán được tô sáng viền cam — bé nghe "aunt" thì tìm hình có người cô được tô sáng.
+- **5 từ quan hệ mới**: parents (bố mẹ), grandparents (ông bà), aunt (cô, dì), uncle (chú, bác), cousin (anh chị em họ). **Chủ động BỎ nephew/niece**: với mốc "Bé" (trẻ nhỏ) thì bé chưa có cháu — muốn vẽ được phải đổi mốc tham chiếu sang người lớn giữa chừng, phá vỡ tính nhất quán của cả bộ hình và chắc chắn gây rối cho trẻ 4–6 tuổi.
+- **Phát hiện lỗ hổng bất ngờ**: chủ đề Gia đình của giai đoạn 4 bấy lâu THIẾU cả mother/father/brother/sister (chỉ có ông bà, em bé, cưới hỏi...) — đã thêm đủ 4 từ cốt lõi này (emoji 👩👨👦👧). Gia đình: 14 → **23 từ**.
+- **Thi đấu +5**: champion 👑, goal 🥅, team 👥, race 🏎️, high five ✋ (mục "medal" định thêm bị phát hiện TRÙNG id với "gold medal" 🥇 sẵn có trong chủ đề thể thao — test id-uniqueness bắt được ngay, đã bỏ vì khái niệm huy chương đã được dạy). Thi đấu: 15 → **20 từ**.
+- **"Bổ sung nhiều từ vựng khác"**: gđ 3 động vật hoang dã +5 loài có emoji mà chưa dạy (hedgehog 🦔, sloth 🦥, otter 🦦, skunk 🦨, beaver 🦫 — 96 → 101), gđ 1 món ăn +5 (dumpling 🥟, pancake 🥞, waffle 🧇, pretzel 🥨, donut 🍩 — 107 → 112).
+- Đăng ký: precache 5 SVG vào `sw.js` v61→v62, ghi chú "SVG tự vẽ" trong CREDITS.md gđ4, test img-wiring gđ4 mở rộng thêm 5 mục cây gia đình, số từ hiển thị cập nhật chính xác (99, không làm tròn thành 100) — `npm test`: **934 ✅, 0 ❌**.
+
+### 📊 Bảng tổng sau đợt cây gia đình
+
+| Giai đoạn | Game | Số từ |
+|---|---|---|
+| 1 | `nghe-doan-tieng-anh/` | 112 |
+| 2 | `nghe-doan-giao-thong/` | 97 |
+| 3 | `nghe-doan-dong-vat-vu-tru/` | 101 |
+| 4 | `nghe-doan-gia-dinh-nghe-nghiep/` | 99 |
+| 5 | `nghe-doan-do-dung-hang-ngay/` | 92 |
+| 6 | `nghe-doan-thoi-tiet-cam-xuc/` | 80 |
+| 7 | `nghe-doan-quoc-gia-nghe-nghiep/` | 73 |
+| 8 | `nghe-doan-hoat-dong-do-choi/` | 70 |
+| 9 | `nghe-doan-nha-bep-cong-nghe/` | 45 |
+
+**Tổng cộng: 769 mục từ vựng** trên **9 game** — 28 mục dùng hình thật (23 ảnh Wikimedia/Openverse + 5 SVG cây gia đình tự vẽ).
+
+**Việc còn để ngỏ**: kỹ thuật "SVG tự vẽ + mốc tham chiếu" vừa mở ra hướng minh họa cho cả nhóm từ QUAN HỆ/VỊ TRÍ từng bị bỏ qua — đáng cân nhắc quay lại nhóm **giới từ chỉ vị trí** (in/on/under/behind, đã bỏ ở giai đoạn 8) bằng SVG 2 vật thể (quả bóng + cái hộp); hoặc màn ôn tập tổng hợp trộn cả 9 game.
+
+---
+---
+
+## Đợt "bơm từ vào các game ít nhất" (+23 từ, gđ 5/6/7/9)
+
+Bạn phản hồi các game hiện có "quá ít" từ — đã bơm vào 4 game mỏng nhất, mọi từ đều grep đối chiếu 9 game trước khi thêm:
+
+- **Giai đoạn 9** (45 → **54**): chế biến & nhà bếp +6 (plate 🍽️, jar 🫙, lunchbox 🍱, straw 🥤, roast 🍗, steam ♨️ — đủ bộ động từ nấu nướng cut/mix/pour/boil/bake/fry/grill/stir/freeze/heat/roast/steam), rau củ +3 (olive 🫒, peanut 🥜, chestnut 🌰).
+- **Giai đoạn 7** (73 → **81**): quốc kỳ 30 → 38 — thêm Bắc Âu/Đông Âu: Thụy Điển 🇸🇪, Na Uy 🇳🇴, Phần Lan 🇫🇮, Đan Mạch 🇩🇰, Ba Lan 🇵🇱, Ai-len 🇮🇪, Ai-xơ-len 🇮🇸, U-crai-na 🇺🇦.
+- **Giai đoạn 6** (80 → **84**): cảm xúc +2 (nervous 😬, silly 🤪), tính từ đối lập +2 (loud 📢 / quiet 🤫 — cặp đối lập mới).
+- **Giai đoạn 5** (92 → **94**): hoạt động hằng ngày +2 (yawn 🥱, stretch 🤸).
+- **Quyết định thiết kế đáng chú ý — BỎ nhóm tính từ thời tiết** (sunny/rainy/windy/snowy/cloudy) dù cả 5 từ đều trống và có emoji riêng (⛅🌦️🍃🌨️🌥️): các emoji này đứng CẠNH danh từ sẵn có trong CÙNG chủ đề (rain 🌧️ vs rainy 🌦️, cloud ☁️ vs cloudy 🌥️) — bé nghe "rainy" mà thấy cả 🌧️ lẫn 🌦️ trong 1 vòng 4 lựa chọn thì không thể phân biệt được. Đây là dạng xung đột KHÁI NIỆM mà test emoji-uniqueness (chỉ so glyph) không bắt được — phải soát bằng mắt người.
+- Ngưỡng test gđ9 nâng 40→50; comment đếm số theo chủ đề + thẻ hub cập nhật chính xác; `sw.js` v62→v63 — `npm test`: **934 ✅, 0 ❌**.
+
+### 📊 Bảng tổng sau đợt bơm từ
+
+| Giai đoạn | Game | Số từ |
+|---|---|---|
+| 1 | `nghe-doan-tieng-anh/` | 112 |
+| 2 | `nghe-doan-giao-thong/` | 97 |
+| 3 | `nghe-doan-dong-vat-vu-tru/` | 101 |
+| 4 | `nghe-doan-gia-dinh-nghe-nghiep/` | 99 |
+| 5 | `nghe-doan-do-dung-hang-ngay/` | 94 |
+| 6 | `nghe-doan-thoi-tiet-cam-xuc/` | 84 |
+| 7 | `nghe-doan-quoc-gia-nghe-nghiep/` | 81 |
+| 8 | `nghe-doan-hoat-dong-do-choi/` | 70 |
+| 9 | `nghe-doan-nha-bep-cong-nghe/` | 54 |
+
+**Tổng cộng: 792 mục từ vựng** trên **9 game** (28 mục dùng hình thật).
+
+**Việc còn để ngỏ**: kho từ có-emoji còn trống đã gần cạn thật sự — muốn vượt xa 800 từ, các hướng còn lại là: (a) ảnh thật Wikimedia cho danh từ cụ thể (chim/thú/món ăn/địa danh còn thiếu), (b) SVG tự vẽ cho nhóm giới từ vị trí + khái niệm quan hệ, (c) màn ôn tập tổng hợp trộn cả 9 game (không cần từ mới mà tăng giá trị ôn luyện).
+
+---
+---
+
+## Đợt "3 mũi tên": giới từ vị trí SVG + 4 ảnh mới + GAME ÔN TẬP TỔNG HỢP
+
+Bạn duyệt cả 3 hướng (a)(b)(c) đề xuất ở trên — đã làm xong cả 3 trong 1 đợt:
+
+**✅ (b) Giới từ vị trí — chủ đề thứ 6 của giai đoạn 8** (`nghe-doan-hoat-dong-do-choi`, 70 → **77 từ**): 7 giới từ **in / on / under / behind / in front of / next to / between** — nhóm từ giao tiếp quan trọng từng bị BỎ ở bản đầu giai đoạn 8 vì "không vẽ được bằng 1 emoji". Nay minh họa bằng 7 SVG tự vẽ (`pos-*.svg`, ~1KB/file): **quả bóng đỏ + cái hộp nâu** — cái hộp là mốc tham chiếu cố định trong cả 7 hình, chỉ vị trí quả bóng thay đổi (trong hộp / trên nắp / dưới gầm kệ / ló sau hộp / trước mặt hộp / bên cạnh / giữa 2 hộp). Đúng kỹ thuật "mốc tham chiếu" đã kiểm chứng với cây gia đình. Ghi chú thiết kế cũ trong file (nói rằng giới từ không thể minh họa) đã được cập nhật lại.
+
+**✅ (a) 4 ảnh thật mới** (duyệt từng ảnh bằng mắt như quy trình đã đặt): quả đu đủ (Scott Bauer/USDA, Public Domain), quả mít (Augustus Binu, CC BY-SA 3.0 — lần tải đầu bị nhầm quả SA KÊ/breadfruit, phát hiện khi xem ảnh và tải lại), quả khế (Contentshare, CC BY-SA 4.0 — lát cắt hình sao không lẫn được) → giai đoạn 1: 112 → **115 từ**; chim mòng biển (Arnold Paul, CC BY-SA 2.5) → giai đoạn 3: 101 → **102 từ**. CREDITS.md + precache cập nhật đủ.
+
+**✅ (c) GAME MỚI: Nghe & Đoán — Ôn Tập Tổng Hợp** (`nghe-doan-on-tap/`, 22 unit test):
+- Gộp WORD_BANK của CẢ 9 game (import trực tiếp module logic của từng game — không sao chép dữ liệu, game gốc thêm từ là màn ôn tập tự có theo) → **~800 mục** trong 1 màn chơi; bộ lọc theo TỪNG GAME GỐC (9 nút + Tất cả).
+- Kỹ thuật đáng chú ý: id gắn tiền tố `g1-`..`g9-` để không đụng nhau; đường dẫn ảnh được đổi về tuyệt đối (`/ten-game/images/...`) vì trang ôn tập ở thư mục khác; và **emoji có thể trùng giữa các game gốc** (mỗi game chỉ đảm bảo duy nhất nội bộ) nên `pickRound` phải KHỬ TRÙNG emoji khi chọn mồi nhử — có test riêng quét 60 seed xác nhận không bao giờ có 2 hình giống nhau trong 1 vòng.
+- Không dạy từ mới — đúng mục tiêu "tăng giá trị ôn luyện": bé gặp lại từ cũ trong ngữ cảnh trộn đa chủ đề.
+- Đăng ký đủ: hub Góc Tiếng Anh 15→**16 game** (sửa cả chip i18n 5 ngôn ngữ + fallback tĩnh trang chủ), `game-mini/`, 4 khóa i18n `ontap.*`, `sw.js` v63→**v64**, chuỗi test gốc.
+
+`npm test` toàn bộ: **957 ✅, 0 ❌**. Smoke test: mọi route + SVG + ảnh mới đều 200.
+
+### 📊 Bảng tổng sau đợt "3 mũi tên"
+
+| Giai đoạn | Game | Số từ |
+|---|---|---|
+| 1 | `nghe-doan-tieng-anh/` | 115 |
+| 2 | `nghe-doan-giao-thong/` | 97 |
+| 3 | `nghe-doan-dong-vat-vu-tru/` | 102 |
+| 4 | `nghe-doan-gia-dinh-nghe-nghiep/` | 99 |
+| 5 | `nghe-doan-do-dung-hang-ngay/` | 94 |
+| 6 | `nghe-doan-thoi-tiet-cam-xuc/` | 84 |
+| 7 | `nghe-doan-quoc-gia-nghe-nghiep/` | 81 |
+| 8 | `nghe-doan-hoat-dong-do-choi/` | 77 |
+| 9 | `nghe-doan-nha-bep-cong-nghe/` | 54 |
+| Ôn tập | `nghe-doan-on-tap/` | gộp cả 9 game |
+
+**Tổng cộng: 803 mục từ vựng** trên **9 game gốc + 1 màn ôn tập tổng hợp** — vượt mốc 800! (35 mục dùng hình thật: 24 ảnh Wikimedia + 12 SVG tự vẽ gồm 5 cây gia đình + 7 giới từ vị trí.)
+
+**Việc còn để ngỏ**: bộ sưu tập Nghe & Đoán đã khá tròn trịa (803 từ + ôn tập). Các hướng xa hơn nếu muốn: chế độ "thi đấu" trong màn ôn tập (đếm giờ/xếp hạng), thống kê từ hay sai để ôn lại đúng chỗ yếu, hoặc quay lại các việc ngoài mảng tiếng Anh (ví dụ `pokemon/` vẫn chưa có intro giọng nói — đã hoãn từ đợt trước).
+
+---
+---
+
+## Đợt "hình người SVG + quốc kỳ đợt 3" (+22 từ, gđ 2/3/5/7)
+
+Bạn hỏi "có thể mở rộng thêm đợt từ vựng nữa không?" — có, bằng cách khai thác tiếp 3 mỏ chưa cạn:
+
+- **✅ Bộ phận cơ thể bằng SVG hình người** (giai đoạn 5: 94 → **101 từ**, chủ đề Cơ thể 16 → 23): 7 khớp/bộ phận không có emoji riêng — **knee, elbow, shoulder, ankle, wrist, neck, cheek** — vẽ 1 bé trai (tóc nâu, áo xanh lá, quần xanh dương) GIỐNG HỆT nhau trong cả 7 file `body-*.svg`, chỉ khác vòng tô sáng cam chỉ vào bộ phận cần đoán. Đây chính là lời giải cho thất bại ở đợt trước (ảnh chụp người thật luôn lẫn nhiều bộ phận trong 1 khung hình): với SVG tự vẽ, ta kiểm soát được chính xác điểm nhấn. Chủ động BỎ "chin" (cằm) vì điểm tô sáng quá gần "cheek" (gò má) — 2 hình sẽ gần giống nhau trong cùng 1 vòng.
+- **✅ Quốc kỳ đợt 3** (giai đoạn 7: 81 → **93 từ**, chủ đề Quốc gia 38 → 50): Bồ Đào Nha 🇵🇹, Áo 🇦🇹, Bỉ 🇧🇪, Ả Rập Xê Út 🇸🇦, UAE 🇦🇪, Nam Phi 🇿🇦, Chi-lê 🇨🇱, Cu-ba 🇨🇺, Mông Cổ 🇲🇳, Nê-pan 🇳🇵, Mi-an-ma 🇲🇲, Xri Lan-ca 🇱🇰.
+- **✅ Thiên nhiên Việt Nam + chim** (duyệt ảnh bằng mắt như thường lệ): **hoa sen** 🪷 (hóa ra có emoji riêng Unicode 14 — không cần ảnh!), **cây tre** dùng ảnh rừng tre Arashiyama (Mitchwandrew, CC BY 4.0) → giai đoạn 2: 97 → **99 từ**; **con quạ** (Alexis Lours, CC BY 4.0) → giai đoạn 3: 102 → **103 từ**.
+- Sổ sách: `CREDITS.md` mới cho giai đoạn 5 (ghi rõ SVG tự vẽ), 2 CREDITS cũ thêm dòng tre/quạ, test SVG-wiring mới cho giai đoạn 5, precache 7 SVG + 2 ảnh vào `sw.js` v64→**v65**, thẻ Ôn Tập cập nhật "~825 từ vựng". Phát hiện + sửa 1 lỗi script vá: kiểm tra idempotent bị nhầm khi chuỗi mới ("~99 từ vựng") trùng với thẻ game khác đã có sẵn số đó — 2 thẻ gđ2 bị bỏ sót đã sửa tay.
+- `npm test` toàn bộ: **958 ✅, 0 ❌**.
+
+### 📊 Bảng tổng sau đợt này
+
+| Giai đoạn | Game | Số từ |
+|---|---|---|
+| 1 | `nghe-doan-tieng-anh/` | 115 |
+| 2 | `nghe-doan-giao-thong/` | 99 |
+| 3 | `nghe-doan-dong-vat-vu-tru/` | 103 |
+| 4 | `nghe-doan-gia-dinh-nghe-nghiep/` | 99 |
+| 5 | `nghe-doan-do-dung-hang-ngay/` | 101 |
+| 6 | `nghe-doan-thoi-tiet-cam-xuc/` | 84 |
+| 7 | `nghe-doan-quoc-gia-nghe-nghiep/` | 93 |
+| 8 | `nghe-doan-hoat-dong-do-choi/` | 77 |
+| 9 | `nghe-doan-nha-bep-cong-nghe/` | 54 |
+| Ôn tập | `nghe-doan-on-tap/` | gộp cả 9 game |
+
+**Tổng cộng: 825 mục từ vựng** (48 mục dùng hình thật: 29 ảnh Wikimedia + 19 SVG tự vẽ) — màn Ôn Tập Tổng Hợp tự động gộp đủ 825 từ vì import trực tiếp module của từng game.
+
+**Việc còn để ngỏ**: các mỏ từ còn khai thác được tiếp — quốc kỳ (vẫn còn ~140 nước), SVG khái niệm (hình khối nếu gđ3 chưa đủ, số lượng nhiều/ít, so sánh to/nhỏ theo cặp 2 vật thể), ảnh thật cho danh từ cụ thể bất kỳ. Hoặc chuyển hướng: chế độ thi đấu/thống kê từ hay sai cho màn ôn tập, intro giọng nói cho `pokemon/`.
+
+---
+---
+
+## Đợt "🎯 Ôn chỗ yếu" — sổ theo dõi từ hay sai dùng chung cả 10 game
+
+Tính năng ôn luyện có giá trị nhất còn lại trong danh sách để ngỏ — đã làm xong:
+
+- **Sổ theo dõi chung** (`nghe-doan-on-tap/src/misses.js`, lưu localStorage khóa `nghedoan-misses`): mỗi lần bé chọn SAI ở BẤT KỲ game Nghe & Đoán nào (kể cả lần sai thứ 2 trong 1 câu), từ tiếng Anh đó +1 điểm "cần ôn"; trả lời **đúng ngay lần đầu** thì −1 — đúng đủ nhiều lần từ sẽ ra khỏi sổ (coi như đã thuộc). Từ tiếng Anh làm khóa duy nhất được là nhờ chính sách xuyên suốt "không dạy trùng 1 từ ở 2 game". Sổ tự giới hạn 300 từ (bỏ bớt từ ít sai nhất), mọi thao tác bọc try/catch — hỏng storage thì game vẫn chạy.
+- **Nối vào cả 10 game** (9 game gốc + màn ôn tập): vá script đồng loạt vào `onPick` — nhánh retry ghi miss, nhánh kết quả ghi hit/miss. Module đặt tại game ôn tập, 9 game kia import ngược vào (không tạo vòng lặp import vì misses.js độc lập).
+- **Bộ lọc "🎯 Ôn chỗ yếu"** trong màn Ôn Tập Tổng Hợp: chip đầu tiên của hàng lọc, hiện luôn SỐ TỪ đang cần ôn (cập nhật sau mỗi ván) — bé và bố mẹ thấy rõ tiến bộ khi con số giảm dần. Khi sổ còn quá ít từ (dưới 4), `makeGame` tự bù thêm từ ngẫu nhiên toàn kho để vẫn đủ 4 lựa chọn mỗi vòng — sổ rỗng vẫn chơi được bình thường.
+- **Test**: misses.js viết theo kiểu storage tiêm được (`_setStorage`) nên unit-test chạy được trong Node không cần trình duyệt — 4 test mới (tally + clear khi đúng đủ, lọc weak đúng theo sổ, bù pool nhỏ, sổ rỗng vẫn chơi được). `sw.js` v65→**v66** (+misses.js precache). `npm test` toàn bộ: **962 ✅, 0 ❌**.
+
+Bộ sưu tập Nghe & Đoán hiện tại: **825 từ / 9 game chủ đề + 1 màn ôn tập có trí nhớ về chỗ yếu của từng bé**.
+
+**Việc còn để ngỏ**: chế độ thi đấu đếm giờ cho màn ôn tập; các mỏ từ còn lại (quốc kỳ, SVG khái niệm, ảnh thật); intro giọng nói cho `pokemon/` (vẫn hoãn từ trước).
+
+---
+---
+
+## Đợt bổ sung "intro hướng dẫn lúc đầu" cho các game cũ + thử nguồn ảnh mới
+
+**Bối cảnh:** bạn phản hồi rằng rất nhiều game trong bộ sưu tập KHÔNG có phần hướng dẫn cách chơi tự động phát ra lúc mới mở — bé phải tự mò cách chơi. Đã rà soát toàn bộ ~55 thư mục game (script kiểm tra sự hiện diện của nút ❓/overlay hướng dẫn/lời thoại tự động khi tải trang), phát hiện **18 game thiếu hẳn phần này**.
+
+**✅ Đã bổ sung xong 17/18 game** (chỉ còn `pokemon/` — xem lý do hoãn bên dưới):
+
+- **3 game vốn có màn hình bắt đầu nhưng chỉ hiện chữ chung chung "Bấm để chơi!"** (dùng chung 1 khoá i18n `ran.start` giữa 3 game, không giải thích được luật riêng): `bat-vit/`, `ran-san-moi/`, `xep-gach/` — đã thay bằng hướng dẫn RIÊNG cho từng game (luật chơi, cách điều khiển, các chế độ), đọc to tự động khi mở trang.
+- **4 game cờ dân gian** hoàn toàn không có nút hướng dẫn: `co-caro/`, `co-ganh/`, `co-ca-ngua/`, `o-an-quan/` — thêm nút ❓ + lời hướng dẫn luật chơi (kể cả luật "gánh" của Cờ Gánh, cách "rải quân ăn" của Ô Ăn Quan vốn khá lạ với người mới).
+- **5 game đơn giản khác** không có nút hướng dẫn: `lat-hinh/`, `ghep-hinh/`, `nhay-lo-co/`, `tap-viet/`, `to-mau/` — đây là những game ĐẦU TIÊN của cả bộ sưu tập (Nhóm 1, Nhóm 2 trong tài liệu này), có nút "🔊 Đọc lại" cho TỪNG chữ/tên nhưng chưa từng có hướng dẫn TỔNG QUÁT về cách chơi (tô màu thế nào, rê tay ra sao, lật bài ra sao) — đã bổ sung.
+- **5 game "nhiều-trò-trong-1"** (dien-tu, hoc-van, hoc-vui, toan-lop-1, tu-duy): phức tạp hơn vì mỗi tab/mode có luật khác nhau — đã thêm hướng dẫn RIÊNG cho từng chế độ con, phát lại mỗi khi đổi tab. Phát hiện thú vị: `tu-duy/` (Luyện Tư Duy) thực ra ĐÃ có sẵn lời thoại hướng dẫn cho 5/6 trò con (chỉ thiếu trò "Cái nào khác nhóm?") — chỉ cần thêm nút ❓ để bé nghe lại được, không phải viết mới từ đầu.
+- **Vấn đề kỹ thuật gặp phải và cách xử lý**: 2 game dùng cấu trúc "chọn tab → tự động đọc câu hỏi đầu tiên" (`hoc-van/`, `toan-lop-1/`) — nếu gọi `speak()` cho lời hướng dẫn NGAY TRƯỚC khi gọi hàm hiện câu hỏi đầu tiên, câu hỏi sẽ NGẮT LỜI hướng dẫn ngay lập tức (vì `speak()` luôn hủy câu đang đọc dở). Đã dùng `speakSequence()` (hàm đã xây cho các game Nghe & Đoán trước đó) để đảm bảo đọc xong hướng dẫn rồi MỚI hiện câu hỏi đầu tiên.
+
+**⏸ Tạm hoãn: `pokemon/` (Pikachu Classic — game lâu đời nhất, nhiều người chơi nhất)**. Lý do hoãn thay vì làm vội: (1) file `app.js` dài 813 dòng, cấu trúc phức tạp nhất cả bộ sưu tập (menu, level, gợi ý, xáo, đấu đôi, đổi bộ hình...); (2) đây là game DUY NHẤT trong toàn bộ 55 game chưa từng tích hợp module giọng đọc (`to-mau/src/speech.js`) — thêm mới hoàn toàn thay vì mở rộng cái đã có sẵn nên rủi ro gây lỗi cao hơn hẳn; (3) đây là game được chơi nhiều nhất nên một lỗi nhỏ ảnh hưởng rộng nhất. Quyết định làm riêng, cẩn thận, ở lượt sau thay vì làm vội trong đợt sửa hàng loạt này.
+
+`npm test` toàn bộ sau đợt sửa: **836 ✅, 0 ❌** — không phát sinh lỗi ở bất kỳ game nào trong 17 game vừa sửa.
+
+## Nguồn ảnh miễn phí khác ngoài Wikimedia — đã thử nghiệm Openverse
+
+Bạn lưu ý đúng: Wikimedia Commons có ít ảnh phù hợp với một số từ vựng tiếng Anh thông dụng (nhất là đồ vật/khái niệm hiện đại). Đã thử nghiệm **Openverse** (openverse.org — công cụ tìm kiếm CHÍNH THỨC do Creative Commons/WordPress vận hành, gộp hàng trăm triệu ảnh CC-licensed từ Flickr, Wikimedia, bảo tàng, v.v., có API công khai không cần đăng ký key) làm nguồn bổ sung — **kết quả tốt, đã dùng thử ngay**: sửa từ **"scoreboard"** (`nghe-doan-gia-dinh-nghe-nghiep`, chủ đề thi đấu) — emoji 📋 chỉ là clipboard văn phòng chứ không giống bảng điện tử sân vận động — thay bằng ảnh thật bảng điểm sân bóng chày (nguồn Flickr qua Openverse, tác giả scriptingnews, CC BY-SA 2.0, đã ghi công trong `CREDITS.md`).
+
+**Lưu ý quan trọng về bản quyền** (để tránh hiểu lầm): mục đích giáo dục KHÔNG tự động khiến một ảnh có bản quyền trở thành "miễn phí" — cái quyết định được phép dùng lại hay không là GIẤY PHÉP của ảnh đó (CC0/CC BY/CC BY-SA/Public Domain), không phải mục đích sử dụng. Vì vậy vẫn tiếp tục quy trình cũ: chỉ lấy ảnh có giấy phép tự do rõ ràng, luôn ghi công đầy đủ theo yêu cầu giấy phép, không đoán URL hay tải bừa. Openverse chỉ là THÊM 1 nguồn tìm kiếm (bên cạnh Wikimedia Commons), lọc sẵn theo giấy phép ngay từ đầu — không đổi nguyên tắc bản quyền đã áp dụng xuyên suốt.
+
+---
+---
 
 # Thêm menu game để học từ vựng tiếng Anh 
 Hãy thiết kế  thêm các game để học tiếng Anh từ vựng ? nhiều game càng tốt .
@@ -759,3 +1218,132 @@ Mục tiêu học từ vựng , quen các câu ngắn , cụm từ thường dù
 + Bên cạnh từ vựng luôn có 1 câu ngắn đi kèm hoặc các cụm từ đi kèm ...để bé nhớ cả câu hoặc cụm từ vựng vẫn tốt hơn trong giao tiếp hằng ngày 
 - Nguồn hình ảnh/ icon liên quân tới từ vựng rất nhiều và miễn phí cho mục đích giáo dục . hãy tải nhiều nhất và tạo nhiều nhất từ vựng và câu , có thể chia làm nhiều giai đoạn .
 hãy đọc kỹ và ghi lại đầy đủ bên dưới để tôi có thể xem xét bạn có hiểu và ghi nhiều bổ sung sau đó chúng tôi sẽ xem xét.    
+
+# 📋 Quản lý bé (User Management) + Trang Phụ Huynh (Admin) — ĐANG TRIỂN KHAI
+
+> **Trạng thái (07/2026): P1+P2 phần lớn ĐÃ CODE XONG** (chi tiết ở mục 7 cuối
+> tài liệu này). Việc duy nhất chờ bạn: tạo project Supabase theo
+> `server/README.md` rồi điền URL + anon key vào `/server-config.js`.
+
+> Ý tưởng gốc của bạn: *"bổ sung thêm database và đăng ký đăng nhập để theo dõi
+> từng bé, có hệ thống phân phối thưởng như thưởng kẹo, hoa cho bé"*.
+> Dưới đây là bản thiết kế đầy đủ để bạn xem xét — CHƯA viết dòng code nào,
+> duyệt phần nào làm phần đó.
+
+## 1. Mục tiêu
+
+1. Nhiều bé dùng chung 1 máy (anh chị em / lớp học) — mỗi bé có hồ sơ riêng, tiến độ riêng, sổ "từ hay sai" riêng.
+2. "Đăng nhập" phù hợp trẻ 4–8 tuổi: KHÔNG email/mật khẩu chữ — bé chọn avatar của mình là vào chơi.
+3. Hệ thống thưởng (kẹo 🍬, hoa 🌸, thú cưng 🐣...) để tạo động lực học dài hạn.
+4. Trang Phụ Huynh có khóa: xem tiến độ từng bé, danh sách từ yếu, thời gian chơi, phát thưởng tay, cài đặt, xuất/xóa dữ liệu.
+
+## 2. Kiến trúc — ĐÃ CHỐT: lưu trên SERVER, đồng bộ nhiều máy (bỏ local-first)
+
+> Quyết định của bạn (07/2026): *"nên lưu trên server và có thể sync hoặc quản
+> lý giữa nhiều máy — bỏ luôn cấu trúc local-first"*. Toàn bộ thiết kế bên dưới
+> viết theo hướng **cloud thuần**: server là NGUỒN SỰ THẬT DUY NHẤT của hồ sơ
+> bé, tiến độ, sổ từ yếu và quà thưởng.
+
+**Stack đề xuất: Supabase** (Postgres + Auth + Row Level Security + Realtime):
+- Hợp với dự án tĩnh đang deploy Vercel: KHÔNG cần viết server riêng — trang web gọi thẳng API PostgREST của Supabase bằng `fetch` + anon key, quyền truy cập chặn bằng RLS theo `family_id`. Không cần build system (giữ đúng kiểu "file tĩnh, mở là chạy" của repo).
+- Realtime có sẵn → bảng điều khiển phụ huynh thấy điểm của bé nhảy TRỰC TIẾP khi bé đang chơi ở máy khác.
+- Phương án dự phòng nếu không thích Supabase: Firebase (tương đương) hoặc tự dựng Postgres+PostgREST trên VPS (chủ động 100% nhưng tự lo backup/bảo mật).
+
+**Hệ quả cần chấp nhận khi bỏ local-first** (ghi rõ để không bất ngờ):
+1. **Mất mạng = không ghi được tiến độ**: game tĩnh vẫn MỞ được nhờ service worker, nhưng điểm/sao/sổ từ yếu sẽ không lưu khi offline (hiện báo nhỏ "📡 mất mạng — điểm ván này không được lưu"). Chữ "Offline" trên thẻ game cần sửa lại thành "Chơi được offline, lưu tiến độ cần mạng".
+2. **Phụ thuộc dịch vụ ngoài**: Supabase free tier đủ cho gia đình/lớp nhỏ nhưng project free sẽ bị TẠM DỪNG sau ~1 tuần không ai truy cập (phải bấm khôi phục) — dùng nghiêm túc lâu dài nên tính gói Pro (~25 USD/tháng) hoặc tự host.
+3. **Trách nhiệm dữ liệu trẻ em**: dữ liệu rời khỏi máy → cần tối thiểu hóa (bé chỉ có biệt danh + avatar, KHÔNG ngày sinh/ảnh thật), tài khoản là CỦA PHỤ HUYNH, có nút xóa toàn bộ dữ liệu 1 chạm (phù hợp tinh thần Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân).
+4. Dữ liệu localStorage hiện có (hồ sơ stats.js, sổ misses) sẽ được **nhập lên server 1 lần** khi phụ huynh đăng nhập lần đầu trên máy cũ, sau đó localStorage chỉ còn giữ phiên đăng nhập + cache nhẹ.
+
+## 3. Nền móng ĐÃ CÓ SẴN (không phải làm từ đầu)
+
+- `pokemon/src/stats.js` đã có: **nhiều hồ sơ** (`getProfiles/addProfile/setCurrentProfile/currentProfile`), **phiên chơi theo từng hồ sơ** (`recordSession` — mọi game đều đang gọi với mode/result/score/level/seconds), thống kê `summarize` + `last7Days`, `getDeviceId`. Chuyển sang server tức là GIỮ NGUYÊN giao diện hàm này (mọi game không phải sửa) nhưng ruột đổi thành gọi API — thêm 1 lớp `api.js` là 56 game hưởng chung.
+- `nghe-doan-on-tap/src/misses.js` đã có sổ "từ hay sai" với giao diện gọn (`recordMiss/recordHit/missedWords`) — cùng cách làm: giữ giao diện, đổi ruột thành API, dữ liệu theo từng bé trên server.
+- `pokemon/src/achievements.js` đã có khung huy hiệu — tham khảo được cho phần thưởng.
+
+## 4. Thiết kế từng phần
+
+### 4.1. Hồ sơ bé & "đăng nhập kiểu trẻ em"
+- Màn chọn bé ở trang chủ (hoặc lần đầu vào 1 game): lưới avatar to (🐰🐯🐸🦄... + tên bé), bấm là vào — đó chính là "đăng nhập".
+- Tạo bé mới: nhập tên + chọn avatar + chọn màu. Không ngày sinh, không thông tin thật nào khác (an toàn dữ liệu trẻ em).
+- Thanh nhỏ góc màn hình mọi game: avatar bé đang chơi, bấm để đổi bé.
+- Dữ liệu: `profiles: [{ id, name, avatar, color, createdAt }]` + `currentProfileId` (mở rộng schema sẵn có của stats.js).
+
+### 4.2. Hệ thống thưởng (kinh tế "Sao → Quà")
+- **Kiếm SAO ⭐**: quy đổi từ điểm sẵn có của các game (ví dụ 10 điểm = 1 sao), thưởng thêm khi: hoàn thành ván, chuỗi 3 câu đúng, làm sạch N từ trong sổ "🎯 Ôn chỗ yếu" (thưởng đậm nhất — vì đây là hành vi giá trị nhất), nhiệm vụ ngày ("hôm nay chơi 2 game khác nhau", "ôn 5 từ yếu").
+- **Đổi QUÀ 🎁** ở "Tủ quà của bé": kẹo 🍬 (rẻ, mua vui hằng ngày), hoa 🌸 (trồng vào **Vườn hoa của bé** — mỗi hoa 1 loại, sưu tập), thú cưng 🐣→🐥→🐓 (đắt, lớn dần theo ngày có chơi — níu bé quay lại), khung avatar/danh hiệu ("Vua Từ Vựng").
+- **Chống lạm phát**: trần sao/ngày (ví dụ 50), chơi lại cùng 1 màn liên tục thì sao giảm dần, quà chỉ mua bằng sao (không mua = không có).
+- **Phụ huynh phát thưởng tay** (đúng ý "phân phối thưởng"): trong trang Phụ Huynh có nút "Thưởng cho bé" — chọn bé, chọn quà/sao kèm lời nhắn ("Mẹ thưởng vì con tự giác học!"), bé mở game thấy hộp quà 🎁 rơi xuống + máy đọc lời nhắn.
+- Dữ liệu: `rewards:<profileId> = { stars, ledger: [{ ts, delta, reason }], items: [{ id, boughtAt }], dailyQuest: {...} }` — kiểu SỔ CÁI (chỉ ghi thêm) để sau này đồng bộ cloud không bị xung đột.
+
+### 4.3. Trang Phụ Huynh `/phu-huynh/` (admin page) — mở được từ BẤT KỲ máy nào
+- **Đăng nhập bằng tài khoản phụ huynh thật** (email + mật khẩu / magic link của Supabase Auth) — không cần PIN tự chế nữa vì đã có auth chuẩn. Nhờ dữ liệu trên server, bố mẹ mở trang này **từ điện thoại riêng của mình** vẫn xem được bé đang học gì trên tablet ở nhà — đây chính là giá trị lớn nhất của việc chuyển sang server.
+- **Bảng điều khiển từng bé**: tổng thời gian chơi theo ngày/tuần (biểu đồ 7 ngày), game nào chơi nhiều, điểm trung bình, chuỗi ngày có học; **danh sách "từ hay sai"** kèm nút "đọc thử" từng từ (TTS sẵn có) — bố mẹ biết chính xác nên kèm con chữ nào; sổ quà + lịch sử sao. Bật **Realtime** → số liệu nhảy trực tiếp khi bé đang chơi.
+- **Phát thưởng tay** (mục 4.2 — ghi vào bảng `manual_rewards`, máy của bé nhận qua Realtime/lần tải kế), **cài đặt** (tốc độ đọc TTS, giới hạn phút chơi/ngày — lưu server nên áp dụng đồng loạt mọi máy của bé), **quản trị dữ liệu**: xuất JSON, xóa 1 bé, **xóa toàn bộ dữ liệu gia đình 1 chạm** (bắt buộc có — quyền xóa dữ liệu trẻ em).
+- **Quản lý thiết bị**: danh sách máy đã liên kết ("iPad nhà", "điện thoại bà nội"), thu hồi máy lạc mất.
+
+### 4.4. Thiết kế server (Supabase) — CHI TIẾT
+- **Bảng** (mọi bảng đều có `family_id` + RLS "chỉ gia đình đó đọc/ghi"):
+  - `families` — gắn 1-1 với tài khoản Supabase Auth của phụ huynh.
+  - `profiles` — bé: `{ id, family_id, name, avatar, color, created_at }` (biệt danh + avatar, KHÔNG dữ liệu thật).
+  - `sessions` — mỗi ván chơi 1 dòng: `{ id uuid, profile_id, mode, result, score, level, seconds, played_at }` (chỉ-ghi-thêm, id sinh phía client → ghi trùng không tạo bản sao).
+  - `miss_events` — mỗi lần sai/đúng 1 dòng `{ profile_id, word, delta ±1, ts }`; "sổ từ yếu" = view cộng dồn `SUM(delta) > 0` theo từ. Chỉ-ghi-thêm nên 2 máy cùng ghi không bao giờ xung đột.
+  - `reward_ledger` — sổ sao chỉ-ghi-thêm `{ profile_id, delta, reason, ts }`; số dư = SUM. `purchases` — quà đã đổi. `manual_rewards` — thưởng tay của bố mẹ kèm lời nhắn + trạng thái "bé đã mở quà chưa".
+  - `settings`, `devices`.
+- **Đăng nhập trên máy của bé**: phụ huynh đăng nhập 1 lần trên máy đó (hoặc quét mã liên kết) → phiên lưu lâu dài → bé chỉ thấy màn chọn avatar, không bao giờ thấy form email.
+- **Tầng client `api.js` dùng chung**: bọc `fetch` tới PostgREST (không cần SDK, không cần build); giữ nguyên chữ ký `recordSession/recordMiss/recordHit/missedWords/getProfiles...` để 56 game gần như không phải sửa; có hàng đợi gửi lại ngắn trong phiên cho request lỗi mạng thoáng qua (không phải local-first — chỉ là retry lịch sự).
+- **`sw.js`**: file tĩnh cache như cũ; mọi request API đi thẳng mạng (network-only).
+
+## 5. Lộ trình đề xuất (duyệt phần nào làm phần đó)
+
+| Giai đoạn | Nội dung | Khối lượng ước tính |
+|---|---|---|
+| **P1 — Dựng server + đăng nhập** | Tạo project Supabase, schema + RLS ở trên, tài khoản phụ huynh, liên kết thiết bị, `api.js` + nhập dữ liệu localStorage cũ lên server 1 lần | 1–2 buổi |
+| **P2 — Hồ sơ bé chạy trên server** | Màn chọn bé + tạo bé, thanh avatar mọi game, `stats.js`/`misses.js` đổi ruột sang `api.js` (giữ nguyên giao diện hàm), báo "mất mạng — không lưu điểm" | 1–2 buổi |
+| **P3 — Thưởng** | Sao từ điểm + trần/ngày + nhiệm vụ ngày, Tủ quà + Vườn hoa, hộp quà bố mẹ gửi kèm lời nhắn đọc to | 1–2 buổi |
+| **P4 — Trang Phụ Huynh** | Dashboard từng bé (kể cả xem từ xa), danh sách từ yếu + đọc thử, phát thưởng tay, cài đặt đồng bộ mọi máy, quản lý thiết bị, xóa dữ liệu 1 chạm | 1–2 buổi |
+| **P5 — Realtime + báo cáo tuần** | Số liệu nhảy trực tiếp, tổng kết tuần ("bé học 34 từ, thuộc thêm 12 từ yếu") | 1 buổi |
+
+## 6. Các quyết định ĐÃ CHỐT (từ trả lời của bạn)
+
+1. ~~Local-first hay server?~~ → **server + sync nhiều máy (bỏ local-first)**. Việc còn chờ: bạn tạo project Supabase (miễn phí, theo `server/README.md`) và điền URL + anon key vào `/server-config.js`.
+2. PIN cho bé → **KHÔNG CẦN** — bé chỉ chạm avatar là vào; bảo vệ nằm ở tài khoản phụ huynh.
+3. Quà ảo gắn thưởng thật ngoài đời → **CHƯA TRẢ LỜI** (không chặn việc gì; trả lời lúc nào thêm mục "quy đổi quà thật" lúc đó).
+4. Giới hạn thời gian chơi/ngày → **CÓ** (chưa nói số phút — tạm mặc định 45 phút, chỉnh được trong trang Phụ Huynh).
+5. Phạm vi thưởng → **TẤT CẢ bài học/game đều có quà**; kết thúc mỗi chuỗi học 10–20 câu sẽ có quà (đã hiện thực: cứ mỗi 15 câu trả lời có 1 hộp quà nhỏ + sao từ điểm mỗi ván, trần 50 sao/ngày).
+
+## 7. NHẬT KÝ TRIỂN KHAI — đợt 1 (đã xong, đang chờ bạn tạo Supabase)
+
+Đã code xong toàn bộ phần nền (chạy được ngay khi điền config, KHÔNG phá gì khi chưa điền — mọi game vẫn chạy như cũ, trang mới hiện hướng dẫn cài đặt):
+
+- **`server/schema.sql`** — toàn bộ database: 9 bảng (`families/profiles/sessions/miss_events/reward_ledger/purchases/manual_rewards/settings/devices`), 2 view (`weak_words`, `star_balance`), Row Level Security "mỗi gia đình chỉ thấy dữ liệu của mình", hàm `delete_my_family()` cho nút xóa 1 chạm. Dán 1 lần vào Supabase SQL Editor là xong. Kèm **`server/README.md`** hướng dẫn từng bước (10 phút) và **`/server-config.js`** chỉ cần điền 2 dòng.
+- **`shared/api.js`** — client dùng chung: đăng nhập/đăng ký/refresh token (Supabase Auth qua fetch, không SDK, không build), CRUD hồ sơ bé, ghi ván chơi **kèm tự cộng sao theo luật + trần ngày**, sổ từ hay sai (`miss_events` chỉ-ghi-thêm), số dư sao, đổi quà, thưởng tay, cài đặt, thiết bị, xuất JSON, xóa gia đình. An toàn khi import trong Node (test không cần trình duyệt).
+- **`shared/rewards.js`** — luật thưởng THUẦN (6 unit test): 10 điểm = 1 sao (trần 15/ván), trần 50 sao/ngày, **1 hộp quà mỗi 15 câu trả lời** (đúng yêu cầu "chuỗi 10–20 câu có quà"), danh mục 12 quà (4 kẹo giá rẻ, 5 hoa sưu tập, 3 thú cưng + danh hiệu).
+- **`/chon-be/`** — màn "Bé nào đang chơi?": lưới avatar to, chạm là vào (đúng quyết định "không PIN cho bé"), chào bé bằng giọng nói, và **hộp quà bố mẹ gửi** hiện ngay khi chọn bé (mở quà → máy đọc lời nhắn + cộng sao).
+- **`/phu-huynh/`** — trang admin: đăng nhập/đăng ký phụ huynh; thêm/chọn bé (12 avatar); bảng điều khiển từng bé (tổng ván/thắng/giờ chơi/sao/số từ cần ôn + biểu đồ phút chơi 7 ngày); **danh sách từ hay sai kèm nút 🔊 đọc thử**; gửi quà kèm lời nhắn; sổ sao; cài đặt (giới hạn phút/ngày mặc định 45, tốc độ TTS) áp dụng mọi máy; danh sách thiết bị; xuất JSON; xóa toàn bộ (gõ "XOA" xác nhận).
+- **Nối vào hạ tầng cũ đúng như thiết kế mục 3**: `stats.js.recordSession` gửi kèm mỗi ván lên server (tự cộng sao) và `misses.js` gửi từng sự kiện sai/đúng — cả 56 game hưởng chung không phải sửa từng game; mất mạng/chưa cấu hình thì bỏ qua im lặng, không hỏng ván chơi.
+- Đăng ký: 2 thẻ mới trên trang chủ ("Bé Nào Đang Chơi?" + "Trang Phụ Huynh") với i18n 5 ngôn ngữ; `sw.js` v66→**v67** (API Supabase là cross-origin nên service worker vốn đã bỏ qua — không bị cache nhầm); chuỗi test gốc thêm `shared/rewards.test.js`. `npm test` toàn bộ: **968 ✅, 0 ❌**.
+
+**Còn lại cho các đợt sau** (theo lộ trình mục 5): ~~nhập dữ liệu cũ~~, ~~thanh avatar + hộp quà trong game~~, ~~Tủ quà & Vườn hoa~~, ~~chặn giới hạn phút/ngày~~ (xem đợt 2 bên dưới); Realtime + báo cáo tuần. **Việc của bạn ngay bây giờ: làm theo `server/README.md` (10 phút) rồi báo tôi để kiểm thử đầu-cuối với server thật.**
+
+## 8. NHẬT KÝ TRIỂN KHAI — đợt 2 (đã xong)
+
+- **`/tu-qua/` — Tủ Quà & Vườn Hoa của bé**: hiện số dư ⭐, cửa hàng 12 món từ CATALOG (nút đổi tự khóa khi thiếu sao), bộ sưu tập: **vườn hoa** (mỗi 🌸 đã đổi hiện thành hoa trồng trong vườn), thú cưng, đếm kẹo, danh hiệu. Đổi quà xong máy khen bằng giọng nói. Có thẻ riêng trên trang chủ (i18n 5 ngôn ngữ).
+- **`shared/kid-bar.js` — tiện ích trong game** (đã gắn vào cả 10 game Nghe & Đoán bằng script vá):
+  - Thanh avatar bé góc dưới-trái (chạm để đổi bé ở /chon-be/);
+  - `answeredOne()` gọi sau MỖI CÂU: đếm cộng dồn trong ngày, **đủ 15 câu → toast hộp quà 🎁 + máy khen "Bé học chăm quá!" + kẹo miễn phí ghi vào tủ quà trên server** (đúng quyết định số 5: mọi bài học đều có quà theo chuỗi 10–20 câu);
+  - **Chặn giới hạn phút/ngày** (quyết định số 4): khi mở game, so tổng giây đã chơi hôm nay (server) với `daily_limit_min` bố mẹ đặt — vượt thì phủ màn "🌙 Bé nghỉ mắt, mai học tiếp nhé" đọc bằng giọng nói; mất mạng thì không chặn (ưu tiên không phạt oan).
+- **Nhập dữ liệu cũ**: nút "📥 Nhập dữ liệu cũ trên máy này" trong Trang Phụ Huynh (chỉ hiện khi máy còn hồ sơ localStorage thời chưa có server): tạo hồ sơ bé tương ứng + đẩy toàn bộ lịch sử ván chơi + sổ từ hay sai (tối đa 5 điểm/từ) lên server, đánh dấu đã nhập.
+- `api.js` thêm: `recordFreeGift` (quà 0 sao), `currentKidInfo` (cache tên+avatar bé cho thanh trong game), `cachedSettings`, `importLegacySessions/importLegacyMisses` (đẩy theo lô 100–200 dòng).
+- `sw.js` v67→**v68**; `npm test`: **968 ✅, 0 ❌**; smoke test các trang mới đều 200.
+
+**Còn lại (đợt 3, sau khi bạn dựng Supabase)**: kiểm thử đầu-cuối với server thật (đăng ký → tạo bé → chơi → sao/quà/từ yếu lên đúng), Realtime cho dashboard, báo cáo tuần, và trả lời câu hỏi số 3 (quy đổi quà thật) nếu bạn muốn.
+
+## 9. NHẬT KÝ TRIỂN KHAI — đợt 3 (đã xong)
+
+- **📈 Báo cáo tuần** (`shared/report.js` — module THUẦN, 6 unit test): tổng kết 7 ngày của từng bé — học mấy/7 ngày, tổng phút + số ván, tỷ lệ thắng, sao kiếm được, quà chăm học + quà đã đổi, số từ cần ôn kèm top 5 từ hay sai nhất. Hiện trong trang Phụ Huynh kèm nút **📋 Sao chép** (bản văn bản tiếng Việt, dán thẳng vào Zalo/tin nhắn chia sẻ cho ông bà).
+- **🔴 Chế độ "Trực tiếp"** trên dashboard: bật công tắc là số liệu của bé tự tải lại mỗi 15 giây — bố mẹ ngồi máy khác thấy điểm/sao của bé nhảy gần như tức thời khi bé đang chơi. *Chọn polling 15s thay vì WebSocket Realtime của Supabase một cách CÓ CHỦ ĐÍCH*: giao thức Realtime cần SDK (phá kiểu "không SDK, không build" của repo) trong khi 15 giây là quá đủ nhanh cho mắt người; nếu sau này cần đẩy tức thời thật sự thì nâng cấp riêng phần này.
+- **🎁 Quà bố mẹ hiện NGAY TRONG game**: trước đây bé chỉ thấy hộp quà khi vào màn /chon-be/ — nay `kid-bar.js` kiểm tra quà chưa mở ngay khi mở bất kỳ game Nghe & Đoán nào: hộp quà phủ màn, bé bấm MỞ QUÀ, máy đọc lời nhắn của bố mẹ + cộng sao đính kèm.
+- `sw.js` v68→**v69**; chuỗi test thêm `report.test.js` — `npm test` toàn bộ: **974 ✅, 0 ❌**; smoke test các trang đều 200.
+
+**Toàn bộ lộ trình mục 5 (P1→P5) đã CODE XONG.** Chờ duy nhất: bạn dựng Supabase theo `server/README.md` rồi báo để kiểm thử đầu-cuối. Câu hỏi còn mở: số 3 (quy đổi quà ảo ↔ quà thật ngoài đời).

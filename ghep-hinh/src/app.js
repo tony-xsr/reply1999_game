@@ -16,7 +16,7 @@ const $ = (id) => document.getElementById(id);
 const els = {
   board: $('board'), moves: $('moves'), picker: $('picker'),
   tab3: $('tab3'), tab4: $('tab4'),
-  btnPeek: $('btnPeek'), btnNew: $('btnNew'), btnSound: $('btnSound'),
+  btnPeek: $('btnPeek'), btnNew: $('btnNew'), btnHelp: $('btnHelp'), btnSound: $('btnSound'),
   peekImg: $('peekImg'),
   cheer: $('cheer'), cheerImg: $('cheerImg'), cheerText: $('cheerText'), btnAgain: $('btnAgain'),
 };
@@ -31,9 +31,15 @@ const state = {
   moves: 0,
   done: false,
   startedAt: Date.now(),
+  instruction: '',
 };
 
 bindMute(() => sfx.muted);
+
+function sayInstruction(text) {
+  state.instruction = text;
+  speak(text);
+}
 
 function newGame() {
   state.puzzle = scramble(createPuzzle(state.n), state.n === 3 ? 60 : 140);
@@ -156,6 +162,7 @@ for (const [on, off] of [['pointerdown', 'pointerup'], ['pointerdown', 'pointerc
   els.btnPeek.addEventListener(off, () => els.peekImg.classList.add('hidden'));
 }
 els.btnPeek.addEventListener('pointerleave', () => els.peekImg.classList.add('hidden'));
+els.btnHelp.addEventListener('click', () => { sfx.select(); speak(state.instruction); });
 els.btnSound.addEventListener('click', () => {
   sfx.toggleMute();
   els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
@@ -163,6 +170,7 @@ els.btnSound.addEventListener('click', () => {
 });
 
 els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
+sayInstruction(t('ghephinh.help', 'Bức ảnh bị xáo và có 1 ô trống. Chạm vào ô cùng hàng hoặc cùng cột với ô trống để cả dãy trượt theo. Xếp đúng thứ tự các mảnh là xong! Giữ nút con mắt để xem trước hình mẫu.'));
 renderPicker();
 newGame();
 
