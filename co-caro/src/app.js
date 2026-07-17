@@ -16,7 +16,7 @@ const els = {
   board: $('board'),
   tab3: $('tab3'), tab9: $('tab9'), tabAi: $('tabAi'), tab2p: $('tab2p'),
   scoreX: $('scoreX'), scoreO: $('scoreO'), turnLabel: $('turnLabel'),
-  btnNew: $('btnNew'), btnSound: $('btnSound'),
+  btnNew: $('btnNew'), btnHelp: $('btnHelp'), btnSound: $('btnSound'),
   cheer: $('cheer'), cheerEmoji: $('cheerEmoji'), cheerText: $('cheerText'), btnAgain: $('btnAgain'),
 };
 
@@ -30,9 +30,15 @@ const state = {
   over: false,
   scores: { x: 0, o: 0 },
   startedAt: Date.now(),
+  instruction: '',
 };
 
 bindMute(() => sfx.muted);
+
+function sayInstruction(text) {
+  state.instruction = text;
+  speak(text);
+}
 const MARK = { x: '❌', o: '⭕' };            // dùng cho HUD/cheer — emoji dễ nhận diện
 const BOARD_MARK = { x: 'X', o: 'O' };       // dùng trên bàn cờ — chữ thường để CSS color có tác dụng (emoji ❌⭕ tô sẵn màu, bỏ qua color)
 
@@ -175,6 +181,7 @@ els.tabAi.addEventListener('click', () => selectVs(true));
 els.tab2p.addEventListener('click', () => selectVs(false));
 els.btnNew.addEventListener('click', () => { sfx.shuffle(); newRound(); });
 els.btnAgain.addEventListener('click', () => { sfx.select(); newRound(); });
+els.btnHelp.addEventListener('click', () => { sfx.select(); speak(state.instruction); });
 els.btnSound.addEventListener('click', () => {
   sfx.toggleMute();
   els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
@@ -182,6 +189,7 @@ els.btnSound.addEventListener('click', () => {
 });
 
 els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
+sayInstruction(t('caro.help', 'Chạm vào ô trống để đánh dấu. Bàn 3 nhân 3 cần 3 ô thẳng hàng, bàn 9 nhân 9 cần 5 ô thẳng hàng là thắng! Có thể chơi với máy hoặc chơi 2 người trên cùng máy.'));
 newRound();
 
 // Hook cho e2e test

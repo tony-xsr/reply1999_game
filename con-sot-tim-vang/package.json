@@ -1,0 +1,8 @@
+{
+  "name": "con-sot-tim-vang",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/consot.test.js"
+  }
+}

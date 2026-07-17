@@ -16,7 +16,7 @@ const els = {
   svg: $('boardSvg'), turnLabel: $('turnLabel'), countR: $('countR'), countB: $('countB'),
   tabAi: $('tabAi'), tab2p: $('tab2p'),
   cheer: $('cheer'), cheerEmoji: $('cheerEmoji'), cheerText: $('cheerText'), btnAgain: $('btnAgain'),
-  btnNew: $('btnNew'), btnSound: $('btnSound'),
+  btnNew: $('btnNew'), btnHelp: $('btnHelp'), btnSound: $('btnSound'),
 };
 
 const state = {
@@ -25,9 +25,15 @@ const state = {
   selected: null,
   busy: false,
   startedAt: Date.now(),
+  instruction: '',
 };
 
 bindMute(() => sfx.muted);
+
+function sayInstruction(text) {
+  state.instruction = text;
+  speak(text);
+}
 const PAD = 50;
 const GAP = 100;
 const px = (i) => PAD + (i % N) * GAP;
@@ -196,6 +202,7 @@ els.tabAi.addEventListener('click', () => selectVs(true));
 els.tab2p.addEventListener('click', () => selectVs(false));
 els.btnNew.addEventListener('click', () => { sfx.shuffle(); newGame(); });
 els.btnAgain.addEventListener('click', () => { sfx.select(); newGame(); });
+els.btnHelp.addEventListener('click', () => { sfx.select(); speak(state.instruction); });
 els.btnSound.addEventListener('click', () => {
   sfx.toggleMute();
   els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
@@ -203,6 +210,7 @@ els.btnSound.addEventListener('click', () => {
 });
 
 els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
+sayInstruction(t('coganh.help', 'Chạm vào 1 quân của mình rồi chạm vào ô trống để đi. Đứng giữa 2 quân địch thẳng hàng là "gánh" — cả 2 quân đó đổi màu theo mình! Ai hết quân hoặc không đi được nữa là thua.'));
 newGame();
 
 // Hook cho e2e test
