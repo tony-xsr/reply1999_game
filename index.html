@@ -4,7 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#fff6e8" />
-<title>Game Collection</title>
+<meta name="description" content="Kho game giáo dục miễn phí cho bé 4–8 tuổi: 56+ trò chơi tiếng Việt, 800+ từ vựng tiếng Anh có giọng đọc thật, toán, tư duy. Hồ sơ riêng từng bé, thưởng sao đổi quà, góc quản lý cho phụ huynh — chơi được cả khi offline." />
+<title>Game Collection — Bé Học Mà Chơi: Tiếng Anh, Toán, Tư Duy</title>
 <link rel="manifest" href="/manifest.json" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -110,6 +111,18 @@ footer a{color:var(--gold2)}
   pointer-events:none;opacity:0;transition:opacity .2s;
 }
 .game-card:hover::after{opacity:1}
+
+/* Khối giới thiệu cho khách mới (SEO/Google) */
+.intro{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin-bottom:22px;
+  box-shadow:0 4px 14px rgba(194,65,12,.08)}
+.intro h2{margin:0 0 6px;font-size:18px;color:var(--gold2)}
+.intro p{margin:0 0 10px;font-size:14px;color:var(--ink-dim);line-height:1.6}
+.intro ul{margin:0 0 12px;padding-left:2px;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:6px}
+.intro li{font-size:13.5px;line-height:1.55}
+.intro .cta{display:flex;gap:10px;flex-wrap:wrap}
+.intro .cta a{display:inline-block;text-decoration:none;font-weight:800;font-size:14px;border-radius:10px;padding:9px 16px}
+.intro .cta a.kids{background:linear-gradient(180deg,#34b566,#1e7a45);color:#fff;box-shadow:0 3px 10px rgba(30,122,69,.35)}
+.intro .cta a.parent{background:var(--panel2);color:var(--gold2);border:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -132,6 +145,22 @@ footer a{color:var(--gold2)}
       </select>
     </div>
   </header>
+
+  <section class="intro">
+    <h2 data-i18n="intro.title">🌟 Bé học mà chơi — kho game giáo dục miễn phí cho bé 4–8 tuổi</h2>
+    <p data-i18n="intro.desc">56+ trò chơi tiếng Việt chạy ngay trên trình duyệt, không cài đặt, không quảng cáo — chơi được cả khi mất mạng.</p>
+    <ul>
+      <li data-i18n="intro.f1">🇬🇧 <b>800+ từ vựng tiếng Anh</b> có giọng đọc thật + câu mẫu, sai được gợi ý chọn lại, tự ghi nhớ từ bé hay sai để ôn đúng chỗ yếu</li>
+      <li data-i18n="intro.f2">🔢 Toán lớp 1, học vần, tư duy logic, tô màu, tập viết và cả trò chơi dân gian Việt Nam</li>
+      <li data-i18n="intro.f3">👨‍👩‍👧 <b>Quản lý gia đình</b>: mỗi bé một hồ sơ + mã đăng nhập riêng, chơi trên nhiều máy vẫn lưu đúng tiến độ từng bé</li>
+      <li data-i18n="intro.f4">🎁 <b>Thưởng sao đổi quà</b> (kẹo, hoa, thú cưng) và <b>góc phụ huynh</b>: xem tiến độ, từ hay sai, đặt giới hạn giờ chơi, gửi quà kèm lời nhắn</li>
+    </ul>
+    <div class="cta">
+      <a class="kids" href="chon-be/" data-i18n="intro.cta.kids">🐰 Bé vào chơi ▶</a>
+      <a class="parent" href="phu-huynh/" data-i18n="intro.cta.parent">🔒 Góc quản lý phụ huynh</a>
+      <a class="parent" href="gioi-thieu/" data-i18n="intro.cta.docs">📖 Giới thiệu đầy đủ tính năng</a>
+    </div>
+  </section>
 
   <!-- Audio diagnostic modal -->
   <div id="modal-audio-hub" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;padding:14px">

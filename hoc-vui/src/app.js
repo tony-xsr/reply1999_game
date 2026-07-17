@@ -14,7 +14,7 @@ const t = (key, fallback) => {
 
 const $ = (id) => document.getElementById(id);
 const els = {
-  btnBack: $('btnBack'), btnLang: $('btnLang'), btnSay: $('btnSay'), btnSound: $('btnSound'),
+  btnBack: $('btnBack'), btnLang: $('btnLang'), btnSay: $('btnSay'), btnHelp: $('btnHelp'), btnSound: $('btnSound'),
   dots: $('dots'),
   screens: {
     home: $('homeScreen'), match: $('matchScreen'), count: $('countScreen'), listen: $('listenScreen'),
@@ -39,6 +39,13 @@ const state = {
   startedAt: Date.now(),
   round: null,      // dữ liệu vòng hiện tại (tùy trò)
   selectedWord: null,
+  instruction: '',
+};
+
+const HELP_TEXT = {
+  match: 'Kéo hoặc chạm thẻ chữ rồi thả đúng vào hình phù hợp — ghép đúng cặp chữ và hình là được điểm!',
+  count: 'Nhìn số lượng đồ vật rồi chạm vào đáp án đúng trong các nút bên dưới.',
+  listen: 'Bấm nút loa để nghe tên đồ vật, rồi chạm đúng hình được gọi tên trong lưới hình.',
 };
 
 try { state.lang = localStorage.getItem(LANG_KEY) === 'en' ? 'en' : 'vi'; } catch { /* ignore */ }
@@ -56,7 +63,12 @@ function showScreen(name) {
   els.cheer.classList.add('hidden');
   els.btnBack.hidden = name === 'home';
   els.btnSay.hidden = name === 'home' || name === 'match';
+  els.btnHelp.hidden = name === 'home';
   els.dots.classList.toggle('hidden', name === 'home');
+  if (name !== 'home') {
+    state.instruction = t(`hocvui.help.${name}`, HELP_TEXT[name]);
+    speak(state.instruction);
+  }
 }
 
 function renderDots() {
@@ -378,6 +390,7 @@ $('modeCount').addEventListener('click', startCount);
 $('modeListen').addEventListener('click', startListen);
 els.btnBack.addEventListener('click', () => showScreen('home'));
 els.btnHome.addEventListener('click', () => showScreen('home'));
+els.btnHelp.addEventListener('click', () => { sfx.select(); speak(state.instruction); });
 els.btnAgain.addEventListener('click', () => starters[state.screen]());
 els.btnSay.addEventListener('click', replayPrompt);
 els.btnHear.addEventListener('click', listenPrompt);

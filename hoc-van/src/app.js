@@ -2,7 +2,7 @@
 // Ghép đúng là máy ĐÁNH VẦN to như cô giáo lớp 1: "bờ - o - bo - huyền - bò!"
 
 import { WORDS, spellParts, makeGhepVan, makeDienChu, makeNgheViet } from './van.js';
-import { speak, bindMute } from '../../to-mau/src/speech.js';
+import { speak, speakSequence, bindMute } from '../../to-mau/src/speech.js';
 import { sfx } from '../../pokemon/src/sfx.js';
 import { currentProfile, recordSession } from '../../pokemon/src/stats.js';
 
@@ -15,11 +15,17 @@ const $ = (id) => document.getElementById(id);
 const els = {
   tabs: { ghep: $('tabGhep'), dien: $('tabDien'), nghe: $('tabNghe') },
   dots: $('dots'), qEmoji: $('qEmoji'), wordLine: $('wordLine'), tray: $('tray'),
-  btnSay: $('btnSay'), btnSound: $('btnSound'),
+  btnSay: $('btnSay'), btnHelp: $('btnHelp'), btnSound: $('btnSound'),
   cheer: $('cheer'), cheerText: $('cheerText'), btnAgain: $('btnAgain'),
 };
 
 const QUESTIONS = 8;
+
+const HELP_TEXT = {
+  ghep: 'Chạm các thẻ âm và vần theo đúng thứ tự để ghép thành tiếng đúng với hình. Ghép đúng máy sẽ đánh vần to cho bé nghe!',
+  dien: 'Từ đang thiếu 1 chữ cái, chạm vào chữ cái đúng trong 3 lựa chọn để điền vào chỗ trống.',
+  nghe: 'Nghe máy đọc to 1 tiếng, rồi chạm đúng từng chữ cái theo thứ tự trên bàn phím để viết lại tiếng đó.',
+};
 
 const state = {
   mode: 'ghep',      // ghep | dien | nghe
@@ -29,6 +35,7 @@ const state = {
   wrongThisQ: false,
   typed: 0,          // nghe–viết: đã gõ tới chữ thứ mấy
   startedAt: Date.now(),
+  instruction: '',
 };
 
 bindMute(() => sfx.muted);
@@ -105,7 +112,8 @@ function startSet(mode) {
   els.cheer.classList.add('hidden');
   for (const [k, el] of Object.entries(els.tabs)) el.classList.toggle('active', k === mode);
   renderDots();
-  nextQuestion();
+  state.instruction = t(`hocvan.help.${mode}`, HELP_TEXT[mode]);
+  speakSequence([{ text: state.instruction, lang: 'vi-VN', rate: 0.92 }], nextQuestion);
 }
 
 function nextQuestion() {
@@ -243,6 +251,7 @@ els.tabs.ghep.addEventListener('click', () => { sfx.select(); startSet('ghep'); 
 els.tabs.dien.addEventListener('click', () => { sfx.select(); startSet('dien'); });
 els.tabs.nghe.addEventListener('click', () => { sfx.select(); startSet('nghe'); });
 els.btnSay.addEventListener('click', introSpeech);
+els.btnHelp.addEventListener('click', () => { sfx.select(); speak(state.instruction); });
 els.btnAgain.addEventListener('click', () => { sfx.select(); startSet(state.mode); });
 els.btnSound.addEventListener('click', () => {
   sfx.toggleMute();
