@@ -124,8 +124,11 @@ async function rest(method, path, body, extraHeaders = {}, retry = true) {
     const err = await res.text().catch(() => '');
     throw new Error(`REST ${res.status}: ${err.slice(0, 200)}`);
   }
-  if (res.status === 204) return null;
-  return res.json();
+  // PostgREST trả body RỖNG với Prefer: return=minimal (kể cả status 201) —
+  // không được gọi res.json() thẳng kẻo nổ "Unexpected end of JSON input".
+  const text = await res.text().catch(() => '');
+  if (!text) return null;
+  try { return JSON.parse(text); } catch { return null; }
 }
 
 const get = (path) => rest('GET', path);

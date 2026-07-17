@@ -22,7 +22,7 @@ const els = {
   wrap: $('boardWrap'), canvas: $('traceCanvas'), hintLine: $('hintLine'),
   cheer: $('cheer'), cheerStars: $('cheerStars'), cheerEmoji: $('cheerEmoji'),
   cheerText: $('cheerText'), btnNext: $('btnNext'),
-  btnSay: $('btnSay'), btnRedo: $('btnRedo'), btnSound: $('btnSound'),
+  btnSay: $('btnSay'), btnRedo: $('btnRedo'), btnHelp: $('btnHelp'), btnSound: $('btnSound'),
 };
 
 const state = {
@@ -30,9 +30,15 @@ const state = {
   index: 0,
   nameSeq: [],       // dãy chữ của tên bé
   startedAt: Date.now(),
+  instruction: '',
 };
 
 bindMute(() => sfx.muted);
+
+function sayInstruction(text) {
+  state.instruction = text;
+  speak(text);
+}
 
 /* ===== Danh sách bài theo tab ===== */
 
@@ -74,7 +80,7 @@ function introSpeech(item) {
   switch (state.tab) {
     case 'basic': return speak(`${item.label}. Rê tay theo mũi tên nhé!`);
     case 'vi': return speak(`Chữ ${item.ch}`);
-    case 'en': return speak(`${item.ch}`, { lang: 'en-US' });
+    case 'en': return speak(`${item.ch}`, { lang: 'en-US', rate: 0.68 });
     case 'name': return speak(`Chữ ${item.ch}`);
     default: return null;
   }
@@ -85,7 +91,7 @@ function cheerSpeech(item, stars) {
   switch (state.tab) {
     case 'basic': return speak(`${praise} ${item.label}!`);
     case 'vi': return speak(`${praise} Chữ ${item.ch} — ${item.label.split('— ')[1]}!`);
-    case 'en': return speak(`Great job! ${item.ch}! ${item.ch} for ${EN_WORDS[item.ch].word}!`, { lang: 'en-US' });
+    case 'en': return speak(`Great job! ${item.ch}! ${item.ch} for ${EN_WORDS[item.ch].word}!`, { lang: 'en-US', rate: 0.66 });
     default: return null;
   }
 }
@@ -260,6 +266,7 @@ els.tabs.en.addEventListener('click', () => selectTab('en'));
 els.tabs.name.addEventListener('click', () => selectTab('name'));
 els.btnSay.addEventListener('click', () => introSpeech(current()));
 els.btnRedo.addEventListener('click', () => { buildCurrent(); sfx.select(); });
+els.btnHelp.addEventListener('click', () => { sfx.select(); speak(state.instruction); });
 els.btnSound.addEventListener('click', () => {
   sfx.toggleMute();
   refreshSoundIcon();
@@ -271,6 +278,7 @@ els.btnNext.addEventListener('click', () => {
 });
 
 refreshSoundIcon();
+sayInstruction(t('tapviet.help', 'Nhìn chữ mờ trên bảng, rê ngón tay hoặc chuột theo đúng nét chỉ dẫn. Đi đúng đường thì nét hiện màu, lệch quá thì làm lại nét đó. Có 4 chế độ: Nét cơ bản, chữ cái tiếng Việt, chữ cái tiếng Anh, và viết tên của bé.'));
 selectItem(0, true);
 
 // Hook cho e2e test
