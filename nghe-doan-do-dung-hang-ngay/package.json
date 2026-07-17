@@ -1,0 +1,8 @@
+{
+  "name": "nghe-doan-do-dung-hang-ngay",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/dodung.test.js"
+  }
+}

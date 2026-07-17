@@ -1,0 +1,8 @@
+{
+  "name": "nghe-doan-dong-vat-vu-tru",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/dongvat.test.js"
+  }
+}

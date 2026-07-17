@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+<rect width="240" height="240" fill="#fffaf2"/>
+<g stroke="#a8834a" stroke-width="3">
+<line x1="95" y1="48" x2="145" y2="48"/>
+<line x1="120" y1="48" x2="120" y2="86"/>
+<line x1="52" y1="86" x2="160" y2="86"/>
+<line x1="52" y1="86" x2="52" y2="122"/>
+<line x1="160" y1="86" x2="160" y2="122"/>
+<line x1="52" y1="122" x2="98" y2="122"/>
+<line x1="75" y1="122" x2="75" y2="196"/>
+<line x1="160" y1="122" x2="206" y2="122"/>
+<line x1="183" y1="122" x2="183" y2="196"/>
+</g>
+<circle cx="95" cy="48" r="20" fill="#fff3df" stroke="#a8834a" stroke-width="2"/>
+<text x="95" y="49" font-size="24" text-anchor="middle" dominant-baseline="central">👴</text>
+<circle cx="145" cy="48" r="20" fill="#fff3df" stroke="#a8834a" stroke-width="2"/>
+<text x="145" y="49" font-size="24" text-anchor="middle" dominant-baseline="central">👵</text>
+<circle cx="52" cy="122" r="20" fill="#fff3df" stroke="#a8834a" stroke-width="2"/>
+<text x="52" y="123" font-size="24" text-anchor="middle" dominant-baseline="central">👨</text>
+<circle cx="98" cy="122" r="20" fill="#fff3df" stroke="#a8834a" stroke-width="2"/>
+<text x="98" y="123" font-size="24" text-anchor="middle" dominant-baseline="central">👩</text>
+<circle cx="160" cy="122" r="20" fill="#fff3df" stroke="#a8834a" stroke-width="2"/>
+<text x="160" y="123" font-size="24" text-anchor="middle" dominant-baseline="central">👱‍♀️</text>
+<circle cx="206" cy="122" r="27" fill="none" stroke="#ff8a3d" stroke-width="10" opacity="0.35"/>
+<circle cx="206" cy="122" r="20" fill="#fff3df" stroke="#ff8a3d" stroke-width="5"/>
+<text x="206" y="123" font-size="24" text-anchor="middle" dominant-baseline="central">🧔</text>
+<circle cx="75" cy="196" r="20" fill="#fff3df" stroke="#a8834a" stroke-width="2"/>
+<circle cx="75" cy="196" r="24" fill="none" stroke="#2f6bd8" stroke-width="2.5" stroke-dasharray="5 4"/>
+<text x="75" y="197" font-size="24" text-anchor="middle" dominant-baseline="central">🧒</text>
+<circle cx="183" cy="196" r="20" fill="#fff3df" stroke="#a8834a" stroke-width="2"/>
+<text x="183" y="197" font-size="24" text-anchor="middle" dominant-baseline="central">🧑</text>
+<text x="75" y="232" font-size="15" font-weight="bold" fill="#2f6bd8" text-anchor="middle" font-family="Arial, sans-serif">Bé</text>
+</svg>
