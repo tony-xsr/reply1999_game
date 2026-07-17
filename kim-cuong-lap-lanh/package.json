@@ -1,0 +1,8 @@
+{
+  "name": "kim-cuong-lap-lanh",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/kimcuong.test.js"
+  }
+}
