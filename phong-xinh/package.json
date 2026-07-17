@@ -1,0 +1,8 @@
+{
+  "name": "phong-xinh",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/phongxinh.test.js"
+  }
+}
