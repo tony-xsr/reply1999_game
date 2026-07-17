@@ -1,0 +1,8 @@
+{
+  "name": "xep-chu-tieng-anh",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/xepchu.test.js"
+  }
+}
