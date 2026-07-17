@@ -1,0 +1,8 @@
+{
+  "name": "ga-vu-tru",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/gavutru.test.js"
+  }
+}
