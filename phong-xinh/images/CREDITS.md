@@ -1,1 +1,5 @@
-Icon nguồn: Twemoji (jdecked/twemoji) — CC-BY 4.0. Phòng vẽ CSS/SVG. Không dùng asset game thương mại nào.
+Icon nguồn: Twemoji (jdecked/twemoji) — CC-BY 4.0 (39 món đồ ban đầu). Phòng vẽ CSS/SVG. Không dùng asset game thương mại nào.
+
+Đợt mở rộng thêm 34 món đồ (tủ quần áo, bàn học, kệ ti vi, thùng đồ chơi, giường tầng, tấm thảm, ghế lười, đàn xylophone, khủng long đồ chơi, xe scooter, xe ba bánh, ba lô, lồng chim, lồng chuột hamster, cúp, lều tipi, xích đu, võng, bạt nhún, dây nhảy, vòng hula, giày trượt patin, rương kho báu, giá vẽ tranh, xe kéo đồ chơi, kệ trang trí, lịch treo tường, bản đồ thế giới, bảng ghim, đèn chùm, lá cờ, dây cờ, vòng bắt mộng): icon TỰ VẼ bằng SVG hình khối đơn giản (không phải Twemoji), cùng phong cách phẳng, không dùng asset game thương mại nào.
+
+Đợt mở rộng thứ 2 thêm 20 món đồ chủ đề trường học/vườn/âm nhạc (sáo recorder, trống lục lạc, rổ bóng rổ mini, bảng pha màu, hộp bút, bình tưới cây, xe cút kít, chú lùn vườn, bể tắm chim, bộ ấm trà đồ chơi, kệ bánh cupcake, đèn lồng, bàn tính, chuông trường học, giá treo áo khoác, bảng đen, mũ tốt nghiệp, bằng khen đóng khung, cờ gió hình ống, dây đèn lồng trang trí): cũng là icon TỰ VẼ bằng SVG hình khối đơn giản, cùng phong cách với đợt mở rộng thứ nhất.

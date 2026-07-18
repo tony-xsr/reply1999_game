@@ -1,7 +1,7 @@
 // Unit test cho Phòng Xinh Của Bé. Chạy: node src/phongxinh.test.js
 
 import {
-  ROOM_W, ROOM_H, WALL_H, MAX_ITEMS, FURNITURE, WALL_COLORS, FLOOR_COLORS,
+  ROOM_W, ROOM_H, WALL_H, MAX_ITEMS, FURNITURE, WALL_COLORS, FLOOR_COLORS, CONTAINERS,
   furnitureById, clampPos, makeRoom, addItem, moveItem, flipItem, removeItem,
   setWall, setFloor, drawOrder, serializeRoom, deserializeRoom, randomRoom,
 } from './phongxinh.js';
@@ -141,6 +141,110 @@ check('phòng ngẫu nhiên: 6–9 món hợp lệ không trùng kiểu, đồ n
     }
   }
   return true;
+})());
+
+console.log('— Món chứa: kệ sách/kệ ti vi/bàn học... "chứa" hoặc "đặt lên" món khác —');
+
+check('CONTAINERS: mọi id món chứa tồn tại trong FURNITURE, mọi id được accepts cũng vậy', (() => {
+  return Object.keys(CONTAINERS).every((id) => furnitureById(id))
+    && Object.values(CONTAINERS).every((c) => c.slots.every((s) => s.accepts.every((aid) => furnitureById(aid))));
+})());
+
+check('đặt sách cạnh tủ sách sẽ tự "hút" lên kệ (thành con của tủ sách, đúng vị trí slot)', (() => {
+  const room = makeRoom();
+  const shelf = addItem(room, 'bookshelf', 200, 300);
+  const books = addItem(room, 'books', 200, 300); // thả ngay tại tâm tủ sách → đủ gần để hút
+  const slot = CONTAINERS.bookshelf.slots[0];
+  return books.parentUid === shelf.uid && books.slotIndex === 0
+    && books.x === shelf.x + slot.dx && books.y === shelf.y + slot.dy;
+})());
+
+check('đặt gấu bông cạnh tủ sách (đã có sách) sẽ vào slot còn trống thứ 2, không đè lên sách', (() => {
+  const room = makeRoom();
+  const shelf = addItem(room, 'bookshelf', 200, 300);
+  addItem(room, 'books', 200, 300);
+  const teddy = addItem(room, 'teddy', 200, 300);
+  return teddy.parentUid === shelf.uid && teddy.slotIndex === 1;
+})());
+
+check('đặt ti vi cạnh kệ ti vi sẽ tự lên kệ; đặt xa kệ thì vẫn là món độc lập', (() => {
+  const room = makeRoom();
+  const stand = addItem(room, 'tvstand', 100, 320);
+  const tiviNear = addItem(room, 'tivi', 105, 322);
+  const tiviFar = addItem(room, 'tivi', 400, 380);
+  return tiviNear.parentUid === stand.uid && tiviFar.parentUid === null;
+})());
+
+check('đặt ba lô cạnh giá treo áo (coatrack, thêm ở vòng mở rộng 2) sẽ tự treo lên', (() => {
+  const room = makeRoom();
+  const rack = addItem(room, 'coatrack', 150, 300);
+  const bag = addItem(room, 'backpack', 152, 302);
+  const slot = CONTAINERS.coatrack.slots[0];
+  return bag.parentUid === rack.uid && bag.x === rack.x + slot.dx && bag.y === rack.y + slot.dy;
+})());
+
+check('slot đã đầy hết (2/2) thì món thứ 3 không hút được nữa, đặt tự do như bình thường', (() => {
+  const room = makeRoom();
+  addItem(room, 'bookshelf', 200, 300);
+  addItem(room, 'books', 200, 300);
+  addItem(room, 'teddy', 200, 300);
+  const extra = addItem(room, 'globe', 200, 300); // globe cũng được slot 2 chấp nhận nhưng đã đầy
+  return extra.parentUid === null;
+})());
+
+check('món KHÔNG hợp lệ với slot (vd cái ghế) đặt cạnh tủ sách vẫn là món độc lập, không bị hút', (() => {
+  const room = makeRoom();
+  addItem(room, 'bookshelf', 200, 300);
+  const chair = addItem(room, 'chair', 200, 300);
+  return chair.parentUid === null;
+})());
+
+check('kéo tủ sách sang chỗ khác thì sách/gấu bông trên kệ đi theo đúng khoảng cách tương đối', (() => {
+  const room = makeRoom();
+  const shelf = addItem(room, 'bookshelf', 200, 300);
+  const books = addItem(room, 'books', 200, 300);
+  moveItem(room, shelf.uid, 350, 350);
+  const slot = CONTAINERS.bookshelf.slots[0];
+  return books.x === shelf.x + slot.dx && books.y === shelf.y + slot.dy;
+})());
+
+check('kéo sách ra xa khỏi tủ sách thì tách thành món độc lập (parentUid về null)', (() => {
+  const room = makeRoom();
+  addItem(room, 'bookshelf', 200, 300);
+  const books = addItem(room, 'books', 200, 300);
+  moveItem(room, books.uid, 400, 380);
+  return books.parentUid === null && books.x === 400;
+})());
+
+check('dọn tủ sách đi thì sách/gấu bông KHÔNG bị xoá theo, chỉ tách thành món độc lập', (() => {
+  const room = makeRoom();
+  const shelf = addItem(room, 'bookshelf', 200, 300);
+  const books = addItem(room, 'books', 200, 300);
+  removeItem(room, shelf.uid);
+  return room.items.length === 1 && room.items[0].uid === books.uid && room.items[0].parentUid === null;
+})());
+
+check('món đang xếp trong món chứa luôn vẽ NGAY SAU món chứa, bất kể y tuyệt đối', (() => {
+  const room = makeRoom();
+  const shelf = addItem(room, 'bookshelf', 200, 260); // shelf ở y nhỏ (xa hơn trong phòng)
+  const books = addItem(room, 'books', 200, 260); // con của shelf, y thực tế < shelf.y (đặt "lên" kệ)
+  const farItem = addItem(room, 'cat', 200, 400); // món độc lập ở y lớn hơn nhiều
+  const order = drawOrder(room).map((it) => it.uid);
+  const shelfIdx = order.indexOf(shelf.uid);
+  const booksIdx = order.indexOf(books.uid);
+  return booksIdx === shelfIdx + 1 && order.indexOf(farItem.uid) > booksIdx;
+})());
+
+check('serialize → deserialize giữ nguyên quan hệ cha-con (kể cả khi có id lạ chen giữa)', (() => {
+  const room = makeRoom();
+  const shelf = addItem(room, 'bookshelf', 200, 300);
+  const books = addItem(room, 'books', 200, 300);
+  const raw = JSON.parse(serializeRoom(room));
+  raw.items.splice(1, 0, { id: 'khong_co_that', x: 0, y: 0, uid: 999 }); // chèn id lạ vào giữa
+  const room2 = deserializeRoom(JSON.stringify(raw));
+  const shelf2 = room2.items.find((it) => it.id === 'bookshelf');
+  const books2 = room2.items.find((it) => it.id === 'books');
+  return room2.items.length === 2 && books2.parentUid === shelf2.uid && books2.slotIndex === books.slotIndex;
 })());
 
 console.log(`\nKết quả: ${passed} pass, ${failed} fail`);
