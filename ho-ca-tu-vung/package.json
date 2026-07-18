@@ -1,0 +1,8 @@
+{
+  "name": "ho-ca-tu-vung",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/hoca.test.js"
+  }
+}
