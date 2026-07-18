@@ -10,6 +10,7 @@ import { viNumber } from '../../nhay-lo-co/src/loco.js';
 import { speak, bindMute } from '../../to-mau/src/speech.js';
 import { sfx } from '../../pokemon/src/sfx.js';
 import { currentProfile, recordSession } from '../../pokemon/src/stats.js';
+import { mountKidFeatures } from '../../shared/kid-bar.js';
 
 const t = (key, fallback) => {
   const v = window.I18N?.t(key);
@@ -498,3 +499,5 @@ speak(state.instruction); // đọc gợi ý ngay khi mới vào trang, bé chư
 
 // Hook cho e2e test
 window.__troxua = { state, startGame, showHome };
+
+mountKidFeatures(); // thanh avatar bé + huy hiệu sao header + kiểm tra giới hạn phút/ngày (áp dụng cho mọi game, kể cả game giải trí thuần)
