@@ -1,0 +1,8 @@
+{
+  "name": "nghe-doan-on-tap",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/ontap.test.js"
+  }
+}

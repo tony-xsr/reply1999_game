@@ -811,6 +811,7 @@ const GAMES = {
   goingtowill: startGoingToWill,
   modal: startModal,
   conditional: startConditional,
+  sentencebuilder: startSentenceBuilder,
 };
 
 const HELP_TEXT = {
@@ -820,6 +821,7 @@ const HELP_TEXT = {
   goingtowill: t('nguphap.goingtowill.help', 'Nhìn biểu tượng: va li đã đóng gói hoặc mây đen là kế hoạch/dấu hiệu rõ ràng (dùng going to); chuông điện thoại hoặc lời hứa là quyết định ngay lúc đó (dùng will). Bé chọn đúng câu.'),
   modal: t('nguphap.modal.help', 'Nhìn biển báo hoặc tình huống: biển cấm dùng mustn\'t, biển bắt buộc dùng must, lời khuyên nên làm dùng should, lời khuyên không nên làm dùng shouldn\'t. Bé chọn đúng động từ khuyết thiếu.'),
   conditional: t('nguphap.conditional.help', 'Nhìn nguyên nhân (biểu tượng) dẫn tới kết quả gì. Mệnh đề "if" chia hiện tại đơn, mệnh đề kết quả dùng "will" + V nguyên mẫu. Bé chọn đúng câu, tránh nhầm dùng "will" ngay trong mệnh đề "if".'),
+  sentencebuilder: t('nguphap.sentencebuilder.help', 'Đọc nghĩa tiếng Việt, rồi bấm từng từ tiếng Anh theo đúng thứ tự để dựng lại câu. Bấm sai 1 lần sẽ có từ đúng sáng lên gợi ý, bấm sai lần 2 thì câu sẽ được ghép sẵn cho bé xem.'),
 };
 
 document.querySelectorAll('.mode-card').forEach((btn) => {
