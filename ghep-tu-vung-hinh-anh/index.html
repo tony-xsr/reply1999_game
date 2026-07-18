@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#fff3e0">
+  <title>Ghép Từ Vựng Và Hình Ảnh</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <a class="round-btn" href="/thi-chung-chi-anh/" data-i18n-title="examhub.back" title="Thi Chứng Chỉ Anh">🏠</a>
+      <h1 data-i18n="ghepvung.title">🖼️ Ghép Từ Vựng</h1>
+      <div class="chip-stat" id="levelChip">1/6</div>
+      <div class="chip-stat score" id="scoreChip">0</div>
+      <button class="round-btn" id="btnHelp" data-i18n-title="pika.btn.help" title="Cách chơi">❓</button>
+      <button class="round-btn" id="btnSound" data-i18n-title="pika.btn.sound" title="Âm thanh">🔊</button>
+    </header>
+
+    <main class="stage">
+      <div class="board" id="board"></div>
+      <div class="overlay" id="overlay">
+        <div class="ov-emoji" id="ovEmoji">🖼️</div>
+        <div class="ov-text" id="ovText" data-i18n="ghepvung.help">Lật 2 lá bài bất kỳ — nếu 1 lá hình và 1 lá chữ cùng là một từ, bé thắng cặp đó và máy sẽ đọc to từ tiếng Anh! Ghép hết cả bàn là qua màn mới, đi hết 6 màn là hoàn thành.</div>
+        <button class="big-btn" id="btnPlay" data-i18n="ran.play">CHƠI ▶</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="/i18n.js"></script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

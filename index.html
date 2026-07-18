@@ -38,7 +38,7 @@ body{
     max(48px, calc(env(safe-area-inset-bottom, 0px) + 32px))
     max(18px, env(safe-area-inset-left, 0px));
 }
-header{display:flex;align-items:center;gap:14px;padding:18px 6px 26px;border-bottom:1px solid #e9d3ad;margin-bottom:24px}
+header{display:flex;align-items:center;flex-wrap:wrap;gap:14px;padding:18px 6px 26px;border-bottom:1px solid #e9d3ad;margin-bottom:24px}
 header .logo{
   width:54px;height:54px;border-radius:14px;
   background:linear-gradient(135deg,#ffe1b0,#ff8a3d);
@@ -170,8 +170,9 @@ footer a{color:var(--gold2)}
     <div class="logo">🌟</div>
     <div style="flex:1">
       <h1 data-i18n="hub.title">Game Collection</h1>
-      <p class="sub" data-i18n="hub.subtitle">Bộ sưu tập game offline luyện tư duy</p>
+      <p class="sub" data-i18n="hub.subtitle">Học&luyện tư duy</p>
     </div>
+    <div id="homeProfileSlot" style="display:flex;align-items:center"></div>
     <div class="lang-picker" id="lang-picker" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
       <button id="btn-test-audio-hub" aria-label="Test audio" title="Test audio (iPhone)" style="background:linear-gradient(180deg,#3b82f6,#1d4ed8);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;cursor:pointer">🔊 Test</button>
       <select id="lang-select" aria-label="Language" style="background:#fff3df;color:var(--gold2);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;cursor:pointer;outline:none">
@@ -285,7 +286,7 @@ footer a{color:var(--gold2)}
       <div class="gc-title"><span data-i18n="card.hubtienganh.title">Góc Tiếng Anh</span> <span class="chip gold" data-i18n="hub.chip.new">Mới</span></div>
       <div class="gc-desc" data-i18n="card.hubtienganh.desc">Học từ vựng &amp; câu tiếng Anh qua trò chơi: đánh vần, ghép câu, phát âm, thay đồ búp bê, trang trí phòng — giọng đọc en-US thật.</div>
       <div class="gc-meta">
-        <span class="chip" data-i18n="card.hubtienganh.chip">19 game tiếng Anh</span>
+        <span class="chip" data-i18n="card.hubtienganh.chip">24 game tiếng Anh</span>
         <span class="chip" data-i18n="hub.chip.offline">Offline</span>
       </div>
       <div class="gc-cta"><button class="info-btn" type="button" aria-label="Thông tin trò chơi">ℹ️</button><a class="play" href="goc-tieng-anh/" data-i18n="hub.cta.play">Chơi ▶</a></div>
@@ -527,6 +528,14 @@ footer a{color:var(--gold2)}
 </div>
 
 <script src="/i18n.js"></script>
+<script type="module">
+// Trang chủ không phải "game" (không có <header class="top">) nên không dùng
+// mountKidFeatures() — chỉ gắn riêng ô hồ sơ bé vào header của trang chủ: đã
+// chọn bé thì hiện avatar+tên+số sao (chạm vào xem thêm), chưa chọn thì hiện
+// nút "Chọn bé" dẫn tới /chon-be/.
+import { mountHomeProfileChip } from '/shared/kid-bar.js';
+mountHomeProfileChip(document.getElementById('homeProfileSlot'));
+</script>
 <script>
 // Đăng ký service worker + tự kiểm tra bản mới giờ đã chuyển vào i18n.js (chạy trên mọi trang).
 
@@ -620,12 +629,20 @@ document.querySelectorAll('.game-card:not(.locked)').forEach(card => {
   });
 });
 
-// Khối giới thiệu thu gọn/mở rộng
+// Khối giới thiệu thu gọn/mở rộng — nhớ lựa chọn lần trước (localStorage),
+// lần sau vào lại trang sẽ tự mở đúng trạng thái bé/phụ huynh để lại lần trước.
 (function(){
   const box = document.getElementById('introBox');
   const btn = document.getElementById('introToggle');
   if (!box || !btn) return;
-  btn.addEventListener('click', () => box.classList.toggle('expanded'));
+  const KEY = 'r99-intro-expanded';
+  try {
+    if (localStorage.getItem(KEY) === '1') box.classList.add('expanded');
+  } catch { /* private mode: bỏ qua, dùng mặc định thu gọn */ }
+  btn.addEventListener('click', () => {
+    const expanded = box.classList.toggle('expanded');
+    try { localStorage.setItem(KEY, expanded ? '1' : '0'); } catch { /* ignore */ }
+  });
 })();
 
 // Góc Gia Đình: thu gọn mặc định (ít dùng nhưng chiếm nhiều chỗ) — bấm tiêu đề để mở/đóng
