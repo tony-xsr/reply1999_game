@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#cdeaff">
+  <title>Câu Cá Từ Vựng</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <a class="round-btn" href="/goc-tieng-anh/" data-i18n-title="hocvui.back" title="Chọn trò khác">◀</a>
+      <h1 data-i18n="cauca.title">🎣 Câu Cá Từ Vựng</h1>
+      <button class="round-btn" id="btnNew" data-i18n-title="pika.btn.new" title="Chơi lại">🔄</button>
+      <button class="round-btn" id="btnHelp" data-i18n-title="pika.btn.help" title="Cách chơi">❓</button>
+      <button class="round-btn" id="btnSound" data-i18n-title="pika.btn.sound" title="Âm thanh">🔊</button>
+    </header>
+
+    <button class="filter-toggle" id="filterToggle" type="button">
+      <span class="ft-icon">🔽</span>
+      <span data-i18n="filter.label">Lọc chủ đề</span>
+      <span class="ft-label"></span>
+    </button>
+    <div class="filter-row" id="filterRow"></div>
+
+    <div class="hud">
+      <div class="hud-chip money"><span>⭐</span><b id="hudScore">0</b></div>
+      <div class="hud-chip word"><span>📖</span><b id="hudRound">0/6</b></div>
+      <div class="hud-chip streak"><span>🔥</span><b id="hudStreak">0</b></div>
+      <div class="hud-chip level" id="hudLevel">Màn 1</div>
+    </div>
+
+    <main class="stage">
+      <div class="board" id="board">
+        <button class="listen-btn" id="btnListen">🔊 Nghe lại</button>
+        <div class="sentence-cap" id="sentenceCap"></div>
+        <div class="pond-field" id="field">
+          <div class="rod" id="rod">🎣</div>
+          <div class="options" id="options"></div>
+        </div>
+      </div>
+
+      <div class="overlay" id="overlay">
+        <div class="ov-emoji" id="ovEmoji">🎣</div>
+        <div class="ov-text" id="ovText" data-i18n="cauca.start">Nghe từ tiếng Anh rồi chạm đúng con cá để câu nhé!</div>
+        <button class="big-btn" id="btnPlay" data-i18n="cauca.play">CÂU CÁ ▶</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="/i18n.js"></script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
