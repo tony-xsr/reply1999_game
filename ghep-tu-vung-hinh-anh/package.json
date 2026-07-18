@@ -1,0 +1,8 @@
+{
+  "name": "ghep-tu-vung-hinh-anh",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/ghepvung.test.js"
+  }
+}
