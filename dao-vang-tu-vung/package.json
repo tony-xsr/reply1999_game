@@ -1,0 +1,8 @@
+{
+  "name": "dao-vang-tu-vung",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/daovangtuvung.test.js"
+  }
+}

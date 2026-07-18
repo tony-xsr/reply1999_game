@@ -463,6 +463,32 @@ export const MOVERS_UNITS = [
       { id: 'movers-vocabulary-20', type: 'vocab', prompt: 'The day after Monday is ___.', options: ['Tuesday', 'Wednesday', 'Sunday', 'Friday'], answer: 0, explain: "'Tuesday' = thứ Ba, ngày sau thứ Hai." },
     ],
   },
+  {
+    id: 'movers-articles',
+    level: 'movers',
+    topic: 'Mạo Từ A/An/The',
+    grammarPoints: ["mạo từ 'a/an' trước danh từ số ít đếm được, chia theo ÂM ĐỌC (không phải chữ viết)", "mạo từ 'the' khi vật/người đã xác định hoặc chỉ có 1"],
+    vocab: ['umbrella', 'teacher', 'apple', 'car', 'hour', 'university', 'moon', 'door'],
+    lesson: {
+      intro: "'A/an' dùng cho danh từ số ít đếm được, chưa xác định; 'the' dùng khi người nghe đã biết vật/người đó là gì.",
+      points: [
+        { rule: "'a' + âm PHỤ ÂM khi đọc, 'an' + âm NGUYÊN ÂM khi đọc — chú ý chữ viết có thể đánh lừa (an hour có 'h' câm, a university lại đọc là /juː/).", examples: [{ en: 'a car', vi: 'một chiếc xe (phụ âm /k/)' }, { en: 'an umbrella', vi: 'một cái ô (nguyên âm /ʌ/)' }, { en: 'an hour', vi: 'một tiếng đồng hồ (h câm)' }, { en: 'a university', vi: 'một trường đại học (âm /j/)' }] },
+        { rule: "'the' dùng khi vật/người đã được nhắc tới trước đó, hoặc trên đời chỉ có DUY NHẤT 1 (mặt trời, mặt trăng).", examples: [{ en: 'Look at the moon!', vi: 'Nhìn mặt trăng kìa!' }, { en: 'Can you close the door?', vi: 'Bạn đóng cửa lại giúp mình nhé?' }] },
+      ],
+    },
+    questions: [
+      { id: 'movers-articles-1', type: 'grammar', prompt: 'I have ___ umbrella in my bag.', options: ['a', 'an', 'the', '-'], answer: 1, explain: "'umbrella' bắt đầu bằng âm nguyên âm → an." },
+      { id: 'movers-articles-2', type: 'grammar', prompt: 'She is ___ teacher at my school.', options: ['a', 'an', 'the', '-'], answer: 0, explain: "'teacher' bắt đầu bằng âm phụ âm /t/ → a." },
+      { id: 'movers-articles-3', type: 'grammar', prompt: 'He ate ___ apple for breakfast.', options: ['a', 'an', 'the', '-'], answer: 1, explain: "'apple' bắt đầu bằng âm nguyên âm → an." },
+      { id: 'movers-articles-4', type: 'grammar', prompt: 'This is ___ car. It is very fast.', options: ['a', 'an', 'the', '-'], answer: 0, explain: "'car' bắt đầu bằng âm phụ âm /k/ → a." },
+      { id: 'movers-articles-5', type: 'grammar', prompt: 'My father waited for ___ hour at the airport.', options: ['a', 'an', 'the', '-'], answer: 1, explain: "'hour' có chữ 'h' câm, âm đọc bắt đầu bằng nguyên âm /aʊ/ → an." },
+      { id: 'movers-articles-6', type: 'grammar', prompt: 'My sister studies at ___ university.', options: ['a', 'an', 'the', '-'], answer: 0, explain: "'university' viết bằng nguyên âm 'u' nhưng ĐỌC là /juː/ (âm phụ âm /j/) → a." },
+      { id: 'movers-articles-7', type: 'grammar', prompt: 'The sun is ___ star.', options: ['a', 'an', 'the', '-'], answer: 0, explain: "'star' bắt đầu bằng âm phụ âm /s/ → a." },
+      { id: 'movers-articles-8', type: 'grammar', prompt: "Look at ___ moon! It's so bright tonight.", options: ['a', 'an', 'the', '-'], answer: 2, explain: "Mặt trăng chỉ có DUY NHẤT 1 → the." },
+      { id: 'movers-articles-9', type: 'grammar', prompt: "Can you close ___ door? It's cold in here.", options: ['a', 'an', 'the', '-'], answer: 2, explain: "Cái cửa cụ thể trong phòng (người nghe biết rõ) → the." },
+      { id: 'movers-articles-10', type: 'grammar', prompt: 'She is ___ honest girl; she never lies.', options: ['a', 'an', 'the', '-'], answer: 1, explain: "'honest' có chữ 'h' câm, âm đọc bắt đầu bằng nguyên âm /ɒ/ → an." },
+    ],
+  },
 ];
 
 export const FLYERS_UNITS = [
@@ -768,6 +794,35 @@ export const FLYERS_UNITS = [
       { id: 'flyers-vocabulary-20', type: 'vocab', prompt: 'A person who fixes cars is a ___.', options: ['mechanic', 'electrician', 'plumber', 'tailor'], answer: 0, explain: "'mechanic' = thợ sửa xe." },
     ],
   },
+  {
+    id: 'flyers-time-prepositions',
+    level: 'flyers',
+    topic: 'Giới Từ Thời Gian: In/On/At',
+    grammarPoints: ["giới từ thời gian: 'in' (tháng/mùa/năm/buổi), 'on' (ngày/thứ), 'at' (giờ cụ thể/thời điểm đặc biệt)", 'ngoại lệ cần nhớ: at night, at the weekend, at Christmas'],
+    vocab: ['library', 'camera', 'coat', 'laboratory', 'band', 'coast', 'morning', 'weekend'],
+    lesson: {
+      intro: "3 giới từ thời gian dễ nhầm nhất: 'in' cho khoảng thời gian DÀI (tháng, mùa, năm, buổi trong ngày), 'on' cho NGÀY cụ thể, 'at' cho GIỜ hoặc 1 điểm thời gian đặc biệt.",
+      points: [
+        { rule: "'in' + tháng/mùa/năm/buổi (in July, in summer, in 2020, in the morning).", examples: [{ en: 'My birthday is in July.', vi: 'Sinh nhật tôi vào tháng Bảy.' }, { en: 'We often go to the coast in summer.', vi: 'Chúng tôi hay đi biển vào mùa hè.' }] },
+        { rule: "'on' + ngày trong tuần/ngày cụ thể (on Monday, on my birthday, on Christmas Day).", examples: [{ en: 'I go to the library on Monday.', vi: 'Tôi đi thư viện vào thứ Hai.' }, { en: 'We have a party on Christmas Day.', vi: 'Chúng tôi có tiệc vào ngày Giáng Sinh.' }] },
+        { rule: "'at' + giờ cụ thể/thời điểm đặc biệt (at 8 o'clock, at night, at the weekend, at Christmas) — LƯU Ý các ngoại lệ này không theo quy tắc 'in/on' thông thường.", examples: [{ en: 'The shop opens at 9am.', vi: 'Cửa hàng mở cửa lúc 9 giờ sáng.' }, { en: 'I usually sleep at night.', vi: 'Tôi thường ngủ vào ban đêm.' }] },
+      ],
+    },
+    questions: [
+      { id: 'flyers-time-prepositions-1', type: 'grammar', prompt: 'I go to the library ___ Monday.', options: ['in', 'on', 'at'], answer: 1, explain: "Thứ trong tuần → on." },
+      { id: 'flyers-time-prepositions-2', type: 'grammar', prompt: 'She was born ___ 2012.', options: ['in', 'on', 'at'], answer: 0, explain: "Năm → in." },
+      { id: 'flyers-time-prepositions-3', type: 'grammar', prompt: 'We always watch TV ___ the evening.', options: ['in', 'on', 'at'], answer: 0, explain: "Buổi trong ngày → in." },
+      { id: 'flyers-time-prepositions-4', type: 'grammar', prompt: 'The train leaves ___ 8 o\'clock.', options: ['in', 'on', 'at'], answer: 2, explain: "Giờ cụ thể → at." },
+      { id: 'flyers-time-prepositions-5', type: 'grammar', prompt: "It's very cold ___ winter.", options: ['in', 'on', 'at'], answer: 0, explain: "Mùa → in." },
+      { id: 'flyers-time-prepositions-6', type: 'grammar', prompt: 'I usually sleep ___ night.', options: ['in', 'on', 'at'], answer: 2, explain: "Ngoại lệ cần nhớ: at night." },
+      { id: 'flyers-time-prepositions-7', type: 'grammar', prompt: 'My birthday is ___ July.', options: ['in', 'on', 'at'], answer: 0, explain: "Tháng → in." },
+      { id: 'flyers-time-prepositions-8', type: 'grammar', prompt: 'We have a party ___ Christmas Day.', options: ['in', 'on', 'at'], answer: 1, explain: "Ngày cụ thể (Christmas Day) → on." },
+      { id: 'flyers-time-prepositions-9', type: 'grammar', prompt: 'The shop opens ___ 9am.', options: ['in', 'on', 'at'], answer: 2, explain: "Giờ cụ thể → at." },
+      { id: 'flyers-time-prepositions-10', type: 'grammar', prompt: 'They go to the coast ___ the weekend.', options: ['in', 'on', 'at'], answer: 2, explain: "Ngoại lệ cần nhớ: at the weekend (tiếng Anh Anh)." },
+      { id: 'flyers-time-prepositions-11', type: 'grammar', prompt: 'She practices with her band ___ Saturdays.', options: ['in', 'on', 'at'], answer: 1, explain: "Thứ trong tuần (số nhiều = mọi thứ Bảy) → on." },
+      { id: 'flyers-time-prepositions-12', type: 'grammar', prompt: "He wears his coat ___ the morning because it's cold.", options: ['in', 'on', 'at'], answer: 0, explain: "Buổi trong ngày → in." },
+    ],
+  },
 ];
 
 // KET (A2 Key) — bắt đầu Đợt 6 của mục 30: 4 unit đầu tiên, tập trung vào
@@ -939,6 +994,32 @@ export const KET_UNITS = [
       { id: 'ket-reading-comprehension-4', type: 'reading', prompt: 'What happened last Saturday?', options: ['It started to rain heavily', 'The market was closed', 'Maria got lost', 'Her mother was late'], answer: 0, explain: "'it started to rain heavily, so they had to leave earlier'." },
       { id: 'ket-reading-comprehension-5', type: 'reading', prompt: 'Why was Maria sad?', options: ["She didn't have time to buy a croissant", 'She lost her money', 'She missed the bus', 'Her mother was angry'], answer: 0, explain: "'Maria was sad because she didn't have time to buy her croissant'." },
       { id: 'ket-reading-comprehension-6', type: 'reading', prompt: 'What did Maria and her mother do on Sunday?', options: ['They went back to the market and bought two croissants', 'They stayed home all day', 'They went to a different market', "They didn't buy anything"], answer: 0, explain: "'they bought two croissants!' vào Chủ nhật khi quay lại chợ." },
+    ],
+  },
+  {
+    id: 'ket-subject-object-questions',
+    level: 'ket',
+    topic: 'Câu Hỏi Về Chủ Ngữ vs Tân Ngữ',
+    grammarPoints: ["câu hỏi về CHỦ NGỮ (Who/What làm chủ ngữ): KHÔNG cần trợ động từ do/does/did", "câu hỏi về TÂN NGỮ: CẦN trợ động từ do/does/did + chủ ngữ + động từ nguyên mẫu"],
+    vocab: ['appointment', 'book', 'passport', 'friendly', 'crowded', 'charge'],
+    lesson: {
+      intro: "Khi 'Who/What' LÀM CHỦ NGỮ của câu (chính nó thực hiện hành động), câu hỏi giữ nguyên trật tự như câu khẳng định — KHÔNG thêm do/does/did. Khi hỏi về TÂN NGỮ (đối tượng của hành động), câu hỏi cần đảo trợ động từ như bình thường.",
+      points: [
+        { rule: "Hỏi về CHỦ NGỮ: Who/What + động từ (chia như câu khẳng định) — không có do/does/did.", examples: [{ en: 'Someone opened the door. → Who opened the door?', vi: 'Ai đó đã mở cửa. → Ai đã mở cửa?' }, { en: 'Something happened at school. → What happened at school?', vi: 'Có chuyện gì đó xảy ra ở trường. → Chuyện gì đã xảy ra ở trường?' }] },
+        { rule: "Hỏi về TÂN NGỮ: Who/What + do/does/did + chủ ngữ + động từ nguyên mẫu.", examples: [{ en: 'You opened something. → What did you open?', vi: 'Bạn đã mở cái gì đó. → Bạn đã mở cái gì?' }, { en: 'You called someone. → Who did you call?', vi: 'Bạn đã gọi cho ai đó. → Bạn đã gọi cho ai?' }] },
+      ],
+    },
+    questions: [
+      { id: 'ket-subject-object-questions-1', type: 'grammar', prompt: 'Someone opened the door. → ___ opened the door?', options: ['Who', 'Who did', 'Did who', 'Whom'], answer: 0, explain: "Hỏi về CHỦ NGỮ (ai đã mở) → không cần 'did': Who opened..." },
+      { id: 'ket-subject-object-questions-2', type: 'grammar', prompt: 'You opened something. → ___ did you open?', options: ['Who', 'What', 'Whose', 'Where'], answer: 1, explain: "Hỏi về TÂN NGỮ (mở cái gì) → cần 'did': What did you open?" },
+      { id: 'ket-subject-object-questions-3', type: 'grammar', prompt: 'Someone likes pizza in your family. → ___ likes pizza?', options: ['Who', 'Who does', 'Does who', 'Whom'], answer: 0, explain: "Hỏi về CHỦ NGỮ → không cần 'does': Who likes pizza?" },
+      { id: 'ket-subject-object-questions-4', type: 'grammar', prompt: 'You like something for breakfast. → ___ do you like for breakfast?', options: ['Who', 'What', 'Whose', 'Why'], answer: 1, explain: "Hỏi về TÂN NGỮ (thích cái gì) → What do you like?" },
+      { id: 'ket-subject-object-questions-5', type: 'grammar', prompt: 'Someone lives next door. → ___ lives next door?', options: ['Who', 'Who does', 'Does who', 'Whom'], answer: 0, explain: "Hỏi về CHỦ NGỮ → Who lives next door?" },
+      { id: 'ket-subject-object-questions-6', type: 'grammar', prompt: 'You live somewhere. → ___ do you live?', options: ['Who', 'What', 'Where', 'When'], answer: 2, explain: "Hỏi về nơi chốn (tân ngữ của giới từ) → Where do you live?" },
+      { id: 'ket-subject-object-questions-7', type: 'grammar', prompt: 'Something happened at the crowded market. → ___ happened at the market?', options: ['What', 'What did', 'Did what', 'Whom'], answer: 0, explain: "Hỏi về CHỦ NGỮ (chuyện gì đã xảy ra) → không cần 'did': What happened?" },
+      { id: 'ket-subject-object-questions-8', type: 'grammar', prompt: 'You saw someone at your friendly neighbour\'s house. → ___ did you see there?', options: ['Who', 'What', 'Whose', 'Why'], answer: 0, explain: "Hỏi về TÂN NGỮ (thấy ai) → Who did you see?" },
+      { id: 'ket-subject-object-questions-9', type: 'grammar', prompt: 'Someone booked the appointment. → ___ booked the appointment?', options: ['Who', 'Who did', 'Did who', 'Whom'], answer: 0, explain: "Hỏi về CHỦ NGỮ → Who booked the appointment?" },
+      { id: 'ket-subject-object-questions-10', type: 'grammar', prompt: 'You want something for your birthday. → ___ do you want for your birthday?', options: ['Who', 'What', 'Whose', 'Where'], answer: 1, explain: "Hỏi về TÂN NGỮ (muốn cái gì) → What do you want?" },
     ],
   },
 ];
@@ -1154,6 +1235,35 @@ export const PET_UNITS = [
       { id: 'pet-rewrite-sentences-8', type: 'rewrite', prompt: 'Workers built the bridge in 1980. → ___', options: ['The bridge was built in 1980.', 'The bridge is built in 1980.', 'The bridge has been built in 1980.', 'The bridge was building in 1980.'], answer: 0, explain: 'Bị động quá khứ đơn: The bridge was built in 1980.' },
       { id: 'pet-rewrite-sentences-9', type: 'rewrite', prompt: '"I have finished my homework," he said. → ___', options: ['He said he had finished his homework.', 'He said he has finished his homework.', 'He said he finished his homework.', 'He said he was finishing his homework.'], answer: 0, explain: 'Lùi thì xa hơn: have → had.' },
       { id: 'pet-rewrite-sentences-10', type: 'rewrite', prompt: 'They grow rice in Vietnam. → ___', options: ['Rice is grown in Vietnam.', 'Rice grows in Vietnam.', 'Rice was grown in Vietnam.', 'Rice has grown in Vietnam.'], answer: 0, explain: 'Bị động hiện tại đơn: Rice is grown in Vietnam.' },
+    ],
+  },
+  {
+    id: 'pet-question-tags',
+    level: 'pet',
+    topic: 'Câu Hỏi Đuôi (Question Tags)',
+    grammarPoints: ['câu khẳng định → đuôi phủ định; câu phủ định → đuôi khẳng định', "đuôi dùng ĐÚNG trợ động từ của câu chính (is/does/can/have...); 'I am' → 'aren't I'; 'Let's' → 'shall we'"],
+    vocab: ['tourist', 'technology', 'culture', 'museum', 'education', 'environment', 'relationship'],
+    lesson: {
+      intro: "Câu hỏi đuôi (question tag) là 1 câu hỏi ngắn thêm vào cuối câu để xác nhận thông tin — quy tắc chung: KHẲNG ĐỊNH + đuôi PHỦ ĐỊNH, PHỦ ĐỊNH + đuôi KHẲNG ĐỊNH, luôn dùng đúng trợ động từ của câu chính.",
+      points: [
+        { rule: 'Câu chính có trợ động từ (is/are/can/have/will...) → đuôi lặp lại đúng trợ động từ đó, đảo phủ định/khẳng định.', examples: [{ en: "She is a tourist, isn't she?", vi: 'Cô ấy là khách du lịch, phải không?' }, { en: "They can't speak French, can they?", vi: 'Họ không biết nói tiếng Pháp, phải không?' }] },
+        { rule: "Câu chính KHÔNG có trợ động từ (hiện tại đơn/quá khứ đơn thường) → đuôi dùng do/does/did.", examples: [{ en: "She studies education, doesn't she?", vi: 'Cô ấy học ngành giáo dục, phải không?' }, { en: "He didn't go to the museum, did he?", vi: 'Anh ấy đã không đi bảo tàng, phải không?' }] },
+        { rule: "2 ngoại lệ đặc biệt cần nhớ: 'I am' → 'aren't I'; 'Let's...' → 'shall we'.", examples: [{ en: 'I am right, aren\'t I?', vi: 'Tôi đúng, phải không?' }, { en: "Let's improve our relationship, shall we?", vi: 'Hãy cải thiện mối quan hệ của chúng ta nhé?' }] },
+      ],
+    },
+    questions: [
+      { id: 'pet-question-tags-1', type: 'grammar', prompt: 'She is a tourist, ___?', options: ['isn\'t she', 'is she', 'doesn\'t she', 'was she'], answer: 0, explain: "Câu khẳng định với 'is' → đuôi phủ định 'isn't she'." },
+      { id: 'pet-question-tags-2', type: 'grammar', prompt: "You don't like modern technology, ___?", options: ['do you', "don't you", 'are you', 'did you'], answer: 0, explain: "Câu phủ định → đuôi khẳng định 'do you'." },
+      { id: 'pet-question-tags-3', type: 'grammar', prompt: 'They can speak French, ___?', options: ["can't they", 'can they', 'do they', "don't they"], answer: 0, explain: "Trợ động từ 'can' → đuôi phủ định 'can't they'." },
+      { id: 'pet-question-tags-4', type: 'grammar', prompt: 'He didn\'t go to the conference, ___?', options: ['did he', "didn't he", 'does he', 'was he'], answer: 0, explain: "Câu phủ định 'didn't' → đuôi khẳng định 'did he'." },
+      { id: 'pet-question-tags-5', type: 'grammar', prompt: 'This culture is very interesting, ___?', options: ["isn't it", 'is it', 'doesn\'t it', 'does it'], answer: 0, explain: "'is' → đuôi phủ định 'isn't it'." },
+      { id: 'pet-question-tags-6', type: 'grammar', prompt: 'You have visited that museum before, ___?', options: ["haven't you", 'have you', 'did you', "didn't you"], answer: 0, explain: "Trợ động từ 'have' (hiện tại hoàn thành) → đuôi phủ định 'haven't you'." },
+      { id: 'pet-question-tags-7', type: 'grammar', prompt: 'I am right, ___?', options: ["aren't I", 'am I not', 'am not I', "isn't I"], answer: 0, explain: "Ngoại lệ đặc biệt: 'I am' → đuôi 'aren't I' (không phải 'am I not' trong văn nói)." },
+      { id: 'pet-question-tags-8', type: 'grammar', prompt: 'She studies education at university, ___?', options: ["doesn't she", 'does she', "isn't she", "didn't she"], answer: 0, explain: "Hiện tại đơn không trợ động từ → dùng 'does': doesn't she." },
+      { id: 'pet-question-tags-9', type: 'grammar', prompt: 'They weren\'t at the meeting, ___?', options: ['were they', "weren't they", 'was they', 'are they'], answer: 0, explain: "Câu phủ định 'weren't' → đuôi khẳng định 'were they'." },
+      { id: 'pet-question-tags-10', type: 'grammar', prompt: 'We should protect the environment, ___?', options: ["shouldn't we", 'should we', 'do we', "don't we"], answer: 0, explain: "Trợ động từ 'should' → đuôi phủ định 'shouldn't we'." },
+      { id: 'pet-question-tags-11', type: 'grammar', prompt: 'He will apply for that job, ___?', options: ["won't he", 'will he', 'does he', "doesn't he"], answer: 0, explain: "Trợ động từ 'will' → đuôi phủ định 'won't he'." },
+      { id: 'pet-question-tags-12', type: 'grammar', prompt: "Let's improve our relationship, ___?", options: ['shall we', 'will we', 'do we', "won't we"], answer: 0, explain: "Ngoại lệ đặc biệt: 'Let's...' → đuôi luôn là 'shall we'." },
     ],
   },
 ];
@@ -1385,6 +1495,32 @@ export const TOEFL_JUNIOR_UNITS = [
       { id: 'toefl-junior-relative-clauses-nondefining-8', type: 'grammar', prompt: 'We stayed at a small hotel, ___ was very comfortable.', options: ['that', 'which', 'who', 'whose'], answer: 1, explain: 'Không xác định dùng which.' },
     ],
   },
+  {
+    id: 'toefl-junior-correlative-comparatives',
+    level: 'toefl-junior',
+    topic: 'So Sánh Kép: The + Hơn..., The + Hơn...',
+    grammarPoints: ["cấu trúc 'The + so sánh hơn + mệnh đề 1, the + so sánh hơn + mệnh đề 2' (càng... thì càng...)"],
+    vocab: ['analyze', 'reliable', 'evaluate', 'significant', 'global', 'achievement', 'community', 'contribute'],
+    lesson: {
+      intro: "Cấu trúc song song 'The + so sánh hơn..., the + so sánh hơn...' diễn tả 2 sự việc thay đổi CÙNG TỶ LỆ với nhau (càng... thì càng...) — thường gặp trong bài đọc/viết học thuật.",
+      points: [
+        { rule: "The + tính từ/trạng từ so sánh hơn + S + V, the + tính từ/trạng từ so sánh hơn + S + V.", examples: [{ en: 'The harder you study, the better you will do.', vi: 'Bạn học càng chăm, bạn sẽ làm càng tốt.' }, { en: 'The more global a company becomes, the more challenges it faces.', vi: 'Công ty càng toàn cầu hóa, công ty càng đối mặt nhiều thách thức.' }] },
+        { rule: "Mệnh đề sau 'the + so sánh hơn' vẫn chia động từ BÌNH THƯỜNG theo đúng thì của câu (không lược bỏ chủ ngữ/động từ).", examples: [{ en: 'The more people contribute, the faster the project finishes.', vi: 'Càng nhiều người đóng góp, dự án càng hoàn thành nhanh.' }] },
+      ],
+    },
+    questions: [
+      { id: 'toefl-junior-correlative-comparatives-1', type: 'grammar', prompt: 'The harder you study, ___ you will do on the exam.', options: ['the better', 'better', 'the best', 'good'], answer: 0, explain: "Vế 2 cũng cần 'the' + so sánh hơn: the better." },
+      { id: 'toefl-junior-correlative-comparatives-2', type: 'grammar', prompt: '___ more you practice, the more confident you become.', options: ['The', 'A', 'Some', 'Much'], answer: 0, explain: "Cấu trúc luôn bắt đầu bằng 'The': The more..." },
+      { id: 'toefl-junior-correlative-comparatives-3', type: 'grammar', prompt: 'The more people ___ to the project, the faster it will be finished.', options: ['contribute', 'contributes', 'contributed', 'will contribute'], answer: 0, explain: "Mệnh đề chia hiện tại đơn bình thường theo chủ ngữ số nhiều 'people': contribute." },
+      { id: 'toefl-junior-correlative-comparatives-4', type: 'grammar', prompt: 'The bigger the city, ___ the traffic.', options: ['worse', 'the worse', 'the worst', 'worst'], answer: 1, explain: "Vế 2 cần 'the' + so sánh hơn bất quy tắc: the worse." },
+      { id: 'toefl-junior-correlative-comparatives-5', type: 'grammar', prompt: 'The more global a company becomes, ___ challenges it faces.', options: ['the more', 'more', 'much more', 'the most'], answer: 0, explain: "'the more' đi với danh từ đếm được số nhiều 'challenges'." },
+      { id: 'toefl-junior-correlative-comparatives-6', type: 'grammar', prompt: 'The sooner we start, ___ we will finish.', options: ['the sooner', 'sooner', 'soonest', 'the soonest'], answer: 0, explain: "Vế 2 cần 'the' + so sánh hơn của trạng từ: the sooner." },
+      { id: 'toefl-junior-correlative-comparatives-7', type: 'grammar', prompt: 'The more scientific the method, ___ reliable the results.', options: ['the more', 'more', 'much', 'the most'], answer: 0, explain: "'the more reliable' — so sánh hơn của tính từ dài dùng 'the more'." },
+      { id: 'toefl-junior-correlative-comparatives-8', type: 'grammar', prompt: 'The older she gets, ___ she becomes.', options: ['the wiser', 'wiser', 'wisest', 'the wisest'], answer: 0, explain: "Vế 2 cần 'the' + so sánh hơn: the wiser." },
+      { id: 'toefl-junior-correlative-comparatives-9', type: 'grammar', prompt: 'The more significant the achievement, ___ attention it receives.', options: ['the more', 'more', 'the most', 'most'], answer: 0, explain: "'the more attention' — so sánh hơn với danh từ không đếm được." },
+      { id: 'toefl-junior-correlative-comparatives-10', type: 'grammar', prompt: 'The stronger the community, ___ it can support its members.', options: ['the better', 'better', 'the best', 'good'], answer: 0, explain: "Vế 2 cần 'the' + so sánh hơn của trạng từ: the better." },
+    ],
+  },
 ];
 
 // TOEIC (mục tiêu 800/990) — bắt đầu Đợt 10 của mục 30, TRACK CUỐI CÙNG
@@ -1579,6 +1715,32 @@ export const TOEIC_UNITS = [
       { id: 'toeic-reading-notice-4', type: 'reading', prompt: 'Where will third-floor employees work during the renovation?', options: ['On the fourth floor', 'At home', 'In a different building', 'Outdoors'], answer: 0, explain: "'will be temporarily relocated to the fourth floor'." },
       { id: 'toeic-reading-notice-5', type: 'reading', prompt: 'When will the renovation work be done?', options: ['Between 6:00 PM and 6:00 AM', 'During business hours only', 'On weekends only', '24 hours a day'], answer: 0, explain: "'will take place between 6:00 PM and 6:00 AM'." },
       { id: 'toeic-reading-notice-6', type: 'reading', prompt: 'Who should employees contact with questions?', options: ['The Facilities Department', 'The HR Department', 'The CEO', 'The security guard'], answer: 0, explain: "'please contact the Facilities Department at extension 205'." },
+    ],
+  },
+  {
+    id: 'toeic-comparatives-superlatives-business',
+    level: 'toeic',
+    topic: 'So Sánh Hơn/Nhất Trong Ngữ Cảnh Kinh Doanh',
+    grammarPoints: ['ôn lại so sánh hơn/nhất (đã học ở Movers/Flyers) đặt vào ngữ cảnh công sở/kinh doanh — đúng phong cách Part 5/6 thật của TOEIC'],
+    vocab: ['contract', 'shipment', 'budget', 'revenue', 'colleague', 'client', 'deadline'],
+    lesson: {
+      intro: "TOEIC không có nhiều ngữ pháp mới ở điểm này — mục tiêu là LUYỆN LẠI so sánh hơn/nhất đã học nhưng trong đúng ngữ cảnh công sở/thương mại thật của đề thi.",
+      points: [
+        { rule: "Tính từ ngắn + er/est; tính từ dài (2+ âm tiết) dùng more/most.", examples: [{ en: 'This contract is longer than the previous one.', vi: 'Hợp đồng này dài hơn hợp đồng trước.' }, { en: 'Our new product is more efficient than the old model.', vi: 'Sản phẩm mới của chúng tôi hiệu quả hơn mẫu cũ.' }] },
+        { rule: 'So sánh nhất dùng khi so sánh từ 3 đối tượng trở lên (nhiều khách hàng, nhiều quý tài chính...).', examples: [{ en: 'Of all our clients, this one pays the fastest.', vi: 'Trong tất cả khách hàng, khách này trả tiền nhanh nhất.' }] },
+      ],
+    },
+    questions: [
+      { id: 'toeic-comparatives-superlatives-business-1', type: 'grammar', prompt: 'This contract is ___ than the previous one.', options: ['long', 'longer', 'longest', 'more long'], answer: 1, explain: "Tính từ ngắn + er: longer." },
+      { id: 'toeic-comparatives-superlatives-business-2', type: 'grammar', prompt: 'Our new product is ___ than the old model.', options: ['efficient', 'more efficient', 'efficienter', 'most efficient'], answer: 1, explain: "Tính từ dài dùng 'more': more efficient." },
+      { id: 'toeic-comparatives-superlatives-business-3', type: 'grammar', prompt: 'She is ___ employee in the department.', options: ['the most hardworking', 'the hardworkingest', 'more hardworking', 'hardworkinger'], answer: 0, explain: "Tính từ ghép dài dùng 'the most': the most hardworking." },
+      { id: 'toeic-comparatives-superlatives-business-4', type: 'grammar', prompt: 'This shipment arrived ___ than we expected.', options: ['early', 'earlier', 'earliest', 'more early'], answer: 1, explain: "Trạng từ ngắn + er: earlier." },
+      { id: 'toeic-comparatives-superlatives-business-5', type: 'grammar', prompt: 'Of all our clients, this one pays ___.', options: ['fast', 'faster', 'the fastest', 'more fast'], answer: 2, explain: "So sánh từ 3 khách hàng trở lên → so sánh nhất: the fastest." },
+      { id: 'toeic-comparatives-superlatives-business-6', type: 'grammar', prompt: "The budget this year is ___ than last year's.", options: ['big', 'bigger', 'biggest', 'more big'], answer: 1, explain: "Tính từ ngắn + er (gấp đôi phụ âm cuối): bigger." },
+      { id: 'toeic-comparatives-superlatives-business-7', type: 'grammar', prompt: 'This is ___ meeting of the quarter.', options: ['important', 'more important', 'the most important', 'importanter'], answer: 2, explain: "So sánh nhất của tính từ dài: the most important." },
+      { id: 'toeic-comparatives-superlatives-business-8', type: 'grammar', prompt: 'Their marketing strategy is ___ than ours.', options: ['creative', 'more creative', 'creativer', 'most creative'], answer: 1, explain: "Tính từ dài dùng 'more': more creative." },
+      { id: 'toeic-comparatives-superlatives-business-9', type: 'grammar', prompt: 'He is ___ colleague I have ever worked with.', options: ['good', 'better', 'the best', 'more good'], answer: 2, explain: "So sánh nhất bất quy tắc: good → the best." },
+      { id: 'toeic-comparatives-superlatives-business-10', type: 'grammar', prompt: "The revenue this quarter is ___ than last quarter's.", options: ['high', 'higher', 'highest', 'more high'], answer: 1, explain: "Tính từ ngắn + er: higher." },
     ],
   },
 ];

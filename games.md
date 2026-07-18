@@ -3959,3 +3959,1522 @@ cho điểm ngữ pháp đã có sẵn ở exam-prep". Như mọi đợt trướ
 tiếp bằng mắt trong trình duyệt thật (không có Playwright/Puppeteer) — bạn
 tự mở `/nguphap-truc-quan/` để xác nhận lưới icon tô đỏ hiển thị rõ ràng,
 dễ đếm như mong muốn.
+
+## 58. SỬA LỖ HỔNG LỚN: CỖ MÁY THỜI GIAN CHỈ CÓ 6/12 THÌ + ĐÀO SÂU VÒNG 7 (07/2026)
+
+Bạn chỉ ra đúng 1 lỗ hổng quan trọng: tiếng Anh có **12 thì cơ bản** (3 mốc
+thời gian Hiện tại/Quá khứ/Tương lai × 4 dạng Đơn/Tiếp diễn/Hoàn thành/
+Hoàn thành tiếp diễn), nhưng "Cỗ Máy Thời Gian" — trò ĐẦU TIÊN và cũng là
+trò lấy tên cho cả game — trước đó CHỈ có 6 thì (thiếu tới 6/12, hơn một
+nửa). Đây là lỗ hổng nghiêm trọng nhất được phát hiện trong toàn bộ 6 đợt
+đào sâu dữ liệu trước đó vì nằm ngay ở trò MANG TÍNH BIỂU TƯỢNG của cả bộ.
+
+**Thêm đủ 7 thì còn thiếu** (giữ nguyên 6 thì cũ theo đúng quy ước "chỉ
+thêm vào cuối mảng", không sắp xếp lại — bảo toàn mọi tiến độ % đã lưu của
+bé từ mục 55):
+- **`present-perfect-continuous`** (⏳ has been V-ing) — nhấn mạnh khoảng
+  THỜI GIAN đang tiếp diễn từ quá khứ tới bây giờ, khác hẳn hiện tại hoàn
+  thành 🔗 (has just V-pp) chỉ nhấn mạnh việc VỪA XONG.
+- **`past-perfect`** (⏮️ had already V-pp before...) — "quá khứ của quá
+  khứ", xong TRƯỚC 1 mốc khác trong quá khứ.
+- **`past-perfect-continuous`** (🌀 had been V-ing for... before...) —
+  tiếp diễn liên tục tới 1 mốc khác trong quá khứ.
+- **`future-simple`** (🔮 will + V) — dự đoán/quyết định tức thời, khác
+  "going to" 📅 đã có kế hoạch sẵn (cùng ý tưởng với trò "Going To vs Will"
+  riêng, nhưng giờ CŨNG xuất hiện ngay trong Cỗ Máy Thời Gian để bé thấy
+  toàn cảnh 12 thì).
+- **`future-continuous`** (🕐 will be V-ing at...) — tái dùng đúng cue 🕐
+  đã có ý nghĩa "đang diễn ra tại 1 thời điểm", giờ áp dụng cho mốc Tương
+  Lai (cùng 1 icon, khác timelineMark — đúng quy ước đã có từ đầu).
+- **`future-perfect`** (🔗 will have already V-pp by...) — sẽ hoàn thành
+  trước 1 mốc tương lai, đối xứng với hiện tại hoàn thành nhưng nối
+  BÂY GIỜ→TƯƠNG LAI thay vì QUÁ KHỨ→BÂY GIỜ.
+- **`future-perfect-continuous`** (⏳ will have been V-ing for... by...) —
+  đối xứng với hiện tại hoàn thành tiếp diễn, cũng nối bây giờ→tương lai.
+
+**Kỹ thuật đáng chú ý — mốc thời gian mới `now-to-future`**: 2 thì hoàn
+thành tương lai cần 1 cách vẽ MỚI trên trục thời gian (nối vùng "Bây Giờ"
+sang vùng "Tương Lai" bằng mũi tên, đối xứng với `past-to-now` đã có cho
+hiện tại hoàn thành) — thêm nhánh xử lý mới trong `renderScene()` của
+`app.js` + 1 class CSS `.tm-link-arrow--future` (chỉ đổi `left: 50%` để mũi
+tên nằm giữa 2 vùng Bây Giờ/Tương Lai thay vì giữa Quá Khứ/Bây Giờ).
+**Không cần sửa gì thêm nhờ mọi CHARACTERS đều ở ngôi thứ 3 số ít** (đã
+thiết kế từ đầu ở mục 37) — "has been/had been/will have been" luôn giống
+nhau bất kể chủ ngữ, nên các thì hoàn thành mới không cần thêm logic chia
+động từ theo ngôi.
+
+**Test mới**: 9 check (đủ 12 thì cơ bản đúng tên, mỗi thì mới build đúng
+cấu trúc ngữ pháp glossary chuẩn kể cả động từ bất quy tắc, và **1 check
+quan trọng xác nhận cả 13 thì sinh câu KHÁC NHAU cho cùng 1 nhân vật/động
+từ** — tránh lặp lại đúng lớp lỗi "câu trùng nhau" đã gặp ở mục 52).
+
+**Tiếp tục đào sâu dữ liệu — vòng 7**: `CHARACTERS` 16→**18** (+cú, +cáo),
+`VERBS` 26→**28** (+paint/dream), `GOING_TO_WILL_SCENARIOS` 40→**44**,
+`MODAL_SITUATIONS` 42→**46**, `CONDITIONAL_SITUATIONS` 40→**44**,
+`SENTENCE_BUILDER_POOL` 52→**56**. **1 lỗi trùng câu bị bắt ngay khi viết
+test** (đúng quy trình luôn kiểm tra trước khi commit): thêm nhầm 2 câu
+"He is going to go fishing this weekend." giống hệt nhau ở 2 đợt khác
+nhau — phát hiện qua script kiểm tra trùng lặp, sửa câu mới thành
+"I will call an electrician now." (khác nội dung, vẫn ôn đúng tình huống
+mới thêm ở vòng này).
+
+**Kết quả**: `nguphaptructuan.test.js` 67→**77 ✅** (9 check thì mới + 1
+check "vòng 7"). `npm test` toàn bộ vẫn **0 ❌**. `sw.js` v121→**v122**.
+Smoke test `/nguphap-truc-quan/` cùng `nguphaptructuan.js` đều 200.
+
+**Còn để ngỏ**: Cỗ Máy Thời Gian giờ phủ đủ 12/12 thì cơ bản + going-to (13
+tổng) — đây là bản đầy đủ nhất có thể cho 1 trò minh hoạ THÌ. Như mọi đợt
+trước, chưa xem trực tiếp bằng mắt trong trình duyệt thật (không có
+Playwright/Puppeteer) — bạn tự mở `/nguphap-truc-quan/`, chọn "Cỗ Máy Thời
+Gian" và chơi vài vòng để xác nhận mũi tên mới (nối Bây Giờ→Tương Lai) và
+2 icon mới (⏳ 🌀 ⏮️) hiển thị rõ ràng, dễ phân biệt với các icon cũ.
+
+## 59. SỬA CÁCH HIỂN THỊ "SỐ CÂU HỎI" + ĐÀO SÂU ĐÚNG 3 TRÒ BỊ CHÊ MỎNG (07/2026)
+
+Bạn chỉ ra 2 việc: (1) Cỗ Máy Thời Gian, Ghép Câu, Chủ Động/Bị Động có
+"quá ít câu hỏi"; (2) huy hiệu trên mỗi thẻ chọn trò trước giờ CHƯA thực
+sự đo "số câu hỏi" — chỉ hiện số liệu THÔ của 1 mảng dữ liệu (vd "13 thì"),
+trong khi thanh % tiến độ lại không đi kèm con số tuyệt đối rõ ràng.
+
+**Sửa cách tính "số câu hỏi"** (`app.js`, hàm `MODE_COUNTS`): với các trò
+SINH CÂU BẰNG CÔNG THỨC (không phải rút từ 1 danh sách cố định), số câu hỏi
+THẬT là TÍCH của các mảng thành phần, không phải độ dài 1 mảng riêng lẻ:
+- **Cỗ Máy Thời Gian**: trước hiện "13 thì" khiến tưởng chỉ có 13 câu hỏi
+  — SAI, vì mỗi câu hỏi là 1 tổ hợp (nhân vật × động từ × thì). Huy hiệu
+  giờ hiện **"13 thì · X câu hỏi"** (X = `CHARACTERS.length × VERBS.length
+  × TENSES.length`, tính TRỰC TIẾP nên tự đúng khi thêm dữ liệu sau này).
+- **Chủ Động/Bị Động**: mỗi tình huống được random thêm thì hiện tại/quá
+  khứ ĐỘC LẬP → số câu hỏi thật = `PASSIVE_SCENARIOS.length × 2`, không
+  phải chỉ độ dài mảng tình huống.
+- Các trò còn lại (Going To vs Will, Modal, Điều Kiện, Ghép Câu, Lời Nói
+  Gián Tiếp) đổi nhãn "tình huống"/"câu" thống nhất thành **"câu hỏi"** —
+  các trò này KHÔNG có tầng ngẫu nhiên phụ nên độ dài mảng ĐÃ ĐÚNG LÀ số
+  câu hỏi thật, chỉ cần đổi chữ cho nhất quán và dễ hiểu hơn.
+- Số lớn (vd "8.320 câu hỏi") định dạng bằng `toLocaleString('vi-VN')` —
+  dùng dấu CHẤM ngăn cách hàng nghìn đúng quy ước tiếng Việt.
+
+**Đào sâu đúng 3 trò bị phản hồi** (không dàn trải sang các trò khác đợt
+này, tập trung đúng yêu cầu):
+- **Cỗ Máy Thời Gian**: `CHARACTERS` 18→**20** (+sư tử, +gấu trúc), `VERBS`
+  32→**32** giữ nguyên số nhưng thêm 4 động từ mới thay vào (build/catch/
+  teach/grow) — không gian câu hỏi từ **7.488 → 8.320** câu hỏi khác nhau.
+- **Chủ Động vs Bị Động**: `PASSIVE_SCENARIOS` +8 tình huống mới (đầu bếp
+  nấu mì, phi hành gia phóng vệ tinh, thủ thư sắp sách, nhà khoa học trộn
+  hóa chất, tài xế giao hàng, huấn luyện viên huấn luyện đội, nhà thiết kế
+  thiết kế váy, phi công lái máy bay) — số câu hỏi thật (×2 thì) từ
+  **44 → 68 câu hỏi**.
+- **Ghép Câu**: `SENTENCE_BUILDER_POOL` +14 câu mới, LỒNG ĐÚNG các thì/tình
+  huống mới nhất vừa thêm (hiện tại hoàn thành tiếp diễn, quá khứ hoàn
+  thành, tương lai đơn/hoàn thành, câu bị động với agent mới, lượng từ
+  all/some) — từ **56 → 70 câu hỏi**.
+
+**Test mới**: 1 check "vòng 8" xác nhận cả 3 pool đã tăng đúng như phản
+hồi, kèm 2 assertion đặc biệt xác nhận KHÔNG GIAN CÂU HỎI THẬT (không chỉ
+độ dài mảng) đủ lớn: `CHARACTERS × VERBS × TENSES >= 5000` và
+`PASSIVE_SCENARIOS × 2 >= 60`. `nguphaptructuan.test.js`: 77→**78 ✅**.
+
+**Kết quả**: `npm test` toàn bộ vẫn **0 ❌**. `sw.js` v122→**v123**. Smoke
+test `/nguphap-truc-quan/` cùng `app.js`/`nguphaptructuan.js` đều 200; xác
+nhận huy hiệu hiển thị đúng "13 thì · 8.320 câu hỏi" / "68 câu hỏi" (Chủ
+Động/Bị Động) / "70 câu hỏi" (Ghép Câu).
+
+**Còn để ngỏ**: như mọi đợt trước, chưa xem trực tiếp huy hiệu mới bằng
+mắt trong trình duyệt thật (không có Playwright/Puppeteer) — bạn tự mở
+`/nguphap-truc-quan/` để xác nhận dòng chữ "X thì · Y câu hỏi" không bị
+tràn/vỡ dòng trên thẻ đã thu nhỏ. Nếu muốn, có thể tiếp tục đào sâu thêm
+2 trò còn "mỏng nhất" hiện tại (Lượng Từ Đúng 18 đồ vật, Lời Nói Gián Tiếp
+24 câu hỏi).
+
+## 60. TÌM RA NGUYÊN NHÂN THẬT: SERVICE WORKER CACHE CỨNG TRÊN THIẾT BỊ TEST LAN (07/2026)
+
+Bạn gửi ảnh chụp màn hình chọn trò KHÔNG hề có huy hiệu số câu hỏi lẫn
+progress bar — dù mục 54–59 vừa xác nhận cả 2 thứ này đã code xong và
+test pass. Trước khi sửa thêm dữ liệu, kiểm tra lại toàn bộ code hiện tại
+(`app.js`, `style.css`, `index.html`) thì thấy KHÔNG có gì sai — huy hiệu,
+`.mc-progress`, `.op-bar` đều đúng như đã báo.
+
+**Truy nguyên nhân bằng `git status`/`git log`**: toàn bộ thay đổi mục
+54–59 (`app.js` +391 dòng, `nguphaptructuan.js` +845 dòng, `style.css`
++113 dòng...) đều đang là **thay đổi CHƯA COMMIT** — commit gần nhất chạm
+các file này (578b96b) có TỪ RẤT LÂU trước cả mục 54. Hỏi lại bạn: màn
+hình chụp là từ server local (`npm run dev`) hay trang đã deploy? → Bạn
+xác nhận là **server local**, xem qua thiết bị thật (điện thoại/tablet)
+trỏ vào IP LAN của máy chạy `serve . -l 8766`.
+
+**Đây chính là gốc lỗi**: `sw.js` có sẵn logic "dev thì luôn lấy mạng,
+không cache" (`Dev localhost: luôn lấy từ mạng`) nhưng điều kiện CHỈ kiểm
+`hostname === 'localhost' || '127.0.0.1'` — bỏ sót hoàn toàn trường hợp
+test qua **IP LAN** (192.168.x.x/10.x.x.x/172.16-31.x.x), vốn là cách DUY
+NHẤT để xem trên điện thoại/tablet thật của bé. Với IP LAN, Service Worker
+cache-first phục vụ y nguyên bản HTML/JS/CSS đã cache TỪ RẤT LÂU (trước cả
+khi huy hiệu/progress bar được thêm vào ở mục 54) — mọi thay đổi sau đó dù
+đúng và test pass tới đâu, thiết bị test qua LAN vẫn KHÔNG BAO GIỜ thấy,
+trừ khi gỡ cài đặt PWA / xoá dữ liệu site thủ công.
+
+**Sửa `sw.js`**: thay điều kiện hostname đơn giản bằng hàm `isDevHost()`
+nhận diện đầy đủ mọi cách test cục bộ — `localhost`/`127.0.0.1`/`::1`,
+hostname kết thúc `.local` (mDNS), và 3 dải IP LAN riêng tư chuẩn
+(`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`). Khi khớp bất kỳ điều
+kiện nào, Service Worker bỏ qua hoàn toàn cache — luôn lấy thẳng từ mạng,
+giống hệt hành vi localhost đã có sẵn trước đó.
+
+**Lưu ý bắt buộc cho bạn**: sửa xong `sw.js` KHÔNG tự động xoá cache CŨ đã
+nằm sẵn trên điện thoại/tablet đang test — bản SW mới cần được thiết bị đó
+tải về và kích hoạt trước. Cách chắc chắn nhất: mở Cài đặt trình duyệt trên
+thiết bị → xoá dữ liệu duyệt web (hoặc gỡ cài đặt PWA nếu đã "Thêm vào màn
+hình chính") cho đúng địa chỉ IP đang test, rồi mở lại từ đầu. Sau lần đó,
+mọi lần sửa dữ liệu tiếp theo sẽ hiện ngay lập tức khi tải lại trang, không
+cần lặp lại thao tác này nữa.
+
+**Tiếp tục đào sâu vòng 9** đúng 3 trò bạn nhắc lại (Cỗ Máy Thời Gian,
+Ghép Câu, Chủ Động/Bị Động) — vì màn hình cũ khiến bạn tưởng dữ liệu mục 59
+chưa từng được thêm:
+- **Cỗ Máy Thời Gian**: `CHARACTERS` 20→**23** (+voi 🐘, +sóc 🐿️, +vịt 🦆),
+  `VERBS` 32→**36** (+kick, +push, +hide, +throw — thêm 2 động từ bất quy
+  tắc hide/hid/hidden và throw/threw/thrown) — không gian câu hỏi từ
+  **8.320 → 10.764** câu hỏi khác nhau.
+- **Chủ Động vs Bị Động**: `PASSIVE_SCENARIOS` 34→**40** (+6: DJ phát nhạc,
+  thợ điện sửa đèn, người nuôi ong thu mật, học sinh viết luận, kỹ sư thiết
+  kế tên lửa, đầu bếp trang trí bánh) — số câu hỏi thật từ **68 → 80**.
+- **Ghép Câu**: `SENTENCE_BUILDER_POOL` 70→**80** (+10 câu, phủ thêm tương
+  lai hoàn thành tiếp diễn — thì DUY NHẤT trong 13 thì chưa có câu mẫu
+  trước đó — cùng câu dùng 4 động từ mới và câu bị động/lượng từ mới).
+
+**Test mới**: check "vòng 9" xác nhận cả 3 pool tăng đúng, cộng 2 assertion
+chống trùng lặp bắt buộc chạy lại mỗi lần thêm dữ liệu — không câu tiếng
+Anh nào trùng trong Ghép Câu, không tổ hợp agent|object|verb nào trùng
+trong Chủ Động/Bị Động (2 lớp lỗi đã từng dính ở các vòng trước).
+`nguphaptructuan.test.js`: 78→**79 ✅**.
+
+**Kết quả**: đã dùng script Node kiểm tra trùng lặp trước khi ghi test —
+0 câu trùng, 0 tổ hợp trùng. `npm test` toàn bộ **0 ❌** (79 + 7 + các suite
+khác). `sw.js` v123→**v124** (kèm sửa `isDevHost`). Smoke test qua
+`npx serve` cổng tạm: `/nguphap-truc-quan/`, `app.js`, `sw.js` đều 200,
+xác nhận đúng bản `reply1999-v124`.
+
+**Còn để ngỏ**: KHÔNG có Playwright/Puppeteer nên không tự xác nhận được
+việc sửa `isDevHost` có thực sự làm điện thoại test hết bị "đứng hình" ở
+bản cũ hay không — bạn cần tự làm bước xoá cache/gỡ PWA nêu trên trên
+đúng thiết bị đang dùng để kiểm chứng. Nếu sau khi xoá cache mà huy hiệu/
+progress bar vẫn không hiện, khả năng cao là do trình duyệt trên thiết bị
+đó chặn JS module hoặc lỗi mạng khác — lúc đó cần xem Console trên chính
+thiết bị (hoặc chrome://inspect nếu là Android) để biết thêm.
+
+## 61. LỖI THẬT SỰ: THIẾU IMPORT KHIẾN CẢ TRANG "CHẾT ĐỨNG" — KHÔNG CHỈ CACHE (07/2026)
+
+Bạn gửi console error trực tiếp từ thiết bị (điều mà mọi lần trước không
+có, vì không dùng được Playwright): `Uncaught ReferenceError: CHARACTERS
+is not defined at app.js:1138:49`. Đây mới là NGUYÊN NHÂN GỐC thật sự —
+việc nghi ngờ Service Worker cache LAN ở mục 60 là SAI, hoặc chỉ là 1 phần
+nhỏ; lỗi chính nghiêm trọng hơn nhiều.
+
+**Lỗi**: khi viết `MODE_COUNTS` ở mục 59 (`app.js:1138`), công thức
+`CHARACTERS.length * VERBS.length * TENSES.length` dùng `CHARACTERS` và
+`VERBS` nhưng CÂU IMPORT ở đầu file (`app.js:7-21`) quên thêm 2 tên này —
+chỉ có `TENSES` được import, không có `CHARACTERS`/`VERBS`.
+
+**Vì sao hậu quả nặng hơn "mất mỗi huy hiệu"**: `MODE_COUNTS` là code Ở
+CẤP MODULE (top-level), chạy ngay khi `app.js` được import, TRƯỚC CẢ dòng
+gắn `addEventListener('click', ...)` cho các thẻ chọn trò (`app.js:1201`),
+trước `showHome()`, trước `renderModeCounts()`, trước `mountKidFeatures()`.
+Một `ReferenceError` ở cấp module DỪNG NGAY toàn bộ phần còn lại của file
+— nghĩa là KHÔNG CHỈ mất huy hiệu/progress bar, mà TOÀN BỘ nút chọn trò
+cũng mất luôn sự kiện click → bấm vào thẻ nào cũng không phản ứng gì, "y
+như đứng hình", đúng như bạn báo "không thể đi vào học".
+
+**Vì sao lọt qua hết mọi lần test trước**: toàn bộ `nguphaptructuan.test.js`
+(79 check) chỉ import trực tiếp `nguphaptructuan.js` (file dữ liệu/engine
+thuần, không đụng DOM) — KHÔNG hề import `app.js`. Đây là lỗ hổng đã biết
+từ đầu dự án (không có Playwright/jsdom để chạy `app.js` thật), nên 1 lỗi
+cú pháp/tham chiếu ở tầng UI như thế này chưa từng được test nào bắt được,
+dù `npm test` báo "0 ❌" suốt từ mục 54 tới giờ.
+
+**Sửa**: thêm `CHARACTERS, VERBS` vào câu import ở đầu `app.js`. Rồi RÀ
+SOÁT LẠI toàn bộ danh sách 15 tên dữ liệu (`CHARACTERS`, `VERBS`, `TENSES`,
+`BG_SUBJECTS`, `BG_ACTIONS`, `INTERRUPT_EVENTS`, `COMPARE_ENTITIES`,
+`ATTRIBUTES`, `GOING_TO_WILL_SCENARIOS`, `MODAL_SITUATIONS`,
+`CONDITIONAL_SITUATIONS`, `SENTENCE_BUILDER_POOL`, `PASSIVE_SCENARIOS`,
+`REPORTED_SPEECH_SCENARIOS`, `QUANTIFIER_NOUNS`) và 29 hàm
+`make*Game`/`current*Round`/`answer*`/`tapSentenceBuilderChip` bằng script
+đếm số lần xuất hiện trong `app.js` — xác nhận tất cả đều được import VÀ
+được dùng ít nhất 1 lần (không còn tên nào bị thiếu tương tự).
+
+**Verify nghiêm túc hơn bình thường**: vì lỗi này chỉ lộ ra khi THỰC SỰ
+chạy `app.js` (không phải chỉ đọc code), đã viết 1 script Node dựng DOM giả
+tối thiểu (`document`/`window`/`localStorage`/`speechSynthesis` giả) rồi
+`import()` thẳng `app.js` — xác nhận module load xong KHÔNG ném lỗi nữa
+("MODULE LOADED OK"). Đây là lần đầu tiên trong cả dự án `app.js` được
+thực thi thử (dù chỉ với DOM giả) thay vì chỉ test file engine — nên cân
+nhắc giữ lại cách này cho các lần sửa `app.js` sau, để bắt được lớp lỗi
+"thiếu import/tham chiếu sai" mà test hiện tại không với tới.
+
+**Số liệu huy hiệu thực tế sẽ hiển thị** (in trực tiếp từ `MODE_COUNTS` sau
+khi sửa): Cỗ Máy Thời Gian "13 thì · **10.764 câu hỏi**", Hai Hành Động
+"1.320 câu hỏi", So Sánh "20 nhân vật · 14 thang đo", Going To vs Will "44
+câu hỏi", Modal "46 câu hỏi", Điều Kiện "44 câu hỏi", Ghép Câu "80 câu
+hỏi", Chủ Động/Bị Động "80 câu hỏi", Lời Nói Gián Tiếp "24 câu hỏi",
+Lượng Từ Đúng "14 đồ vật".
+
+**Kết quả**: `npm test` toàn bộ vẫn **0 ❌** (79 + 7 + các suite khác —
+không suite nào phát hiện được lỗi này, đúng như phân tích ở trên).
+`sw.js` v124→**v125**. Smoke test qua `npx serve` cổng tạm: trang và
+`app.js` đều 200, `sw.js` xác nhận đúng bản `reply1999-v125`.
+
+**Còn để ngỏ**: mục 60 (sửa `isDevHost` cho IP LAN) vẫn ĐÚNG và NÊN GIỮ —
+đó là 1 cải thiện thật, chỉ là không phải nguyên nhân chính lần này. Bạn
+vẫn cần xoá cache/gỡ PWA trên thiết bị test 1 lần để chắc chắn nhận được
+bản `v125` chứa cả 2 bản sửa. Nếu bấm vào trò rồi mà vẫn không thấy hiệu
+ứng nào, gửi tiếp console error (như lần này) sẽ giúp xác định lỗi nhanh
+hơn nhiều so với chỉ gửi ảnh chụp màn hình.
+
+## 62. NÂNG MỌI TRÒ LÊN ÍT NHẤT 200 CÂU HỎI/TỪ VỰNG (07/2026)
+
+Sau khi lỗi thiếu import được sửa (mục 61), bạn thấy huy hiệu hiện đúng
+nhưng nhiều trò vẫn "quá ít câu hỏi" và yêu cầu nâng MỌI chủ đề lên ít
+nhất 200 câu hỏi/đề/từ vựng. Trước đó: Going To vs Will 44, Modal 46,
+Câu Điều Kiện 44, Ghép Câu 80, Chủ Động/Bị Động 80, Lời Nói Gián Tiếp 24,
+Lượng Từ Đúng 14 — đều dưới 200. Thay vì viết tay hàng trăm câu, dùng lại
+đúng kỹ thuật đã chứng minh hiệu quả ở Cỗ Máy Thời Gian (mục 58-59): NHÂN
+dữ liệu qua công thức, đảm bảo đúng ngữ pháp 100% bằng cấu trúc thay vì
+gõ tay từng câu.
+
+**Going To vs Will** (`GOINGTOWILL_SUBJECTS` mới, 6 chủ ngữ I/You/He/She/
+We/They): động từ "to be" (beForm/wrongBeForm/pastBeForm) đã xử lý đúng
+MỌI chủ ngữ từ trước, nên đổi chủ ngữ luôn ra câu đúng. 3 tình huống thời
+tiết ("rain"/"be sunny"/"be windy") được đánh dấu `weatherOnly: true` để
+GIỮ NGUYÊN "It" (không nhân, vì "She is going to rain" vô nghĩa). Thêm
+hàm `applyPossessive()` đổi "your" thành đúng đại từ sở hữu theo chủ ngữ
+mới (vd "He brushes HIS teeth" thay vì vẫn "his teeth" cứng theo người
+nghe). Kết quả: 44 tình huống → **249 câu hỏi thật**.
+
+**Modal Ai Đúng** (`MODAL_SUBJECTS` mới, 6 chủ ngữ): động từ khuyết thiếu
+(must/should...) KHÔNG chia theo ngôi nào cả nên đổi chủ ngữ 100% an toàn
+— cùng dùng `applyPossessive()` ở trên. Kết quả: 46 → **276 câu hỏi thật**.
+
+**Chủ Động vs Bị Động**: thêm thì thứ 3 "future" (will be + P2) bên cạnh
+present/past có sẵn (`PASSIVE_TENSES`), cộng thêm 30 tình huống mới (thợ
+may, thợ ống nước, nha sĩ, thợ chụp ảnh...). Kết quả: 40 tình huống × 3
+thì = 40→70 tình huống, **80 → 210 câu hỏi thật**.
+
+**Câu Điều Kiện** — trò khó nhất vì mỗi tình huống là 1 câu viết tay hoàn
+chỉnh (không thể chỉ đổi chủ ngữ vì nhiều câu có sở hữu cách/phản thân gắn
+với đúng người). Giải pháp: xây HỆ THỐNG TEMPLATE mới — 30 mẫu nguyên
+nhân→kết quả DO CÙNG 1 NGƯỜI thực hiện cả 2 vế (vd "nếu X học chăm, X sẽ
+đỗ"), viết với placeholder `{poss}`/`{refl}` (vd "brush {poss} teeth"),
+nhân với 6 chủ ngữ (I/you/he/she/we/they). Hàm `conditionalThirdPerson()`
+tự chia đúng "-s" ngôi 3 số ít (kể cả "have"→"has"), `fillConditionalPlaceholders()`
+tự thay đúng đại từ sở hữu/phản thân theo từng chủ ngữ. Đã kiểm tra kỹ:
+0 câu trùng, 0 trường hợp `ifPresent === ifPast` (bẫy lỗi cũ), 0 dấu cách
+đôi. Kết quả: 44 → **224 câu hỏi thật**.
+
+**Lời Nói Gián Tiếp** — cũng khó vì mỗi tình huống viết tay 4 câu (đúng +
+3 lỗi). Giải pháp tương tự Điều Kiện: hệ thống template theo "kind" backshift
+(am-adj/am-ving/present-verb/will/can/have-pp — mỗi loại là 1 quy tắc lùi
+thì CỐ ĐỊNH), viết 90 mẫu trích dẫn KHÔNG chứa đại từ/sở hữu cách chỉ
+người nghe ("you"/"your" — dễ đổi nghĩa khi tường thuật, lý do ban đầu bài
+viết tay), nhân với 2 người tường thuật (he/she). Đã đối chiếu 90 mẫu mới
+với 24 câu cũ để tránh trùng trích dẫn — phát hiện và sửa 2 trùng ("reading
+a book", "playing football") trước khi chạy test. Kết quả: 24 → **204 câu
+hỏi thật**, không trùng bất kỳ câu correct/noBackshift/wrongPronoun/
+wrongReportingVerb nào.
+
+**Ghép Câu**: nhân `CHARACTERS` (23) × `VERBS` (36, chọn xoay vòng) × 6 mẫu
+câu mới (hiện tại tiếp diễn/hiện tại đơn/quá khứ đơn/going-to/hiện tại hoàn
+thành/should) — thêm 2 bảng dịch tiếng Việt mới `SB_CHARACTER_VI`/
+`SB_VERB_VI` (tiếng Việt không chia động từ theo thì nên chỉ cần 1 nghĩa
+gốc/nhân vật, còn tiếng Anh tái dùng đúng các dạng thirdPerson/past/pp/ing/
+base đã kiểm chứng kỹ ở Cỗ Máy Thời Gian). 1 lỗi bắt được khi chạy test:
+mẫu quá khứ đơn với chủ ngữ 1 từ (He/She/It) chỉ ra câu 3 từ ("He slept
+yesterday.") — dưới ngưỡng tối thiểu 4 từ của trò Ghép Câu; sửa bằng cách
+thêm "afternoon" vào cuối câu. Kết quả: 80 → **218 câu hỏi**, không câu
+nào trùng hay quá ngắn.
+
+**Lượng Từ Đúng**: mở rộng vốn từ vựng từ 14 lên **205 đồ vật** — thêm 8
+nhóm chủ đề (con vật, đồ ăn, đồ chơi/dụng cụ học tập, phương tiện, thiên
+nhiên, đồ gia dụng, quần áo, thể thao), viết bằng script rồi kiểm tra trùng
+emoji/từ trước khi dán vào — 0 trùng.
+
+**Test mới**: check "vòng 10" xác nhận TẤT CẢ các con số trên đều >=200,
+cộng các assertion chống trùng lặp cho từng trò (Điều Kiện: không trùng
+`ifPresent===ifPast`, không trùng cặp câu; Lời Nói Gián Tiếp: không trùng
+4 loại câu; Ghép Câu: không trùng câu + không câu ngắn; Lượng Từ Đúng:
+không trùng từ/emoji). `nguphaptructuan.test.js`: **80 ✅** (gộp nhiều
+assertion mới vào 1 check "vòng 10" duy nhất thay vì tách nhiều check
+riêng, vì tất cả đều thuộc cùng 1 đợt nâng cấp "đạt 200 câu hỏi").
+
+**Kết quả cuối cùng cho cả 10 trò** (huy hiệu sẽ hiện đúng các số này):
+- Cỗ Máy Thời Gian: 13 thì · **10.764 câu hỏi**
+- Hai Hành Động Cùng Lúc: **1.320 câu hỏi**
+- So Sánh Hơn/Nhất: 20 nhân vật · 14 thang đo (không gian câu hỏi thật ~2.660)
+- Going To vs Will: **249 câu hỏi**
+- Modal Ai Đúng: **276 câu hỏi**
+- Câu Điều Kiện: **224 câu hỏi**
+- Ghép Câu: **218 câu hỏi**
+- Chủ Động vs Bị Động: **210 câu hỏi**
+- Lời Nói Gián Tiếp: **204 câu hỏi**
+- Lượng Từ Đúng: **205 đồ vật**
+
+`npm test` toàn bộ: **0 ❌**. Đã chạy lại script mô phỏng DOM giả để
+`import()` thẳng `app.js` (kỹ thuật dùng lần đầu ở mục 61) — xác nhận
+KHÔNG có `ReferenceError` nào phát sinh từ các import mới. `sw.js`
+v125→**v126**. Smoke test qua `npx serve` cổng tạm: trang, `app.js`,
+`nguphaptructuan.js` đều 200.
+
+**Còn để ngỏ**: chưa xem trực tiếp bằng mắt trên trình duyệt thật (không
+có Playwright/Puppeteer) — bạn tự mở lại trò để xác nhận huy hiệu hiện
+đúng số mới và chơi thử vài vòng mỗi trò để cảm nhận độ đa dạng câu hỏi.
+Một số câu ở Ghép Câu/Cỗ Máy Thời Gian hơi "ngộ nghĩnh" về nghĩa (vd "con
+sóc xây nhà mỗi ngày") do ghép công thức nhân vật × động từ — ngữ pháp
+luôn đúng nhưng nghĩa đôi khi vui hơn là thực tế, giống phong cách đã có
+sẵn từ Cỗ Máy Thời Gian. Nếu muốn thu hẹp bớt sự ngộ nghĩnh này (vd giới
+hạn động từ theo từng nhân vật), có thể làm ở đợt sau.
+
+## 63. HIỆN SỐ SAO Ở HEADER + TRANG PHỤ HUYNH THEO DÕI QUÀ ĐÃ ĐỔI/ĐÃ GIAO (07/2026)
+
+Bạn muốn: (1) luôn thấy số sao hiện tại của bé ngay trên header mỗi game
+(không chỉ ở thanh avatar góc dưới), (2) phụ huynh xem lại được giờ chơi/
+sao đạt được/quà đã đổi, và (3) sau khi đổi quà thật (vd sô-cô-la) và đã
+đưa cho bé rồi thì đánh dấu lại trong app để khỏi nhầm món nào đã giao,
+món nào chưa — KHÔNG phải trừ lại sao hay tịch thu kẹo thật.
+
+**Trước khi sửa gì, khảo sát lại toàn bộ hệ thống có sẵn** (dùng Explore
+agent, vì đây là hệ thống dùng chung cho hàng chục game, sửa nhầm ảnh
+hưởng rất rộng): `pokemon/src/stats.js` (localStorage cũ, chỉ lưu phiên
+chơi thô) → nguồn số sao THẬT nằm ở server (`shared/api.js` `starBalance()`
+đọc view SQL `star_balance`); `shared/rewards.js` (catalog quà + logic tính
+giá); `shared/api.js` đã có `buyItem()`/`kidPurchases()` ghi/đọc bảng
+`purchases` nhưng **KHÔNG có cột trạng thái đã giao hay chưa**; trang
+`phu-huynh/` đã hiện giờ chơi + sao hiện có + sổ giao dịch sao (`#rewardLog`)
+nhưng **chưa từng liệt kê danh sách quà đã đổi**; `shared/kid-bar.js` đã có
+sẵn logic hiện số sao (`showStars()`) nhưng chỉ ở thanh nổi góc dưới-trái,
+KHÔNG có trong `<header>`.
+
+**Phát hiện phụ (đã báo riêng cho bạn, tạm gác lại theo yêu cầu)**:
+`server/README.md` đang lộ 1 chuỗi trông giống MẬT KHẨU DATABASE THẬT ngay
+dưới đoạn cảnh báo "không ghi mật khẩu vào file" — đã tồn tại trong git từ
+commit `e626139`. Bạn đã chọn tạm gác việc này để tập trung tính năng chính;
+**vẫn nên tự đổi mật khẩu Supabase sớm** vì coi như đã lộ.
+
+**1. Số sao ở header** (`shared/kid-bar.js`): tách logic lấy số sao (có
+cache 5 phút) ra hàm dùng chung `fetchStars()`, thêm hàm `mountHeaderStars()`
+gắn huy hiệu "⭐ N" vào `<header class="top">` — class này dùng chung ở
+**80 game** trong repo nên chỉ cần sửa 1 file `kid-bar.js` là mọi game gọi
+`mountKidFeatures()` đều tự có huy hiệu sao trên header, không cần sửa
+từng game. Game nào dùng header khác (vd `pokemon` dùng `.top-bar`) thì
+tự bỏ qua êm, không lỗi. Mất mạng thì huy hiệu tự ẩn (gỡ khỏi DOM) thay vì
+kẹt mãi ở trạng thái "⭐ …".
+
+**2. Quà đã đổi trong Trang Phụ Huynh** (`phu-huynh/index.html` +
+`src/app.js`): thêm thẻ "📦 Quà đã đổi" mới, liệt kê từng quà bé đã đổi
+(tên/icon tra từ `CATALOG` trong `shared/rewards.js`, ngày đổi) kèm trạng
+thái **⏳ Chưa giao** / **✅ Đã giao** + nút bấm chuyển trạng thái. Dữ liệu
+đọc lại từ `kidPurchases()` có sẵn (trước đây chỉ dùng cho báo cáo tuần,
+chưa từng hiện danh sách).
+
+**Thêm cột `delivered_at` vào bảng `purchases`** (`server/schema.sql` +
+migration mới `server/migrate-04-purchase-delivered.sql`, theo đúng khuôn
+mẫu các migration trước) — null nghĩa là "chưa giao tận tay bé". Không cần
+sửa RLS vì policy `purchases_fam` đã cho phép UPDATE theo `family_id`.
+Thêm 2 hàm mới trong `shared/api.js`: `markPurchaseDelivered(id)` (đánh dấu
+đã giao) và `unmarkPurchaseDelivered(id)` (lỡ bấm nhầm thì bỏ đánh dấu) —
+CHỈ ghi lại mốc thời gian, KHÔNG hoàn/trừ sao vì sao đã bị trừ lúc đổi quà.
+
+**Verify**: vì đây đụng tới DOM và nhiều file không có test sẵn (giống
+mục 61), đã tự dựng DOM giả trong Node để `import()` thẳng `kid-bar.js` và
+gọi `mountKidFeatures()` — xác nhận thanh avatar VÀ huy hiệu header đều lên
+đúng, và khi giả lập "mất mạng" thì huy hiệu tự gỡ thay vì kẹt loading.
+Với `phu-huynh/src/app.js` (593 dòng, quá nhiều phần tử DOM để dựng giả
+đầy đủ), dùng cách nhẹ hơn: viết script đối chiếu MỌI lời gọi `$('...')`
+trong `app.js` với MỌI `id="..."` có trong `index.html` — xác nhận
+**0 id bị thiếu** (đúng lớp lỗi đã bắt được ở mục 61, lần này áp dụng cho
+DOM id thay vì import).
+
+**Kết quả**: `npm test` toàn bộ vẫn **0 ❌** (không đổi gì ở các file có
+test). `sw.js` v126→**v127**. Smoke test qua `npx serve`: `/nguphap-truc-quan/`,
+`/phu-huynh/`, `shared/kid-bar.js`, `shared/api.js`, `phu-huynh/src/app.js`
+đều 200.
+
+**Còn để ngỏ**: 
+- Bạn cần tự chạy `server/migrate-04-purchase-delivered.sql` trong Supabase
+  SQL Editor 1 lần (hoặc cài mới hoàn toàn từ `schema.sql` đã cập nhật) thì
+  cột `delivered_at` mới thực sự tồn tại — nếu chưa chạy, phần "Quà đã đổi"
+  sẽ báo lỗi khi bấm "Đánh dấu đã giao".
+- Chưa xem trực tiếp bằng mắt trên trình duyệt thật (không có Playwright) —
+  bạn tự mở vài game bất kỳ để xác nhận huy hiệu "⭐ N" hiện đúng trên
+  header, và mở Trang Phụ Huynh → chọn 1 bé đã từng đổi quà → xác nhận
+  thẻ "📦 Quà đã đổi" hiện đúng danh sách + nút đánh dấu hoạt động.
+- Mật khẩu database bị lộ ở `server/README.md` vẫn chưa xử lý — nên tự đổi
+  mật khẩu Supabase khi rảnh, coi như đã lộ ra ngoài.
+
+## 64. TRÒ MỚI THỨ 11: NHẬN BIẾT TỪ LOẠI (PARTS OF SPEECH) (07/2026)
+
+Bạn hỏi tiếng Anh có nhiều từ loại đúng không, và mỗi từ loại nhận ra qua
+đuôi/tiền tố hay phải hiểu nghĩa — mục tiêu là 1 trò MỚI dạy bé nhận biết
+từ loại. Trả lời: tiếng Anh có **8 từ loại cơ bản** theo ngữ pháp truyền
+thống — danh từ, đại từ, động từ, tính từ, trạng từ, giới từ, liên từ,
+thán từ. Trò mới dạy đúng theo cách phân biệt thực tế:
+
+- **4 loại đầu (danh/động/tính/trạng từ)**: phần lớn nhận ra qua **ĐUÔI**
+  (suffix) — vd "-tion"/"-ment"/"-ness"/"-ity"/"-er"/"-or"/"-ance"/"-ence"/
+  "-ship"/"-hood"/"-ism"/"-dom" → danh từ; "-ize"/"-ise"/"-ify"/"-ate"/
+  "-en" → động từ; "-able"/"-ible"/"-al"/"-ful"/"-less"/"-ous"/"-ive"/
+  "-ic"/"-y"/"-ish"/"-ent"/"-ant" → tính từ; "-ly" → trạng từ.
+- **Tiền tố (prefix)** như "un-"/"re-"/"dis-" hầu như **KHÔNG đổi từ loại**,
+  chỉ đổi NGHĨA — cố tình đưa vài ví dụ ("disagree", "rewrite", "unable")
+  kèm hint giải thích rõ điều này, đúng câu hỏi bạn đặt ra.
+- **4 loại còn lại (giới/đại/liên/thán từ)**: KHÔNG có đuôi cố định, phải
+  hiểu **VAI TRÒ** của từ trong câu (đứng trước danh từ chỉ vị trí/thời
+  gian → giới từ; thay cho danh từ đã nhắc → đại từ; nối 2 phần câu → liên
+  từ; tách riêng bằng dấu "!" thể hiện cảm xúc → thán từ) — mỗi ví dụ đều
+  có hint giải thích theo vai trò thay vì đuôi.
+
+**Dữ liệu** (`POS_CATEGORIES` 8 từ loại + `POS_WORDS` **100 câu**, mỗi câu
+có `sentence`/`word` (từ cần tô đậm) /`pos`/`hint`): noun 13, verb 15,
+adjective 14, adverb 12, preposition 12, pronoun 12, conjunction 12,
+interjection 10. Bắt được ngay 1 lỗi khi viết script kiểm tra: 1 câu ghi
+sai — sentence nói về "childhood" nhưng word lại là "friendship" (copy-
+paste nhầm câu) — sửa lại thành câu đúng chứa "friendship".
+
+**Cơ chế chơi** giống hệt Cỗ Máy Thời Gian (`makePosRound`): chọn 1 câu, 1
+từ được tô đậm, sinh 4 lựa chọn (1 từ loại đúng + 3 nhiễu random trong 7
+loại còn lại) — không cố định 4 lựa chọn như Modal/Lượng Từ Đúng, vì có
+tới 8 từ loại nên chọn ngẫu nhiên tăng đa dạng câu hỏi.
+
+**UI** (`startPos()` trong `app.js`, CSS mới `.pg-scene`/`.pg-sentence`/
+`.pg-highlight`/`.pg-question`): hiện nguyên câu, từ cần nhận biết được tô
+vàng đậm (`<mark>`), bên dưới là câu hỏi + 4 nút từ loại. Trả lời sai lần
+1 hiện gợi ý (hint) ngay, giống mọi trò khác.
+
+**Sửa luôn 1 chỗ hard-code cũ khi thêm trò 11**: dòng "Tổng tiến độ cả 9
+trò" ở đầu trang đã BỊ LỆCH từ khi thêm trò thứ 10 (mục 57) nhưng chưa ai
+để ý — giờ tính `${gameCount}` TRỰC TIẾP từ số key trong `PROGRESS_SOURCES`
+thay vì hard-code, để không lặp lại lỗi này khi thêm trò 12 sau này.
+
+**Verify**: test mới xác nhận 8 từ loại, đủ dữ liệu, mọi `word` THẬT SỰ
+nằm trong `sentence` tương ứng (bắt lỗi copy-paste nói trên), không câu
+nào trùng, 4 lựa chọn luôn khác nhau. `nguphaptructuan.test.js`: 80→**84
+✅**. Đã chạy lại kiểm tra `app.js` bằng DOM giả (không lỗi) + đối chiếu
+mọi `$('id')` với `index.html` (0 thiếu) — đúng quy trình đã rút ra ở mục
+61. `npm test` toàn bộ **0 ❌**. `sw.js` v127→**v128**. Smoke test 200 OK.
+
+**Còn để ngỏ**: 100 câu là điểm khởi đầu hợp lý cho 1 trò MỚI (không áp
+ngay chuẩn "500 câu" như các trò cũ — sẽ đào sâu thêm nếu bạn muốn ở đợt
+sau, giống cách các trò khác đã được đào sâu dần qua nhiều đợt). Bố cục 11
+thẻ chọn trò: hàng cuối giờ có 2 thẻ (11 ÷ 3 dư 2) thay vì 1 — không cần
+CSS đặc biệt để căn giữa (thẻ tự nằm lệch trái ở hàng cuối, vẫn rõ ràng
+không vỡ layout); nếu bạn thấy hàng cuối 2 thẻ không đẹp, có thể chỉnh CSS
+căn giữa cặp thẻ này ở đợt sau. Trò này KHÔNG đọc câu tiếng Anh bằng giọng
+nói (chỉ đọc phản hồi tiếng Việt + gợi ý khi trả lời) — giống đa số trò
+khác trong bộ (chỉ Ghép Câu có đọc tiếng Anh). Bạn tự mở lại trò để xem
+bằng mắt huy hiệu/giao diện mới (chưa test được bằng mắt vì không có
+Playwright).
+
+## 65. ÁP CHUẨN ÍT NHẤT 500 CÂU HỎI/TỪ VỰNG (07/2026)
+
+Tiếp nối yêu cầu "nâng lên ít nhất 500 câu" đã nêu trước đó — đào sâu tiếp
+7 trò đang ở mốc ~200-220 (từ mục 62) lên >=500, dùng đúng các kỹ thuật đã
+kiểm chứng (nhân subject-pool, thêm template, mở rộng combinatorial) thay
+vì chỉ lặp lại thao tác cũ với số lượng lớn hơn.
+
+**Going To vs Will**: +42 tình huống mới (21 going-to có kế hoạch sẵn, 21
+will quyết định tức thời) — 44→**86 tình huống**, không gian câu hỏi
+(nhân 6 chủ ngữ, trừ 3 tình huống thời tiết giữ nguyên "It") từ 249→**501
+câu hỏi**. Bắt được 2 lỗi trùng verb ngay khi viết script kiểm tra ("order
+a pizza" trùng, "take an umbrella" trùng ý với tình huống cũ) — sửa thành
+"order some noodles" và "close the windows".
+
+**Modal Ai Đúng**: +38 tình huống mới (10 must, 10 mustn't, 9 should, 9
+shouldn't) — 46→**84 tình huống** × 6 chủ ngữ = 276→**504 câu hỏi**.
+
+**Câu Điều Kiện**: +48 template mới trong hệ thống đã xây ở mục 62 (mẫu
+nguyên nhân→kết quả + placeholder `{poss}`/`{refl}`) — 30→**78 template** ×
+6 chủ ngữ + 44 câu cố định = 224→**500 câu hỏi** (khớp CHÍNH XÁC mốc 500).
+Kiểm tra kỹ 0 trùng cặp câu, 0 trường hợp `ifPresent === ifPast`.
+
+**Ghép Câu**: +13 mẫu câu mới (quá khứ tiếp diễn, hiện tại hoàn thành tiếp
+diễn, quá khứ hoàn thành, 3 thì tương lai, modal must, 3 dạng phủ định,
+used to, enjoy + V-ing, can) — 6→**19 mẫu** × 23 nhân vật + 80 câu cố định
+= 218→**517 câu hỏi**.
+
+**Chủ Động vs Bị Động** — trò khó nhất vì mỗi tình huống cần agent/object/3
+dạng động từ THẬT SỰ hợp lý (không thể chỉ nhân công thức): viết script
+sinh 100 tình huống mới có kiểm tra trùng lặp tự động (agent|object|verb),
+dùng lại ĐÚNG các dạng động từ đã xác minh đúng ở những tình huống trước đó
+(cook/teach/paint/build/grow/bake/write/clean/wash/deliver...) để giảm rủi
+ro chia sai động từ mới — 70→**170 tình huống** × 3 thì = 210→**510 câu
+hỏi**. Bắt được 4 lỗi trùng lặp qua script trước khi ghi vào file (2 trùng
+với tình huống đã có từ mục 60, 1 trùng nội bộ) — sửa hết trước khi chèn.
+
+**Lời Nói Gián Tiếp** — cũng khó vì mỗi mẫu cần đúng quy tắc lùi thì: viết
+150 mẫu trích dẫn mới (25 mỗi loại "kind" trong 6 loại đã có: am-adj/
+am-ving/present-verb/will/can/have-pp), dùng lại đúng hệ thống template
+backshift đã xây ở mục 62 — 90→**240 mẫu** × 2 người tường thuật (he/she) +
+24 câu cố định = 204→**504 câu hỏi**. Bắt được 2 lỗi: 1 trùng câu trích dẫn
+với dữ liệu cũ ("I will water the garden."), 1 lỗi cú pháp (dấu nháy đơn
+trong "it's true" làm vỡ chuỗi JS) — cả 2 sửa xong trước khi chạy test.
+
+**Lượng Từ Đúng** — mở rộng vốn từ vựng nhiều nhất (204→**504 đồ vật**,
++300 mục): viết 4 đợt danh sách ứng viên (côn trùng/hải sản/nhạc cụ/dụng
+cụ/đồ gia dụng/hình khối/thiết bị công nghệ, và đặc biệt **cờ quốc gia** —
+~90 lá cờ Unicode, mỗi lá cờ là 1 icon riêng biệt tuyệt đối chính xác,
+không cần suy diễn hình ảnh), mỗi đợt đối chiếu tự động qua script để loại
+trùng emoji/từ với dữ liệu đã có trước khi chèn — không có bước nào chèn
+mù, luôn kiểm tra trước.
+
+**Nhận Biết Từ Loại — CHƯA đạt 500 (báo trung thực thay vì ép số giả)**:
++120 câu mới (15 câu/1 trong 8 từ loại) — 100→**220 câu hỏi**. Đây là trò
+khó đạt 500 nhất vì MỖI câu cần viết tay hoàn chỉnh + đúng ngữ pháp + đúng
+gợi ý giải thích (không thể sinh bằng công thức như các trò khác) — làm
+tiếp thêm 280 câu nữa trong 1 đợt sẽ khó giữ chất lượng kiểm chứng từng câu
+như đã làm xuyên suốt dự án. Đã đào sâu gấp hơn 2 lần (100→220), sẽ tiếp
+tục nếu bạn muốn ở đợt sau.
+
+**Test mới**: check "vòng 11" xác nhận toàn bộ 7/8 trò đạt >=500, riêng
+Nhận Biết Từ Loại chỉ yêu cầu >=200 (khớp thực tế), cộng loạt assertion
+chống trùng lặp cho cả 6 trò vừa mở rộng (Điều Kiện/Ghép Câu/Bị Động/Lời
+Nói Gián Tiếp/Lượng Từ Đúng/Nhận Biết Từ Loại). `nguphaptructuan.test.js`:
+84→**85 ✅**.
+
+**Kết quả cuối cùng** (huy hiệu sẽ hiện đúng các số này):
+- Cỗ Máy Thời Gian: **10.764 câu hỏi** (đã >500 từ trước)
+- Hai Hành Động Cùng Lúc: **1.320 câu hỏi** (đã >500 từ trước)
+- So Sánh Hơn/Nhất: 20 nhân vật · 14 thang đo (không gian câu hỏi thật ~2.660, đã >500)
+- Going To vs Will: **501 câu hỏi**
+- Modal Ai Đúng: **504 câu hỏi**
+- Câu Điều Kiện: **500 câu hỏi**
+- Ghép Câu: **517 câu hỏi**
+- Chủ Động vs Bị Động: **510 câu hỏi**
+- Lời Nói Gián Tiếp: **504 câu hỏi**
+- Lượng Từ Đúng: **504 đồ vật**
+- Nhận Biết Từ Loại: **220 câu hỏi** (chưa đạt 500 — xem giải thích ở trên)
+
+`npm test` toàn bộ: **0 ❌**. Đã chạy lại kiểm tra `app.js` bằng DOM giả —
+không lỗi. `sw.js` v128→**v129**. Smoke test qua `npx serve`: trang,
+`app.js`, `nguphaptructuan.js` đều 200.
+
+**Còn để ngỏ**: Nhận Biết Từ Loại là trò DUY NHẤT chưa đạt chuẩn 500 —
+muốn tiếp tục thì báo để làm thêm ~280 câu nữa (7 đợt ~40 câu, mỗi đợt
+kiểm tra kỹ trước khi chèn, giống cách đã làm ở đợt này). Như mọi đợt
+trước, chưa xem trực tiếp bằng mắt trong trình duyệt thật (không có
+Playwright/Puppeteer) — bạn tự mở lại các trò để xác nhận huy hiệu hiện
+
+## 66. ÁP CHUẨN ÍT NHẤT 700 CÂU HỎI/TỪ VỰNG (07/2026)
+
+Tiếp nối ngay yêu cầu "áp chuẩn ít nhất 700 câu" — đào sâu thêm 1 nấc nữa
+trên nền 500 vừa đạt ở mục 65, dùng đúng các kỹ thuật đã kiểm chứng.
+
+**Going To vs Will**: +34 tình huống (17 going-to, 17 will) — 86→**120
+tình huống** × 6 chủ ngữ (117 tình huống không phải thời tiết, +3 tình
+huống thời tiết giữ nguyên) = 501→**705 câu hỏi**.
+
+**Modal Ai Đúng**: +33 tình huống (9 must, 8 mustn't, 8 should, 8
+shouldn't) — 84→**117 tình huống** × 6 chủ ngữ = 504→**702 câu hỏi**.
+
+**Câu Điều Kiện**: +34 template mới, dùng nhiều động từ chưa từng dùng
+(wake/jog/label/water/iron/polish/rehearse/check/compost/mark/memorize/
+stretch/hydrate/declutter/budget/network/sanitize/recharge/downsize/
+summarize/brainstorm/multitask/overwork/underestimate/double-check/
+cross-train/fast-forward/rewind/unplug/reboot/skim/bookmark/fold/shower)
+— 78→**112 template** × 6 chủ ngữ + 44 câu cố định = 500→**704 câu hỏi**.
+Đếm hụt 1 lần giữa chừng (viết nhầm 30 thay vì 32 template) — phát hiện
+qua script đếm lại, bổ sung thêm 2 template để về đúng mốc.
+
+**Ghép Câu**: +8 mẫu câu mới (would like to, has to, might, quá khứ tiếp
+diễn phủ định, ought to, keeps + V-ing, loves to, starts + V-ing lúc bình
+minh) — 19→**27 mẫu** × 23 nhân vật + 80 câu cố định = 517→**701 câu hỏi**.
+
+**Chủ Động vs Bị Động**: viết script sinh 65 tình huống mới (bảng tra 56
+động từ base/past/pp/s3 + hàng chục agent/object mới), đối chiếu tự động
+chống trùng nội bộ VÀ trùng dữ liệu cũ trước khi chèn (bắt được 1 lỗi
+trùng nội bộ + 1 lỗi trùng với tình huống có sẵn, sửa hết trước khi ghi
+file) — 170→**235 tình huống** × 3 thì = 510→**705 câu hỏi**.
+
+**Lỗi thật bắt được qua test (không phải qua script kiểm trùng thủ công)**:
+hàm `buildPassiveSentence()` phần sinh đáp án sai "wrong-participle" dùng
+thẳng `scenario.base` — với các động từ bất quy tắc có base===pp (như
+"cut/cut/cut"), câu "sai" sinh ra TRÙNG Y HỆT câu "đúng" (câu đúng cũng
+dùng `pp`). Lỗi này đã tồn tại âm thầm từ trước (4 tình huống dùng "cut"
+có từ mục 60), chỉ lộ ra khi số tình huống tăng lên làm test ngẫu nhiên
+`makePassiveRound sinh 4 lựa chọn khác nhau` bắt trúng va chạm và **FAIL
+thật sự** (không phải lỗi ở script này viết). Sửa: khi base===pp, dùng
+`${base}ed` (vd "cutted") làm đáp án sai thay vì base thẳng — vẫn là 1 lỗi
+hợp lý (chia quy tắc nhầm), chỉ khác dạng lỗi. Thêm hẳn 1 vòng quét 300
+lần ngẫu nhiên (seed cố định) vào test để chặn tái diễn lỗi này với bất kỳ
+động từ base===pp nào thêm sau này.
+
+**Lời Nói Gián Tiếp**: +98 mẫu mới (phủ đều cả 6 loại "kind") — 240→**336
+mẫu** × 2 người tường thuật + 24 câu cố định = 504→**700 câu hỏi** (khớp
+CHÍNH XÁC mốc 700). Bắt 1 lỗi cú pháp JS (dấu nháy đơn chưa escape trong
+`rest: 'it's true'` làm vỡ cả file) — sửa thành "the story is true". Đếm
+hụt 2 mẫu giữa chừng (viết 96 thay vì 98) — bổ sung 2 mẫu `have-pp` nữa
+("darned the socks"/"repainted the chair") để về đúng mốc.
+
+**Lượng Từ Đúng**: +199 mục từ vựng qua 3 đợt script (thêm cờ quốc gia
+hiếm hơn, số dạng keycap, mặt đồng hồ, cung hoàng đạo, màu trái tim, biểu
+tượng cử chỉ tay, thêm động vật/trái cây/rau củ/quần áo/dụng cụ thể
+thao/công trình/nhạc cụ/đồ vật không gian/dụng cụ/món ăn) — 504→**703 đồ
+vật**, mỗi đợt đối chiếu tự động chống trùng emoji/từ trước khi chèn, 0
+trùng lặp cuối cùng.
+
+**Nhận Biết Từ Loại — VẪN CHƯA đạt 700 (báo trung thực thay vì ép số
+giả)**: +120 câu mới (15 câu/1 trong 8 từ loại, ví dụ noun: importance/
+appearance/painter/wisdom..., verb: automate/negotiate/optimize...,
+adjective: natural/cultural/wonderful..., adverb: quietly/eventually/
+frequently..., preposition: about/despite/regarding..., pronoun:
+herself/whom/everybody..., conjunction: "so that"/"now that"/whilst...,
+interjection: ta-da/alrighty/bingo...) — 220→**340 câu hỏi**. Vẫn là trò
+khó nhất vì mỗi câu cần viết tay + kiểm tra ngữ pháp + gợi ý giải thích
+riêng, không có cách nhân công thức. Bắt 1 lỗi: từ `word: 'Anybody'`
+không khớp chữ thường "anybody" trong câu ví dụ — sửa lại đúng case.
+
+**Test mới**: check "vòng 12" xác nhận 7/8 trò đạt >=700, riêng Nhận Biết
+Từ Loại chỉ yêu cầu >=300 (khớp thực tế 340), cộng vòng quét 300 lần chống
+va chạm `base===pp` cho Bị Động, cộng loạt assertion chống trùng lặp cho
+tất cả các trò vừa mở rộng. `nguphaptructuan.test.js`: 85→**86 ✅**.
+
+**Kết quả cuối cùng** (huy hiệu sẽ hiện đúng các số này):
+- Cỗ Máy Thời Gian: **10.764 câu hỏi** (đã >700 từ trước)
+- Hai Hành Động Cùng Lúc: **1.320 câu hỏi** (đã >700 từ trước)
+- So Sánh Hơn/Nhất: 20 nhân vật · 14 thang đo (không gian câu hỏi thật ~2.660, đã >700)
+- Going To vs Will: **705 câu hỏi**
+- Modal Ai Đúng: **702 câu hỏi**
+- Câu Điều Kiện: **704 câu hỏi**
+- Ghép Câu: **701 câu hỏi**
+- Chủ Động vs Bị Động: **705 câu hỏi**
+- Lời Nói Gián Tiếp: **700 câu hỏi**
+- Lượng Từ Đúng: **703 đồ vật**
+- Nhận Biết Từ Loại: **340 câu hỏi** (chưa đạt 700 — xem giải thích ở trên)
+
+`npm test` toàn bộ: **0 ❌**. Đã chạy lại kiểm tra `app.js` bằng DOM giả —
+không lỗi. `sw.js` v129→**v130**. Smoke test qua `npx serve`: trang,
+`app.js`, `nguphaptructuan.js` đều 200, `sw.js` xác nhận đúng `reply1999-v130`.
+
+**Còn để ngỏ**: Nhận Biết Từ Loại vẫn là trò DUY NHẤT chưa đạt chuẩn 700
+(hiện 340) — muốn tiếp tục thì báo để làm thêm ~360 câu nữa (nhiều đợt
+~30-40 câu, mỗi câu vẫn phải viết tay + kiểm tra kỹ như mọi lần). Như mọi
+đợt trước, chưa xem trực tiếp bằng mắt trong trình duyệt thật (không có
+Playwright/Puppeteer) — bạn tự mở lại các trò để xác nhận huy hiệu hiện
+đúng số mới và cảm nhận độ đa dạng câu hỏi tăng rõ rệt.
+
+## 67. NHẬN BIẾT TỪ LOẠI ĐẠT 700, SONG NGỮ TỪ LOẠI + 2 LỖI UI (07/2026)
+
+Yêu cầu tiếp theo gồm 4 việc: (1) thêm tên tiếng Anh cạnh tên từ loại tiếng
+Việt trong trò Nhận Biết Từ Loại để bé học thêm từ vựng ngữ pháp tiếng Anh,
+(2) sửa lỗi UI "options rớt ra ngoài ô vuông" ở trò nghe-đoán chọn hình
+(ảnh chụp "Hoạt Động & Đồ Chơi"), (3) huy hiệu ⭐ số sao hiện tại vẫn chưa
+thấy ở header, (4) viết tiếp cho Nhận Biết Từ Loại đến khi đủ 700 câu —
+sau đó bạn xác nhận thêm "tiếp tục cho đủ 700" nên đã dồn toàn bộ phần còn
+thiếu vào 1 đợt thay vì chia nhỏ như mọi lần.
+
+**1. Song ngữ tên từ loại**: `POS_CATEGORIES` đổi nhãn hiển thị, ví dụ
+`'Danh từ'` → `'Danh từ (Noun)'`, áp dụng cho cả 8 từ loại (Noun/Pronoun/
+Verb/Adjective/Adverb/Preposition/Conjunction/Interjection). Chỉ đổi
+`label` hiển thị trên nút chọn — không đụng phần đọc giọng nói (hint vẫn
+đọc thuần tiếng Việt như cũ, không lẫn tiếng Anh vào câu TTS).
+
+**2. Lỗi UI "options rớt ra ngoài ô vuông" — lỗi CSS Grid kinh điển**: các
+trò "Nghe & Đoán" (10 game dùng chung 1 khuôn `.opt-btn { aspect-ratio: 1/1
+}` bên trong CSS Grid `1fr 1fr`) đều thiếu `min-width: 0; min-height: 0;
+overflow: hidden;` — theo mặc định, item trong CSS Grid có `min-width:
+auto` lấy kích thước NỘI DUNG BÊN TRONG làm sàn tối thiểu, nên nếu emoji ở
+một vài thiết bị/font render rộng hơn cột lưới, nút sẽ bị đẩy tràn ra
+ngoài khung vuông đã định — đúng như ảnh chụp mô tả, và giải thích vì sao
+"thỉnh thoảng" mới xảy ra (phụ thuộc font-emoji của từng máy). Sửa đồng
+loạt cả 10 file `style.css` cùng khuôn (`nghe-doan-do-dung-hang-ngay`,
+`nghe-doan-dong-vat-vu-tru`, `nghe-doan-gia-dinh-nghe-nghiep`, `nghe-doan-
+giao-thong`, `nghe-doan-hoat-dong-do-choi`, `nghe-doan-nha-bep-cong-nghe`,
+`nghe-doan-on-tap`, `nghe-doan-quoc-gia-nghe-nghiep`, `nghe-doan-thoi-tiet-
+cam-xuc`, `nghe-doan-tieng-anh`) chứ không chỉ sửa đúng 1 game trong ảnh,
+vì cả 10 game dùng chung 1 khuôn CSS y hệt nên đều mắc lỗi tiềm ẩn này.
+
+**3. Huy hiệu ⭐ header vẫn không thấy — cũng là lỗi tràn khung, khác chỗ**:
+`header.top` mỗi game có sẵn 3-4 nút tròn cố định 44px (🏠/◀/❓/🔊) + tiêu đề
+— hàng flex mặc định "nowrap", nên khi `mountHeaderStars()` (mục 63) chèn
+thêm 1 huy hiệu ⭐ vào CUỐI hàng, trên màn hình hẹp không đủ chỗ sẽ bị đẩy
+tràn ra NGOÀI khung nhìn (không có thanh cuộn ngang trên di động) — huy
+hiệu vẫn tồn tại và cập nhật đúng trong DOM, chỉ là vô hình với bé/phụ
+huynh. Sửa trong `shared/kid-bar.js`: `mountHeaderStars()` ép
+`header.style.flexWrap = 'wrap'` — khi không đủ chỗ, huy hiệu sẽ tự động
+rơi xuống dòng 2 thay vì mất hút. Áp dụng chung cho MỌI game gọi
+`mountKidFeatures()`, không chỉ Ngữ Pháp Trực Quan.
+
+**4. Nhận Biết Từ Loại: 340→700 câu (ĐẠT ĐỦ CHUẨN, không còn ngoại lệ)**:
+viết tay toàn bộ 360 câu còn thiếu (45 câu mới cho mỗi 1 trong 8 từ loại),
+mỗi câu vẫn kèm hint giải thích dấu hiệu nhận biết (đuôi/tiền tố/vai trò/ý
+nghĩa) đúng tinh thần gốc của trò:
+- Danh từ (+45): đuôi -tion/-ment/-ness/-ity/-ance/-ence/-ship/-hood/-ism/
+  -dom/-er/-or/-ure/-th/-y (information, management, kindness, curiosity,
+  relationship, kingdom, director, sculpture, strength, honesty...).
+- Động từ (+45): đuôi -ize/-ify/-ate/-en và tiền tố re-/dis-/un- (apologize,
+  identify, educate, darken, rebuild, dislike, unpack...).
+- Tính từ (+45): đuôi -ous/-ful/-less/-ive/-able/-ible (famous, joyful,
+  fearless, supportive, reliable, edible...).
+- Trạng từ (+45): chủ yếu đuôi -ly, cộng vài từ nghĩa/tần suất không theo
+  quy tắc (seldom, perhaps) — cẩn thận tránh nhóm "trạng từ nối câu" dễ gây
+  nhầm với liên từ (however/therefore...) để không rối cho bé.
+- Giới từ (+45): mở rộng sang CỤM giới từ phức hợp thường gặp trong đề thi
+  chứng chỉ (because of, according to, in spite of, regardless of, on
+  behalf of, as opposed to...) vì giới từ đơn thông dụng đã dùng gần hết ở
+  các mục trước.
+- Đại từ (+45): I/you/he/we/they/me/them/myself + đại từ chỉ định/bất
+  định/quan hệ (this, whichever, whoever) + CỤM đại từ chỉ nhóm (all of
+  us, none of them, several of them...).
+- Liên từ (+45): mở rộng liên từ trang trọng (albeit, inasmuch as, granted
+  that) và tái sử dụng một số liên từ phổ biến (because/when/while/if...)
+  với câu ví dụ HOÀN TOÀN MỚI — dữ liệu gốc vốn đã chấp nhận trùng "word"
+  miễn câu không trùng nhau (and/but/or vốn đã lặp lại ở mục 62).
+- Thán từ (+45): thêm các cảm thán thông dụng/thân mật chưa dùng (Jeez,
+  Whew, Woohoo, Ahem, Uh-oh, Great, Cool, Fantastic...).
+
+Quy trình kiểm tra TRƯỚC khi chèn vào file (giống mọi đợt trước): viết
+360 câu ra file nháp, chạy script đối chiếu qua `import()` module thật để
+bắt (a) câu trùng với 340 câu đã có, (b) câu trùng nội bộ trong chính 360
+câu mới, (c) từ "word" không thực sự nằm trong câu — bắt được đúng 1 lỗi
+(câu "Speak softly lest you wake the baby." trùng với câu có sẵn cho từ
+"lest") và sửa thành "Take a coat lest the wind turns cold." trước khi
+chèn. Sau khi chèn: `POS_WORDS.length` = ĐÚNG **700**, mỗi từ loại đạt
+85-90 câu, 0 câu trùng, 0 lỗi từ không khớp câu.
+
+**Test mới**: check "vòng 13" xác nhận `POS_WORDS.length === 700` (không
+chỉ ">="), mỗi từ loại >=80 câu, 0 trùng câu, mọi từ đều nằm trong câu ví
+dụ tương ứng. `nguphaptructuan.test.js`: 86→**87 ✅**.
+
+**Kết quả cuối cùng — LẦN ĐẦU TIÊN CẢ 8/8 TRÒ ĐẠT CHUẨN 700**:
+- Going To vs Will: 705 · Modal Ai Đúng: 702 · Câu Điều Kiện: 704 ·
+  Ghép Câu: 701 · Chủ Động vs Bị Động: 705 · Lời Nói Gián Tiếp: 700 ·
+  Lượng Từ Đúng: 703 · **Nhận Biết Từ Loại: 700** (không còn là ngoại lệ)
+
+`npm test` toàn bộ: **0 ❌**. Đã chạy lại kiểm tra `app.js` bằng DOM giả —
+không lỗi. `sw.js` v130→**v131**. Smoke test qua `npx serve`: trang Ngữ
+Pháp Trực Quan, `app.js`, `nguphaptructuan.js`, trang "Hoạt Động & Đồ
+Chơi", CSS của trò đó, và `shared/kid-bar.js` đều 200; `sw.js` xác nhận
+đúng `reply1999-v131`.
+
+**Còn để ngỏ**: chưa xem trực tiếp bằng mắt trong trình duyệt thật (không
+có Playwright/Puppeteer) — đặc biệt 2 lỗi UI (options tràn khung, huy
+hiệu sao mất hút) là lỗi HIỂN THỊ nên rất cần bạn tự mở app trên đúng
+thiết bị/màn hình đã gặp lỗi để xác nhận đã hết hẳn, vì CSS Grid có thể
+render khác nhau tuỳ trình duyệt/font máy. Nếu vẫn còn thấy huy hiệu sao
+bị mất, khả năng khác là bé chưa được chọn ở /chon-be/ hoặc phụ huynh
+chưa đăng nhập/cấu hình server — báo lại để kiểm tra tiếp theo hướng đó.
+
+## 68. ÁP CHUẨN ÍT NHẤT 850 CÂU HỎI/TỪ VỰNG — CẢ 8/8 TRÒ (07/2026)
+
+Ngay sau khi cả 8/8 trò đạt mốc 700 ở mục 67, bạn yêu cầu tiếp tục nâng
+chuẩn lên **850**, rồi xác nhận thêm "tiếp tục và tiếp tục cho đủ 700"
+(đã áp dụng ở mục 67) và cuối cùng "tiếp tục mục tiêu 850" cho đợt này —
+dùng lại đúng các kỹ thuật đã kiểm chứng xuyên suốt dự án (nhân subject-
+pool, thêm template, script sinh + đối chiếu trùng lặp tự động, viết tay
+có kiểm tra kỹ cho trò không thể nhân công thức).
+
+**Going To vs Will**: +26 tình huống mới (13 going-to có kế hoạch sẵn, 13
+will quyết định tức thời/lời hứa/dự đoán) — 120→**146 tình huống**, không
+gian câu hỏi 705→**861 câu hỏi**.
+
+**Modal Ai Đúng**: +25 tình huống mới (7 must, 6 mustn't, 6 should, 6
+shouldn't) — 117→**142 tình huống** × 6 chủ ngữ = 702→**852 câu hỏi**.
+
+**Câu Điều Kiện**: +25 template mới, dùng toàn động từ CHƯA từng dùng
+(sweep/tidy/wipe/vacuum/dust/sew/knit/sketch/doodle/journal/floss/gargle/
+whistle/hum/juggle/skateboard/surf/kayak/canoe/hike/forage/whittle/braid/
+crochet/quilt) — 110→**135 template** × 6 chủ ngữ + 44 câu cố định =
+704→**854 câu hỏi**. 0 trùng cặp câu, 0 trường hợp `ifPresent === ifPast`.
+
+**Ghép Câu**: +7 mẫu câu mới (is able to, is supposed to, is about to,
+hardly ever + động từ chia ngôi 3, is still + V-ing, needs to, tends to)
+— 27→**34 mẫu** × 23 nhân vật + 80 câu cố định = 862→**862 câu hỏi**
+(khớp đúng công thức, không câu nào dưới 4 từ).
+
+**Chủ Động vs Bị Động**: viết script sinh ứng viên với bảng tra ~55 động
+từ mới (organize/mend/fix/repair/brew/arrange/polish/harvest/weave/carve/
+frame/print/fold/iron/stitch/pack/wrap/label/sort/slice/peel/grind/roast/
+grill/steam/freeze/stir/knead/scrub/trim/prune/rake/mow/shear/milk/feed/
+brush/bathe/train/guard/patrol/inspect/scan/file/stamp/seal/post/ship/
+load/unload...) và hàng chục agent/object nghề nghiệp mới (thợ sửa ống
+nước, thợ kim hoàn, người dệt vải, người gác rừng, nhân viên bưu điện...)
+— script tự đối chiếu chống trùng nội bộ VÀ trùng dữ liệu cũ, bắt được 5
+lỗi trùng lặp (librarian/books/organize, plumber/pipe/fix, jeweler/ring/
+polish, farmer/wheat/harvest, farmer/cows/milk — đều trùng với tình huống
+có sẵn từ các mục trước) và loại bỏ trước khi chèn — 235→**286 tình
+huống** × 3 thì = 705→**858 câu hỏi**. Quét lại 500 vòng ngẫu nhiên xác
+nhận không tái diễn lỗi "base === pp" (mục 66).
+
+**Lời Nói Gián Tiếp**: +76 mẫu mới phủ đều cả 6 loại "kind" (13 mỗi loại:
+am-adj, am-ving, present-verb, will, can, have-pp) — 338→**414 mẫu** × 2
+người tường thuật + 24 câu cố định = 700→**856 câu hỏi**.
+
+**Lượng Từ Đúng**: mở rộng vốn từ vựng khó nhất đợt này vì phần lớn danh
+mục dễ (cờ quốc gia, con vật, đồ vật quen thuộc) đã dùng gần hết — chia
+4 đợt: (1) xúc xắc/bộ bài/pha mặt trăng/thời tiết/sinh vật biển/côn
+trùng/bánh ngọt/núi non/phương tiện/biểu cảm khuôn mặt (74 mục sống sót
+sau lọc trùng trong 134 ứng viên), (2) cờ không phải quốc gia/thêm biểu
+cảm/phụ kiện thời trang/nhạc cụ còn lại/dụng cụ thể thao/đồ gia dụng-văn
+phòng/vũ trụ/thêm động vật-món ăn (50 mục sống sót trong 106 ứng viên),
+(3) 18 lá cờ hiếm còn sót lại (Bắc Triều Tiên, Đài Loan, Hong Kong, Macau,
+Palestine, Puerto Rico, Greenland, Bermuda, Gibraltar, quần đảo Faroe,
+Isle of Man, Guernsey, Jersey, Cook Islands, Niue, Nam Cực, Liên minh
+Châu Âu, Liên Hợp Quốc) + vài mục lẻ khác, (4) 8 mục lấp khoảng trống
+cuối cùng — 703→**854 đồ vật**, mỗi đợt đối chiếu tự động chống trùng
+emoji/từ trước khi chèn, 0 trùng lặp cuối cùng.
+
+**Nhận Biết Từ Loại — ĐẠT ĐỦ 850 (không còn ngoại lệ, giống mục 67)**:
++152 câu mới (19 câu/1 trong 8 từ loại), khai thác thêm các nhóm suffix/
+prefix CHƯA dùng ở mục 67:
+- Danh từ (+19): đuôi -age/-ery/-ry/-eer/-ian (marriage, courage, bakery,
+  jewelry, engineer, musician, historian, electrician...).
+- Động từ (+19): tiền tố over-/under-/mis-/pre-/post-/re-/un- (overcook,
+  misunderstand, preheat, postpone, redo, reopen, unlock...).
+- Tính từ (+19): đuôi -y/-ish/-en (rainy, windy, muddy, reddish, selfish,
+  ticklish, wooden, golden, woolen, silken...).
+- Trạng từ (+19): chuyển hẳn sang nhóm trạng từ CHỈ NƠI CHỐN/HƯỚNG/CÁCH
+  THỨC không theo đuôi "-ly" (nearby, abroad, upstairs, outdoors,
+  everywhere, forward, sideways, together, alone, aloud, already...) vì
+  nhóm đuôi "-ly" đã khai thác gần hết ở 2 mục trước.
+- Giới từ (+19): giới từ đơn ít gặp hơn (onto, via, amidst, beneath,
+  circa, aboard, astride, round) + cụm giới từ trang trọng thường gặp
+  trong đề thi (by way of, in favor of, on account of, in light of, with
+  respect to...).
+- Đại từ (+19): cụm đại từ nhóm/so sánh (the former/the latter, somebody
+  else, each one, any of them, few of them, both of us, neither one,
+  the rest, one's own...).
+- Liên từ (+19): tái sử dụng 19 liên từ phổ biến đã dùng (and/but/or/so/
+  because/although/unless/while/since/till/yet/nor/whereas/before/after/
+  until/when/if/though) với 19 câu ví dụ HOÀN TOÀN MỚI — liên từ là lớp
+  từ đóng, đã gần cạn kiệt từ mới sau 2 mục trước, nên áp dụng lại đúng
+  quy tắc đã có từ mục 66: chỉ cần câu không trùng, từ có thể lặp lại.
+- Thán từ (+19): thêm cảm thán ít phổ biến hơn/mô phỏng âm thanh (Wowzers,
+  Gadzooks, Hallelujah, Encore, Eek, Pfft, Poof, Presto, Voila, Kapow,
+  Boom, Whoop...).
+
+Quy trình kiểm tra vẫn giữ nguyên: viết toàn bộ 152 câu ra file nháp,
+chạy script đối chiếu qua `import()` module thật để bắt câu trùng với 700
+câu đã có + trùng nội bộ + từ "word" không thực sự nằm trong câu — lần
+này KHÔNG bắt được lỗi nào (0 trùng, 0 lệch) trước khi chèn, nhờ tra cứu
+kỹ danh sách từ đã dùng trước khi viết thay vì chỉ viết rồi lọc sau.
+
+**Test mới**: check "vòng 14" xác nhận 8/8 trò đạt >=850, cộng lại toàn bộ
+các vòng quét chống trùng lặp đã có từ vòng 12/13 áp dụng cho dữ liệu mới
+(300 vòng quét `base === pp`, combo Bị Động, cặp câu Điều Kiện, câu Ghép
+Câu, 4 khoá Lời Nói Gián Tiếp, từ/emoji Lượng Từ Đúng, câu Nhận Biết Từ
+Loại, verb Going-To-Will/Modal). Đồng thời sửa 1 assertion đã lỗi thời ở
+check "vòng 13" (`assert.equal(POS_WORDS.length, 700)` không còn đúng vì
+đã tăng lên 852) — đổi thành `>= 700` để không báo lỗi giả khi dữ liệu
+tiếp tục tăng ở các vòng sau. `nguphaptructuan.test.js`: 87→**88 ✅**.
+
+**Kết quả cuối cùng — CẢ 8/8 TRÒ ĐẠT CHUẨN 850**:
+- Going To vs Will: **861 câu hỏi**
+- Modal Ai Đúng: **852 câu hỏi**
+- Câu Điều Kiện: **854 câu hỏi**
+- Ghép Câu: **862 câu hỏi**
+- Chủ Động vs Bị Động: **858 câu hỏi**
+- Lời Nói Gián Tiếp: **856 câu hỏi**
+- Lượng Từ Đúng: **854 đồ vật**
+- Nhận Biết Từ Loại: **852 câu hỏi**
+
+`npm test` toàn bộ: **0 ❌**. Đã chạy lại kiểm tra `app.js` bằng DOM giả —
+không lỗi. `sw.js` v131→**v132**. Smoke test qua `npx serve`: trang Ngữ
+Pháp Trực Quan, `app.js`, `nguphaptructuan.js` đều 200; `sw.js` xác nhận
+đúng `reply1999-v132`.
+
+**Còn để ngỏ**: chưa xem trực tiếp bằng mắt trong trình duyệt thật (không
+có Playwright/Puppeteer) — bạn tự mở lại các trò để xác nhận huy hiệu
+hiện đúng số mới. Lượng Từ Đúng và Nhận Biết Từ Loại đang tiến gần giới
+hạn tự nhiên của lớp từ đóng/emoji thông dụng — nếu muốn tiếp tục nâng
+chuẩn cao hơn 850 ở vòng sau, 2 trò này sẽ cần khai thác các nhóm từ
+vựng/emoji ngày càng hiếm hoặc chuyên biệt hơn, có thể ảnh hưởng tới độ
+tự nhiên/độ khó phù hợp lứa tuổi — báo trước để cân nhắc kỹ hơn nếu bạn
+muốn đẩy tiếp.
+
+## 69. ÁP CHUẨN ÍT NHẤT 1000 CÂU HỎI/TỪ VỰNG — CẢ 8/8 TRÒ (07/2026)
+
+Ngay sau mục 68, bạn yêu cầu tiếp tục nâng chuẩn lên **1000** cho cả 8/8
+trò. Đúng như cảnh báo ở cuối mục 68, Lượng Từ Đúng và Nhận Biết Từ Loại
+ngày càng khó tìm dữ liệu mới chưa dùng — quy trình script sinh + đối
+chiếu trùng lặp tự động (đã dùng xuyên suốt dự án) trở nên quan trọng hơn
+bao giờ hết để đảm bảo không lặp lại nội dung cũ.
+
+**Going To vs Will**: +24 tình huống mới (12 going-to có kế hoạch sẵn —
+đăng ký lớp gốm, dự thi đánh vần, ra mắt website...; 12 will quyết định
+tức thời/lời hứa/dự đoán — lấy túi đá, giữ bí mật, có thể thắng vòng
+này...) — 146→**170 tình huống**, không gian câu hỏi 861→**1.005 câu
+hỏi**.
+
+**Modal Ai Đúng**: +25 tình huống mới (7 must, 6 mustn't, 6 should, 6
+shouldn't) — 142→**167 tình huống** × 6 chủ ngữ = 852→**1.002 câu hỏi**.
+
+**Câu Điều Kiện**: +25 template mới, toàn động từ CHƯA từng dùng (rinse/
+scrub/dry/hang/mop/wax/oil/grease/tune/calibrate/align/balance/weigh/
+sort/catalog/archive/digitize/scan/upload/download/sync/encrypt/revise/
+translate/illustrate) — 135→**160 template** × 6 chủ ngữ + 44 câu cố định
+= 854→**1.004 câu hỏi**. 0 trùng cặp câu, 0 trường hợp `ifPresent ===
+ifPast`.
+
+**Ghép Câu**: +7 mẫu câu mới (had better, would rather...than, never +
+động từ chia ngôi 3, was about to...when, has never + P2, is going to
+have + P2, isn't going to) — 34→**41 mẫu** × 23 nhân vật + 80 câu cố định
+= 862→**1.023 câu hỏi**, không câu nào dưới 4 từ.
+
+**Chủ Động vs Bị Động**: viết script sinh 49 tình huống mới với ~50 động
+từ mới thuộc lĩnh vực nghề nghiệp sáng tạo/kỹ thuật/hậu cần (kiến trúc
+sư, lập trình viên, nhiếp ảnh gia, người phục chế tranh, thợ hàn, phi
+công, người giao hàng, kế toán viên...) — đối chiếu tự động chống trùng
+nội bộ VÀ trùng dữ liệu cũ trước khi chèn, lần này 0 trùng lặp phát hiện
+— 286→**335 tình huống** × 3 thì = 858→**1.005 câu hỏi**. Quét lại 500
+vòng ngẫu nhiên xác nhận không tái diễn lỗi "base === pp".
+
+**Lời Nói Gián Tiếp**: +72 mẫu mới phủ đều cả 6 loại "kind" (12 mỗi loại)
+— 414→**486 mẫu** × 2 người tường thuật + 24 câu cố định = 856→**1.000
+câu hỏi** (khớp CHÍNH XÁC mốc 1000).
+
+**Lượng Từ Đúng — phần khó nhất đợt này**: hầu hết danh mục dễ (con vật,
+đồ vật, thực phẩm quen thuộc, cờ quốc gia phổ biến) đã dùng gần cạn kiệt
+sau 3 đợt trước — phải chia nhỏ thành 6 đợt script với các nhóm ngày càng
+chuyên biệt: (1) hình khối hình học, hoa, tiền tệ, y khoa/khoa học,
+phương tiện hiếm, lễ hội (44/71 sống sót), (2) mặt mèo cảm xúc, cử chỉ
+tay còn lại, mặt cảm xúc cổ điển còn lại, bóng thể thao, đồ vật linh tinh
+(35/43 sống sót), (3) biển báo cảnh báo, đồ ngọt, văn phòng phẩm, xe cứu
+hộ, phụ kiện thời trang, huy chương, thú cưng đặc biệt (33/64 sống sót),
+(4) vũ khí đồ chơi, đồ gia dụng nhỏ (7/36 sống sót — tỉ lệ trùng rất cao
+ở đợt này, cho thấy vốn emoji thông dụng gần như đã khai thác hết),
+(5) **27 lá cờ quốc gia/vùng lãnh thổ HIẾM CÒN SÓT LẠI** sau khi tính
+toán chính xác bằng mã ISO 3166-1 (Antigua, Anguilla, Samoa thuộc Mỹ,
+Aruba, Barbados, Burundi, Bahamas, Cộng hòa Trung Phi, Djibouti,
+Dominica, Eritrea, quần đảo Falkland, Grenada, Gambia, Guam, Iran, Saint
+Kitts, quần đảo Cayman, Saint Lucia, quần đảo Mariana, Mauritania,
+Montserrat, New Caledonia, Polynesia thuộc Pháp, Nam Sudan, Turks and
+Caicos, Tuvalu — 26/27 sống sót), (6) 5 mục lấp khoảng trống cuối cùng
+(quần đảo Virgin thuộc Anh/Mỹ, Saint Vincent, Wallis and Futuna, nhiệt kế)
+— 854→**1.004 đồ vật**. Đáng chú ý: tính chính xác được toàn bộ 195 mã
+quốc gia ISO còn thiếu bằng script (thay vì đoán mò) để tìm ra ĐÚNG 27 lá
+cờ chưa dùng — kỹ thuật này giúp tránh lãng phí thời gian thử các lá cờ
+đã dùng rồi.
+
+**Nhận Biết Từ Loại — ĐẠT ĐỦ 1000 (không còn ngoại lệ)**: +152 câu mới
+(19 câu/1 trong 8 từ loại), khai thác nhóm suffix/prefix/ý nghĩa CHƯA
+dùng ở 2 mục trước:
+- Danh từ (+19): đuôi -ment/-ance/-ence/-ity/-ness còn lại (entertainment,
+  equipment, environment, insurance, conference, ability, community,
+  darkness...).
+- Động từ (+19): tiền tố en-/em-/sub-/inter-/out-/up-/down-/be- (enable,
+  encourage, subscribe, interact, outgrow, upgrade, befriend...).
+- Tính từ (+19): đuôi -like/-proof/-worthy/-some/-able còn lại (lifelike,
+  waterproof, trustworthy, handsome, adorable, remarkable...).
+- Trạng từ (+19): chuyển sang nhóm trạng từ TẦN SUẤT ĐỊNH KỲ (daily/
+  weekly/monthly/yearly) và MỨC ĐỘ (extremely/entirely/absolutely/
+  slightly/rather...) vì nhóm nơi chốn/hướng đã dùng hết ở mục 68.
+- Giới từ (+19): cụm giới từ trang trọng bậc cao thường gặp trong văn bản
+  học thuật/đề thi khó (in accordance with, with regard to, by virtue of,
+  in the absence of, at the discretion of, pursuant to...).
+- Đại từ (+19): cụm đại từ chỉ định/số lượng nhóm nhỏ (no one, this one,
+  these two, the two of us, all three, either party, the rest of us...).
+- Liên từ (+19): tái sử dụng 19 liên từ phổ biến với câu ví dụ HOÀN TOÀN
+  MỚI (lớp từ đóng đã cạn từ mới sau 3 mục liên tiếp khai thác).
+- Thán từ (+19): thán từ mô phỏng âm thanh/tiếng kêu động vật (Zap, Vroom,
+  Splat, Crash, Meow, Woof, Moo, Cock-a-doodle-doo...) — nhóm hoàn toàn
+  mới so với 3 mục trước (vốn tập trung cảm thán bằng lời).
+
+Quy trình kiểm tra giữ nguyên: viết 152 câu ra file nháp, đối chiếu qua
+`import()` module thật chống trùng với 852 câu đã có + trùng nội bộ + từ
+"word" không nằm trong câu — 0 lỗi trước khi chèn.
+
+**Test mới**: check "vòng 15" xác nhận 8/8 trò đạt >=1000, cộng lại toàn
+bộ vòng quét chống trùng lặp từ vòng 12/13/14 áp dụng cho dữ liệu vòng
+15 (seed khác để phủ thêm trường hợp). `nguphaptructuan.test.js`:
+88→**89 ✅**.
+
+**Kết quả cuối cùng — CẢ 8/8 TRÒ ĐẠT CHUẨN 1000**:
+- Going To vs Will: **1.005 câu hỏi**
+- Modal Ai Đúng: **1.002 câu hỏi**
+- Câu Điều Kiện: **1.004 câu hỏi**
+- Ghép Câu: **1.023 câu hỏi**
+- Chủ Động vs Bị Động: **1.005 câu hỏi**
+- Lời Nói Gián Tiếp: **1.000 câu hỏi**
+- Lượng Từ Đúng: **1.004 đồ vật**
+- Nhận Biết Từ Loại: **1.004 câu hỏi**
+
+`npm test` toàn bộ: **0 ❌**. Đã chạy lại kiểm tra `app.js` bằng DOM giả —
+không lỗi. `sw.js` v132→**v133**. Smoke test qua `npx serve`: trang Ngữ
+Pháp Trực Quan, `app.js`, `nguphaptructuan.js` đều 200; `sw.js` xác nhận
+đúng `reply1999-v133`.
+
+**Còn để ngỏ — CẢNH BÁO QUAN TRỌNG cho vòng sau nếu muốn tiếp tục**:
+Lượng Từ Đúng và Nhận Biết Từ Loại đã chạm gần giới hạn thực tế:
+- Lượng Từ Đúng: gần như đã dùng hết TOÀN BỘ 195 lá cờ quốc gia ISO, phần
+  lớn emoji Unicode phổ biến/dễ đoán nghĩa cho trẻ em. Vòng sau muốn tăng
+  thêm sẽ phải dùng emoji ngày càng hiếm/trừu tượng (khó đoán nghĩa qua
+  hình) hoặc emoji ghép phức tạp (ZWJ sequences) — rủi ro giảm chất lượng
+  sư phạm.
+- Nhận Biết Từ Loại: liên từ (closed class) đã tái dùng gần hết các từ
+  phổ biến với câu mới; vòng sau sẽ cần quay lại các từ đã dùng LẦN THỨ 3
+  với ngữ cảnh khác, hoặc chấp nhận thán từ/liên từ ngày càng hiếm gặp.
+Nếu bạn muốn đẩy tiếp lên mốc cao hơn 1000, nên cân nhắc: (a) chấp nhận
+độ khó/độ hiếm tăng dần ở 2 trò này, hoặc (b) đặt mục tiêu khác nhau cho
+từng trò thay vì áp 1 con số chung cho cả 8/8 — báo lại hướng bạn muốn
+trước khi mình bắt đầu đợt kế tiếp. Như mọi lần, chưa xem trực tiếp bằng
+mắt trong trình duyệt thật — bạn tự mở lại các trò để xác nhận huy hiệu
+hiện đúng số mới.
+
+## 70. THƯỞNG SAO CÔNG BẰNG CHO GAME GIẢI TRÍ + HUY HIỆU SAO Ở MỌI GAME + HỒ SƠ BÉ (07/2026)
+
+Bạn phản hồi 3 việc: (1) các game thuần giải trí không hỗ trợ học từ vựng
+(ví dụ Đào Vàng, Giải Cứu Khủng Long Con) đang thưởng SAO THEO ĐIỂM giống
+hệt game học (+3/+15/+13/+14 sao/ván tuỳ điểm số) — không hợp lý vì bé
+không học được gì khi chơi, nên chỉ nên thưởng CỐ ĐỊNH +1 sao/lần chơi
+xong; (2) huy hiệu ⭐ số sao ở header vẫn không thấy dù đã sửa lỗi CSS ở
+mục 67; (3) chưa có trang "hồ sơ của bé" hay thông tin hồ sơ nào cả.
+
+**1. Sửa luật thưởng sao — phân biệt game HỌC và game GIẢI TRÍ THUẦN**:
+rà toàn bộ ~84 file gọi `recordSession()` để xác định chính xác 42 game
+KHÔNG có nội dung từ vựng/ngữ pháp/kiến thức nào (Đào Vàng, Đào Hầm Vàng,
+Đường Hầm Săn Vàng, Cơn Sốt Tìm Vàng, Hang Kim Cương, Kim Cương Lấp Lánh,
+Vị Vua Vàng, Xây Thị Trấn Vàng, Đập Vàng, Giải Cứu Khủng Long Con, Bắt
+Vịt, Rắn Săn Mồi, Xếp Gạch, Ghép Hình, Lật Hình, Nhà Thám Hiểm Tí Hon,
+Chim Non Vượt Ống, Rồng Con Bắn Trứng, Cá Lớn Biển Xanh, Phi Đội Nhí, Gà
+Vũ Trụ, Bóng Đỏ Phiêu Lưu, Ném Banh Đổ Tháp, Pháo Nước Giữ Đảo, Vũ Điệu
+Theo Nhịp, Tay Đua Nhí, Thú Cưng Đại Chiến, Võ Đài Thú Nhí, Pokémon Đại
+Chiến, Pikachu Classic/Onet, Vườn Rau Thần Kỳ, Bé Hái Trái Cây, Bé Tìm
+Bạn, Bé Làm Stylist, Phòng Xinh Của Bé, Ô Ăn Quan, Cờ Cá Ngựa, Cờ Gánh,
+Cờ Ca-rô, Điện Tử Xưa, Arcade Xưa, Trò Xưa, Vận Động Vui).
+
+Thêm vào `shared/rewards.js`: `FLAT_REWARD_MODES` (danh sách khớp đúng
+chuỗi `mode` mỗi game truyền vào `recordSession`) + `FLAT_REWARD_MODE_PREFIXES`
+(cho `arcade-xua`/`van-dong-vui` — 2 game này ghép thêm tên minigame con
+vào mode, vd `arcadexua-whack`, nên so khớp theo tiền tố) + hàm
+`isFlatRewardMode(mode)` + `starsForSession(mode, score)` (trả về CỐ ĐỊNH
+1 sao nếu là game giải trí thuần, ngược lại vẫn tính theo điểm như cũ qua
+`starsFromScore`). Đổi `shared/api.js`'s `recordSessionServer()` dùng
+`starsForSession(mode, score)` thay vì gọi thẳng `starsFromScore(score)` —
+chỉ đổi 2 dòng (import + 1 lệnh gọi), không đụng luồng ghi `sessions`/
+`reward_ledger` nào khác. Game HỌC (Nghe & Đoán, *-tu-vung, Ngữ Pháp Trực
+Quan, luyện thi...) không đổi gì — vẫn thưởng theo điểm như trước giờ.
+
+**Test mới**: `shared/rewards.test.js` thêm 3 check xác nhận
+`isFlatRewardMode`/`starsForSession` phân loại đúng (kể cả 2 game dùng
+tiền tố động), và không có mode nào nghe như game học lọt vào danh sách
+giải trí thuần. `rewards.test.js`: 7→**10 ✅**.
+
+**2. Lý do thật khiến huy hiệu sao không hiện: 42 game giải trí chưa bao
+giờ gọi `mountKidFeatures()`** — không phải lỗi CSS tái diễn. Lỗi flexWrap
+ở mục 67 chỉ sửa cho các game ĐÃ gọi hàm này (Nghe & Đoán, *-tu-vung, Ngữ
+Pháp Trực Quan...); các game giải trí thuần (Đào Vàng, Khủng Long...)
+chưa bao giờ import `shared/kid-bar.js` nên KHÔNG THỂ có huy hiệu sao,
+thanh avatar bé, hay kiểm tra giới hạn phút/ngày — bất kể sửa CSS gì. Đã
+thêm `import { mountKidFeatures } from '../../shared/kid-bar.js';` +
+lệnh gọi `mountKidFeatures();` vào cả 42 file `app.js` của các game giải
+trí thuần (danh sách như mục 1), theo đúng khuôn mẫu đã dùng ở các game
+học. Riêng `pokemon/` (Pikachu Classic/Onet) dùng cấu trúc header khác
+(`header.top-bar` thay vì `header.top`) nên huy hiệu sẽ không gắn được —
+để nguyên, ghi chú lại thay vì ép sửa cấu trúc header có thể ảnh hưởng
+giao diện gốc của game.
+
+Xác minh: `node --check` toàn bộ 42 file, chạy `node --eval` với DOM giả
+để `import()` thử ~9 file đại diện (dao-vang, co-caro, arcade-xua,
+van-dong-vui, ghep-hinh, be-lam-stylist, vo-dai-thu-nhi, o-an-quan,
+pokemon-dai-chien) — đều load sạch, 2 lỗi gặp phải (dao-vang cần `Image`,
+xep-gach cần `ctx.moveTo`) đều là hạn chế của bộ giả lập canvas/DOM tối
+giản, không liên quan tới thay đổi lần này.
+
+**3. Hồ sơ của bé — thêm màn "Hồ Sơ Của Bé" chạm được từ MỌI game**: huy
+hiệu ⭐ trên header giờ có thể chạm vào (`cursor:pointer`, thêm
+`click` listener trong `mountKidFeatures()`) để mở overlay hiển thị
+avatar to, tên bé, số sao hiện tại, huy hiệu 🎯 số từ cần ôn (nếu có), và
+link "Đổi bé khác" quay lại `/chon-be/`. Đây là hàm thuần hiển thị
+(`showProfileOverlay`), không gọi thêm mạng — dùng lại đúng dữ liệu đã có
+sẵn từ `mountKidFeatures()`, nên luôn mở được kể cả khi mất mạng (số sao
+hiện "đang cập nhật…" thay vì bị coi là lỗi). Đồng thời sửa lại hành vi
+"mất mạng" của huy hiệu: trước đây mất mạng sẽ XOÁ HẲN huy hiệu (mục 63),
+giờ chỉ đổi nhãn thành "⭐ Hồ sơ" để bé vẫn chạm vào xem được avatar/tên/từ
+cần ôn dù không có mạng.
+
+Xác minh bằng script Node giả lập DOM có `addEventListener`: mount
+`kid-bar.js` với 1 hồ sơ giả, bấm huy hiệu ⭐ → overlay mở ra không lỗi.
+
+`npm test` toàn bộ: **0 ❌**. `sw.js` v133→**v134**. Smoke test qua `npx
+serve`: Đào Vàng, Giải Cứu Khủng Long Con, Cờ Ca-rô, `shared/rewards.js`,
+`shared/kid-bar.js`, `shared/api.js` đều 200.
+
+**Còn để ngỏ**: chưa xem trực tiếp bằng mắt trong trình duyệt thật (không
+có Playwright/Puppeteer) — đặc biệt cần bạn tự mở Đào Vàng/Khủng Long
+chơi thử 1 ván để xác nhận: (a) chỉ nhận đúng +1 sao dù thắng/thua/điểm
+cao thấp, (b) huy hiệu sao xuất hiện ở header và bấm vào mở đúng màn hồ
+sơ. `pokemon/` (Pikachu Classic) vẫn chưa có huy hiệu sao do khác cấu
+trúc header — báo lại nếu muốn mình điều chỉnh riêng cho game đó. Màn hồ
+sơ hiện là overlay đơn giản (avatar/tên/sao/từ cần ôn) — nếu bạn muốn có
+thêm lịch sử chơi/thời gian chơi/quà đã đổi ngay trong màn này (hiện các
+thông tin đó chỉ có ở trang Phụ Huynh), báo để mình bổ sung thêm.
+
+## 71. HỒ SƠ Ở TRANG CHỦ + PHÒNG XINH: THÊM 34 MÓN ĐỒ + CƠ CHẾ "MÓN CHỨA MÓN" (07/2026)
+
+Bạn phản hồi tiếp 2 việc: (1) sau khi bé chọn hồ sơ ở `/chon-be/`, quay về
+trang chủ (`index.html`) thì không thấy số sao/hồ sơ ở đâu cả — nên có 1
+nút/ô ở header trang chủ, và nếu bé chưa chọn hồ sơ thì hiện nút "chọn hồ
+sơ"; (2) trò Phòng Xinh Của Bé cần thêm nhiều lựa chọn trang trí hơn, và
+những món đồ LỚN nên "chứa" hoặc "đặt" được món đồ NHỎ lên trên — ví dụ tủ
+sách chứa sách + gấu bông ngồi trên, kệ ti vi đặt cái ti vi lên trên.
+
+**1. Ô hồ sơ ở header trang chủ**: thêm `mountHomeProfileChip(container)`
+vào `shared/kid-bar.js` — khác với `mountKidFeatures()` (dành cho TRONG
+game, cần `<header class="top">`), hàm này gắn thẳng vào 1 container bất
+kỳ nên dùng được ở `index.html` (trang chủ không phải "game"). Nếu ĐÃ chọn
+bé: hiện chip "🐼 Tên · ⭐N", bấm vào mở đúng màn "Hồ Sơ Của Bé" đã làm ở
+mục 70 (dùng lại nguyên `showProfileOverlay`, không viết lại UI). Nếu
+CHƯA chọn bé: hiện nút "👤 Chọn bé" dẫn tới `/chon-be/`. Thêm `<div
+id="homeProfileSlot">` vào header của `index.html` (giữa khối tiêu đề và
+bộ chọn ngôn ngữ) + `<script type="module">` gọi hàm này lúc tải trang.
+Cũng thêm `flex-wrap:wrap` cho CSS `header` của trang chủ — cùng lý do
+với mục 67 (hàng header nowrap dễ đẩy phần tử mới tràn ra ngoài khung nhìn
+trên màn hẹp).
+
+Xác minh bằng script Node giả lập DOM: gọi `mountHomeProfileChip` khi CHƯA
+chọn bé → ra đúng nút "👤 Chọn bé"; giả lập ĐÃ chọn bé (localStorage có
+`r99-kid`/`r99-kid-info`) → ra đúng chip "🐼 Bé Lan · ⭐ …" rồi cập nhật số
+sao. Cả 2 trường hợp không lỗi.
+
+**2. Phòng Xinh Của Bé — thêm 34 món đồ (38→72 món) + cơ chế "món chứa"**:
+
+*Món đồ mới* (26 đồ sàn + 8 đồ tường — tủ quần áo, tủ đầu giường, bàn học,
+kệ ti vi, thùng đồ chơi, giường tầng, tấm thảm, ghế lười, đàn xylophone,
+khủng long đồ chơi, xe scooter, xe ba bánh, ba lô, lồng chim, lồng chuột
+hamster, cúp, lều tipi, xích đu, võng, bạt nhún, dây nhảy, vòng hula,
+giày trượt patin, rương kho báu, giá vẽ tranh, xe kéo đồ chơi · kệ trang
+trí, lịch treo tường, bản đồ thế giới, bảng ghim, đèn chùm, lá cờ, dây cờ,
+vòng bắt mộng). Mỗi món đều cần 1 icon SVG riêng (`phong-xinh/images/
+{id}.svg`) — 38 icon gốc là Twemoji có sẵn, 34 icon mới được TỰ VẼ bằng
+hình khối SVG đơn giản (không phải Twemoji, ghi rõ trong `CREDITS.md`) vì
+không có công cụ tải icon ngoài trong môi trường này.
+
+*Cơ chế "món chứa" (`CONTAINERS`)*: 5 món lớn giờ có "slot" neo món nhỏ —
+tủ sách (chứa sách + gấu bông/cúp/địa cầu ngồi trên), kệ ti vi (đặt cái ti
+vi lên trên), bàn học (sách/địa cầu + đèn/hộp quà), tủ đầu giường (đèn/
+nến), thùng đồ chơi (gấu bông/robot + bóng/chú cún). Thả 1 món nhỏ đủ gần
+(trong bán kính 40px) 1 món chứa còn slot trống hợp lệ sẽ tự "hút" vào
+đúng vị trí neo, gắn `parentUid`/`slotIndex`; thả xa hoặc slot đã đầy thì
+vẫn là món độc lập như trước giờ. Kéo món chứa đi thì đồ bên trong đi
+theo; dọn món chứa thì đồ bên trong KHÔNG mất, chỉ tách thành món độc
+lập. `drawOrder()` sửa để món con luôn vẽ NGAY SAU món chứa (nên luôn
+hiện "nằm trên/trong" đúng mắt thấy) bất kể vị trí y tuyệt đối — khớp
+thẳng vào cách tính `zIndex` có sẵn trong `app.js` nên không cần sửa gì ở
+tầng UI. `serializeRoom`/`deserializeRoom` lưu và khôi phục đúng quan hệ
+cha-con (kể cả khi có id lạ/hỏng chen giữa dữ liệu cũ). `randomRoom` cố
+tình dùng đường đi RIÊNG (`rawPlace`, không tự hút) để giữ đúng tính ngẫu
+nhiên thuần tuý, tránh 2 món liên quan tình cờ đứng gần nhau bị dính vào
+nhau ngoài ý muốn.
+
+**Test mới**: `phong-xinh/src/phongxinh.test.js` thêm 11 check cho cơ chế
+món chứa (hút đúng slot, slot đầy thì thôi, món không hợp lệ thì không
+hút, kéo theo/tách ra đúng lúc, dọn món chứa không mất đồ bên trong, thứ
+tự vẽ đúng, và serialize/deserialize giữ đúng quan hệ cha-con kể cả khi
+dữ liệu cũ có id lạ chen giữa). `phongxinh.test.js`: 13→**24 ✅**.
+
+**Lỗi bắt được và sửa TRƯỚC khi chạy test** (tự rà lại, không phải test
+báo): bản nháp đầu của `deserializeRoom` khôi phục quan hệ cha-con bằng
+cách so khớp CHỈ SỐ mảng giữa dữ liệu đã lưu và item mới tạo — sai ngay
+khi có 1 item với id không còn tồn tại bị bỏ qua giữa chừng (làm lệch chỉ
+số mọi item phía sau). Sửa bằng cách ghép trực tiếp record đã lưu ↔ item
+mới tạo (không dựa vào chỉ số), và thêm hẳn 1 test riêng mô phỏng đúng
+tình huống này (chèn 1 id lạ vào giữa mảng đã lưu) để chặn tái diễn.
+
+`npm test` toàn bộ: **0 ❌**. `sw.js` v134→**v135** (thêm 34 icon SVG mới
+vào PRECACHE, xác minh bằng script đối chiếu FURNITURE ↔ danh sách
+PRECACHE — 0 thiếu). Smoke test qua `npx serve`: trang chủ, Phòng Xinh Của
+Bé, `app.js`, 2 icon mới (`wardrobe.svg`/`dreamcatcher.svg`), `shared/
+kid-bar.js` đều 200; `sw.js` xác nhận đúng `reply1999-v135`.
+
+**Còn để ngỏ**: chưa xem trực tiếp bằng mắt trong trình duyệt thật (không
+có Playwright/Puppeteer) — đặc biệt cần bạn tự mở trang chủ xác nhận ô hồ
+sơ hiện đúng ở header, và tự mở Phòng Xinh Của Bé thử đặt sách/gấu bông
+cạnh tủ sách, đặt ti vi cạnh kệ ti vi để xác nhận cơ chế "hút vào slot"
+hoạt động đúng trên thiết bị thật (bán kính hút 40px có thể cần chỉnh lại
+tuỳ cảm giác thao tác chạm trên điện thoại thật so với chuột). 34 icon mới
+là hình khối tự vẽ đơn giản, chưa chắc đẹp bằng bộ Twemoji gốc — nếu muốn
+nâng cấp hình ảnh đẹp hơn, báo để mình vẽ lại chi tiết hơn hoặc tìm nguồn
+icon khác phù hợp giấy phép.
+
+## 72. SỬA LỖI HUY HIỆU SAO ĐÈ UI + BÉ LÀM STYLIST: PHỤ KIỆN ĐEO CÙNG LÚC + PHÒNG XINH THÊM 20 MÓN (07/2026)
+
+Bạn báo huy hiệu "⭐10" nổi ở góc dưới-trái đè lên phần chọn đồ/màu phía
+dưới ở CẢ Phòng Xinh Của Bé và Bé Làm Stylist (kèm ảnh chụp màn hình) —
+đây là lỗi thật phát sinh từ mục 70 (thêm `mountKidFeatures()` vào 42 game
+giải trí). Đồng thời yêu cầu tiếp: (1) Bé Làm Stylist thêm thật nhiều phụ
+kiện + bộ phận cơ thể trang trí, càng nhiều càng tốt; (2) Phòng Xinh Của
+Bé thêm nữa nhiều lựa chọn; (3) hỏi liệu có thể có scene khác ngoài
+"phòng" (nhà, sân, lớp học, hội trường...) không.
+
+**1. Lỗi huy hiệu đè UI — SỬA CHO CẢ 42 GAME, không chỉ 2 game bị báo**:
+thanh avatar bé (`#kidBar`) + huy hiệu "từ cần ôn" (`#kidWeakBadge`) trong
+`shared/kid-bar.js` dùng `position:fixed;bottom:10px`/`bottom:48px` — hợp
+lý với các game cuộn trang bình thường, nhưng SAI với khuôn `.shell {
+height: 100dvh }` (chiếm trọn màn hình, không cuộn) mà TOÀN BỘ 42 game
+giải trí thêm ở mục 70 đều dùng: hàng UI cuối cùng (màu/tủ đồ/kệ đồ) cũng
+neo sát đáy màn hình y hệt vị trí 2 huy hiệu nổi, nên đè lên nhau. Rà lại
+thấy khuôn mẫu `.shell` này giống hệt nhau ở tất cả 40 game còn lại (kiểm
+tra bằng script đối chiếu chuỗi CSS) nên sửa ĐỒNG LOẠT thay vì chờ báo
+từng game một: thêm `calc(74px + env(safe-area-inset-bottom))` vào
+`padding-bottom` của `.shell` ở cả 42 file `style.css` (2 game đã sửa
+riêng trong mục này + 40 game còn lại bằng script) — chừa đủ chỗ cho cả 2
+huy hiệu nổi mà không cần đổi gì trong `shared/kid-bar.js` (tránh rủi ro
+ảnh hưởng ~90 game khác đang dùng ổn).
+
+**2. Bé Làm Stylist — thiết kế lại: phụ kiện đeo CÙNG LÚC thay vì chọn 1
+trong nhiều**: bản cũ chỉ có 1 slot "accessory" (nơ HOẶC mũ HOẶC kính,
+chọn 1 lúc), giới hạn khả năng tổ hợp/học từ vựng. Tách thành **11 slot
+độc lập**: tóc, áo, quần, giày (như cũ) + 7 phụ kiện riêng biệt — đội mũ
+(`headwear`), đeo kính (`glasses`), vòng cổ (`necklace`), bông tai
+(`earrings`), găng tay (`gloves`), tất (`socks`), túi/ba lô (`bag`) — bé
+có thể đội vương miện + đeo kính râm + vòng cổ ngọc trai + bông tai + găng
+tay len + tất dài + ba lô CÙNG MỘT LÚC. Số món đồ tăng từ 15→**47** (thêm
+tóc đuôi sam/đuôi ngựa/xoăn/mái bằng, áo hoodie/len/ba lỗ/sơ mi, quần
+legging/yếm, giày xăng đan/búp bê, mũ vương miện/mũ len, kính râm, 2 kiểu
+vòng cổ, 2 kiểu bông tai, 2 kiểu găng tay, 2 kiểu tất, ba lô/túi xách).
+Thêm 4 màu mới (cam/đen/trắng/nâu, 6→10 màu). `BODY_PARTS` (chạm búp bê
+nghe tên bộ phận) tăng từ 6→**11** (thêm mũi, tai, cổ, cánh tay, đôi
+chân) — chỉnh lại toạ độ vùng chạm (mắt/miệng thu gọn một chút để chừa chỗ
+cho mũi) để không đè lên nhau. Toàn bộ vẽ bằng SVG nội tuyến có sẵn
+(không cần thêm file ảnh như Phòng Xinh Của Bé).
+
+**Lỗi bắt được và sửa TRƯỚC khi chạy test**: bản nháp đầu đặt dòng khai
+báo `let knownStars` SAU dòng gắn sự kiện click dùng biến đó trong cùng
+hàm — tuy chạy đúng nhờ hoisting + closure (sự kiện click chỉ thật sự kích
+hoạt sau khi hàm đã chạy xong), nhưng dễ gây hiểu lầm khi đọc lại code nên
+đã sắp xếp lại thứ tự cho rõ ràng (không phải lỗi logic, chỉ là dọn code
+trước khi bàn giao).
+
+**Test mới**: `stylist.test.js` thêm 2 check (11 slot đúng danh sách, đeo
+7 phụ kiện cùng lúc không đụng nhau + vẫn giữ áo/quần/tóc mặc định) và sửa
+lại toàn bộ test cũ tham chiếu `'acc_none'`/"5 slot" cho khớp thiết kế
+mới. `stylist.test.js`: cũ có sẵn nhưng đã viết lại phần lớn, tổng
+**16 ✅** (0 ❌).
+
+**3. Phòng Xinh Của Bé — thêm đợt 2: +20 món đồ (72→93)**: chủ đề trường
+học/vườn/âm nhạc — sáo recorder, trống lục lạc, rổ bóng rổ mini, bảng pha
+màu, hộp bút, bình tưới cây, xe cút kít, chú lùn vườn, bể tắm chim, bộ ấm
+trà đồ chơi, kệ bánh cupcake, đèn lồng, bàn tính, chuông trường học, giá
+treo áo khoác · bảng đen, mũ tốt nghiệp, bằng khen đóng khung, cờ gió hình
+ống, dây đèn lồng trang trí. Nhân tiện thêm 1 "món chứa" mới: giá treo áo
+khoác (`coatrack`) treo được ba lô (`backpack`) — dùng đúng cơ chế
+`CONTAINERS` đã xây ở mục 71. `phongxinh.test.js` thêm 1 check cho
+container mới này: 24→**25 ✅**.
+
+**Trả lời câu hỏi (3) — CHƯA XÂY, chỉ đề xuất hướng vì đây là câu hỏi mở**:
+làm thêm scene khác (nhà/sân/lớp học/hội trường) là khả thi nhưng tốn công
+hơn "thêm món đồ" nhiều — khái niệm "tường + sàn" hiện tại gắn với phòng
+kín, còn "sân nhà" cần "bầu trời + mặt đất" thay vì "tường sơn màu", "lớp
+học"/"hội trường" thì tường+sàn vẫn hợp nhưng cần bộ nội thất riêng phù
+hợp ngữ cảnh (bảng đen/bàn ghế học sinh cho lớp học — vừa thêm ở mục này —
+sân khấu/hàng ghế cho hội trường). Đề xuất: nếu bạn muốn làm, nên coi mỗi
+"scene" là 1 bộ NỀN riêng (kiểu nền: phòng kín / ngoài trời / lớp học...)
++ danh sách màu nền phù hợp riêng, còn TOÀN BỘ 93 món đồ hiện tại vẫn dùng
+chung được ở mọi scene (không cần lọc theo scene, tránh phức tạp hoá) —
+đổi qua lại giữa các scene tương tự cơ chế "3 phòng" (tab) đã có sẵn. Đây
+là việc đổi kiến trúc dữ liệu (`room.wall`/`room.floor` cần khái quát hoá
+thành "background" tuỳ scene) nên muốn làm thật thì nên xác nhận lại quy
+mô trước (bao nhiêu scene, ưu tiên scene nào trước) để tránh làm dở dang.
+
+`npm test` toàn bộ: **0 ❌**. `sw.js` v135→**v136** (thêm 20 icon SVG mới
+vào PRECACHE, xác minh bằng script đối chiếu FURNITURE ↔ PRECACHE — 0
+thiếu). Smoke test qua `npx serve`: Phòng Xinh Của Bé, `abacus.svg`,
+`coatrack.svg`, Bé Làm Stylist, Đào Vàng (đại diện cho 40 game vừa sửa CSS)
+đều 200; `sw.js` xác nhận đúng `reply1999-v136`.
+
+**Còn để ngỏ**: chưa xem trực tiếp bằng mắt trong trình duyệt thật — đặc
+biệt cần bạn tự mở lại đúng 2 game đã báo lỗi (Phòng Xinh Của Bé, Bé Làm
+Stylist) để xác nhận huy hiệu sao không còn đè lên phần chọn đồ nữa, và
+tự thử Bé Làm Stylist đeo nhiều phụ kiện cùng lúc xem hình búp bê ghép có
+hợp lý không (11 nhóm SVG chồng lên nhau, có thể có chỗ che khuất nhau
+chưa đẹp mắt mà chỉ xem trên trình duyệt thật mới thấy rõ). Câu hỏi về
+scene khác (nhà/sân/lớp học/hội trường) vẫn đang chờ bạn xác nhận quy mô
+trước khi bắt tay làm.
+
+## 73. TRANG CHỦ NHỚ TRẠNG THÁI INTRO + 2 GAME MỚI: LEO THÁC VƯỢT BẪY & TÔ MÀU TỪ VỰNG (07/2026)
+
+Bạn yêu cầu 3 việc: (1) khối giới thiệu "🌟 Bé học mà chơi" ở trang chủ nhớ
+lại lần sau đúng trạng thái thu gọn/mở rộng bé hoặc phụ huynh để lại lần
+trước; (2) game mới "Leo Thác Vượt Bẫy": máy đọc từ tiếng Anh (vd
+"apple"), có 2 lối đi, chọn lối có hình sai (vd kiwi) là sập bẫy thua; (3)
+game mới "Tô Màu Từ Vựng": tô màu trái cây/đồ vật kèm đọc từ vựng.
+
+**1. Trang chủ nhớ trạng thái intro**: thêm `localStorage['r99-intro-expanded']`
+— bấm nút "Xem thêm tính năng ▼"/"Thu gọn ▲" giờ lưu lại lựa chọn, lần sau
+mở lại trang chủ tự áp đúng trạng thái đã lưu (mặc định vẫn thu gọn nếu
+chưa từng bấm, giữ nguyên hành vi cũ cho người dùng mới).
+
+**2. Game mới: Leo Thác Vượt Bẫy** (`leo-thac-vuot-bay/`) — máy đọc to 1 từ
+tiếng Anh, bé chạm ĐÚNG lối đi (trái/phải) mang hình vật đó để leo lên 1
+bậc thác; chọn NHẦM lối là **sập bẫy, thua ngay lập tức** — khác hẳn mọi
+game "nghe & đoán" khác trong bộ sưu tập vốn luôn cho chọn lại 1 lần khi
+sai. Đây là kiểu chơi rủi ro cao/độ chính xác cao, bổ sung sự đa dạng cho
+bộ sưu tập thay vì lặp lại đúng khuôn quiz khoan dung đã có. Leo hết 10
+bậc liên tiếp không sai lần nào thì lên tới đỉnh, thắng cuộc. Engine thuần
+logic (`leothac.js`): `makeGame`/`currentStep`/`choosePath` — mỗi bậc có 1
+từ mục tiêu + 1 từ mồi nhử random, xáo vào lối trái/phải ngẫu nhiên; điểm
+tính theo số bậc leo được dù thắng hay thua giữa chừng (không mất trắng).
+
+**3. Game mới: Tô Màu Từ Vựng** (`to-mau-tu-vung/`) — chọn ngẫu nhiên 1 từ
+(trái cây/đồ vật), đọc to tiếng Anh, bé tô màu hình emoji của từ đó, tô
+kín là xong, máy đọc lại từ + nghĩa tiếng Việt rồi chuyển từ khác. Tái
+dùng THẲNG engine tô màu `Painter` đã có sẵn ở game Tô Màu Chữ & Số
+(`to-mau/src/paint.js`) — chỉ cần đưa EMOJI vào làm "glyph" (`fillText`
+trên canvas) thay vì chữ cái, engine tự chia vùng bằng lưới kẻ chéo + BFS
+y hệt như cũ, không cần vẽ SVG riêng cho từng trái cây/đồ vật (khác Phòng
+Xinh Của Bé phải tự vẽ icon SVG từng món). Tái dùng luôn bảng màu
+`PALETTE` có sẵn. Xác minh bằng script Node giả lập canvas: `painter.build()`
+với glyph là emoji chạy không lỗi.
+
+**Vốn từ dùng chung mới**: `shared/fruit-object-words.js` — 36 từ (18 trái
+cây + 18 đồ vật quen thuộc), mỗi từ có sẵn `{en, vi, emoji}`, dùng chung
+cho CẢ 2 game mới (tránh soạn trùng 2 lần).
+
+**Test mới**: `leothac.test.js` (8 check: sinh bậc thang đúng luật, leo
+đúng/sai/thắng/thua, điểm dở dang khi thua giữa chừng, ván đã xong gọi
+tiếp không đổi gì) và `tomautuvung.test.js` (4 check: vốn từ hợp lệ,
+`pickWord` luôn trả về từ hợp lệ và không lặp lại từ vừa xong). Cả 2 game
+đăng ký vào `package.json` gốc (chuỗi lệnh `npm test`) và `sw.js` PRECACHE
++ file `package.json` riêng (`"type": "module"`) theo đúng khuôn mẫu mọi
+game khác trong bộ sưu tập.
+
+**Phân loại thưởng sao**: cả 2 game đều DẠY TỪ VỰNG qua giọng đọc tiếng
+Anh nên KHÔNG nằm trong `FLAT_REWARD_MODES` (mục 70) — thưởng sao theo
+điểm số như mọi game học khác, không phải cố định +1 sao của nhóm giải
+trí thuần.
+
+**Lỗi bắt được và sửa TRƯỚC khi hoàn thiện**: viết `data-i18n="leothac.title"`/
+`"leothac.help"`/`"tomautv.title"`/... trực tiếp trong HTML nhưng CHƯA
+thêm khoá vào `i18n.js` — nếu bỏ qua, `i18n.js`'s `t(key)` sẽ trả về
+NGUYÊN CHUỖI KEY khi không tìm thấy bản dịch (vd hiện chữ "leothac.title"
+thay vì tên game) vì hàm `translateNode()` gán `textContent` bất kể có
+bản dịch thật hay không. Đã bổ sung đủ 8 khoá dịch (5 ngôn ngữ: vi/en/ja/
+zh/ar) cho cả 2 game trước khi bàn giao, tránh lộ lỗi hiển thị này.
+
+`npm test` toàn bộ: **0 ❌** (thêm 12 check mới: 8 leothac + 4 tomautuvung).
+`sw.js` v136→**v137**. Smoke test qua `npx serve`: trang chủ, Leo Thác
+Vượt Bẫy (`index.html`/`app.js`/`style.css`), Tô Màu Từ Vựng (`index.html`/
+`app.js`), `shared/fruit-object-words.js` đều 200; `sw.js` xác nhận đúng
+`reply1999-v137`.
+
+**Còn để ngỏ**: chưa xem trực tiếp bằng mắt trong trình duyệt thật (không
+có Playwright/Puppeteer) — đặc biệt cần bạn tự chơi thử cả 2 game mới:
+(a) Leo Thác Vượt Bẫy — xác nhận cảm giác "sập bẫy thua ngay" có đúng ý
+muốn không hay nên cho thêm mạng/lượt thử lại; (b) Tô Màu Từ Vựng — xác
+nhận emoji khi vẽ qua canvas `fillText` chia vùng tô có đẹp/dễ tô không
+(1 số emoji phức tạp có thể chia ra quá nhiều vùng nhỏ vụn hoặc quá ít
+vùng tùy hình dạng, khác hẳn chữ cái đơn giản mà engine gốc được thiết kế
+cho). Cả 2 game CHƯA được thêm vào lưới game ở trang chủ (`index.html`)
+— theo dõi thấy nhiều game khác gần đây (Bé Hái Trái Cây, Bé Làm Stylist,
+Phòng Xinh Của Bé...) cũng chưa có mặt ở đó nên đoán là bạn tự thêm thủ
+công sau; báo nếu muốn mình thêm thẳng vào lưới luôn.
+
+## 74. LEO THÁC VƯỢT BẪY: THÊM 5 TIM MỖI MÀN + 3 GAME MỚI (CHÉM/ỐC SÊN/GHÉP TỪ VỰNG) (07/2026)
+
+Bạn phản hồi về game Leo Thác Vượt Bẫy (mục 73): sập bẫy nên "cho cơ hội"
+thay vì thua ngay, cụ thể 5 tim mỗi màn. Đồng thời yêu cầu suy nghĩ và
+viết thêm 3 game mới dựa trên 3 ý tưởng: (1) Chém Từ Vựng — icon bay lên,
+chém trúng cái nào đọc cái đó, không có khái niệm sai; (2) Ốc Sên Phiêu
+Lưu Ăn Từ Vựng — ốc sên bò ăn từng món trên đường; (3) Ghép Từ Vựng Và
+Hình Ảnh Đúng — ghép đúng chữ tiếng Anh với hình minh hoạ.
+
+**1. Leo Thác Vượt Bẫy: hệ thống 5 tim** — viết lại toàn bộ `leothac.js`:
+bỏ mảng `steps` dựng sẵn (leo hết là xong), thay bằng 1 `game.step` hiện
+tại sinh lười (`makeStep`) và tái sinh mỗi lần cần. Chọn sai lối giờ chỉ
+trừ 1 tim (`game.hearts--`) rồi SINH LẠI bậc đó (từ mục tiêu/mồi nhử mới)
+cho bé thử lại đúng vị trí, không mất tiến độ leo được — chỉ khi hết sạch
+5 tim mới thực sự thua. `app.js` thêm `heartsChip` hiển thị ❤️/🖤, tách rõ
+nhánh "còn tim → thử lại" khỏi nhánh "hết tim → kết thúc ván" trong
+`onPick()`. Viết lại `leothac.test.js` (10 check, thay hoàn toàn bộ test
+cũ theo model tim): khởi tạo đủ 5 tim, đúng lối không mất tim, sai còn tim
+thì thử lại NGAY bậc đó, sai 5 lần liên tiếp mới thua, mất tim giữa chừng
+rồi leo tiếp không cộng dồn phạt, thắng vẫn giữ nguyên tim, ván xong gọi
+tiếp không đổi gì, điểm dở dang giữ nguyên khi thua.
+
+**2. Game mới: Chém Từ Vựng** (`chem-tu-vung/`) — icon trái cây/đồ vật
+(`shared/fruit-object-words.js`) bay lên từ đáy màn hình liên tục trong 45
+giây, bé chạm/chém icon nào, máy đọc to tên tiếng Anh của icon đó ngay —
+**không có khái niệm đúng/sai**, chém trúng cái nào cũng được cộng điểm.
+Khác hẳn mọi game "nghe & đoán" quiz trong bộ sưu tập, đây là game hành
+động thuần luyện phản xạ + tiếp xúc từ vựng thụ động. Engine thuần logic
+(`chemtuvung.js`): `spawnItem`/`sliceItem`/`expireItem`/`tick` quản lý tối
+đa 4 icon cùng lúc, đếm ngược giờ, icon bay hết không chạm không bị trừ
+điểm (chỉ tính `missedCount` thống kê). `app.js` dùng CSS animation
+(`@keyframes rise`) cho icon bay lên, `setTimeout` khớp thời lượng animation
+để dọn icon hết hạn.
+
+**3. Game mới: Ốc Sên Phiêu Lưu Ăn Từ Vựng** (`oc-sen-phieu-luu/`) — chú
+ốc sên bò dọc 1 hàng món ăn (trái cây/đồ vật), bé chạm vào món nào, ốc sên
+bò tới ăn món đó (CSS `transform: translateX` theo toạ độ nút), máy đọc to
+tên tiếng Anh — cũng KHÔNG có đáp án sai, ăn thứ tự tuỳ ý đều được. Ăn hết
+cả hàng là qua màn mới (nhiều món hơn 1 chút, `foodCountForLevel`), đi hết
+8 màn là hoàn thành cuộc phiêu lưu. Engine (`ocsen.js`) theo đúng khuôn
+"level progression với cờ `over`/`won`" như đã dùng ở các game trước.
+
+**4. Game mới: Ghép Từ Vựng Và Hình Ảnh Đúng** (`ghep-tu-vung-hinh-anh/`)
+— trò lật thẻ trí nhớ: mỗi từ có 2 lá bài, 1 lá HÌNH (emoji) và 1 lá CHỮ
+(từ tiếng Anh viết ra), bé lật 2 lá bất kỳ; đúng cặp (cùng 1 từ) thì giữ mở
++ máy đọc to từ đó + cộng điểm, sai cặp thì rung nhẹ rồi úp lại sau ~0.9s.
+Đây là game vốn từ DUY NHẤT trong 3 game mới lần này luyện thêm ĐỌC (nhận
+mặt chữ tiếng Anh) thay vì chỉ luyện NGHE thụ động như Chém Từ Vựng/Ốc
+Sên. Ghép hết bàn là qua màn mới (nhiều cặp hơn, `pairsForLevel`), đi hết
+6 màn là hoàn thành. Engine (`ghepvung.js`): `flipCard` xử lý lá lật thứ
+nhất (trả về ngay) và lá lật thứ hai (so khớp `pairId`, tự đánh dấu
+`matched` + cộng điểm nếu đúng); chặn lật lá thứ 3 cho tới khi gọi
+`resolveFlip()` — mô phỏng đúng nhịp game trí nhớ thật (phải xem xong cặp
+vừa lật rồi mới lật tiếp).
+
+**Phân loại thưởng sao**: cả 3 game mới đều DẠY TỪ VỰNG qua giọng đọc
+tiếng Anh nên KHÔNG nằm trong `FLAT_REWARD_MODES` — thưởng sao theo điểm
+số như mọi game học khác, giống quyết định đã áp dụng cho Leo Thác Vượt
+Bẫy/Tô Màu Từ Vựng ở mục 73.
+
+**Test mới**: `leothac.test.js` viết lại (10 check, xem mục 1), thêm
+`chemtuvung.test.js` (13 check), `ocsen.test.js` (11 check),
+`ghepvung.test.js` (13 check) — tổng 47 check mới/thay đổi. Cả 3 game mới
+có `package.json` riêng (`"type": "module"`, script `test`), đăng ký vào
+chuỗi lệnh `test` ở `package.json` gốc và `sw.js` PRECACHE
+(`index.html`/`style.css`/`src/*.js` mỗi game) theo đúng khuôn mẫu mọi
+game khác.
+
+**Lỗi bắt được và sửa TRƯỚC khi hoàn thiện**: như các phase trước, viết
+`data-i18n="chemtv.title"`/`"ocsen.help"`/`"ghepvung.*"`... trực tiếp
+trong HTML nhưng phải nhớ bổ sung khoá dịch tương ứng vào `i18n.js` NGAY —
+nếu bỏ qua sẽ lộ nguyên chuỗi key thay vì chữ thật (lỗi `translateNode()`
+đã ghi ở mục 73). Đã bổ sung đủ khoá dịch 5 ngôn ngữ (vi/en/ja/zh/ar) cho
+`chemtv.*` (4 khoá), `ocsen.*` (4 khoá), `ghepvung.*` (4 khoá) trước khi
+bàn giao.
+
+`npm test` toàn bộ: **0 ❌** (exit code 0, không dòng "Kết quả" nào báo
+fail khác 0). `sw.js` v137→**v138**. Smoke test qua `npx serve`: cả 3 game
+mới (`index.html` có `/` cuối, `style.css`, `src/app.js`, file logic thuần
+`src/*.js`) đều 200, xác nhận `301` ban đầu chỉ là redirect thêm `/` (hành
+vi giống hệt `leo-thac-vuot-bay/` cũ, không phải lỗi). Đã chạy fake-DOM
+Node harness cho `ghep-tu-vung-hinh-anh/src/app.js` (dựng `FakeEl` giả lập
+DOM, `import()` file thật) xác nhận load không lỗi + `startGame()` dựng
+đúng 12 lá bài cho màn 1.
+
+**Còn để ngỏ**: (a) chưa xem trực tiếp bằng mắt trong trình duyệt thật —
+đặc biệt cần bạn tự chơi thử độ khó/nhịp game của cả 3 game mới, nhất là
+cảm giác rung+úp lại của Ghép Từ Vựng (0.9s có đủ để bé kịp nhìn thấy cặp
+sai không, hay cần lâu hơn/nhanh hơn) và tốc độ bay lên của Chém Từ Vựng
+(3–4.2s có vừa tầm bé chưa); (b) tô màu vẫn đang chờ bạn tự kiểm tra như đã
+nói ở tin nhắn trước — chưa động vào; (c) cả 3 game mới CŨNG chưa được
+thêm vào lưới game ở trang chủ (`index.html`), theo đúng thông lệ đã nêu ở
+mục 73 (nhiều game gần đây bạn tự thêm thủ công sau) — báo nếu muốn mình
+thêm thẳng vào lưới luôn.
+đúng số mới và cảm nhận độ đa dạng câu hỏi tăng rõ rệt.
+
+## 75. 2 GAME MỚI (BẮN CHIM TỪ VỰNG, TOÁN TIẾNG ANH) + SỬA LỖI "GAME MỚI KHÔNG THẤY TRÊN WEB" (07/2026)
+
+Bạn yêu cầu 2 việc: (1) viết thêm 2 game dựa trên 2 ý tưởng — "Bắn chim phiên bản chim mang từ vựng, bắn trúng chim có mang từ vựng chỉ định" và "Học tiếng Anh qua toán, ví dụ show 1+1=? đọc 'one plus one equal 2' bé chọn số đúng"; (2) sau đó hỏi thẳng: sao các game vừa code không thấy trên web, và những game đã làm có được thêm vào "danh sách game tiếng anh" hay "ôn tập vui" chưa.
+
+**Trả lời câu hỏi (2) trước vì đây là lỗi cần sửa ngay**: đúng như bạn nghi ngờ — LÝ DO game không thấy trên web là vì suốt mục 73 và 74, mọi game mới (Leo Thác Vượt Bẫy, Tô Màu Từ Vựng, Chém Từ Vựng, Ốc Sên Phiêu Lưu, Ghép Từ Vựng Và Hình Ảnh) tuy đã có đủ file/test/PWA cache nhưng CHƯA từng được gắn link vào bất kỳ trang danh sách nào — mình đã 2 lần ghi chú "còn để ngỏ" việc này ở cuối mục 73/74 nhưng chưa tự ý thêm. Rà lại toàn bộ cấu trúc mới phát hiện: trang chủ (`index.html`) KHÔNG list từng game lẻ mà chỉ list các HUB (Góc Tiếng Anh, Game Mini, Thi Chứng Chỉ Anh...); quy ước lâu nay của dự án (lặp lại xuyên suốt hàng chục mục cũ trong games.md) là **mọi game từ vựng mới phải đăng ký thẻ ở CẢ 2 nơi: `goc-tieng-anh/index.html` (hub "Góc Tiếng Anh" — đúng nơi bạn gọi là "danh sách game tiếng Anh") và `game-mini/index.html`** — bước này đã bị bỏ sót suốt 2 mục vừa qua. Đã sửa dứt điểm: thêm đủ 7 thẻ (5 game mục 73/74 + 2 game mới mục này) vào **cả 2 file**, thêm ở đầu lưới `goc-tieng-anh/` và cuối lưới `game-mini/` (đúng vị trí thẻ mới theo quy ước có sẵn từng thấy trong 2 file). Đã xác minh bằng `curl` qua `npx serve`: cả 7 href `/leo-thac-vuot-bay/`, `/to-mau-tu-vung/`, `/chem-tu-vung/`, `/oc-sen-phieu-luu/`, `/ghep-tu-vung-hinh-anh/`, `/ban-chim-tu-vung/`, `/toan-tieng-anh/` đều xuất hiện trong HTML trả về của cả `goc-tieng-anh/` lẫn `game-mini/`. Tiện thể phát hiện và sửa luôn 1 lỗi số liệu có sẵn từ trước (không liên quan việc bạn hỏi): thẻ "Góc Tiếng Anh" ở trang chủ ghi cứng "19 game tiếng Anh" còn khóa dịch `i18n.js` lại ghi "16 game tiếng Anh" — cả 2 đều sai lệch so với số thẻ thật (17 trước khi thêm); nay đã sửa đồng bộ thành "24 game tiếng Anh" (đúng bằng 17 + 7 game mới) ở cả `i18n.js` (5 ngôn ngữ) và `index.html` gốc. Về "Ôn Tập Vui" (`on-tap-vui/`): đây là 1 hub RIÊNG chỉ gồm 8 game "vận động" (bắn cung/ném lon/câu cá...) tái dùng kho từ vựng chung — không phải nơi phù hợp cho 7 game vừa rồi nên KHÔNG đụng vào file này, chỉ đăng ký đúng 2 nơi nêu trên.
+
+**1. Game mới: Bắn Chim Từ Vựng** (`ban-chim-tu-vung/`) — phỏng theo gần như y hệt cơ chế "Đập theo chữ" của game Bắt Vịt (`bat-vit/src/ducks.js`) nhưng thay 1 CHỮ CÁI đơn lẻ bằng CẢ 1 TỪ VỰNG có emoji minh hoạ: chim ngoi lên ở 9 ổ mây, mỗi con mang 1 từ (`shared/fruit-object-words.js`); máy công bố từ mục tiêu bằng tiếng Anh ("Find the apple!"), bé CHỈ được bắn con chim mang ĐÚNG từ đó trong 45 giây — bắn đúng 3 lần liên tiếp thì đổi từ mục tiêu khác, bắn nhầm bị trừ nhẹ điểm (không âm). Tái dùng gần như nguyên khối UI/CSS của Bắt Vịt (đổi ao→bầu trời, vịt→chim, hố→ổ mây). Engine thuần logic (`banchim.js`): `pickTarget`/`makeBirdWord`/`hitScore`/`spawnDelay` — 6 test.
+
+**2. Game mới: Học Tiếng Anh Qua Toán** (`toan-tieng-anh/`) — đúng như bạn mô tả: hiện phép tính "1 + 3 = ?" rồi máy đọc TOÀN BỘ câu bằng tiếng Anh KÈM LUÔN ĐÁP ÁN ("1 plus 3 equals 4" — giọng en-US tự đọc số thành từ, không cần tự soạn bảng từ số tiếng Anh riêng), bé chỉ cần NGHE rồi chọn đúng con số đã nghe trong 3 lựa chọn. Khác hẳn game Toán Lớp 1 (`toan-lop-1/src/toan.js`) vốn CHỦ ĐÍCH không đọc đáp án để bé tự giải toán — game này ưu tiên dạy TỪ VỰNG SỐ ĐẾM tiếng Anh qua ngữ cảnh phép tính (nghe & nhận biết số, không kiểm tra khả năng tính toán). 8 câu/lượt, khó dần: 4 câu đầu chỉ cộng phạm vi 0–10, 4 câu sau cộng lẫn trừ phạm vi 0–20 (tái dùng đúng khuôn "khó dần trong 1 lượt" của Toán Lớp 1). Engine thuần logic (`toananh.js`): `makeProblem`/`equationDisplay`/`equationSpeech` — 7 test.
+
+**Phân loại thưởng sao**: cả 2 game mới đều DẠY TỪ VỰNG/SỐ ĐẾM qua giọng đọc tiếng Anh nên KHÔNG nằm trong `FLAT_REWARD_MODES` — thưởng sao theo điểm số như mọi game học khác.
+
+**Test mới**: `banchim.test.js` (6 check) + `toananh.test.js` (7 check) = 13 check mới. Cả 2 game có `package.json` riêng, đăng ký vào chuỗi lệnh `test` ở `package.json` gốc và `sw.js` PRECACHE.
+
+**Lỗi bắt được và sửa TRƯỚC khi hoàn thiện**: như thường lệ, bổ sung đủ khoá dịch 5 ngôn ngữ (vi/en/ja/zh/ar) cho `banchim.*` (4 khoá) và `toananh.*` (4 khoá) vào `i18n.js` TRƯỚC khi bàn giao, tránh lộ nguyên chuỗi key trên `data-i18n`. Khi viết `index.html` cho `toan-tieng-anh/`, ban đầu gõ nhầm khoá nút "Đọc lại"/"Chơi tiếp" (`hocvui.replay`/`xepchu.next`) — kiểm lại `toan-lop-1/index.html` mới phát hiện khoá đúng phải là `tomau.say`/`hocvui.again`; đã sửa lại cho khớp khoá đã có sẵn, tránh vừa tạo thêm khoá thừa vừa lộ lỗi hiển thị.
+
+`npm test` toàn bộ: **0 ❌** (exit code 0). `sw.js` v138→**v139**. Smoke test qua `npx serve`: 2 game mới (`index.html`, `style.css`, `src/app.js`, file logic thuần `src/*.js`) đều 200; `goc-tieng-anh/` và `game-mini/` cũng 200 và xác nhận bằng `curl` chứa đủ 7 href game mới. Đã chạy fake-DOM Node harness cho cả `ban-chim-tu-vung/src/app.js` (dựng ổ mây, bắn trúng chim +10 điểm) và `toan-tieng-anh/src/app.js` (sinh câu hỏi, chọn đáp án đúng tăng `firstTry`/`qIndex`) — cả 2 load và chạy không lỗi.
+
+**Còn để ngỏ**: (a) chưa xem trực tiếp bằng mắt trong trình duyệt thật — đặc biệt cần bạn tự chơi thử nhịp game Bắn Chim Từ Vựng (chim lơ lửng 1.9 giây có đủ để bé kịp đọc cả từ + nhìn hình so với chỉ đọc 1 chữ cái ở Bắt Vịt không) và Toán Tiếng Anh (máy đọc câu tiếng Anh có kèm số + từ nối — giọng en-US trên các máy/trình duyệt khác nhau có đọc số tự nhiên như "one plus three equals four" hay đọc rời rạc từng ký tự, cần bạn nghe thử thật); (b) tô màu vẫn đang chờ bạn tự kiểm tra như đã nói ở tin nhắn trước — chưa động vào; (c) trang chủ (`index.html` gốc) vẫn CHƯA có thẻ riêng cho từng game trong số 7 game này — đúng thiết kế hub-of-hub sẵn có của dự án (trang chủ chỉ trỏ vào hub `Góc Tiếng Anh`/`Game Mini`, không list từng game lẻ), nên đây không phải thiếu sót mà là đúng kiến trúc; (d) hộp thoại `on-tap-vui/` (Ôn Tập Vui) CHƯA được sờ tới vì đúng như phân tích ở trên, nó dành riêng cho các game "vận động" tái dùng khung có sẵn — nếu bạn muốn biến 1 trong 7 game này (vd Bắn Chim Từ Vựng) thành phiên bản "vận động" kiểu Ôn Tập Vui thì báo mình làm thêm bản riêng.

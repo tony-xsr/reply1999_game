@@ -38,14 +38,14 @@ function seeded(seed = 1) {
 
 /* ===== units.js: cấu trúc dữ liệu ===== */
 
-check('có đúng 5 unit Starters, 11 unit Movers, 11 unit Flyers, 6 unit KET, 8 unit PET, 9 unit TOEFL Junior và 7 unit TOEIC', () => {
+check('có đúng 5 unit Starters, 12 unit Movers, 12 unit Flyers, 7 unit KET, 9 unit PET, 10 unit TOEFL Junior và 8 unit TOEIC', () => {
   assert.equal(STARTERS_UNITS.length, 5);
-  assert.equal(MOVERS_UNITS.length, 11);
-  assert.equal(FLYERS_UNITS.length, 11);
-  assert.equal(KET_UNITS.length, 6);
-  assert.equal(PET_UNITS.length, 8);
-  assert.equal(TOEFL_JUNIOR_UNITS.length, 9);
-  assert.equal(TOEIC_UNITS.length, 7);
+  assert.equal(MOVERS_UNITS.length, 12);
+  assert.equal(FLYERS_UNITS.length, 12);
+  assert.equal(KET_UNITS.length, 7);
+  assert.equal(PET_UNITS.length, 9);
+  assert.equal(TOEFL_JUNIOR_UNITS.length, 10);
+  assert.equal(TOEIC_UNITS.length, 8);
 });
 
 check('unit "toeic-message-chain" có passage hợp lệ (chuỗi tin nhắn), câu hỏi type "reading" không cần chỗ trống', () => {
@@ -128,7 +128,7 @@ check('mọi câu hỏi có id duy nhất toàn hệ thống, answer hợp lệ,
       assert.ok(q.explain && q.explain.length > 0, `${q.id} thiếu giải thích`);
     }
   }
-  assert.ok(ids.size >= 560, `tổng số câu hỏi quá ít: ${ids.size}`);
+  assert.ok(ids.size >= 620, `tổng số câu hỏi quá ít: ${ids.size}`);
 });
 
 /* ===== examprep.js: engine thuần ===== */
@@ -140,12 +140,12 @@ check('LEVELS có Starters, Movers, Flyers, KET, PET, TOEFL Junior và TOEIC', (
 
 check('unitsForLevel trả đúng bộ unit từng cấp, cấp lạ trả mảng rỗng', () => {
   assert.equal(unitsForLevel('starters').length, 5);
-  assert.equal(unitsForLevel('movers').length, 11);
-  assert.equal(unitsForLevel('flyers').length, 11);
-  assert.equal(unitsForLevel('ket').length, 6);
-  assert.equal(unitsForLevel('pet').length, 8);
-  assert.equal(unitsForLevel('toefl-junior').length, 9);
-  assert.equal(unitsForLevel('toeic').length, 7);
+  assert.equal(unitsForLevel('movers').length, 12);
+  assert.equal(unitsForLevel('flyers').length, 12);
+  assert.equal(unitsForLevel('ket').length, 7);
+  assert.equal(unitsForLevel('pet').length, 9);
+  assert.equal(unitsForLevel('toefl-junior').length, 10);
+  assert.equal(unitsForLevel('toeic').length, 8);
   assert.deepEqual(unitsForLevel('ielts'), []);
 });
 
