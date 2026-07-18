@@ -3,7 +3,7 @@
 // Toàn bộ số dư/quà nằm trên server theo hồ sơ bé đang chọn ở /chon-be/.
 
 import * as api from '../../shared/api.js';
-import { CATALOG, catalogItem } from '../../shared/rewards.js';
+import { CATALOG, catalogItem, effectiveCost, DEFAULT_REWARD_COST_MULTIPLIER } from '../../shared/rewards.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -45,12 +45,18 @@ async function boot() {
 }
 
 let balance = 0;
+let rewardMultiplier = DEFAULT_REWARD_COST_MULTIPLIER;
 
 async function refresh() {
   try {
     const kidId = api.getCurrentKidId();
-    const [stars, purchases] = await Promise.all([api.starBalance(kidId), api.kidPurchases(kidId)]);
+    const cached = api.cachedSettings();
+    if (cached?.reward_cost_multiplier) rewardMultiplier = cached.reward_cost_multiplier;
+    const [stars, purchases, settings] = await Promise.all([
+      api.starBalance(kidId), api.kidPurchases(kidId), api.getSettings(),
+    ]);
     balance = stars;
+    rewardMultiplier = settings.reward_cost_multiplier ?? DEFAULT_REWARD_COST_MULTIPLIER;
     $('starBox').textContent = `⭐ ${stars}`;
     renderCollection(purchases);
     renderShop();
@@ -81,24 +87,25 @@ function renderShop() {
   const shop = $('shop');
   shop.innerHTML = '';
   for (const item of CATALOG) {
+    const cost = effectiveCost(item, rewardMultiplier);
     const div = document.createElement('div');
     div.className = 'item';
     div.innerHTML = `<div class="icon">${item.icon}</div><div class="name">${item.name}</div>`;
     const btn = document.createElement('button');
-    btn.textContent = `⭐ ${item.cost}`;
-    btn.disabled = balance < item.cost;
-    btn.addEventListener('click', () => buy(item, btn));
+    btn.textContent = `⭐ ${cost}`;
+    btn.disabled = balance < cost;
+    btn.addEventListener('click', () => buy(item, cost, btn));
     div.appendChild(btn);
     shop.appendChild(div);
   }
 }
 
-async function buy(item, btn) {
+async function buy(item, cost, btn) {
   const msg = $('shopMsg');
   msg.className = 'msg';
   btn.disabled = true;
   try {
-    await api.buyItem(api.getCurrentKidId(), item);
+    await api.buyItem(api.getCurrentKidId(), { ...item, cost });
     msg.classList.add('ok');
     msg.textContent = `Bé đã đổi được ${item.icon} ${item.name}! Tuyệt vời!`;
     speakVi(`Bé đã đổi được ${item.name}! Tuyệt vời!`);
