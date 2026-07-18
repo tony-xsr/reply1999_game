@@ -1,0 +1,8 @@
+{
+  "name": "ren-tri-nao",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/rentrinao.test.js"
+  }
+}
