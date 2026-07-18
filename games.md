@@ -3349,3 +3349,613 @@ tổng hợp unit + `unitsForLevel`), ngưỡng tổng câu hỏi tối thiểu 
 cấp trên). Có thể tiếp tục thêm unit TOEIC (ví dụ: đọc hiểu quảng cáo/
 thông báo tuyển dụng, từ vựng tài chính/ngân hàng) hoặc chuyển sang đào
 sâu TOEFL Junior (9 unit, đứng thứ nhì về độ mỏng).
+
+## 49. SỬA 2 LỖI UI + THÊM TRÒ THỨ 6 CHO NGỮ PHÁP TRỰC QUAN (07/2026)
+
+Bạn báo 2 lỗi UI kèm ảnh chụp màn hình `Ngữ Pháp Trực Quan`, cộng yêu cầu
+"tiếp tục cung cấp nhiều và sâu hơn ngữ pháp".
+
+**Lỗi 1 — màn chọn trò và màn chơi hiển thị ĐÈ LÊN NHAU** (ảnh cho thấy cả
+lưới 5 thẻ chọn trò lẫn HUD/timeline/câu hỏi của trò "Cỗ Máy Thời Gian"
+cùng xuất hiện, có thanh cuộn). Nguyên nhân: `nguphap-truc-quan/style.css`
+có `.screen.hidden { display: none; }` (đặc trưng 2 class) nhưng
+`#homeScreen { display: grid; ... }` dùng ID selector — ID luôn thắng
+class bất kể số lượng class, nên dù JS gắn đúng class `hidden` vào
+`#homeScreen` khi vào màn chơi, luật `display: grid` của ID vẫn đè lên,
+màn chọn trò không bao giờ thực sự ẩn. **Sửa bằng 1 dòng**: thêm
+`#homeScreen.hidden { display: none; }` (đặc trưng ID+class, thắng cả 2
+luật kia). Đã rà toàn bộ các file `style.css` khác trong dự án tìm lỗi
+tương tự (ID selector đặt `display` trùng với 1 màn có toggle `.hidden`)
+— không phát hiện thêm trường hợp nào khác, đây là lỗi cục bộ chỉ ở
+`nguphap-truc-quan`.
+
+**Lỗi 2 — nút góc trái không quay về đúng "Thi Chứng Chỉ Anh"**: cả 6 app
+con của hub (`exam-prep/`, `luyen-thi-ket/`, `luyen-thi-pet/`,
+`luyen-thi-toefl-junior/`, `luyen-thi-toeic/`, `nguphap-truc-quan/`) đều
+có nút 🏠 góc trái trỏ thẳng về `/` (trang chủ toàn hệ thống) — đúng kiểu
+cũ từ khi các app này còn nằm trực tiếp ở trang chủ, nhưng từ mục 39/46
+chúng chỉ còn truy cập được qua hub `thi-chung-chi-anh/`. Đối chiếu với
+quy ước đã có sẵn trong dự án (`goc-tieng-anh/` → các game con như
+`nghe-doan-on-tap/` dùng nút góc trái trỏ VỀ HUB, không về `/`), sửa cả 6
+app: đổi `href="/"` → `href="/thi-chung-chi-anh/"`, đổi khoá i18n từ
+`pika.btn.home` sang khoá mới `examhub.back` (5 ngôn ngữ, text "Thi Chứng
+Chỉ Anh"/"Exam Prep"...), **giữ nguyên icon 🏠** (không đổi sang ◀) để
+không trùng lặp/gây rối với nút ◀ nội bộ `id="btnBack"` sẵn có của mỗi app
+(nút đó dùng để quay lại màn chọn trò/cấp độ NỘI BỘ trong app, khác mục
+đích với nút góc trái).
+
+**Bổ sung ngữ pháp sâu hơn — trò thứ 6 "🌦️ Câu Điều Kiện Loại 1"**: theo
+đúng yêu cầu "tiếp tục... sâu hơn ngữ pháp", thêm 1 điểm ngữ pháp HOÀN
+TOÀN MỚI (câu điều kiện chưa từng xuất hiện ở 5 trò trước, cũng chưa dạy
+riêng ở Cambridge/KET/PET) theo đúng công thức của `nguphaptructuan.js`
+(sinh câu bằng dữ liệu, không hard-code từng câu):
+- 6 tình huống nhân-quả trực quan (🌧️ mưa→ở nhà, ⏰ dậy sớm→kịp xe buýt,
+  📚 học chăm→đỗ thi, 🍔 ăn nhiều đồ nhanh→ốm, 💧 cây thiếu nước→chết,
+  🎉 đội thắng→ăn mừng).
+- 4 lựa chọn/vòng: `correct` ("If + hiện tại đơn, S + will + V"), và 3 lỗi
+  THẬT SỰ học sinh hay mắc: `will-in-if` (chèn "will" ngay trong mệnh đề
+  if — lỗi phổ biến nhất do ảnh hưởng tiếng Việt "nếu... sẽ..."),
+  `no-will-result` (quên "will" ở mệnh đề kết quả), `past-mix` (chia quá
+  khứ ở mệnh đề if, nhầm sang câu điều kiện loại 2).
+- Đăng ký đúng khuôn: `GAMES.conditional`, `HELP_TEXT.conditional`, thẻ
+  chọn trò thứ 6 trong `index.html`, class CSS `.cnd-scene/.cnd-cue/
+  .cnd-caption` (mô phỏng `.gtw-scene`), 2 khoá i18n mới
+  (`nguphap.conditional`/`.help`, 5 ngôn ngữ).
+
+**Test mới**: 7 check cho trò Câu Điều Kiện (cấu trúc dữ liệu, 4 lựa chọn
+không trùng, câu "correct" không có "will" trong mệnh đề if, câu
+"will-in-if" phải có "will" trong mệnh đề if, luật chọn-lại/streak, kết
+thúc ván). `nguphaptructuan.test.js`: 30 → **37 ✅**. `npm test` toàn bộ:
+**381 → 388 ✅, 0 ❌**. `sw.js` v110 → **v112** (bump 2 lần: 1 cho đợt sửa
+UI, 1 cho trò mới). Smoke test `/`, `/thi-chung-chi-anh/`, cả 6 app con
+(`/exam-prep/`, `/luyen-thi-ket/`, `/luyen-thi-pet/`,
+`/luyen-thi-toefl-junior/`, `/luyen-thi-toeic/`, `/nguphap-truc-quan/`)
+cùng `nguphap-truc-quan/src/app.js`, `style.css` đều 200; xác nhận cả 6
+app đều có `href="/thi-chung-chi-anh/"` ở nút góc trái.
+
+**Còn để ngỏ**: `Ngữ Pháp Trực Quan` giờ có 6 trò (lưới 3x2 vừa khít, hết
+cảnh lẻ 1 thẻ phải căn giữa). Có thể tiếp tục thêm trò thứ 7 (ví dụ: câu
+bị động cơ bản, hoặc câu hỏi đuôi) nếu muốn đào sâu thêm mảng này.
+
+## 50. NÂNG CẤP ANIMATION + THÊM TRÒ TƯƠNG TÁC "GHÉP CÂU" (07/2026)
+
+Bạn khen `Ngữ Pháp Trực Quan` làm tốt, yêu cầu làm animation/hiệu ứng/hình
+minh hoạ TỐT HƠN, DỄ HIỂU HƠN, hiệu quả học tập hơn, có thể tương tác thì
+càng tốt, và bổ sung thêm nhiều ngữ pháp trực quan hơn nữa.
+
+**A. Nâng cấp animation cho cả 6 trò cũ — không chỉ "đẹp hơn" mà mỗi hiệu
+ứng đều gắn với Ý NGHĨA ngữ pháp cụ thể (dễ hiểu hơn, không phải trang trí
+suông):**
+- **Cỗ Máy Thời Gian**: nhân vật giờ "bật vào" (`tm-pop-in`) mỗi khi xuất
+  hiện thay vì hiện cứng; mốc thời gian đúng được viền sáng
+  (`tm-zone--active`) để mắt bé bắt được ngay VỊ TRÍ quan trọng. Đặc biệt
+  sửa 1 lỗi bỏ sót: CSS `.tm-link-arrow` (mũi tên nối quá khứ→bây giờ cho
+  thì hiện tại hoàn thành) đã được ĐỊNH NGHĨA SẴN từ trước nhưng CHƯA BAO
+  GIỜ được gắn vào HTML — thì khó hình dung nhất (hiện tại hoàn thành,
+  "nối" quá khứ với hiện tại) giờ mới thực sự có mũi tên "➡️" động minh
+  hoạ đúng ý nghĩa đó.
+- **Hai Hành Động Cùng Lúc**: hành động NỀN giờ thực sự "khựng lại" trong
+  chốc lát (`ta-bg--paused`) mỗi khi có tia chớp "⚡" xen vào, mô phỏng
+  đúng bản chất "1 sự kiện ngắn cắt ngang 1 hành động đang diễn ra" thay
+  vì 2 icon chạy song song đều đặn (dễ gây hiểu lầm cả 2 việc ngang hàng).
+- **So Sánh Hơn/Nhất**: thanh đo giờ "mọc lên" từ 0 mỗi vòng (trước đó set
+  cứng chiều cao ngay từ đầu nên thực chất KHÔNG animate) — bé nhìn thấy
+  rõ quá trình lớn dần, dễ so sánh trực quan hơn nhiều so với nhìn số liệu
+  tĩnh.
+- **Going To vs Will**: icon giờ animate khác nhau theo đúng bản chất —
+  kế hoạch có sẵn (going to) dùng nhịp đập đều đặn chậm rãi
+  (`gtw-cue--plan`), quyết định bất chợt (will) dùng chớp nhanh giật cục
+  (`gtw-cue--spontaneous`) — củng cố cảm giác "có kế hoạch" vs "ngẫu
+  hứng" ngay từ animation, không chỉ qua chữ.
+- **Câu Điều Kiện**: icon nảy nhẹ (`cnd-bounce`) gợi cảm giác "nếu... thì
+  sẽ..." thay vì animation dùng chung với Going To/Will như trước.
+- Đã rà lại toàn bộ, xác nhận không hiệu ứng nào tình cờ LỘ đáp án trước
+  khi bé chọn — mọi animation mới chỉ minh hoạ lại chính NGỮ CẢNH đã hiển
+  thị công khai (icon/caption), không thêm thông tin giúp đoán đúng.
+
+**B. Trò thứ 7 hoàn toàn mới — "🧩 Ghép Câu" — trò TƯƠNG TÁC thực sự đầu
+tiên trong `nguphap-truc-quan`** (6 trò trước đều là chọn 1 trong 4 câu có
+sẵn; trò này bé phải TỰ BẤM từng từ theo đúng thứ tự để dựng lại câu):
+- 12 câu mẫu ôn tập tổng hợp mọi điểm ngữ pháp đã học ở 6 trò trên (thì,
+  so sánh, going to/will, điều kiện, modal, mệnh đề "while") kèm gợi ý
+  nghĩa tiếng Việt + icon.
+- Cơ chế: từ được xáo trộn thành các "chip" bấm được; bấm đúng từ tiếp
+  theo → từ "rơi" vào đúng chỗ trống (hiệu ứng `sb-slot-in`); bấm sai lần
+  đầu → chip đúng cần bấm tiếp theo SÁNG LÊN gợi ý (`sb-chip--hint`, bé
+  vẫn phải tự bấm, không tự động điền — giữ tính tương tác); bấm sai lần
+  2 liên tiếp → câu được ghép sẵn hiển thị cho bé xem, qua vòng (đúng luật
+  2-lần-sai như 6 trò kia). Hoàn thành không sai: +10 và tăng streak;
+  hoàn thành sau 1 lần gợi ý: +5, không tính streak.
+- Đăng ký đúng khuôn: `GAMES.sentencebuilder`, `HELP_TEXT.sentencebuilder`,
+  thẻ chọn trò thứ 7, class CSS `.sb-*`, 2 khoá i18n mới
+  (`nguphap.sentencebuilder`/`.help`, 5 ngôn ngữ).
+
+**Test mới**: 8 check cho Ghép Câu (cấu trúc pool, xáo trộn chip không
+trùng/không thiếu, bấm đúng/sai/gợi ý/lộ đáp án, tính điểm +10 vs +5, kết
+thúc ván, không làm gì khi đã kết thúc). `nguphaptructuan.test.js`: 37 →
+**45 ✅**. `npm test` toàn bộ: **388 → 398 ✅, 0 ❌**. `sw.js` v112 →
+**v113**. Smoke test `/`, `/thi-chung-chi-anh/`, `/nguphap-truc-quan/`
+cùng `app.js`/`nguphaptructuan.js`/`style.css` đều 200; xác nhận đủ 7
+`data-game` (timemachine/twoactions/comparative/goingtowill/modal/
+conditional/sentencebuilder) trong HTML.
+
+**Còn để ngỏ**: chưa có công cụ trình duyệt tự động (Playwright/Puppeteer)
+trong dự án nên animation/tương tác mới được xác minh qua test logic +
+soát code kỹ, CHƯA xem trực tiếp bằng mắt trong trình duyệt — nên bạn tự
+mở thử `/nguphap-truc-quan/` để xác nhận animation mượt/dễ hiểu đúng như
+kỳ vọng. Có thể tiếp tục thêm trò thứ 8 (bị động cơ bản, câu hỏi đuôi)
+hoặc thêm chế độ "kéo-thả" (drag) thay vì chỉ "bấm" cho Ghép Câu nếu muốn
+tương tác sâu hơn nữa.
+
+## 51. BỔ SUNG DỮ LIỆU CHO CẢ 7 TRÒ + HUY HIỆU ĐẾM SỐ CÂU/TÌNH HUỐNG (07/2026)
+
+Bạn yêu cầu tiếp tục bổ sung data/hình ảnh/animation/ý tưởng cho việc học
+ngữ pháp dễ hiểu hơn, và thêm số đếm cho mỗi trò để biết có bao nhiêu câu/
+tình huống trong dữ liệu.
+
+**A. Bổ sung dữ liệu cho cả 7 trò** (không thêm trò mới lần này, đào sâu
+những gì đã có để mỗi lượt chơi đa dạng hơn, đỡ lặp lại nhanh):
+- **Cỗ Máy Thời Gian**: `VERBS` 6 → **10** (+read, write, sing, dance —
+  gồm cả động từ bất quy tắc write→wrote→written, sing→sang→sung để bé
+  gặp thêm dạng chia khác `-ed` thường); `CHARACTERS` 4 → **6** (+🤖 robot
+  chủ ngữ "It", +👵 bà chủ ngữ "She").
+- **Hai Hành Động Cùng Lúc**: `BG_ACTIONS` 5 → **8** (+vẽ tranh, +rửa bát,
+  +làm bài tập — chú ý "did homework" dùng đúng quá khứ bất quy tắc của
+  "do"); `INTERRUPT_EVENTS` 4 → **6** (+còi xe "honked", +chuông báo thức
+  "went off").
+- **So Sánh Hơn/Nhất**: `COMPARE_ENTITIES` 6 → **8** (+🐘 voi, +🐰 thỏ);
+  `ATTRIBUTES` 4 → **6** (+strong/stronger/weaker/strongest 💪, +young/
+  younger/older/youngest 👶).
+- **Going To vs Will**: `GOING_TO_WILL_SCENARIOS` 6 → **9** (+tiệc sinh
+  nhật đã đặt trước, +tai nạn cần gọi cấp cứu ngay, +vé xem phim đã mua).
+- **Modal Ai Đúng**: `MODAL_SITUATIONS` 8 → **11** (+biển dừng đèn đỏ,
+  +lời khuyên uống đủ nước, +biển cấm ồn sau 10 giờ đêm).
+- **Câu Điều Kiện**: `CONDITIONAL_SITUATIONS` 6 → **9** (+luyện tập chăm
+  chỉ→thắng trận, +ngủ đủ giấc→tỉnh táo đi học, +chạm lửa→bị bỏng).
+- **Ghép Câu**: `SENTENCE_BUILDER_POOL` 12 → **18** (6 câu mới phản ánh
+  đúng các tình huống vừa thêm ở trên — tiệc sinh nhật, voi khỏe hơn thỏ,
+  đèn đỏ, luyện tập thắng trận, vẽ tranh, làm bài tập).
+- Đã xác nhận qua Node: tổng dữ liệu không trùng lặp, mọi combination vẫn
+  sinh câu đúng ngữ pháp (chạy thử `makeGoingToWillRound` với dữ liệu mới
+  ra câu hợp lệ).
+
+**B. Huy hiệu đếm số liệu trên mỗi thẻ chọn trò** — bé/phụ huynh giờ nhìn
+ngay trên màn chọn trò biết mỗi trò có BAO NHIÊU nội dung, không cần đoán:
+- "🕰️ Cỗ Máy Thời Gian" → **6 thì**
+- "⏳ Hai Hành Động Cùng Lúc" → **144 tình huống** (3 chủ ngữ × 8 hành động
+  nền × 6 sự kiện xen ngang — tính TRỰC TIẾP từ độ dài mảng dữ liệu thật,
+  KHÔNG hard-code số, nên số này tự cập nhật đúng mỗi khi dữ liệu được bổ
+  sung thêm sau này)
+- "📈 So Sánh Hơn/Nhất" → **8 nhân vật · 6 thang đo**
+- "🔮 Going To vs Will" → **9 tình huống**
+- "🚦 Modal Ai Đúng" → **11 tình huống**
+- "🌦️ Câu Điều Kiện" → **9 tình huống**
+- "🧩 Ghép Câu" → **18 câu**
+- Cài đặt: hàm `renderModeCounts()` trong `app.js` chạy 1 lần lúc khởi
+  động, đọc thẳng `.length` của các mảng dữ liệu đã export sẵn từ
+  `nguphaptructuan.js`, gắn huy hiệu `.mc-count` (badge bo tròn, chữ xanh
+  đậm) vào mỗi `.mode-card`.
+
+**Test**: cập nhật 1 regex test cũ ở Hai Hành Động Cùng Lúc (danh sách quá
+khứ hợp lệ của sự kiện xen ngang) để chấp nhận thêm "honked"/"went off"
+mới thêm. `nguphaptructuan.test.js`: vẫn **45 ✅** (không thêm/bớt số
+lượng check, chỉ cập nhật 1 assertion cho khớp dữ liệu mới). `npm test`
+toàn bộ: **398 ✅, 0 ❌**. `sw.js` v113 → **v114**. Smoke test `/`,
+`/thi-chung-chi-anh/`, `/nguphap-truc-quan/` cùng `app.js`/
+`nguphaptructuan.js`/`style.css` đều 200; xác nhận đủ 7 `data-game`.
+
+**Còn để ngỏ**: huy hiệu đếm số mới thêm CHƯA được xem trực tiếp trong
+trình duyệt (dự án không có Playwright/Puppeteer) — nên bạn tự mở
+`/nguphap-truc-quan/` để xác nhận vị trí/kiểu chữ của huy hiệu trên thẻ
+chọn trò đẹp và dễ đọc như mong muốn. Có thể tiếp tục bổ sung thêm dữ liệu
+nữa cho vòng sau, hoặc chuyển sang thêm trò thứ 8 nếu muốn mở rộng chiều
+rộng thay vì chiều sâu.
+
+## 52. ĐÀO SÂU DỮ LIỆU TOÀN DIỆN + 2 TRÒ NGỮ PHÁP MỚI (BỊ ĐỘNG, TƯỜNG THUẬT) (07/2026)
+
+Bạn phản hồi thẳng: dữ liệu quá mỏng — "cái thì tới hơn trăm, còn đa số
+<12 câu tình huống" (so sánh với các game Nghe & Đoán có 100+ từ) — yêu
+cầu làm nhiều hơn để học tới mức NHUẦN NHUYỄN, và thêm game nếu ngữ pháp
+tiếng Anh còn thiếu đề tài nào.
+
+**A. Đào sâu TOÀN BỘ 7 pool dữ liệu hiện có** (tăng 2-3 lần mỗi pool, không
+phải chỉ thêm vài mục cho có):
+- Cỗ Máy Thời Gian: `CHARACTERS` 6→**12** (+ông, cô giáo, bác nông dân, thỏ,
+  khỉ, chim), `VERBS` 10→**20** (+walk/talk/eat/drink/sleep/fly/draw/ride/
+  climb/clean, đủ bộ chia động từ đa dạng hơn nhiều cho Cỗ Máy Thời Gian).
+- Hai Hành Động: `BG_ACTIONS` 8→**16**, `INTERRUPT_EVENTS` 6→**14** (thêm
+  gói hàng đến, ong bay vào, chuông báo cháy, pháo hoa nổ, bé khóc, đĩa vỡ,
+  người đưa thư gõ cửa, sấm sét).
+- So Sánh Hơn/Nhất: `COMPARE_ENTITIES` 8→**14** (+sư tử, ngựa, xe hơi, xe
+  đạp, núi, cá voi), `ATTRIBUTES` 6→**10** (+khỏe/nhẹ-nặng, thông minh, yên
+  tĩnh-ồn ào, đắt-rẻ).
+- Going To vs Will: `GOING_TO_WILL_SCENARIOS` 9→**22**.
+- Modal Ai Đúng: `MODAL_SITUATIONS` 11→**24**.
+- Câu Điều Kiện: `CONDITIONAL_SITUATIONS` 9→**22**.
+- Ghép Câu: `SENTENCE_BUILDER_POOL` 18→**30**.
+- **Sửa 1 lỗi ngữ pháp tiềm ẩn phát hiện trong lúc mở rộng**: hàm
+  `beForm`/`wrongBeForm`/`pastBeForm` (Going To vs Will) trước đó KHÔNG xử
+  lý chủ ngữ "You" (mặc định rơi vào nhánh `else return 'is'`, tức sẽ sinh
+  câu sai "You is going to..." nếu có tình huống dùng "You") — chưa lộ ra
+  vì 9 tình huống cũ chưa từng dùng "You". Khi thêm tình huống mới có
+  "You" (sạc điện thoại), lỗi này mới bị test bắt được — đã sửa cả 3 hàm
+  coi "You" giống "We/They" (dùng are/were), và cập nhật test cũ đang giả
+  định sai (test cũ cũng thiếu nhánh "You").
+- **2 lỗi dữ liệu khác bị test bắt ngay khi viết**: 1 tình huống điều kiện
+  mới dùng động từ "read" có dạng quá khứ TRÙNG với hiện tại (read/read) —
+  khiến câu "đúng" và câu lỗi "past-mix" giống hệt nhau; đổi sang "follow
+  the instructions" (follow/followed, rõ ràng khác nhau). 1 câu Ghép Câu
+  mới ("You mustn't smoke.") chỉ có 3 từ, vừa ngắn hơn ngưỡng tối thiểu
+  test tự đặt vừa TRÙNG Ý gần như nguyên vẹn với 1 câu Ghép Câu có sẵn từ
+  trước ("You mustn't smoke here.") — thay bằng câu mới hoàn toàn ("The
+  soup is cooked by the chef.", giới thiệu sớm ngữ pháp bị động của trò
+  mới thêm ở phần B).
+
+**B. 2 trò ngữ pháp HOÀN TOÀN MỚI — lấp đúng 2 lỗ hổng lớn nhất còn thiếu
+trong toàn bộ hệ thống (chưa game nào trong `nguphap-truc-quan` dạy câu bị
+động hay câu tường thuật bằng animation, dù cả 2 đã có trong dữ liệu trắc
+nghiệm PET/TOEFL Junior)**:
+
+- **🔄 Chủ Động vs Bị Động** (`PASSIVE_SCENARIOS`, 18 tình huống): mũi tên
+  nối icon người-làm-việc → icon đồ vật-bị-tác-động (đầu bếp→súp, thợ xây→
+  nhà, ngư dân→cá...). 4 lựa chọn: `correct` (bị động đúng: Object + is/
+  are/was/were + quá khứ phân từ + by + agent), `active-instead` (câu chủ
+  động — bé phải NHẬN RA cần đổi sang bị động), `wrong-be` (chia sai is/are
+  hoặc was/were theo số ít/nhiều của tân ngữ), `wrong-participle` (dùng
+  động từ nguyên mẫu thay vì quá khứ phân từ, vd "is cook by" thay vì "is
+  cooked by"). Ngẫu nhiên 50/50 giữa thì hiện tại đơn và quá khứ đơn mỗi
+  vòng — đúng phạm vi bị động đã dạy ở PET.
+- **🗣️ Lời Nói Trực Tiếp → Gián Tiếp** (`REPORTED_SPEECH_SCENARIOS`, 16
+  tình huống): nhân vật "nói" 1 câu trực tiếp trong bong bóng thoại (CSS vẽ
+  tay, có đuôi bong bóng trỏ xuống). 4 lựa chọn: `correct` (đổi đại từ "I"
+  đúng người + lùi thì đúng: am/is→was, will→would, can→could, have→had),
+  `no-backshift` (quên lùi thì — lỗi phổ biến nhất), `wrong-pronoun` (giữ
+  nguyên "I" thay vì đổi thành he/she), `wrong-reporting-verb` (chia sai
+  động từ tường thuật "says" thay vì "said"). **Quyết định kỹ thuật**: viết
+  tay cả 4 câu mỗi tình huống (không sinh tự động bằng công thức lùi thì)
+  vì lùi thì tiếng Anh có nhiều ngoại lệ (am/is/are/will/can/have đều lùi
+  khác nhau) — làm bằng công thức dễ sinh câu sai ngữ pháp không mong
+  muốn, viết tay đảm bảo đúng tuyệt đối, đúng cách đã làm với
+  `CONDITIONAL_SITUATIONS` trước đó.
+- Cả 2 trò dùng chung `answerGeneric()` (luật chọn-lại/thưởng y hệt 7 trò
+  kia), đăng ký đúng khuôn: `GAMES.passive/reported`, `HELP_TEXT.passive/
+  reported`, 2 thẻ chọn trò mới (lưới giờ 9 thẻ, thẻ cuối lẻ tự canh giữa),
+  class CSS `.pv-*`/`.rp-*`, huy hiệu đếm số tự động qua `renderModeCounts()`
+  (không cần sửa gì thêm nhờ thiết kế data-driven từ mục 51), 4 khoá i18n
+  mới (`nguphap.passive`/`.help`, `nguphap.reported`/`.help`, 5 ngôn ngữ).
+
+**Test**: 12 check mới (2 cho Passive: cấu trúc dữ liệu + đúng cấu trúc câu
+bị động chia is/are/was/were theo objectPlural/tense + active-instead
+không có "by"; luật chọn-lại/kết thúc ván. 2 tương tự cho Reported Speech)
++ 1 check tổng hợp xác nhận mọi pool đã tăng đáng kể. Cập nhật 2 test cũ
+theo đúng lỗi vừa sửa (thêm nhánh "You" vào test chia to-be; mở rộng regex
+danh sách quá khứ hợp lệ của sự kiện xen ngang). `nguphaptructuan.test.js`:
+45 → **57 ✅**. `npm test` toàn bộ: **398 → 420 ✅, 0 ❌**. `sw.js` v114 →
+**v115**. Smoke test `/`, `/thi-chung-chi-anh/`, `/nguphap-truc-quan/` cùng
+`app.js`/`nguphaptructuan.js`/`style.css` đều 200; xác nhận đủ 9 mode-card.
+
+**Còn để ngỏ**: dù đã đào sâu đáng kể (hầu hết pool giờ 14-30 mục, gấp
+2-3 lần trước), đây KHÔNG phải "học đủ mọi đề tài ngữ pháp tiếng Anh
+không thiếu gì" theo đúng nghĩa đen — những mảng animation CHƯA có game
+riêng: mạo từ a/an/the, giới từ thời gian/nơi chốn đầy đủ, câu hỏi đuôi
+(question tags), lượng từ some/any/much/many, mệnh đề quan hệ trực quan,
+câu điều kiện loại 2/3. Phần lớn các điểm này ĐÃ có trong ngân hàng trắc
+nghiệm exam-prep (KET/PET/TOEFL Junior — mục 40-47) nhưng chưa có phiên
+bản animation trực quan riêng trong `nguphap-truc-quan`. Nếu muốn tiếp tục
+"không thiếu gì cả", hướng tiếp theo hợp lý nhất là thêm 3-4 trò nữa
+(Mạo Từ A/An/The, Giới Từ Thời Gian & Nơi Chốn, Câu Hỏi Đuôi, Điều Kiện
+Loại 2) theo đúng khuôn đã có, hoặc tiếp tục đào sâu hơn nữa các pool hiện
+tại (có thể lên 40-50 mục/pool) — cả 2 hướng đều khả thi với kiến trúc
+hiện tại, cần bạn xác nhận hướng ưu tiên.
+
+## 53. 6 UNIT NGỮ PHÁP MỚI CHO EXAM-PREP — ĐIỂM NGỮ PHÁP CHƯA CÓ, LỒNG ĐÚNG TỪ VỰNG THI CHỨNG CHỈ (07/2026)
+
+Bạn yêu cầu tiếp tục làm dày dữ liệu ngữ pháp, thêm bài học/câu hỏi cho
+điểm ngữ pháp CHƯA CÓ, và đặc biệt: dùng từ vựng đã có trong ngân hàng thi
+chứng chỉ (Cambridge/KET/PET/TOEFL Junior/TOEIC) để soạn câu hỏi ngữ pháp
+— giúp bé làm quen dần cả ngữ pháp lẫn từ vựng thi cùng lúc.
+
+**Rà soát để tìm đúng điểm ngữ pháp THỰC SỰ CHƯA CÓ** (đối chiếu toàn bộ 57
+unit hiện có trước khi thêm, tránh trùng lặp) — phát hiện 3 điểm ngữ pháp
+tiếng Anh cơ bản/quan trọng CHƯA từng xuất hiện ở bất kỳ unit nào trong 6
+cấp: **mạo từ a/an/the**, **giới từ thời gian in/on/at đầy đủ** (Movers/
+Flyers trước đó mới chỉ lồng ghép rải rác qua unit giờ giấc, chưa có unit
+riêng đối chiếu cả 3 giới từ), **câu hỏi về chủ ngữ vs tân ngữ** (who/what
+làm chủ ngữ thì KHÔNG cần do/does/did — điểm rất hay bị nhầm), **câu hỏi
+đuôi (question tags)**, và **so sánh kép "the...the..."** (càng...thì
+càng...). Thêm **6 unit mới**, mỗi unit đều LỒNG từ vựng lấy trực tiếp từ
+đúng unit từ vựng của cấp đó (không bịa từ mới ngoài luồng):
+
+- **`movers-articles`** (Movers, 10 câu) — a/an theo ÂM ĐỌC (không phải
+  chữ viết — dạy đúng 2 ngoại lệ kinh điển: "an hour" h câm, "a university"
+  âm /j/), the khi vật/người đã xác định hoặc duy nhất. Từ vựng tái dùng:
+  umbrella, teacher, apple, car (từ `movers-vocabulary`).
+- **`flyers-time-prepositions`** (Flyers, 12 câu) — đối chiếu đầy đủ in/
+  on/at cho thời gian, kèm 2 ngoại lệ hay sai nhất (at night, at the
+  weekend). Từ vựng tái dùng: library, camera, coat, band, coast (từ
+  `flyers-vocabulary`).
+- **`ket-subject-object-questions`** (KET, 10 câu) — câu hỏi về CHỦ NGỮ
+  ("Who opened the door?" — không cần did) đối lập câu hỏi về TÂN NGỮ
+  ("What did you open?" — cần did) — điểm cực kỳ hay nhầm ở trình độ này.
+  Từ vựng tái dùng: appointment, book, crowded, friendly (từ
+  `ket-vocabulary`).
+- **`pet-question-tags`** (PET, 12 câu) — quy tắc chung (khẳng định↔đuôi
+  phủ định) + 2 ngoại lệ đặc biệt ("I am" → "aren't I", "Let's..." →
+  "shall we"). Từ vựng tái dùng: tourist, technology, culture, education,
+  environment, relationship (từ `pet-vocabulary`).
+- **`toefl-junior-correlative-comparatives`** (TOEFL Junior, 10 câu) —
+  cấu trúc song song "The + so sánh hơn..., the + so sánh hơn..." (càng...
+  thì càng...), điểm ngữ pháp học thuật thường gặp trong bài đọc/viết
+  trình độ cao chưa từng dạy ở cấp nào. Từ vựng tái dùng: analyze,
+  reliable, evaluate, significant, global, achievement, community (từ
+  `toefl-junior-vocabulary`).
+- **`toeic-comparatives-superlatives-business`** (TOEIC, 10 câu) — không
+  phải điểm ngữ pháp mới (so sánh hơn/nhất đã học từ Movers/Flyers) mà là
+  **LUYỆN LẠI đúng ngữ cảnh công sở/thương mại** — đúng tinh thần yêu cầu
+  "dùng từ vựng thi chứng chỉ để tạo câu hỏi ngữ pháp": contract, shipment,
+  budget, revenue, colleague, client (từ `toeic-vocabulary-business/
+  office/travel-hr`).
+
+**Kỹ thuật**: cả 6 unit dùng đúng khuôn dữ liệu `Unit` sẵn có (`lesson` +
+`grammarPoints` + `vocab` + `questions`), KHÔNG sửa `examprep.js` (engine
+100% data-driven, chỉ cần thêm mảng Unit mới vào đúng level là cả 2 nhánh
+Học/Luyện Thi tự nhận diện). Đăng ký: `MOVERS_UNITS`/`FLYERS_UNITS`/
+`KET_UNITS`/`PET_UNITS`/`TOEFL_JUNIOR_UNITS`/`TOEIC_UNITS` mỗi mảng +1 unit
+tương ứng (7 mảng cấp độ, chỉ TOEIC được +1 so với 5 mảng kia do có unit
+thứ 6 luyện lại so sánh).
+
+**Kết quả**: 6 cấp độ Movers/Flyers/KET/PET/TOEFL Junior/TOEIC đều +1 unit
+(riêng TOEIC +2): Movers 11→**12**, Flyers 11→**12**, KET 6→**7**, PET
+8→**9**, TOEFL Junior 9→**10**, TOEIC 7→**8**. Tổng hệ thống 57→**63
+unit**, 570→**634 câu hỏi** (634 id duy nhất, đã xác nhận không trùng qua
+node dynamic-import). Cập nhật số liệu hiển thị ở thẻ hub `thi-chung-chi-
+anh/` (280+→300+ câu Cambridge YLE) và sửa 1 chỗ SỐ LIỆU CŨ THẬT SỰ STALE
+phát hiện tình cờ: thẻ "Ngữ Pháp Trực Quan" vẫn ghi "5 trò" dù đã có 9 trò
+từ mục 52 — đã cập nhật đúng.
+
+**Test**: cập nhật 3 assertion số liệu (unit count từng cấp 2 chỗ, ngưỡng
+tổng câu hỏi tối thiểu 560→620) trong `examprep.test.js` — không cần thêm
+test case mới vì đây là mở rộng NỘI DUNG thuần theo đúng schema đã kiểm
+thử kỹ (engine không đổi hành vi). `npm test` toàn bộ vẫn **420 ✅, 0 ❌**
+(35 test của exam-prep, không đổi số lượng). Smoke test `/`,
+`/thi-chung-chi-anh/`, `/exam-prep/`, cả 4 mục riêng biệt
+(`/luyen-thi-ket/`, `/luyen-thi-pet/`, `/luyen-thi-toefl-junior/`,
+`/luyen-thi-toeic/`) cùng `exam-prep/src/units.js` đều 200. `sw.js` v115→
+**v116**.
+
+**Còn để ngỏ**: đã lấp đúng 5 điểm ngữ pháp cụ thể được nêu tên ở mục 52
+(mạo từ, giới từ thời gian, câu hỏi chủ ngữ/tân ngữ, câu hỏi đuôi, so sánh
+kép) — nhưng vẫn CHƯA "đủ mọi đề tài ngữ pháp tiếng Anh không thiếu gì cả"
+theo nghĩa đen. Các điểm còn thiếu nếu muốn tiếp tục: điều kiện loại 0 lồng
+riêng (hiện gộp chung với loại 1 ở `ket-conditionals`), lượng từ each/
+every/all/none, câu hỏi gián tiếp lịch sự ("Could you tell me...?"), mệnh
+đề trạng ngữ nhượng bộ nâng cao, và cụm động từ (phrasal verbs) mở rộng
+hơn 1 unit hiện có ở KET. Có thể tiếp tục thêm unit mới theo đúng công
+thức "1 điểm ngữ pháp chưa có + từ vựng tái dùng từ unit vocab cùng cấp"
+đã áp dụng ở đợt này, hoặc quay lại đào sâu số câu/unit hiện có.
+
+## 54. SỬA UI THẺ CHỌN TRÒ QUÁ TO + THÊM SỐ CÂU/LƯỢT + ĐÀO SÂU DỮ LIỆU VÒNG 3 (07/2026)
+
+Bạn gửi ảnh chụp `Ngữ Pháp Trực Quan` và phản hồi 2 điểm UI + 1 yêu cầu
+tiếp tục bổ sung dữ liệu.
+
+**A. Thẻ chọn trò quá to — thu nhỏ lại**: `nguphap-truc-quan/style.css`
+`.mode-card` trước đó padding 20px/10px, icon 2.8rem, tên 1.02rem — với 9
+trò trong lưới 2 cột cố định, mỗi thẻ chiếm rất nhiều diện tích màn hình
+(đúng như ảnh chụp: chỉ thấy 3 hàng rưỡi phải cuộn). Đã thu nhỏ đáng kể:
+padding 10px/6px, icon 1.7rem, tên 0.78rem, viền 3px→2px, bo góc 20px→14px,
+khoảng cách lưới 12px→8px — và bổ sung **breakpoint 3 cột từ 460px trở lên**
+(`@media (min-width: 460px) { grid-template-columns: repeat(3,1fr) }`) để
+màn hình rộng hơn (tablet/desktop, đúng như ảnh chụp) hiển thị được nhiều
+thẻ hơn trong 1 màn hình thay vì chỉ 2 cột cố định. Sửa luôn quy tắc "ô lẻ
+cuối cùng tự canh giữa" cho đúng với bố cục 3 cột (9 thẻ chia hết cho 3,
+không còn ô lẻ nên tắt hẳn quy tắc ở breakpoint rộng thay vì tính toán lại).
+
+**B. Thêm số CÂU HỎI MỖI LƯỢT bên cạnh số liệu kho dữ liệu**: bạn hỏi đúng
+— trước đó chỉ có 1 con số (kho dữ liệu: "22 tình huống"...) chứ chưa có
+con số RIÊNG cho "1 lượt chơi có bao nhiêu câu". Thêm huy hiệu thứ 2 màu
+xám nhạt bên dưới huy hiệu cũ, đọc trực tiếp từ hằng số `count` mà mỗi
+`startXxx()` truyền vào `makeXxxGame(count, ...)` (8 câu/lượt cho 8/9 trò,
+riêng Ghép Câu 6 câu/lượt) — gom vào 1 bảng tra `ROUNDS_PER_GAME` dùng
+chung với `renderModeCounts()`, không hard-code rải rác.
+
+**C. Tiếp tục đào sâu dữ liệu — vòng 3**: đào sâu thêm lần nữa TẤT CẢ pool
+đã có (đây là lần đào sâu THỨ 3 liên tiếp, sau vòng 1 ở mục 51 và vòng 2 ở
+mục 52):
+- `CHARACTERS` 12→**14** (+cá, +rùa), `VERBS` 20→**24** (+laugh/smile/
+  shout/whisper).
+- `BG_ACTIONS` 16→**20** (+xếp hình, +chơi violin, +nghe đài, +rửa xe),
+  `INTERRUPT_EVENTS` 14→**18** (+sâu bò ra, +bóng bay nổ, +cửa đóng sầm,
+  +mất điện).
+- `COMPARE_ENTITIES` 14→**18** (+hươu cao cổ, +tàu hỏa, +thuyền, +cầu),
+  `ATTRIBUTES` 10→**12** (+sáng-tối, +dài-ngắn).
+- `GOING_TO_WILL_SCENARIOS` 22→**30**, `MODAL_SITUATIONS` 24→**32**,
+  `CONDITIONAL_SITUATIONS` 22→**30** (đã kiểm tra kỹ tránh lặp lại đúng
+  lỗi "ifPresent === ifPast" từng gặp ở mục 52 — ví dụ tình huống mới
+  "put the ice cream in the freezer" cố tình đổi chủ ngữ sang "she" để
+  "puts" (hiện tại) khác "put" (quá khứ), thay vì giữ chủ ngữ "you" sẽ bị
+  trùng y hệt bug cũ).
+- `SENTENCE_BUILDER_POOL` 30→**40**, `PASSIVE_SCENARIOS` 18→**22**,
+  `REPORTED_SPEECH_SCENARIOS` 16→**20**.
+
+**Test**: cập nhật regex danh sách quá khứ hợp lệ của sự kiện xen ngang
+(Hai Hành Động Cùng Lúc, thêm crawled out/popped/slammed), thêm import
+`BG_ACTIONS`/`INTERRUPT_EVENTS` còn thiếu, thêm 1 check "vòng 3" xác nhận
+mọi pool đã tăng thêm so với ngưỡng vòng 2. `nguphaptructuan.test.js`: 57 →
+**58 ✅**. `npm test` toàn bộ: **420 → 421 ✅, 0 ❌**. `sw.js` v116 →
+**v117**. Smoke test `/nguphap-truc-quan/` cùng `style.css`/`app.js` đều
+200; xác nhận CSS không lệch dấu ngoặc (168 mở = 168 đóng).
+
+**Còn để ngỏ**: như đã lưu ý trước đó, dự án không có Playwright/Puppeteer
+nên kích thước/vị trí huy hiệu mới chỉ được xác minh qua code review, CHƯA
+xem trực tiếp bằng mắt trong trình duyệt — bạn tự mở lại `/nguphap-truc-
+quan/` để xác nhận thẻ đã đủ nhỏ và huy hiệu "câu/lượt" hiển thị đúng ý
+muốn. Vẫn còn dư địa đào sâu thêm (vòng 4) nếu muốn, hoặc quay lại hướng
+thêm trò mới cho các điểm ngữ pháp còn thiếu đã liệt kê ở mục 52 (mạo từ
+đã làm ở `exam-prep` nhưng chưa có bản animation riêng, câu hỏi đuôi
+tương tự, lượng từ each/every/all/none).
+
+## 55. BỎ HUY HIỆU "CÂU/LƯỢT" — THAY BẰNG THANH TIẾN ĐỘ % RIÊNG TỪNG BÉ + ĐÀO SÂU VÒNG 4 (07/2026)
+
+Bạn phản hồi huy hiệu "câu/lượt" vừa thêm ở mục 54 không cần thiết, và yêu
+cầu 2 thứ THỰC SỰ cần: (1) tổng số bài học của mỗi chủ đề ngữ pháp (con số
+này thực ra ĐÃ CÓ SẴN — chính là huy hiệu "X thì/tình huống/câu" cũ, chỉ
+cần bỏ huy hiệu "câu/lượt" đi là đủ), và (2) **thanh progress bar đánh dấu
+% ĐÃ HỌC của TỪNG BÉ** — tính năng hoàn toàn mới.
+
+**Bỏ huy hiệu "câu/lượt"**: xoá hẳn `ROUNDS_PER_GAME` và nhánh render badge
+thứ 2 trong `renderModeCounts()`, xoá CSS `.mc-count--rounds` không dùng
+nữa — mỗi thẻ giờ chỉ còn đúng 1 huy hiệu số liệu như trước mục 54.
+
+**Thanh tiến độ % — module mới `nguphap-truc-quan/src/progress.js`**:
+- Lưu localStorage khoá theo **TỪNG HỒ SƠ BÉ** (`nguphap-progress:<profileId>:
+  <gameKey>`, id hồ sơ lấy từ `pokemon/src/stats.js.currentProfile()` — hệ
+  hồ sơ dùng chung toàn dự án, không cần hạ tầng mới) — đúng yêu cầu "%
+  đã học của mỗi users", 3 bé chung 1 máy sẽ có 3 thanh tiến độ độc lập.
+- Mỗi trò có 1 mảng dữ liệu gốc đóng vai trò "danh sách bài học" (ví dụ
+  Modal Ai Đúng dùng `MODAL_SITUATIONS`, Câu Điều Kiện dùng
+  `CONDITIONAL_SITUATIONS`...) — khi bé trả lời ĐÚNG 1 vòng (kể cả đúng sau
+  gợi ý, chỉ trừ trường hợp sai 2 lần bị lộ đáp án), **mục tương ứng** (xác
+  định bằng VỊ TRÍ trong mảng gốc — ổn định vì quy ước cả dự án chỉ THÊM
+  MỚI vào cuối mảng, không sắp xếp lại) được đánh dấu "đã học". % tiến độ =
+  số mục đã học / tổng số mục.
+- **Quyết định kỹ thuật đáng chú ý cho 2 trò dùng dữ liệu TỔ HỢP** (Hai
+  Hành Động Cùng Lúc, So Sánh Hơn/Nhất): thay vì lấy mẫu số là con số NHÂN
+  LÊN khổng lồ đang hiển thị ở huy hiệu cũ (vd Hai Hành Động = 3×20×18 =
+  1080 tổ hợp — gần như không bao giờ đạt 100%), tiến độ dùng mẫu số là
+  mảng "chủ đề" nền tảng (`BG_ACTIONS` 20 mục cho Hai Hành Động,
+  `ATTRIBUTES` 12 mục cho So Sánh) — bé thực sự có thể đi tới 100%.
+- Test riêng `progress.test.js` (6 check, theo đúng khuôn `_setStorage`
+  tiêm được đã dùng cho `misses.js`): đếm đúng/không đếm trùng, tính % làm
+  tròn không vượt 100, **2 hồ sơ bé độc lập không lẫn tiến độ vào nhau**,
+  2 trò của cùng 1 bé không lẫn sổ vào nhau, bỏ qua index lỗi, storage
+  hỏng không crash game.
+- Nối vào `app.js`: `markRoundLearned(gameKey, round)` gọi ngay sau
+  `if (ev.correct) sfx.match(1);` ở cả 8 trò trắc nghiệm + gọi riêng trong
+  nhánh hoàn thành câu của Ghép Câu (`ev.complete`). Thanh bar (`.mc-progress`
+  + `.mc-progress-fill` co giãn theo % qua CSS transition) vẽ 1 lần lúc
+  khởi động và **VẼ LẠI mỗi khi quay về màn chọn trò** (`showHome()` gọi
+  `renderModeProgress()`) — % luôn cập nhật đúng ngay sau khi chơi xong 1
+  ván, không cần tải lại trang.
+- Xác minh cách vận hành bằng kịch bản node thuần (không qua DOM): chơi 1
+  vòng Modal/Điều Kiện/Ghép Câu thật bằng chính engine game, xác nhận
+  `progressPercent()` tăng đúng lên 1 đơn vị / tổng số mục.
+
+**Tiếp tục đào sâu dữ liệu — vòng 4**: `GOING_TO_WILL_SCENARIOS` 30→**36**,
+`MODAL_SITUATIONS` 32→**38**, `CONDITIONAL_SITUATIONS` 30→**36** (đã kiểm
+tra kỹ tránh lặp lại bug "ifPresent === ifPast"), `PASSIVE_SCENARIOS`
+22→**26**, `REPORTED_SPEECH_SCENARIOS` 20→**24**, `SENTENCE_BUILDER_POOL`
+40→**48** — ưu tiên đúng các pool đang làm MẪU SỐ cho thanh tiến độ, để bé
+có nhiều "bài học" hơn trước khi chạm 100%.
+
+**Test**: `nguphaptructuan.test.js` 58→**59** (thêm 1 check "vòng 4"),
+`progress.test.js` mới **6 ✅**. `npm test` toàn bộ: **421 → 428 ✅, 0 ❌**
+(6 test mới của `progress.test.js` được thêm vào `package.json`). `sw.js`
+v118→**v119** (+precache `progress.js`). Smoke test `/nguphap-truc-quan/`
+cùng `progress.js` đều 200.
+
+**Còn để ngỏ**: như mọi đợt trước, dự án không có Playwright/Puppeteer nên
+vị trí/hiển thị trực quan của thanh progress bar mới CHƯA được xem bằng
+mắt trong trình duyệt thật — bạn tự mở lại `/nguphap-truc-quan/`, chơi thử
+vài vòng rồi quay về màn chọn trò để xác nhận thanh bar tăng đúng như kỳ
+vọng. Tiến độ hiện tính RIÊNG theo từng trò (chưa có 1 con số TỔNG "bé đã
+học bao nhiêu % của cả 9 trò") — có thể làm thêm nếu muốn 1 chỉ số tổng
+quan ở đầu trang chọn trò.
+
+## 56. TỔNG TIẾN ĐỘ CẢ 9 TRÒ + ĐÀO SÂU VÒNG 5 (07/2026)
+
+Bạn nói "tiếp tục" — lấp đúng việc đã tự nêu ở phần "còn để ngỏ" của mục
+55 (chưa có 1 chỉ số TỔNG gộp cả 9 trò), cộng thêm 1 vòng đào sâu dữ liệu
+nữa cho các pool nền tảng chưa động tới ở vòng 4.
+
+**Thanh "Tổng tiến độ cả 9 trò"**: 1 khối mới `#overallProgress` chèn giữa
+dòng hướng dẫn (`subLine`) và lưới chọn trò — cộng dồn `learnedCount(gameKey)`
+và `total()` của TẤT CẢ 9 `PROGRESS_SOURCES` thành 1 cặp số duy nhất
+(vd "126/246 bài học"), hiện dưới dạng "🌟 Tổng tiến độ cả 9 trò: 51%" kèm
+1 thanh bar riêng (tách biệt với 9 thanh bar nhỏ trên từng thẻ). Ẩn/hiện
+đồng bộ với màn chọn trò (`showHome()` hiện + vẽ lại, `startGame()` ẩn đi
+khi vào chơi) — cùng nhịp với 9 thanh bar riêng lẻ đã có từ mục 55.
+
+**Test**: thêm 1 check trong `progress.test.js` mô phỏng ĐÚNG công thức
+`renderOverallProgress()` dùng (cộng dồn learnedCount/total qua nhiều
+gameKey rồi tính % chung) để xác nhận phép cộng gộp cho ra đúng số — xác
+minh cách vận hành bằng kịch bản node thuần (không qua DOM): tạo 3
+"tiến độ giả" (timemachine 2/6, modal 1/10, conditional 3/8), xác nhận
+tổng = 6/24 = 25%.
+
+**Tiếp tục đào sâu dữ liệu — vòng 5** (các pool nền tảng CHƯA đụng tới ở
+vòng 4): `CHARACTERS` 14→**16** (+chim cánh cụt, +gấu túi), `VERBS`
+24→**26** (+skip/wave), `BG_ACTIONS` 20→**22** (+may vá, +chơi phi tiêu),
+`INTERRUPT_EVENTS` 18→**20** (+chuột kêu chít chít, +TV tắt), `COMPARE_ENTITIES`
+18→**20** (+bươm bướm, +lâu đài), `ATTRIBUTES` 12→**14** (+lạnh-ấm,
++rộng-hẹp).
+
+**Test**: cập nhật regex danh sách quá khứ hợp lệ của sự kiện xen ngang
+(Hai Hành Động Cùng Lúc, thêm squeaked/turned off), thêm 1 check "vòng 5"
+xác nhận 6 pool nền tảng đã tăng. `nguphaptructuan.test.js`: 59→**60 ✅**,
+`progress.test.js`: 6→**7 ✅**. `npm test` toàn bộ vẫn **0 ❌**. `sw.js`
+v119→**v120**. Smoke test `/nguphap-truc-quan/` 200, xác nhận đã có phần
+tử `#overallProgress` trong HTML.
+
+**Còn để ngỏ**: như mọi đợt trước, chưa xem trực tiếp bằng mắt trong trình
+duyệt thật (không có Playwright/Puppeteer) — bạn tự mở `/nguphap-truc-quan/`
+để xác nhận thanh "Tổng tiến độ" hiển thị đúng vị trí/kiểu chữ như mong
+muốn. Hướng tiếp theo nếu muốn: thêm trò mới cho các điểm ngữ pháp còn
+thiếu (mạo từ/câu hỏi đuôi/lượng từ each-every-all-none dạng animation —
+đã có bản trắc nghiệm ở `exam-prep` từ mục 53 nhưng chưa có bản trực quan
+ở đây), hoặc tiếp tục đào sâu vòng 6.
+
+## 57. TRÒ THỨ 10 — LƯỢNG TỪ ĐÚNG (ALL/SOME/NONE/EVERY) + ĐÀO SÂU VÒNG 6 (07/2026)
+
+Bạn xác nhận đúng hướng đã đề xuất ở "còn để ngỏ" mục 56 — lấp 1 điểm ngữ
+pháp còn thiếu bằng animation trực quan, đồng thời tiếp tục làm dày dữ
+liệu các pool hiện có.
+
+**Trò thứ 10 hoàn toàn mới — "🔢 Lượng Từ Đúng"**: lấp đúng lỗ hổng
+"lượng từ each/every/all/none" đã nêu ở mục 55/56 — điểm ngữ pháp CHƯA
+từng có bản animation trực quan trong `nguphap-truc-quan` (dù đã có bản
+trắc nghiệm `flyers-quantifiers` ở `exam-prep` cho a lot of/much/many).
+- **Cơ chế trực quan mới, khác hẳn 9 trò trước**: 1 lưới 4-6 icon đồ vật
+  (`QUANTIFIER_NOUNS`, 14 mục), MỘT SỐ được tô đỏ nổi bật (CSS
+  `grayscale`+`drop-shadow`, animation "pop in" khi xuất hiện) — bé đếm số
+  lượng được tô để chọn đúng câu.
+- **4 lựa chọn**: `all` ("All of the ___ are red." — khi TẤT CẢ được tô),
+  `none` ("None of the ___ are red." — khi KHÔNG cái nào), `some` ("Some
+  of the ___ are red." — khi một phần), và **`every` luôn luôn SAI**
+  ("Every ___ is red." — lỗi phổ biến nhất: ghép "every" với danh từ SỐ
+  NHIỀU, trong khi "every" chỉ đi được với danh từ số ít). Tỷ lệ sinh vòng
+  chia đều 1/3 cho mỗi trường hợp all/none/some.
+- Đăng ký đúng khuôn đã thiết lập: `GAMES.quantifier`,
+  `HELP_TEXT.quantifier`, `PROGRESS_SOURCES.quantifier` (dùng
+  `QUANTIFIER_NOUNS` làm mẫu số tiến độ), thẻ chọn trò thứ 10 (lưới giờ
+  10 thẻ — thêm 1 dòng CSS `nth-child(3n+1)` xử lý đúng trường hợp thẻ lẻ
+  đứng 1 mình ở hàng cuối tại breakpoint 3 cột, vì 10 không chia hết cho 3),
+  4 khoá i18n mới (`nguphap.quantifier`/`.help`, 5 ngôn ngữ).
+
+**Test mới**: 6 check cho trò Lượng Từ Đúng (cấu trúc dữ liệu, `total`
+trong khoảng 4-6 và khớp đúng `highlighted`/`correctKey`, 4 lựa chọn luôn
+khác nhau, `every` KHÔNG BAO GIỜ là đáp án đúng và luôn chia sai theo
+đúng mẫu lỗi, luật chọn-lại/kết thúc ván). Xác minh cách vận hành bằng
+kịch bản node thuần (không qua DOM): chơi 1 vòng thật, xác nhận
+`progressPercent()` tăng đúng.
+
+**Tiếp tục đào sâu dữ liệu — vòng 6**: `QUANTIFIER_NOUNS` bắt đầu ngay ở
+mức 14 (không để trò mới quá mỏng), `GOING_TO_WILL_SCENARIOS` 36→**40**,
+`MODAL_SITUATIONS` 38→**42**, `CONDITIONAL_SITUATIONS` 36→**40**,
+`SENTENCE_BUILDER_POOL` 48→**52** (gồm cả câu ôn tập lồng đúng chủ đề
+lượng từ mới: "All of the apples are red.", "None of the stars are red.").
+
+**Test**: `nguphaptructuan.test.js` 60→**67 ✅** (thêm 6 check trò mới + 1
+check "vòng 6"). `npm test` toàn bộ vẫn **0 ❌**. `sw.js` v120→**v121**.
+Smoke test `/nguphap-truc-quan/` 200, xác nhận đủ 10 `data-game` trong
+HTML.
+
+**Còn để ngỏ**: vẫn còn 2 điểm ngữ pháp đã nêu tên nhưng chưa có bản
+animation riêng: **mạo từ a/an/the** (đã có bản trắc nghiệm
+`movers-articles` ở `exam-prep`) và **câu hỏi đuôi** (đã có bản trắc
+nghiệm `pet-question-tags` ở `exam-prep`) — cả 2 đều là ứng viên tốt cho
+trò thứ 11/12 nếu muốn tiếp tục theo đúng công thức "lấp lỗ hổng animation
+cho điểm ngữ pháp đã có sẵn ở exam-prep". Như mọi đợt trước, chưa xem trực
+tiếp bằng mắt trong trình duyệt thật (không có Playwright/Puppeteer) — bạn
+tự mở `/nguphap-truc-quan/` để xác nhận lưới icon tô đỏ hiển thị rõ ràng,
+dễ đếm như mong muốn.
