@@ -1,0 +1,8 @@
+{
+  "name": "nghe-doan-quoc-gia-nghe-nghiep",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/quocgianghenghiep.test.js"
+  }
+}
