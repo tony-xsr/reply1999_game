@@ -11,6 +11,7 @@ import { speak, speakSequence, bindMute } from '../../to-mau/src/speech.js';
 import { recordMiss, recordHit } from '../../nghe-doan-on-tap/src/misses.js';
 import { sfx } from '../../pokemon/src/sfx.js';
 import { mountKidFeatures, answeredOne } from '../../shared/kid-bar.js';
+import { initFilterToggle } from '../../shared/filter-toggle.js';
 import { currentProfile, recordSession } from '../../pokemon/src/stats.js';
 
 const t = (key, fallback) => {
@@ -282,6 +283,7 @@ els.btnSound.addEventListener('click', () => {
 
 els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
 buildFilterRow();
+initFilterToggle(els.filterRow, document.getElementById('filterToggle'));
 mountKidFeatures(); // thanh avatar bé + kiểm tra giới hạn phút/ngày
 sayInstruction(t('nghedoan3.help', 'Máy sẽ đọc một từ hoặc câu tiếng Anh ngắn về động vật, bầu trời, vũ trụ hay toán học — bé nghe thật kỹ rồi chạm vào hình đúng trong 4 hình bên dưới nhé! Chọn đúng liên tiếp 3 lần sẽ được điểm thưởng đó. Có thể lọc theo chủ đề ở hàng nút trên cùng.'));
 startRound();
