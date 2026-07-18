@@ -6,7 +6,7 @@
 // /server-config.js hoặc chưa đăng nhập, các hàm ghi trở thành no-op để game
 // không hỏng — trang Phụ Huynh sẽ hướng dẫn cài đặt.
 
-import { starsFromScore, capDailyStars } from './rewards.js';
+import { starsForSession, capDailyStars } from './rewards.js';
 
 const SESSION_KEY = 'r99-session';
 const KID_KEY = 'r99-kid';
@@ -245,7 +245,7 @@ export async function recordSessionServer({ mode, result, score = 0, level = 1, 
     mode, result, score: score | 0, level: level | 0, seconds: Math.max(0, Math.round(seconds)),
   }, { Prefer: 'return=minimal,resolution=ignore-duplicates' });
 
-  const want = starsFromScore(score);
+  const want = starsForSession(mode, score);
   let granted = 0;
   if (want > 0) {
     const earned = await starsEarnedToday(profileId);

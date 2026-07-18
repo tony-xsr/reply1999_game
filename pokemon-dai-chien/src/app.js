@@ -7,6 +7,7 @@ import {
 import { speak, bindMute } from '../../to-mau/src/speech.js';
 import { sfx } from '../../pokemon/src/sfx.js';
 import { currentProfile, recordSession } from '../../pokemon/src/stats.js';
+import { mountKidFeatures } from '../../shared/kid-bar.js';
 
 const t = (key, fallback) => {
   const v = window.I18N?.t(key);
@@ -455,3 +456,5 @@ sayInstruction(t('pokedc.help.home', 'Chọn 1 Pokémon khởi đầu để bắ
 
 // Hook cho e2e test
 window.__pokedc = { state, startCampaign, onMove };
+
+mountKidFeatures(); // thanh avatar bé + huy hiệu sao header + kiểm tra giới hạn phút/ngày (áp dụng cho mọi game, kể cả game giải trí thuần)
