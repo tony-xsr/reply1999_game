@@ -1,0 +1,146 @@
+/* Chém Từ Vựng — icon trái cây/đồ vật bay lên từ dưới màn hình, chạm để
+   "chém" và nghe tên tiếng Anh. Không có đáp án sai. */
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #fff0e8;
+  --panel: #fffaf2;
+  --ink: #241e2e;
+  --muted: #5d5370;
+  --accent: #ff5a3d;
+  --accent-deep: #c22410;
+  --line: #cf8a6a;
+}
+
+html, body { height: 100%; }
+body {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, #ffd9c8 0%, transparent 70%),
+    var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.shell {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* Dưới cùng chừa thêm chỗ cho thanh avatar bé + huy hiệu "từ cần ôn" nổi cố
+     định ở góc dưới-trái (shared/kid-bar.js, position:fixed). */
+  padding: 10px max(12px, env(safe-area-inset-right)) calc(74px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.top { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.top h1 { font-size: 1.05rem; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip-stat {
+  font-weight: 900; font-size: 1rem; color: var(--muted);
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  padding: 7px 13px;
+}
+.chip-stat.score { color: var(--accent-deep); }
+
+.round-btn {
+  width: 44px; height: 44px; flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: var(--panel);
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 2px 5px rgba(90, 30, 20, 0.15);
+}
+.round-btn:active { transform: scale(0.93); }
+
+.stage { flex: 1; min-height: 0; display: flex; position: relative; }
+.arena {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 100%, #ffe4d6, #ffd0b8);
+  border: 4px solid #e59a78;
+  border-radius: 22px;
+}
+
+.flying {
+  position: absolute;
+  bottom: -60px;
+  font-size: min(14vw, 3.6rem);
+  cursor: pointer;
+  animation: rise linear forwards;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.25));
+}
+@keyframes rise {
+  from { transform: translateY(0) rotate(0deg); opacity: 1; }
+  85% { opacity: 1; }
+  to { transform: translateY(-120vh) rotate(20deg); opacity: 0; }
+}
+.flying.sliced {
+  animation: none;
+  pointer-events: none;
+  transform: scale(1.5);
+  opacity: 0;
+  transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+}
+
+.slash-mark {
+  position: absolute;
+  font-size: 2.4rem;
+  pointer-events: none;
+  animation: slash-pop 0.5s ease-out forwards;
+}
+@keyframes slash-pop {
+  from { transform: scale(0.4) rotate(-20deg); opacity: 1; }
+  to { transform: scale(1.6) rotate(-20deg); opacity: 0; }
+}
+
+.overlay {
+  position: absolute; inset: 0;
+  background: rgba(255, 250, 240, 0.94);
+  border-radius: 20px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px; text-align: center;
+  z-index: 5;
+  padding: 14px;
+}
+.overlay.hidden { display: none; }
+.ov-emoji { font-size: 4rem; animation: pop 0.5s ease-out; }
+.ov-text { font-size: 1.05rem; font-weight: 800; white-space: pre-line; color: var(--muted); }
+@keyframes pop {
+  from { transform: scale(0.5); }
+  60% { transform: scale(1.15); }
+  to { transform: scale(1); }
+}
+.big-btn {
+  background: linear-gradient(180deg, #ff7a4d, var(--accent-deep));
+  color: #fff;
+  border: none; border-radius: 14px;
+  font-size: 1.1rem; font-weight: 900;
+  padding: 13px 30px; cursor: pointer;
+  box-shadow: 0 4px 10px rgba(194, 36, 16, 0.4);
+}
+.big-btn:active { transform: translateY(2px); }
+
+.confetti-piece {
+  position: fixed;
+  top: -12px; left: var(--x);
+  width: 10px; height: 14px;
+  z-index: 60;
+  animation: confetti-fall 2.2s var(--delay) ease-in forwards;
+}
+@keyframes confetti-fall {
+  to { transform: translateY(105vh) rotate(var(--rot)); }
+}
+
+@media (max-width: 400px) {
+  .top h1 { font-size: 0.85rem; }
+}
