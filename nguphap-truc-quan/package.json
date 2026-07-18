@@ -1,0 +1,8 @@
+{
+  "name": "nguphap-truc-quan",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/nguphaptructuan.test.js"
+  }
+}
