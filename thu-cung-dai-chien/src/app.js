@@ -4,6 +4,7 @@ import { CREATURES, makeCampaign, useMove, advanceCampaign } from './thucung.js'
 import { speak, bindMute } from '../../to-mau/src/speech.js';
 import { sfx } from '../../pokemon/src/sfx.js';
 import { currentProfile, recordSession } from '../../pokemon/src/stats.js';
+import { mountKidFeatures } from '../../shared/kid-bar.js';
 
 const t = (key, fallback) => {
   const v = window.I18N?.t(key);
@@ -260,3 +261,5 @@ sayInstruction(t('thucung.help.home', 'Chọn 1 thú cưng của bé để bắt
 
 // Hook cho e2e test
 window.__thucung = { state, startCampaign, onMove };
+
+mountKidFeatures(); // thanh avatar bé + huy hiệu sao header + kiểm tra giới hạn phút/ngày (áp dụng cho mọi game, kể cả game giải trí thuần)

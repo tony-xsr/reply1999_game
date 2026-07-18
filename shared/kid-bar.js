@@ -80,8 +80,9 @@ async function fetchStars(kid) {
 
 /** Gắn huy hiệu "⭐ N" vào header của game (mọi game dùng chung <header
  * class="top">) — để bé/phụ huynh luôn thấy số sao hiện tại ngay trên đầu
- * màn hình, không chỉ ở thanh avatar góc dưới. Không tìm thấy header thì
- * bỏ qua êm, không phá game (vài game như pokemon dùng header khác). */
+ * màn hình, không chỉ ở thanh avatar góc dưới. Chạm vào huy hiệu sẽ mở màn
+ * "Hồ sơ của bé" (xem showProfileOverlay). Không tìm thấy header thì bỏ qua
+ * êm, không phá game (vài game như pokemon dùng header khác). */
 function mountHeaderStars() {
   const header = document.querySelector('header.top');
   if (!header || document.getElementById('kidHeaderStars')) return null;
@@ -93,9 +94,9 @@ function mountHeaderStars() {
   header.style.flexWrap = 'wrap';
   const badge = document.createElement('span');
   badge.id = 'kidHeaderStars';
-  badge.title = 'Số sao hiện có của bé';
+  badge.title = 'Chạm để xem hồ sơ của bé';
   badge.style.cssText = [
-    'display:inline-flex', 'align-items:center', 'flex-shrink:0',
+    'display:inline-flex', 'align-items:center', 'flex-shrink:0', 'cursor:pointer',
     'background:#fffaf2', 'border:2px solid #a8834a', 'border-radius:999px',
     'padding:4px 10px', 'font:800 13px -apple-system,Segoe UI,Roboto,Arial,sans-serif',
     'color:#241e2e', 'box-shadow:0 2px 6px rgba(90,60,20,.2)',
@@ -103,6 +104,38 @@ function mountHeaderStars() {
   badge.textContent = '⭐ …';
   header.appendChild(badge);
   return badge;
+}
+
+/* ===== Hồ sơ của bé (avatar + tên + sao + từ cần ôn) ===== */
+
+/** Màn thông tin hồ sơ bé — mở khi chạm huy hiệu sao trên header. Chỉ đọc
+ * dữ liệu đã có sẵn (không gọi thêm mạng), nên luôn mở được kể cả khi mất
+ * mạng (số sao sẽ hiện "đang cập nhật" thay vì con số). */
+function showProfileOverlay(kid, stars) {
+  if (document.getElementById('kidProfileOverlay')) return;
+  const weak = missCount();
+  const starsText = stars === null ? 'đang cập nhật…' : `${stars}`;
+  const ov = document.createElement('div');
+  ov.id = 'kidProfileOverlay';
+  ov.style.cssText = [
+    'position:fixed', 'inset:0', 'z-index:96', 'background:rgba(36,30,46,.85)',
+    'display:flex', 'align-items:center', 'justify-content:center', 'padding:20px',
+  ].join(';');
+  ov.innerHTML = `<div style="background:#fffaf2;border:3px solid #a8834a;border-radius:20px;padding:26px 22px;
+      max-width:320px;text-align:center;font:800 15px -apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#241e2e">
+    <div style="font-size:64px;line-height:1.2">${kid.avatar}</div>
+    <p style="font-size:19px;margin:6px 0 16px">${kid.name}</p>
+    <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:18px">
+      <span style="background:#fff;border:2px solid #a8834a;border-radius:999px;padding:6px 12px">⭐ ${starsText}</span>
+      ${weak > 0 ? `<span style="background:#fff;border:2px solid #c2410c;border-radius:999px;padding:6px 12px;color:#c2410c">🎯 ${weak} từ cần ôn</span>` : ''}
+    </div>
+    <a href="/chon-be/" style="display:block;color:#5d5370;font-size:13px;margin-bottom:16px;text-decoration:underline">Đổi bé khác</a>
+    <button id="kidProfileClose" style="background:linear-gradient(180deg,#34b566,#1e7a45);color:#fff;border:none;
+      border-radius:12px;padding:10px 26px;font-weight:900;font-size:14px;cursor:pointer">ĐÓNG</button>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.querySelector('#kidProfileClose').addEventListener('click', () => ov.remove());
+  ov.addEventListener('click', (e) => { if (e.target === ov) ov.remove(); });
 }
 
 /* ===== Toast quà ===== */
@@ -241,11 +274,16 @@ export function mountKidFeatures() {
     if (kid) {
       mountBar(kid);
       const headerBadge = mountHeaderStars();
+      let knownStars = null;
+      if (headerBadge) headerBadge.addEventListener('click', () => showProfileOverlay(kid, knownStars));
       fetchStars(kid).then((stars) => {
         if (stars === null) {
-          if (headerBadge) headerBadge.remove(); // mất mạng: bỏ hẳn huy hiệu, khỏi kẹt ở "⭐ …"
+          // Mất mạng: không biết số sao, nhưng vẫn giữ huy hiệu để bé chạm
+          // vào xem hồ sơ (avatar/tên/từ cần ôn) — chỉ đổi nhãn, không xoá.
+          if (headerBadge) headerBadge.textContent = '⭐ Hồ sơ';
           return;
         }
+        knownStars = stars;
         const bar = document.getElementById('kidBar');
         if (bar) bar.textContent = `${kid.avatar} ${kid.name} · ⭐${stars}`;
         if (headerBadge) headerBadge.textContent = `⭐ ${stars}`;
@@ -254,4 +292,43 @@ export function mountKidFeatures() {
     checkDailyLimit();
     checkParentGifts();
   } catch { /* không bao giờ làm hỏng game */ }
+}
+
+/** Gắn 1 ô hồ sơ bé vào trang chủ (index.html) — nơi không phải "game" nên
+ * không dùng mountKidFeatures() (vốn cần <header class="top">, gắn thanh
+ * avatar nổi, kiểm tra giới hạn giờ...). Nếu đã chọn bé: hiện avatar+tên,
+ * chạm vào mở màn hồ sơ (số sao/từ cần ôn) — số sao tự cập nhật khi tải
+ * xong. Nếu CHƯA chọn bé: hiện nút "Chọn bé" dẫn tới /chon-be/. Gọi 1 lần
+ * lúc trang chủ tải xong, truyền vào 1 phần tử container rỗng để gắn vào. */
+export function mountHomeProfileChip(container) {
+  if (!container) return;
+  try {
+    const chipCss = [
+      'display:inline-flex', 'align-items:center', 'gap:6px',
+      'background:#fffaf2', 'border:2px solid #a8834a', 'border-radius:999px',
+      'padding:6px 14px', 'font:800 13px -apple-system,Segoe UI,Roboto,Arial,sans-serif',
+      'color:#241e2e', 'text-decoration:none', 'cursor:pointer', 'box-shadow:0 2px 6px rgba(90,60,20,.2)',
+    ].join(';');
+    const kid = api.currentKidInfo();
+    if (!kid) {
+      const link = document.createElement('a');
+      link.href = '/chon-be/';
+      link.textContent = '👤 Chọn bé';
+      link.style.cssText = chipCss;
+      container.appendChild(link);
+      return;
+    }
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.style.cssText = chipCss;
+    chip.textContent = `${kid.avatar} ${kid.name} · ⭐ …`;
+    let knownStars = null;
+    chip.addEventListener('click', () => showProfileOverlay(kid, knownStars));
+    container.appendChild(chip);
+    fetchStars(kid).then((stars) => {
+      if (stars === null) { chip.textContent = `${kid.avatar} ${kid.name} · ⭐ Hồ sơ`; return; }
+      knownStars = stars;
+      chip.textContent = `${kid.avatar} ${kid.name} · ⭐${stars}`;
+    });
+  } catch { /* không bao giờ làm hỏng trang chủ */ }
 }

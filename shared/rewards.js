@@ -16,6 +16,39 @@ export function starsFromScore(score) {
   return Math.min(SESSION_STAR_CAP, s);
 }
 
+// Các game GIẢI TRÍ THUẦN TÚY — không có nội dung từ vựng/ngữ pháp/kiến thức
+// nào (đào vàng, đua xe, cờ dân gian, arcade cổ điển...). Thưởng sao theo
+// ĐIỂM SỐ như game học sẽ không hợp lý vì bé không học được gì khi chơi.
+// Theo yêu cầu phụ huynh (07/2026): các game này chỉ thưởng CỐ ĐỊNH 1 sao
+// mỗi lần chơi xong (không phụ thuộc điểm số/thắng thua). Danh sách khớp
+// đúng chuỗi `mode` mà mỗi game truyền vào recordSession().
+export const FLAT_REWARD_MODES = new Set([
+  'daovang', 'khunglong', 'dapvang', 'daohamvang', 'duonghham', 'consot',
+  'hangkim', 'kimcuong', 'vivuavang', 'xaytt', 'batvit', 'ransanmoi',
+  'xepgach', 'ghephinh', 'lathinh', 'thamhiem', 'chimnon', 'rongcon',
+  'calon', 'phidoinhi', 'gavutru', 'bongdo', 'nembanh', 'phaonuoc',
+  'vudieu', 'taydua', 'thucung', 'vodai', 'pokedaichien', 'vuonrau',
+  'behai', 'betimban', 'stylist', 'phongxinh', 'oanquan', 'cangua',
+  'coganh', 'cocaro', 'dientu', 'troxua',
+  // Pikachu Classic/Onet (pokemon/) truyền thẳng state.mode làm mode:
+  'classic', 'zen', 'daily', 'duel',
+]);
+// arcade-xua/ và van-dong-vui/ ghép thêm tên minigame con vào mode, vd
+// "arcadexua-whack" — so khớp theo tiền tố thay vì so khớp đúng chuỗi.
+const FLAT_REWARD_MODE_PREFIXES = ['arcadexua-', 'vandongvui-'];
+
+export const FLAT_REWARD_STARS = 1;
+
+/** Game này có phải giải trí thuần (không học) không? */
+export function isFlatRewardMode(mode) {
+  return FLAT_REWARD_MODES.has(mode) || FLAT_REWARD_MODE_PREFIXES.some((p) => mode.startsWith(p));
+}
+
+/** Sao kiếm được từ 1 ván: game giải trí thuần → cố định 1 sao; game có học → theo điểm. */
+export function starsForSession(mode, score) {
+  return isFlatRewardMode(mode) ? FLAT_REWARD_STARS : starsFromScore(score);
+}
+
 /**
  * Áp trần sao NGÀY: đã kiếm `earnedToday`, muốn cộng thêm `want` — trả về số
  * thật sự được cộng (0 nếu đã chạm trần).
