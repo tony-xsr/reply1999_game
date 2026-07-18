@@ -1,0 +1,8 @@
+{
+  "name": "nghe-doan-gia-dinh-nghe-nghiep",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/giadinh.test.js"
+  }
+}
