@@ -1,0 +1,8 @@
+{
+  "name": "nghe-doan-thoi-tiet-cam-xuc",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/thoitietcamxuc.test.js"
+  }
+}
