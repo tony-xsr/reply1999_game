@@ -1,0 +1,8 @@
+{
+  "name": "leo-thac-vuot-bay",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/leothac.test.js"
+  }
+}

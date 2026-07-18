@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#fff6e8">
+  <title>Leo Thác Vượt Bẫy</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <a class="round-btn" href="/thi-chung-chi-anh/" data-i18n-title="examhub.back" title="Thi Chứng Chỉ Anh">🏠</a>
+      <h1 data-i18n="leothac.title">🏞️ Leo Thác Vượt Bẫy</h1>
+      <div class="chip-stat hearts" id="heartsChip">❤️❤️❤️❤️❤️</div>
+      <div class="chip-stat" id="stepChip">0/10</div>
+      <div class="chip-stat score" id="scoreChip">0</div>
+      <button class="round-btn" id="btnHelp" data-i18n-title="pika.btn.help" title="Cách chơi">❓</button>
+      <button class="round-btn" id="btnSound" data-i18n-title="pika.btn.sound" title="Âm thanh">🔊</button>
+    </header>
+
+    <button class="listen-btn" id="btnListen">🔊 <span data-i18n="leothac.listen">Nghe lại</span></button>
+
+    <main class="stage">
+      <div class="ladder" id="ladder"></div>
+      <div class="paths" id="paths">
+        <button class="path-card" id="pathLeft" data-side="left">
+          <span class="path-emoji"></span>
+        </button>
+        <div class="climber" id="climber">🧗</div>
+        <button class="path-card" id="pathRight" data-side="right">
+          <span class="path-emoji"></span>
+        </button>
+      </div>
+      <div class="overlay" id="overlay">
+        <div class="ov-emoji" id="ovEmoji">🏞️</div>
+        <div class="ov-text" id="ovText" data-i18n="leothac.help">Máy đọc to 1 từ tiếng Anh — chạm đúng lối đi có hình vật đó để leo lên 1 bậc thác! Mỗi màn có 5 trái tim, chọn nhầm lối là sập bẫy mất 1 tim nhưng vẫn được thử lại — hết sạch tim mới thua. Leo hết 10 bậc là lên tới đỉnh!</div>
+        <button class="big-btn" id="btnPlay" data-i18n="ran.play">CHƠI ▶</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="/i18n.js"></script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
