@@ -1,0 +1,8 @@
+{
+  "name": "ban-chim-tu-vung",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/banchim.test.js"
+  }
+}
