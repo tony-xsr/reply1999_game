@@ -44,6 +44,25 @@ async function boot() {
   }
 }
 
+/** Đoán tên thiết bị + trình duyệt từ userAgent (chỉ để hiển thị cho bố mẹ). */
+function deviceInfo() {
+  const ua = navigator.userAgent;
+  let device = 'Máy tính';
+  if (/iPad/i.test(ua)) device = 'iPad';
+  else if (/iPhone/i.test(ua)) device = 'iPhone';
+  else if (/Android/i.test(ua)) device = /Mobile/i.test(ua) ? 'Điện thoại Android' : 'Tablet Android';
+  else if (/Macintosh/i.test(ua)) device = 'Máy Mac';
+  else if (/Windows/i.test(ua)) device = 'Máy Windows';
+  let browser = 'Trình duyệt';
+  if (/Edg\//.test(ua)) browser = 'Edge';
+  else if (/OPR\/|Opera/.test(ua)) browser = 'Opera';
+  else if (/Chrome\//.test(ua)) browser = 'Chrome';
+  else if (/Firefox\//.test(ua)) browser = 'Firefox';
+  else if (/Safari\//.test(ua)) browser = 'Safari';
+  if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) browser += ' (WebApp)';
+  return { device, browser };
+}
+
 function speakVi(text) {
   try {
     const u = new SpeechSynthesisUtterance(text);
@@ -64,6 +83,8 @@ async function pickKid(k) {
   }
   api.setCurrentKid(k.id, { name: k.name, avatar: k.avatar, settings: k.settings || {} });
   speakVi(`Chào ${k.name}! Chúc bé chơi vui nhé!`);
+  // Báo cho trang Phụ Huynh: bé vừa đăng nhập (thời gian + thiết bị + trình duyệt).
+  api.recordKidLogin(k.id, deviceInfo()).catch(() => {});
   boot();
   // Có quà bố mẹ gửi đang chờ không?
   try {
