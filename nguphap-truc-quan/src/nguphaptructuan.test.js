@@ -11,6 +11,8 @@ import {
   makeModalRound, makeModalGame, currentModalRound, answerModal,
   CONDITIONAL_SITUATIONS,
   makeConditionalRound, makeConditionalGame, currentConditionalRound, answerConditional,
+  SENTENCE_BUILDER_POOL,
+  makeSentenceBuilderRound, makeSentenceBuilderGame, currentSentenceBuilderRound, tapSentenceBuilderChip,
 } from './nguphaptructuan.js';
 
 let passed = 0;
