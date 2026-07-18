@@ -1,0 +1,8 @@
+{
+  "name": "nghe-doan-nha-bep-cong-nghe",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/nhabepcongnghe.test.js"
+  }
+}
