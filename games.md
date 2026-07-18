@@ -1307,7 +1307,7 @@ hãy đọc kỹ và ghi lại đầy đủ bên dưới để tôi có thể xe
 ## 6. Các quyết định ĐÃ CHỐT (từ trả lời của bạn)
 
 1. ~~Local-first hay server?~~ → **server + sync nhiều máy (bỏ local-first)**. Việc còn chờ: bạn tạo project Supabase (miễn phí, theo `server/README.md`) và điền URL + anon key vào `/server-config.js`.
-2. PIN cho bé → **KHÔNG CẦN** — bé chỉ chạm avatar là vào; bảo vệ nằm ở tài khoản phụ huynh.
+2. PIN cho bé → ~~KHÔNG CẦN~~ → **ĐỔI QUYẾT ĐỊNH (07/2026): CÓ — mã đăng nhập 6 số riêng từng bé** (gia đình 3 bé 3 máy: chọn avatar + nhập đúng mã mới vào; đã hiện thực — xem mục 12).
 3. Quà ảo gắn thưởng thật ngoài đời → **CHƯA TRẢ LỜI** (không chặn việc gì; trả lời lúc nào thêm mục "quy đổi quà thật" lúc đó).
 4. Giới hạn thời gian chơi/ngày → **CÓ** (chưa nói số phút — tạm mặc định 45 phút, chỉnh được trong trang Phụ Huynh).
 5. Phạm vi thưởng → **TẤT CẢ bài học/game đều có quà**; kết thúc mỗi chuỗi học 10–20 câu sẽ có quà (đã hiện thực: cứ mỗi 15 câu trả lời có 1 hộp quà nhỏ + sao từ điểm mỗi ván, trần 50 sao/ngày).
@@ -1384,3 +1384,1968 @@ Yêu cầu: "tiết kiệm dữ liệu lưu trên Supabase, hạn chế dùng t�
 **Kiểm thử**: E2E đợt 2 với server thật — batch/kidLedger/updateKid **4/4 PASS**; 2 mục chờ bạn dán `server/migrate-01-tiet-kiem.sql` (per-kid settings + tidy) — script tự phát hiện và báo "PEND". Suite local: **974 ✅, 0 ❌**.
 
 **Việc của bạn (30 giây)**: Supabase → SQL Editor → dán `server/migrate-01-tiet-kiem.sql` → Run, rồi báo tôi chạy lại E2E xác nhận 2 mục còn lại. (Ai cài mới từ `schema.sql` bản hiện tại thì không cần migrate.)
+
+## 12. MÃ ĐĂNG NHẬP 6 SỐ CHO TỪNG BÉ + TRANG CHỦ GIỚI THIỆU (07/2026)
+
+Bạn đổi quyết định câu 2: mỗi bé CÓ mã đăng nhập riêng (như mật khẩu 6 số) — kịch bản gia đình 3 bé, 3 máy riêng. Đã hiện thực:
+
+- **Đặt mã trong Trang Phụ Huynh** (thẻ ✏️ Hồ sơ của bé): ô "Mã đăng nhập 6 số" + nút 🎲 Tạo mã ngẫu nhiên; bỏ trống = bé chạm avatar là vào như cũ. Mã lưu trong `profiles.settings.code` (cần migrate-01). Cùng thẻ này cũng bổ sung **chọn màu yêu thích** của bé (8 màu).
+- **Bàn phím mã số ở /chon-be/** (thân thiện trẻ em): bé chạm avatar → hiện bàn phím số to 0–9 + dấu chấm tròn ●●●○○○, máy đọc "nhập mã số bí mật của bé nhé"; đúng → "Đúng rồi!" vào luôn; sai → thử lại, **sai 3 lần → "nhờ bố mẹ giúp nhé"** và đóng. Bé đang là hồ sơ hiện tại của máy thì không phải nhập lại (mã chỉ hỏi khi ĐỔI hồ sơ — đúng kịch bản mỗi bé 1 máy: nhập 1 lần là máy của mình).
+- **Lưu ý trung thực về mức bảo mật**: mã này chặn anh chị em nghịch hồ sơ của nhau — không phải lớp bảo mật chống người ngoài (người ngoài đã bị chặn từ tài khoản phụ huynh + RLS).
+- **Trang chủ giới thiệu cho khách từ Google**: thêm `<meta description>` + đổi `<title>` có từ khóa, và khối "🌟 Bé học mà chơi" ngay đầu trang: 4 gạch đầu dòng tính năng (800+ từ tiếng Anh giọng thật + ôn chỗ yếu; toán/vần/tư duy/trò dân gian; quản lý gia đình mỗi bé 1 hồ sơ + mã riêng; thưởng sao & góc phụ huynh) + 2 nút "🐰 Bé vào chơi" (/chon-be/) và "🔒 Góc quản lý phụ huynh" (/phu-huynh/) — i18n đủ 5 ngôn ngữ (8 khóa mới).
+- `sw.js` v69→**v70**; `npm test`: **974 ✅, 0 ❌**; smoke test các trang đều 200.
+
+**Nhắc lại việc đang chờ bạn**: dán `server/migrate-01-tiet-kiem.sql` (Supabase → SQL Editor → Run) — tính năng mã 6 số và giới hạn riêng từng bé đều lưu vào cột `profiles.settings` do migrate này tạo; chưa chạy thì nút Lưu sẽ báo đúng thông điệp hướng dẫn.
+
+## 13. TRANG GIỚI THIỆU ĐẦY ĐỦ `/gioi-thieu/` (07/2026)
+
+Yêu cầu: "cập nhật giới thiệu đầy đủ tính năng để user mới có thể hiểu — documents và tính năng". Đã xây trang tài liệu hoàn chỉnh (tiếng Việt, tĩnh, có meta SEO riêng):
+
+- **7 mục có mục lục**: (1) kho trò chơi theo 4 nhóm (Góc Tiếng Anh / Học & Chơi / Trò Chơi Xưa / Game Mini); (2) hệ thống học tiếng Anh — giọng thật 2 tốc độ, câu mẫu song ngữ, luật chọn-lại, sổ từ hay sai + Ôn chỗ yếu, hình ảnh chuẩn xác, 9 chủ đề; (3) gia đình & hồ sơ bé — mô hình Netflix trẻ em, mã 6 số, nhiều máy một tiến độ; (4) thưởng sao & tủ quà — luật kiếm/tiêu sao, quà 15 câu, vườn hoa, quà bố mẹ; (5) góc phụ huynh — dashboard/trực tiếp/báo cáo tuần/giới hạn giờ/quản lý thiết bị/dữ liệu; (6) offline & quyền riêng tư — nói thẳng "chơi offline được, lưu tiến độ cần mạng", dữ liệu tối thiểu, RLS, quyền xóa; (7) **FAQ 6 câu** (không tài khoản chơi được không, quên mã, 3 bé 1 máy, phí/quảng cáo, không thấy cộng sao, đổi máy).
+- Trang chủ: khối intro thêm nút thứ 3 "📖 Giới thiệu đầy đủ tính năng" (i18n 5 ngôn ngữ); `sw.js` v70→**v71** precache trang mới.
+- `npm test`: **974 ✅, 0 ❌**; smoke 200.
+
+## 14. CHART PHÂN TÍCH CÁC BÉ CHO PHỤ HUYNH (07/2026)
+
+Migrate-01 đã được bạn dán — E2E chốt hạ **7/7 PASS** (cài đặt riêng từng bé + dọn dẹp định kỳ đều sống trên server thật). Sau đó bổ sung bộ biểu đồ "dễ xem dễ nhìn" (thuần CSS/SVG, không thư viện):
+
+- **👀 So sánh các bé** (tự hiện khi nhà có ≥2 bé): bảng 1 dòng/bé — thanh phút chơi tuần (màu theo màu yêu thích của bé), số ngày học /7, ⭐ sao hiện có, 🎯 từ cần ôn (0 thì hiện 🎉). Tiết kiệm tài nguyên: dùng 3 truy vấn GỘP CẢ NHÀ (`familyStarBalances/familyWeakCounts/familySessionsSince`) thay vì N truy vấn/bé, throttle 30s chống gọi trùng.
+- **📊 Phân tích chi tiết từng bé**: (1) **biểu đồ tròn** "bé chơi gì nhiều nhất 30 ngày" — 3 nhóm Tiếng Anh / Học & tư duy / Game vui (hàm thuần `groupOfMode` phân loại theo mode); (2) **thanh ngang khung giờ** "bé hay chơi lúc nào" — 🌅 sáng/☀️ trưa/🌤 chiều/🌙 tối/😴 khuya (bố mẹ phát hiện bé chơi khuya!); (3) **cột tiến bộ 4 tuần** — tỷ lệ thắng từng tuần để thấy bé tiến bộ.
+- 5 hàm phân tích mới trong `shared/report.js` đều THUẦN + **5 unit test mới** (kể cả case khung giờ "khuya" vắt qua nửa đêm 22h–5h); `kidSessions` lấy thêm cột `mode` cho donut.
+- `sw.js` v71→**v72**; `npm test`: **979 ✅, 0 ❌**.
+
+## 15. ĐỘ TUỔI 4–12, SẮP XẾP LẠI TRANG CHỦ, ⭐/🎯 TRONG GAME, NHẬT KÝ ĐĂNG NHẬP BÉ (07/2026)
+
+Yêu cầu: mở rộng độ tuổi 4→12, nhắc "tiếng Anh nâng cao", chia trang chủ 2 mục Học/Giải trí, hiện sao+từ-yếu ngay trong game, thông báo đăng nhập của bé cho phụ huynh (thời gian/thiết bị/trình duyệt), xác nhận webapp vẫn cập nhật dữ liệu, và cơ chế lặp từ sai qua nhiều buổi học.
+
+- **Độ tuổi 4–12 + tiếng Anh nâng cao**: sửa mọi chỗ ghi "4–8 tuổi" → "4–12 tuổi" (trang chủ, `gioi-thieu/`, i18n 5 ngôn ngữ). `gioi-thieu/` mục 1 bổ sung ghi rõ game **`tieng-anh/` (Tiếng Anh Nâng Cao)** dành cho bé lớn 8–12 tuổi — game này đã có sẵn trong kho, trước đây chưa nhắc trong tài liệu giới thiệu.
+- **Trang chủ chia 3 khu rõ ràng** (không chỉ Học/Giải trí — thêm khu Gia đình cho đúng luồng dùng): 👨‍👩‍👧 **Góc Gia Đình** (Bé Nào Đang Chơi?/Tủ Quà/Trang Phụ Huynh) → 📚 **GÓC HỌC TẬP** (Góc Tiếng Anh, Tiếng Anh Nâng Cao, Học & Chơi, Học Vui, Tư Duy, Khoa Học, Kỹ Năng Sống, Văn Hóa VN) → 🎮 **GÓC GIẢI TRÍ** (Game Mini, Pikachu, Trò Chơi Xưa, Điện Tử Xưa). Header tiêu đề mục (`.sec`) tràn hết chiều rộng grid, có viền gạch ngang phân cách — dễ quét mắt.
+- **⭐ Sao + 🎯 Từ cần ôn hiện NGAY trong game** (`shared/kid-bar.js`): thanh avatar giờ hiện thêm số sao hiện có (`🐰 Bin · ⭐23`, cache 5 phút đỡ tốn request); nếu sổ từ hay sai còn > 0, thêm huy hiệu riêng "🎯 N từ cần ôn" phía trên thanh avatar — **chạm vào là nhảy thẳng đến màn Ôn Tập Tổng Hợp**. Huy hiệu đọc từ sổ cục bộ (misses.js) nên không tốn thêm request mạng.
+- **🔔 Thông báo đăng nhập của bé** (bảng mới `kid_logins`, `server/migrate-02-kid-logins.sql`): mỗi lần bé chạm avatar ở `/chon-be/` thành công, hệ thống tự đoán tên máy + trình duyệt từ userAgent (iPad/iPhone/Android/Mac/Windows, Chrome/Safari/Firefox/Edge/Opera, kèm nhãn "(WebApp)" nếu đang chạy dạng cài-vào-màn-hình-chính) và ghi 1 dòng. Trang Phụ Huynh có thẻ **"🔔 Bé đăng nhập gần đây"** liệt kê 15 lần gần nhất: *"🐨 Bin — 17/07 14:32 — 📱 iPad · Safari"*. Cùng gộp vào `tidy_my_family()` (xóa log cũ hơn 30 ngày).
+- **Xác nhận: webapp (cài vào màn hình chính) vẫn cập nhật dữ liệu bình thường** — mọi request tới Supabase đều qua mạng thật (network-only), không đi qua service worker cache; đã ghi rõ vào FAQ mới của `gioi-thieu/`.
+- **Cơ chế lặp từ sai — giải thích rõ trong FAQ mới**: đúng như bạn suy đoán — sai 1 từ thì +1 điểm "cần ôn", từ đó **lặp lại qua nhiều buổi học** (xuất hiện trong 🎯 Ôn chỗ yếu + huy hiệu trong game) cho đến khi bé trả lời đúng đủ nhiều lần để "sạch sổ" (mỗi lần đúng ngay lần đầu trừ 1 điểm) — đây chính là kỹ thuật ôn tập ngắt quãng (spaced repetition) đã có sẵn từ trước, nay được giải thích tường minh + hiện trực quan hơn qua huy hiệu.
+- E2E dot 3 với server thật: **1/1 PASS** phần dọn dẹp; `kid_logins` báo đúng "PEND — cần dán migrate-02" (graceful, không lỗi game khi chưa chạy migrate). `sw.js` v72→**v73**; `npm test`: **979 ✅, 0 ❌**; smoke test mọi trang 200.
+
+**Việc của bạn (30 giây)**: Supabase → SQL Editor → dán `server/migrate-02-kid-logins.sql` → Run, rồi báo tôi chạy lại E2E xác nhận nốt tính năng nhật ký đăng nhập.
+
+## 16. LÀM LẠI LƯỚI GAME TRÊN TRANG CHỦ — GỌN HƠN, NHIỀU CỘT HƠN TRÊN ĐIỆN THOẠI (07/2026)
+
+Yêu cầu: trên iPhone lưới chỉ có 1 cột nên phải kéo rất lâu mới thấy game muốn chơi; khối giới thiệu nên thu gọn có nút mở rộng; mỗi thẻ game nên gọn/nhỏ hơn, đưa phần mô tả dài vào hộp thoại (dialog) mở bằng nút ℹ️ cạnh nút Chơi thay vì hiển thị hết chữ trên thẻ.
+
+- **Lưới game responsive theo cột cố định thay vì auto-fill** (`index.html`): **điện thoại luôn có ít nhất 2 cột** (`repeat(2,1fr)` mặc định) → **≥520px: 3 cột** → **≥760px (tablet dọc): 4 cột** → **≥980px (tablet ngang/desktop): 5 cột**. Trước đây dùng `auto-fill, minmax(280px,1fr)` khiến điện thoại (≤480px) chỉ xếp được đúng 1 cột/hàng — đây là nguyên nhân chính gây "kéo rất lâu mới tìm thấy game" bạn phản ánh.
+- **Thẻ game thu gọn đáng kể**: bỏ hẳn đoạn mô tả dài (`.gc-desc{display:none}`) và chip phụ (chỉ giữ 1 chip đầu tiên, `.gc-meta .chip:nth-child(n+2){display:none}`) khỏi mặt thẻ; ảnh minh họa/emoji thu nhỏ 130px→64px cao; tiêu đề giới hạn 2 dòng (`-webkit-line-clamp:2`); padding/gap giảm ~40%. Kết quả: mỗi thẻ chỉ còn icon + tên game + 1 chip + hàng nút — lướt 1 màn hình iPhone thấy được nhiều game hơn hẳn.
+- **Nút ℹ️ Thông tin cạnh nút Chơi**: thẻ game đổi từ `<a href>` bọc toàn bộ thành `<div data-href>` — chạm vào thân thẻ vẫn vào thẳng game (giữ trải nghiệm quen thuộc), còn nút tròn **ℹ️** nhỏ mở **modal thông tin đầy đủ** (icon lớn, tên game, mô tả gốc không cắt bớt, đủ tất cả chip, nút "Chơi ▶" + "Đóng"). Modal đóng bằng nút Đóng / chạm nền / phím Esc.
+- **Khối giới thiệu đầu trang thu gọn**: chỉ còn tiêu đề + 1 câu mô tả + nút **"Xem thêm tính năng ▼"** hiện mặc định; bấm mới xổ ra danh sách 4 tính năng chi tiết (nút đổi thành "Thu gọn ▲"). 3 nút hành động (Bé vào chơi / Góc phụ huynh / Giới thiệu đầy đủ) vẫn hiện luôn, không bị ẩn — giữ lối vào nhanh cho người đã biết web.
+- **Sửa 1 bug có sẵn từ trước nhân tiện phát hiện**: khóa i18n `hub.play` được 3 thẻ Góc Gia Đình dùng từ đợt trước nhưng **chưa từng được định nghĩa** trong `i18n.js` (chỉ có `hub.cta.play`) — nghĩa là các thẻ đó lẽ ra hiện chữ thô `"hub.play"` thay vì "Chơi ▶". Đã bổ sung khóa còn thiếu + thêm `hub.close` cho nút Đóng của modal.
+- Kỹ thuật: script Python `re.sub` với lookahead xử lý đồng loạt cả 15 thẻ (đổi `<a class="game-card" href>` → `<div data-href>`, chèn nút ℹ️ trước nút Chơi) — xác minh bằng assert đúng 15/15 thẻ trước khi ghi file, không sửa tay từng thẻ để tránh sai sót rải rác.
+- `npm test` toàn bộ vẫn: **979 ✅, 0 ❌** (thay đổi thuần HTML/CSS/JS phía client, không đụng logic game); smoke test trang chủ 200, không id trùng lặp, đủ 15/15 thẻ + nút ℹ️ + `data-href`.
+
+**Lưu ý cho lượt sau nếu cần tinh chỉnh thêm**: không có công cụ chụp màn hình trong phiên này nên bố cục được tính toán bằng CSS Grid theo breakpoint chuẩn (không kiểm chứng trực quan) — nếu mở trên máy thật thấy cột/kích thước chưa vừa ý (chữ quá nhỏ, thẻ quá chật...), báo cụ thể thiết bị/kích thước màn hình để chỉnh đúng breakpoint.
+
+## 17. GÓC GIA ĐÌNH THU GỌN + SỬA NÚT BACK SAI MENU (07/2026)
+
+Yêu cầu: (a) khu "Góc Gia Đình" trên trang chủ ít dùng nhưng chiếm quá nhiều chỗ — nên thu gọn/mở rộng được, mặc định thu gọn; (b) nhiều game xuất hiện ở CẢ 2 menu (ví dụ vừa có trong `game-mini/` vừa có trong `goc-tieng-anh/`) — nút "◀" trong game lại hard-code về 1 menu cố định, nên vào từ menu này nhưng bấm back lại nhảy sang menu kia.
+
+- **Xác nhận bug back-button bằng cách rà soát chéo toàn bộ hub**: viết script đối chiếu `href` giữa `index.html`, `game-mini/index.html`, `goc-tieng-anh/index.html`... — phát hiện **16 game** bị liệt kê ở cả `game-mini/` lẫn `goc-tieng-anh/` (`nghe-doan-tieng-anh`, `be-hai-trai-cay`, `be-lam-stylist`, `phong-xinh`, `xep-chu-tieng-anh`, `hoc-vui`, `tieng-anh`, và 9 game Nghe & Đoán còn lại), trong khi nút "◀ Chọn trò khác" của TỪNG game đó lại `href` cứng về đúng 1 trong 2 menu — ví dụ `nghe-doan-tieng-anh` hard-code về `/goc-tieng-anh/` dù cũng nằm trong `/game-mini/`; ngược lại `be-hai-trai-cay`/`be-lam-stylist`/`phong-xinh`/`xep-chu-tieng-anh` hard-code về `/game-mini/` dù cũng nằm trong `/goc-tieng-anh/`.
+- **Fix bằng `document.referrer`, không sửa tay 45 file game**: thêm 1 khối script vào cuối `i18n.js` (đã nhúng ở MỌI trang) — khi trang tải xong, tìm link `a[data-i18n-title="hocvui.back"]` (marker riêng của nút back trong TỪNG game, khác với nút 🏠 `class="back"` của các trang menu luôn về "/"), nếu `document.referrer` cùng gốc site và khác trang hiện tại thì **ghi đè href bằng đúng đường dẫn referrer** — tức bé vào từ menu nào, bấm back về đúng menu đó. Không có referrer hợp lệ (vào thẳng/bookmark/chia sẻ link) thì giữ nguyên href mặc định viết sẵn trong HTML (không đổi hành vi cũ). Áp dụng đồng loạt cho cả 45 game dùng chung marker này chỉ bằng 1 chỗ sửa.
+- **Góc Gia Đình thu gọn**: tiêu đề mục đổi thành nút bấm được (`role="button"`, có mũi tên `▶` xoay 90° khi mở, hỗ trợ phím Enter/Space), 3 thẻ (Bé Nào Đang Chơi?/Tủ Quà/Trang Phụ Huynh) bọc trong `<div class="fam-cards">` ẩn mặc định (`display:none`) — bấm tiêu đề mới hiện ra, dùng chung breakpoint cột với lưới chính (2→3→4→5 cột theo cùng media query) nên không lệch giao diện khi mở.
+- `sw.js` v73→**v74**; `npm test` toàn bộ: **979 ✅, 0 ❌** (thay đổi HTML/CSS/JS thuần phía client); smoke test trang chủ + 2 game bị ảnh hưởng đều 200, không id trùng lặp.
+
+**Lưu ý**: cũng như đợt trước, không có công cụ trình duyệt thật để bấm thử back-button qua nhiều trang trong phiên này — logic đã kiểm tra kỹ bằng tay (rà soát toàn bộ 45 file + xác nhận cú pháp), nhưng nếu sau khi bạn thử trên máy thật thấy back vẫn sai ở trường hợp cụ thể nào, báo lại đường link bạn đã đi qua để tôi debug đúng case đó.
+
+## Bổ sung thêm game tiếng Anh ôn tập
+
+> Ý tưởng của bạn (07/2026): mượn khung các game vui/game xưa đã có (bắn cung,
+> bắn vịt, ném lon...) nhưng đổi mục tiêu thành TỪ VỰNG tiếng Anh — máy đọc yêu
+> cầu ("bé hãy bắn trúng quả Apple"), bé bắn/ném trúng bia đúng thì máy đọc to
+> từ đó + khen; trúng bia sai thì gợi ý chọn lại (đúng luật retry đã có ở 9 game
+> Nghe & Đoán). Mục tiêu: vừa chơi vui vừa ôn từ, không phải lúc nào cũng ngồi
+> yên bấm 4 lựa chọn như "Nghe & Đoán".
+
+### Vì sao đáng làm
+
+Bộ 9 game "Nghe & Đoán" đều dùng chung 1 khuôn tương tác: nghe → chạm 1 trong 4
+hình. Rất hiệu quả để HỌC từ mới, nhưng lặp lại nhiều sẽ nhàm với bé đã thuộc
+kha khá. Gắn từ vựng vào các CƠ CHẾ VẬN ĐỘNG khác nhau (bắn, ném, kéo, né) tạo
+cảm giác mới trong khi vẫn ôn đúng những từ đã học — đặc biệt hợp để ôn
+**sổ 🎯 Ôn chỗ yếu** theo cách vui hơn là làm lại y hệt bài cũ.
+
+### 6 ý tưởng cụ thể — ưu tiên MƯỢN khung game vật lý đã có sẵn thay vì viết mới
+
+Dự án đã có sẵn nhiều engine "bắn/ném/nhắm mục tiêu" — việc chính là RE-SKIN
+(đổi hình ảnh mục tiêu + gắn giọng đọc + luật retry), không phải viết vật lý
+game từ đầu. Vì vậy khối lượng làm thực tế nhỏ hơn nhiều so với 1 game hoàn
+toàn mới.
+
+1. **🏹 Bắn Cung Từ Vựng** (ý tưởng gốc của bạn) — mượn khung kéo-thả-bắn kiểu
+   `phao-nuoc-giu-dao` (đã có cơ chế nhắm + bắn). 4-5 bia treo trên bãi, mỗi bia
+   là 1 emoji/ảnh từ vựng (trái cây, con vật...). Máy đọc: *"Bé hãy bắn trúng
+   quả Apple!"* — bé kéo cung nhắm đúng bia. Trúng đúng: mũi tên ghim vào bia +
+   máy đọc *"Apple — quả táo! Bé giỏi quá!"* + hiệu ứng pháo hoa. Trúng sai:
+   bia rung + máy đọc gợi ý *"Chưa đúng, Apple là quả táo, bé bắn lại nhé!"`
+   (im lặng luật retry: bia đúng còn nguyên, bé bắn lại không giới hạn số bia
+   sai như hiện tại, hoặc giới hạn 2 lần rồi lộ đáp án — tùy chỉnh sau).
+2. **🦆 Bắn Vịt Từ Vựng** — re-skin trực tiếp `bat-vit/` (đã có súng ngắm +
+   bắn): thay hình con vịt trơn bằng vịt đội mũ có icon từ vựng, hoặc đơn giản
+   hơn là đàn vịt bơi qua mang theo bảng chữ/hình, bắn đúng con mang đúng từ.
+3. **🎯 Ném Lon Từ Vựng** — mượn cơ chế "ném lon" trong `tro-xua/` (đã có sẵn
+   trong Trò Chơi Xưa): mỗi lon dán nhãn 1 từ, ném đổ đúng lon máy yêu cầu.
+4. **🎣 Câu Cá Từ Vựng** — mượn khung `ca-lon-bien-xanh/` (cá bơi qua lại):
+   đàn cá mang theo thẻ từ vựng bơi ngang màn hình, bé chạm/kéo cần câu đúng
+   lúc con cá mang đúng từ bơi qua.
+5. **🧱 Đập Gạch Từ Vựng** — mượn khung `xep-gach/` hoặc làm biến thể mới nhẹ:
+   mỗi viên gạch có 1 từ, bóng nảy trúng gạch nào đọc to từ đó — chế độ
+   "nhiệm vụ" yêu cầu đập đúng gạch máy gọi tên trước, đập nhầm gạch khác thì
+   bị trừ điểm nhẹ (không dừng game, giữ nhịp độ nhanh của thể loại này).
+6. **🚗 Đua Xe Chọn Làn Từ Vựng** — mượn khung `tay-dua-nhi/`: đường đua chia
+   3 làn, mỗi làn có 1 biển từ vựng, máy đọc từ cần tìm, bé lái xe tạt đúng
+   làn để "thu thập" đúng từ, tạt nhầm làn thì xe chậm lại (nhẹ nhàng, không
+   phạt nặng vì đây là ôn tập không phải thi đấu).
+
+### Thiết kế chung cho cả nhóm (để nhất quán với 9 game Nghe & Đoán đã có)
+
+- **Nguồn từ vựng dùng chung**: mỗi game trên KHÔNG cần ngân hàng từ riêng —
+  đọc trực tiếp từ `WORD_BANK` của 9 game hiện có (import y như `nghe-doan-on-tap`
+  đang làm) hoặc ưu tiên đọc từ **sổ 🎯 Ôn chỗ yếu** của bé (qua `missedWords()`)
+  làm "nhiệm vụ" — biến việc ôn từ khó thành 1 màn chơi vui thay vì lặp lại
+  đúng giao diện "nghe rồi chạm 4 hình".
+- **Giữ nguyên luật thưởng đã có**: đúng luật retry (sai lần 1 gợi ý, sai lần 2
+  lộ đáp án), `recordMiss/recordHit` để sổ từ yếu vẫn cập nhật đúng dù chơi ở
+  game bắn/ném thay vì game chạm-hình, `answeredOne()` để vẫn tính vào quà mỗi
+  15 câu, và `recordSessionServer` để vẫn cộng sao như mọi game khác.
+- **Không thay thế 9 game Nghe & Đoán** — đây là lớp ÔN TẬP THỨ 2 mang tính
+  giải trí nhiều hơn, dùng SAU khi bé đã học từ ở Nghe & Đoán, không phải nơi
+  dạy từ mới đầu tiên (nên không cần giải thích ngữ pháp/câu ví dụ dài dòng
+  như Nghe & Đoán — chỉ cần từ đơn + hình + phát âm, giữ nhịp độ game nhanh).
+
+### Đề xuất thứ tự làm (nếu bạn duyệt)
+
+1. Làm thử **🏹 Bắn Cung Từ Vựng** trước (ý tưởng bạn đưa ra đầu tiên, cơ chế
+   kéo-bắn rõ ràng, dễ mượn khung `phao-nuoc-giu-dao`) — 1 game hoàn chỉnh để
+   xác nhận công thức "re-skin + gắn từ vựng + luật retry" chạy tốt.
+2. Nếu ổn, nhân rộng công thức đó sang 2-3 game còn lại (Bắn Vịt, Ném Lon,
+   Câu Cá) — mỗi game sau sẽ nhanh hơn nhiều vì đã có khuôn.
+3. Gộp tất cả game "ôn tập vui" này vào 1 khu mới trên trang chủ (ví dụ
+   "🎪 Ôn Tập Vui" cạnh Góc Tiếng Anh) để phân biệt rõ với 9 game Nghe & Đoán
+   gốc.
+
+**Việc của bạn**: xác nhận có muốn bắt đầu làm **🏹 Bắn Cung Từ Vựng** ngay
+không, hay để tôi trình bày thêm phương án UI/luật chơi cụ thể hơn trước khi
+code.
+
+## 18. GAME MỚI: 🏹 BẮN CUNG TỪ VỰNG — "MƯỢN KHUNG" ĐÚNG NGHĨA ĐEN (07/2026)
+
+Bạn xác nhận: mượn khung có sẵn rồi làm. Thay vì viết engine bắn cung riêng
+(và phải test lại luật retry/thưởng/ngân hàng từ từ đầu), quyết định **mượn
+KHUNG LOGIC đã kiểm thử kỹ nhất** trong dự án — chính module
+`nghe-doan-on-tap/src/ontap.js` (ngân hàng gộp cả 9 game + chủ đề 🎯 Ôn chỗ
+yếu, luật chọn-lại, trộn từ đơn/câu) — và CHỈ viết mới phần DA (giao diện)
+kiểu bắn cung. Không có dòng logic mới nào để test riêng vì `chooseOption`,
+`pickRound`, `makeGame`... đều là y hệt hàm đã có 26 unit test của `ontap.js`.
+
+- **`ban-cung-tu-vung/`** (mới hoàn toàn, KHÔNG có file logic riêng):
+  `src/app.js` `import` thẳng `TOPICS/makeGame/currentRound/chooseOption/promptFor/rateFor`
+  từ `../../nghe-doan-on-tap/src/ontap.js` và `recordMiss/recordHit/missCount`
+  từ `misses.js` cùng thư mục — tái sử dụng 100%, bao gồm cả bộ lọc 9 game gốc
+  + chủ đề "🎯 Ôn chỗ yếu" đã có sẵn trong `ontap.js`.
+- **Lớp da mới — sân bắn cung**: 4 bia hình tròn kiểu bia bắn cung thật (vòng
+  đỏ-trắng đồng tâm bằng CSS `repeating-radial-gradient`, có "cọc" cắm dưới
+  đất) thay cho lưới nút phẳng; cây cung 🏹 cố định dưới đáy sân; bé chạm bia
+  đúng → **mũi tên bay từ cung tới bia** (tạo 1 phần tử `.arrow`, đổi
+  `left/top` qua CSS transition ~300ms, góc bay tính bằng `atan2` theo đúng
+  hướng bia) — RỒI MỚI áp dụng luật đúng/sai y hệt 9 game Nghe & Đoán (đúng
+  ngay → khen + giải nghĩa; sai lần 1 → gợi ý bắn lại; sai lần 2 → lộ đáp án).
+- **Vẫn nối đủ hạ tầng chung**: `mountKidFeatures()` (thanh avatar + giới hạn
+  giờ chơi), `answeredOne()` (quà mỗi 15 câu), `recordSession({mode:'bancungtuvung'})`
+  (cộng sao qua server), `recordMiss/recordHit` (sổ từ yếu) — không thiếu tính
+  năng nào so với game "chạm hình" gốc, chỉ đổi vỏ ngoài.
+- Đăng ký: thẻ mới lên đầu `goc-tieng-anh/` (17 game tiếng Anh, chip "Mới"
+  chuyển từ Ôn Tập Tổng Hợp sang Bắn Cung vì là bổ sung mới nhất), 5 khóa i18n
+  (`bancung.title/start/play/win/help`), `sw.js` v74→**v75** (+3 file precache).
+- **Xác minh**: không cần unit test mới (logic mượn nguyên, đã xanh 26/26 ở
+  `ontap.test.js`); `node --check` cú pháp sạch; `npm test` toàn bộ vẫn
+  **979 ✅, 0 ❌**; smoke test 4/4 route mới + hub đăng ký đúng đều 200.
+
+**Còn để ngỏ (đợt sau, đã duyệt "tiếp tục với game khác")**: nhân rộng đúng
+công thức "mượn khung ontap.js + da mới" sang 🦆 Bắn Vịt Từ Vựng (re-skin
+`bat-vit/`), 🎯 Ném Lon Từ Vựng, 🎣 Câu Cá Từ Vựng — mỗi game sau sẽ nhanh hơn
+Bắn Cung vì công thức đã chạy tốt lần đầu. Cân nhắc gộp nhóm "Ôn Tập Vui" này
+thành 1 khu riêng trên trang chủ khi đã có ≥3 game.
+
+## 19. GAME MỚI THỨ 2: 🎯 NÉM LON TỪ VỰNG (07/2026)
+
+Tiếp tục đúng công thức đã xác nhận ở Bắn Cung — nhân rộng nhanh hơn nhiều
+lần vì công thức "mượn khung `ontap.js` + da mới" đã chạy tốt:
+
+- **`nem-lon-tu-vung/`** — cấu trúc GIỐNG HỆT `ban-cung-tu-vung/` (cùng import
+  `TOPICS/makeGame/currentRound/chooseOption/promptFor/rateFor` từ
+  `ontap.js`, cùng `recordMiss/recordHit/missCount` từ `misses.js`, cùng luật
+  chọn-lại/thưởng/giới hạn giờ) — CHỈ khác lớp da: 4 lon kim loại (gradient
+  bạc) xếp trên kệ gỗ ngang thay vì bia tròn; người ném bóng 🤾 cố định dưới
+  đáy thay vì cây cung; bóng 🥎 bay thẳng (không cần tính góc xoay như mũi
+  tên) từ người ném tới lon bé chạm. Lon đúng "đổ" bằng animation CSS
+  (`translateY + rotate + opacity:0` khi có class `.correct` — tận dụng đúng
+  cơ chế `.correct/.wrong/.dim` đã có, không cần logic JS mới); lon sai chỉ
+  lắc nhẹ (`@keyframes can-wobble`).
+- **Thời gian làm ngắn hơn hẳn Bắn Cung**: sao chép cấu trúc file gần như
+  nguyên vẹn, chỉ đổi tên biến/class (`bow→thrower`, `arrow→ball`) và nội
+  dung lời thoại (bắn cung→ném lon, bia→lon) — đúng như dự đoán "mỗi game sau
+  sẽ nhanh hơn vì đã có khuôn" trong mục 18.
+- Đăng ký: thẻ mới lên đầu `goc-tieng-anh/` (18 game tiếng Anh), 5 khóa i18n
+  (`nemlon.title/start/play/win/help`), `sw.js` v75→**v76** (+3 file precache).
+- `npm test` toàn bộ vẫn: **979 ✅, 0 ❌** (không có logic mới); smoke test cả
+  2 game "Ôn Tập Vui" (Bắn Cung + Ném Lon) + hub đăng ký đúng đều 200.
+
+**Còn để ngỏ**: 🎣 Câu Cá Từ Vựng và 🚗 Đua Xe Chọn Làn Từ Vựng theo đúng công
+thức này; khi đủ 3-4 game, cân nhắc gộp thành khu "🎪 Ôn Tập Vui" riêng trên
+trang chủ thay vì chỉ nằm trong `goc-tieng-anh/`.
+
+## 20. GAME MỚI THỨ 3: 🎣 CÂU CÁ TỪ VỰNG — ĐỦ 3 GAME "ÔN TẬP VUI" (07/2026)
+
+Hoàn thành game thứ 3 theo đúng công thức, khép lại nhóm "khởi động" trước
+khi cân nhắc gộp thành khu riêng trên trang chủ:
+
+- **`cau-ca-tu-vung/`** — cấu trúc GIỐNG HỆT 2 game trước (cùng import từ
+  `ontap.js`/`misses.js`, cùng luật chọn-lại/thưởng/giới hạn giờ) — lớp da
+  lần này: ao nước với 4 con cá bơi lững lờ (`@keyframes fish-bob`, mỗi con
+  lệch pha bằng `animation-delay` cho tự nhiên) thay vì bia/lon; cần câu 🎣 cố
+  định trên ĐỈNH sân (khác 2 game trước đặt ở đáy) thay vì cung/người ném;
+  lưỡi câu 🪝 thả THẲNG XUỐNG đúng cá bé chạm (kèm sợi dây câu vẽ bằng
+  `::before`). Câu trúng: cá bay ngược LÊN khỏi mặt nước
+  (`translateY(-140px) scale(0.7)` + `opacity:0`, dừng hẳn animation bơi) —
+  hướng chuyển động NGƯỢC với 2 game trước (lon rơi xuống, cá bay lên) để mỗi
+  game có cảm giác vật lý khác nhau dù dùng chung 1 kỹ thuật.
+- **Xác nhận công thức tái sử dụng ổn định qua 3 lần liên tiếp**: cả 3 file
+  `app.js` (Bắn Cung/Ném Lon/Câu Cá) chỉ khác nhau ở tên biến DOM
+  (`bow/thrower/rod`), tên hàm animation (`shootArrowTo/throwBallTo/castHookTo`)
+  và nội dung lời thoại — phần lõi (`onPick`, `buildFilterRow`, `endRound`,
+  `startRound`, luật chọn-lại) copy nguyên vẹn không sửa. Điều này xác nhận
+  "khung" đã đủ vững để nhân rộng tiếp cho các game sau mà không cần thiết kế
+  lại từ đầu.
+- Đăng ký: thẻ mới lên đầu `goc-tieng-anh/` (19 game tiếng Anh), 5 khóa i18n
+  (`cauca.title/start/play/win/help`), `sw.js` v76→**v77** (+3 file precache).
+- `npm test` toàn bộ vẫn: **979 ✅, 0 ❌**; smoke test cả 3 game "Ôn Tập Vui"
+  (Bắn Cung/Ném Lon/Câu Cá) + hub đăng ký đúng 3/3 đều 200.
+
+### 📊 Tổng kết nhóm "Ôn Tập Vui" (3 game đầu tiên)
+
+| Game | Lớp da | Hướng chuyển động khi trúng |
+|---|---|---|
+| 🏹 Bắn Cung Từ Vựng | Bia tròn + cung dưới đáy | Mũi tên bay ngang theo góc bia |
+| 🎯 Ném Lon Từ Vựng | Lon kim loại trên kệ + người ném dưới đáy | Lon đổ xuống + xoay |
+| 🎣 Câu Cá Từ Vựng | Cá bơi trong ao + cần câu trên đỉnh | Cá bay ngược lên khỏi mặt nước |
+
+Cả 3 dùng chung 100% logic `ontap.js` (đã có 26 test), không có bug logic
+nào phát sinh vì không viết logic mới.
+
+**Còn để ngỏ**: đã đủ 3 game — có thể gộp thành khu "🎪 Ôn Tập Vui" riêng trên
+trang chủ (tách khỏi danh sách dài của `goc-tieng-anh/`) nếu bạn muốn; hoặc
+tiếp tục thêm 🚗 Đua Xe Chọn Làn Từ Vựng theo đúng công thức nếu muốn nhóm này
+dày hơn nữa trước khi tách khu riêng.
+
+## 21. THU GỌN HÀNG LỌC CHỦ ĐỀ + SỬA HEADER MÉO MÓ TOÀN REPO (07/2026)
+
+Rà lại toàn bộ đề xuất trước đó: chỉ còn 1 việc thật sự chưa xong là
+`server/migrate-02-kid-logins.sql` (kiểm tra lại bằng script E2E — vẫn báo
+`PGRST205`, tức bạn chưa dán script này vào Supabase SQL Editor; cần bạn tự
+chạy, mình không chạy hộ được). Còn `bancung.title` hiện chữ thô trong ảnh
+chụp màn hình: đã kiểm tra lại `i18n.js` (đủ 5 ngôn ngữ), `index.html` (đúng
+`data-i18n`), và parse thử cả file bằng Node — không có lỗi. Nhiều khả năng
+máy bạn đang giữ bản `i18n.js` CŨ do service worker cache (trước khi khoá này
+được thêm) — bấm tải lại trang 1-2 lần (hoặc xoá cache/gỡ cài site) sẽ hết;
+`sw.js` đã tăng version để buộc tải bản mới.
+
+- **`shared/filter-toggle.js`** (mới) — gói hàng nút lọc chủ đề (`filter-row`,
+  vốn LUÔN hiện sẵn, chiếm nhiều chỗ dọc màn hình trên điện thoại) vào sau 1
+  nút bấm "🔽 Lọc chủ đề" — bấm vào mới xổ ra, chọn xong tự đóng lại
+  (`setTimeout` 150ms sau khi bấm 1 nút lọc). Dùng `MutationObserver` theo
+  dõi `filter-row` để tự cập nhật nhãn chủ đề đang chọn lên nút, nên
+  KHÔNG cần sửa `buildFilterRow()` của bất kỳ game nào — chỉ thêm 1 dòng gọi
+  `initFilterToggle()` mỗi game.
+- Áp dụng cho toàn bộ 13 game dùng `filter-row`: 9 game "Nghe & Đoán", và
+  3 game "Ôn Tập Vui" (Bắn Cung/Ném Lon/Câu Cá) — mỗi game: thêm nút toggle
+  vào `index.html`, thêm CSS ẩn/hiện vào `style.css`, gọi
+  `initFilterToggle()` trong `app.js`.
+- **Sửa header méo icon khi tiêu đề dài**: nguyên nhân là `<h1>` mặc định có
+  `flex-shrink: 1` giống các nút tròn bên cạnh, nên tiêu đề dài sẽ giành chỗ
+  làm nút tròn (44×44) bị bóp nhỏ méo hình. Sửa 1 lần cho TOÀN REPO bằng
+  script quét toàn bộ `style.css` (không chỉ 13 game trong ảnh chụp): thêm
+  `min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space:
+  nowrap;` vào `.top h1` (tiêu đề dài sẽ bị cắt "…" thay vì đẩy méo nút icon),
+  và `flex-shrink: 0;` vào mọi nút tròn 44×44 (để không bao giờ bị bóp nữa).
+  Kết quả: quét 67 file `style.css`, vá đúng 66 file (file còn lại —
+  `pokemon/style.css` — dùng bố cục HUD hoàn toàn khác, không có tiêu đề dài
+  nên không cần vá).
+- Tiện thể phát hiện 1 lỗi CSS có sẵn từ trước (không liên quan đợt vá này,
+  xác nhận bằng `git diff` chỉ thêm thuộc tính chứ không đụng dấu ngoặc) ở
+  `giai-cuu-khung-long/style.css`: có 2 khối `@media (max-width: 480px) {`
+  bị lặp và không đóng ngoặc, khiến file CSS bị hỏng cấu trúc cuối file — đã
+  gộp lại thành 1 khối đóng ngoặc đúng.
+- `sw.js` v77 → v78 (thêm `shared/filter-toggle.js` vào precache) → **v79**
+  (sau đợt vá responsive header). `npm test`: vẫn **979 ✅, 0 ❌** — không có
+  hồi quy nào từ các thay đổi CSS/JS thuần giao diện này.
+
+## 22. ĐỀ XUẤT: 20 MINI GAME "HỒI XƯA GÂY NGHIỆN" — VỪA CHƠI VỪA HỌC (07/2026)
+
+Theo yêu cầu: liệt kê ít nhất 20 game arcade/game bỏ túi kinh điển ngày xưa
+(chưa có trong repo — đã đối chiếu với danh sách game hiện tại để không trùng),
+mỗi game gắn thêm 1 lớp "học" phù hợp (từ vựng/toán/màu sắc/an toàn/tư duy)
+nhưng KHÔNG ép giáo dục lên game nào cũng khiên cưỡng — vài game để thuần vui
+giải trí như hồi xưa, vì bản thân sự vui/nghiện tích cực (phản xạ, kiên trì,
+thử-sai) cũng là một dạng học. Đây MỚI CHỈ LÀ ĐỀ XUẤT để bạn duyệt/chọn, CHƯA
+code gì — bạn xem rồi báo lại muốn làm đợt nào trước.
+
+**Về tài nguyên hình ảnh**: sẽ ưu tiên tải icon/sprite thật (không chỉ emoji)
+từ các nguồn free-license uy tín — Kenney.nl (CC0, không cần ghi công),
+OpenGameArt.org (lọc theo CC0/CC-BY), Twemoji/Openmoji (CC-BY, đã dùng ở
+`giai-cuu-khung-long`), Wikimedia Commons (đã dùng nhiều nơi). "Phi thương
+mại" giúp nới điều kiện sử dụng nhưng KHÔNG có nghĩa là mọi giấy phép đều
+dùng được tuỳ ý — vẫn sẽ né các asset ghi rõ "chỉ dùng cá nhân, không được
+đăng lại/phân phối lại" vì trang web công khai này về bản chất là phân phối
+lại; asset nào cần ghi công sẽ được thêm vào `CREDITS.md` như các đợt trước.
+
+### Đợt 1 — "mượn khung" Ôn Tập Vui (dễ nhất, tái dùng gần như 100% `ontap.js`)
+
+1. **🕳️ Bắt Chuột Chũi Từ Vựng** — chuột đội mũ thẻ từ, bé đập đúng con có
+   từ/hình được hỏi trước khi nó chui xuống lại. Bộ khung có sẵn ở `bat-vit`
+   (chế độ chữ cái) — chỉ đổi da vịt→chuột chũi từ lỗ đất.
+2. **🔵 Bắn Bóng Vỡ Chùm Từ Vựng** — kiểu Bubble Shooter: bong bóng mang
+   hình/chữ trôi nổi, bắn trúng đúng đáp án để vỡ chùm.
+3. **🎹 Gõ Nốt Từ Vựng** — kiểu Piano Tiles: các "phím" mang từ trôi xuống
+   theo nhịp, gõ đúng phím có từ vừa nghe/đọc trước khi trôi qua vạch.
+4. **🎯 Ném Phi Tiêu Từ Vựng** — bảng phi tiêu tĩnh chia nhiều vòng, mỗi vòng
+   1 đáp án, ném trúng vòng đúng (khác Bắn Cung ở chỗ bia đứng yên nhiều
+   vòng thay vì bia di chuyển 1 đáp án).
+5. **⚽ Đá Phạt Đền Từ Vựng** — trả lời đúng nhanh trước khi được đá; đá vào
+   góc khung thành ứng với đáp án đúng, thủ môn cố cản.
+
+### Đợt 2 — Game tư duy/trí nhớ thuần túy (giáo dục tự nhiên, không cần gán chủ đề gượng ép)
+
+6. **🧠 Simon Nhớ Màu/Số** — lặp lại đúng chuỗi màu/số/nốt nhạc ngày càng dài
+   (rèn trí nhớ ngắn hạn) — game "Simon Says" điện tử 4 nút kinh điển.
+7. **🔢 Ghép Số 2048** — trượt ghép 2 ô cùng số thành số gấp đôi, rèn cảm giác
+   số và cộng dồn.
+8. **🃏 Lật Bài Nhớ Hình Nâng Cấp** — biến thể của `lat-hinh`: lật đúng 2 lá
+   giống nhau HIỆN thêm từ + phát âm (không chỉ ăn điểm mà còn học từ mới
+   ngay lúc lật trúng).
+9. **🎱 Bi-a Lỗ Mini** — kéo thả ngắm góc, bắn bi vào lỗ (dạy trực quan về góc
+   phản xạ/lực — hình học ẩn trong lối chơi).
+10. **🧩 Ghép Khối Rơi Theo Nhóm** — khối màu rơi xuống, ghép ≥3 khối cùng
+    nhóm (màu/loài/danh mục) để biến mất — rèn phân loại/nhận diện nhóm.
+
+### Đợt 3 — Vận động vui nhộn, tuổi thơ xưa (giải trí là chính, học nhẹ nhàng)
+
+11. **🐸 Ếch Qua Đường An Toàn** — kiểu Frogger: né xe/qua sông đúng lúc, lồng
+    thêm bài học luật an toàn giao thông (đèn đỏ dừng, nhìn 2 bên).
+12. **🪢 Nhảy Dây Đếm Nhịp** — bấm đúng nhịp để nhảy qua dây, đếm số nhịp nhảy
+    được — trò chơi dân gian Việt Nam đúng nghĩa, chưa có trong repo.
+13. **🏀 Ném Rổ Đếm Giờ** — ném bóng vào rổ trong thời gian giới hạn, rổ ghi
+    số điểm để cộng thành phép tính.
+14. **🏓 Bóng Bàn Đối Kháng** — đấu bóng bàn với máy, phản xạ thuần túy.
+15. **🎳 Bowling Ảo** — lăn bóng đổ ki, ki đánh số để cộng điểm (ôn cộng trừ
+    nhẹ nhàng qua kết quả mỗi lượt).
+
+### Đợt 4 — Arcade cổ điển phức tạp hơn (tốn công nhất, để làm sau)
+
+16. **👻 Ăn Chấm Né Ma (ghép chữ)** — mê cung kiểu Pac-Man, ăn các chữ cái
+    theo đúng thứ tự để ghép thành từ, né ma.
+17. **🛹 Nhảy Né Chướng Ngại Vật Không Ngừng** — chạy vô tận kiểu khủng long
+    Chrome, nhảy/né chướng ngại vật ngày càng nhanh (rèn phản xạ + kiên trì).
+18. **🐟 Bắn Cá Ăn Xu** — súng bắn cá kiểu máy game thùng, cá mang mệnh giá/
+    đáp án khác nhau, bắn trúng để "đổi xu" ảo.
+19. **🧱 Đập Gạch Bóng Nảy** — kiểu Breakout/Arkanoid: banh nảy phá gạch bằng
+    thanh trượt, gạch có thể mang chữ/số cần phá đúng thứ tự.
+20. **🍬 Nối Kẹo Ba** — kiểu Candy Crush: đổi chỗ để nối ≥3 kẹo cùng loại,
+    kẹo có thể là chữ cái để vừa nối vừa đánh vần.
+
+**Không trùng với game đã có**: đã đối chiếu kỹ với `bat-vit` (vịt/lỗ),
+`ca-lon-bien-xanh` (ăn cá kiểu Feeding Frenzy), `chim-non-vuot-ong` (Flappy
+Bird), `ran-san-moi` (rắn), `xep-gach` (Tetris), `dao-vang`/biến thể (đào
+vàng), `co-caro`/`co-ca-ngua`/`co-ganh`/`o-an-quan` (cờ dân gian),
+`lat-hinh`/`ghep-hinh` (lật hình cơ bản), `tay-dua-nhi` (đua xe),
+`vo-dai-thu-nhi` (đấm bốc) — 20 ý tưởng trên đều là thể loại CHƯA có bản nào
+trong repo.
+
+**Còn để ngỏ**: chờ bạn duyệt — có thể chọn làm nguyên 1 đợt, hoặc chọn lẻ vài
+game thích nhất trong nhiều đợt khác nhau; đợt 1 sẽ nhanh nhất vì tái dùng
+`ontap.js` y hệt 3 game Ôn Tập Vui đã có.
+
+## 23. TÁCH KHU "🎪 ÔN TẬP VUI" RIÊNG + LÀM XONG ĐỢT 1 (5 GAME MỚI) (07/2026)
+
+Xác nhận `server/migrate-02-kid-logins.sql` đã chạy xong (E2E lại: 2/2 PASS,
+hết PEND). Theo yêu cầu, tách khu "Ôn Tập Vui" ra khỏi Góc Tiếng Anh thành
+1 khu riêng trên trang chủ, và làm luôn Đợt 1 (5 game mới) trong đề xuất ở
+mục 22.
+
+### Tách khu riêng
+
+- **`on-tap-vui/index.html`** (mới) — hub riêng, cùng khung UI với
+  `goc-tieng-anh/index.html`, gộp toàn bộ game "ôn tập kiểu vận động".
+- Xoá 3 thẻ Bắn Cung/Ném Lon/Câu Cá khỏi lưới `goc-tieng-anh/index.html`,
+  thay bằng 1 thẻ quảng cáo dẫn sang `/on-tap-vui/`; số đếm "19 game tiếng
+  Anh" → **"16 game tiếng Anh"** (đúng số còn lại trong Góc Tiếng Anh).
+  Trang chủ (`index.html`) có thêm 1 thẻ "🎪 Ôn Tập Vui" riêng (kèm 3 khoá
+  i18n `card.hubontapvui.*`, 5 ngôn ngữ).
+
+### Đợt 1 — 5 game mới, đúng công thức "mượn khung" `ontap.js`
+
+Cả 5 game dưới đây dùng lại 100% logic đã kiểm thử của
+`nghe-doan-on-tap/src/ontap.js` + `misses.js` (như 3 game trước) — KHÔNG có
+logic mới, chỉ khác lớp da (view) + 1 hàm hiệu ứng "phóng vật thể tới mục
+tiêu" riêng cho từng game để tạo cảm giác vật lý khác nhau:
+
+| Game | Lớp da | Hiệu ứng khi bé chạm chọn |
+|---|---|---|
+| 🕳️ Bắt Chuột Chũi Từ Vựng | Lỗ đất tối màu, chuột chũi nhô lên nhấp nhô | Búa 🔨 bay từ trên xuống, đúng thì chuột bị đập bẹp xuống lỗ (`scaleY` co lại) |
+| 🔵 Bắn Bóng Vỡ Chùm Từ Vựng | Bong bóng nổi lấp lánh, súng ở đáy | Viên đạn bay thẳng từ súng lên, đúng thì bong bóng phóng to rồi biến mất |
+| 🎹 Gõ Nốt Từ Vựng | Phím đàn piano trắng ở đáy, nền sân khấu tối | Nốt nhạc 🎵 rơi thẳng từ đỉnh xuống đúng phím, phím lõm xuống như đàn thật |
+| 🎯 Ném Phi Tiêu Từ Vựng | Bảng bia cổ điển (đen/trắng/đỏ), người ném ở góc trái | Phi tiêu bay theo **đường VÒNG CUNG 2 chặng** (lên đỉnh rồi xuống đích) — khác đường thẳng của Bắn Cung dù cùng là "bắn trúng bia" |
+| ⚽ Đá Phạt Đền Từ Vựng | Khung thành có lưới kẻ ô, thủ môn 🧤 + cầu thủ sút ở đáy | Bóng bay thẳng tới góc; **thủ môn phản ứng theo kết quả**: sút trúng thì thủ môn bay SAI hướng, sút trật thì thủ môn lao ĐÚNG hướng bóng để cản — điểm khác biệt lớn nhất so với 4 game còn lại vì có thêm 1 nhân vật phản ứng |
+
+- Mỗi game: 5 khoá i18n (`*.title/start/play/win/help`, 5 ngôn ngữ), đăng ký
+  thẻ vào `on-tap-vui/index.html`, cập nhật số đếm "N game" trên 2 thẻ quảng
+  cáo (trang chủ + Góc Tiếng Anh) từ 3 → **8**, `sw.js` v81→**v85** (mỗi game
+  +3 dòng precache).
+- `npm test`: vẫn **979 ✅, 0 ❌** sau cả 5 game (đúng như dự đoán — không có
+  logic mới nào cần test riêng, giống 3 game đợt trước). Smoke test HTTP
+  200 cho toàn bộ 16 trang liên quan (trang chủ, 2 hub, 8 game Ôn Tập Vui,
+  kèm `src/app.js` của 5 game mới).
+
+**Còn để ngỏ**: Đợt 2 (Simon Nhớ Màu/Số, Ghép Số 2048, Lật Bài Nâng Cấp,
+Bi-a Lỗ Mini, Ghép Khối Rơi Theo Nhóm) — nhóm này KHÔNG dùng lại `ontap.js`
+được vì là game tư duy/trí nhớ thuần túy, cần thiết kế state machine riêng
+cho từng game (khối lượng việc nhiều hơn hẳn Đợt 1) — chờ bạn duyệt trước
+khi bắt đầu.
+
+## 24. 3 GÓP Ý SAU KHI DÙNG THỬ: GỌN MENU HUB, TĂNG GIÁ ĐỔI QUÀ, PHÓNG TO ICON (07/2026)
+
+Bạn phản hồi 3 điểm sau khi dùng thử — cả 3 đều đã sửa xong:
+
+### 1. Menu các trang "hub" (nhiều game nhỏ) không gọn như trang chủ
+
+`game-mini/` (43 game!), `hoc-va-choi/`, `goc-tieng-anh/`, `on-tap-vui/`,
+`dien-tu-xua/`, `tro-choi-xua/` trước đó dùng lưới `minmax(280px, 1fr)` —
+luôn ra ĐÚNG 1 CỘT trên điện thoại (thẻ to, mô tả dài), khác hẳn trang chủ
+(luôn 2 cột trên điện thoại, thẻ nhỏ gọn kiểu icon app). Đã đồng bộ cả 6
+trang này dùng ĐÚNG kiểu lưới + thẻ compact của trang chủ: 2 cột trên điện
+thoại → 3/4/5 cột khi màn hình rộng dần, ảnh minh hoạ thu nhỏ 130px→64px,
+ẩn mô tả dài (chỉ còn tiêu đề 2 dòng + 1 chip), nút "Chơi ▶" nhỏ gọn hơn.
+Riêng `game-mini/` giữ nguyên rule `.locked`/`.chip.warn` sẵn có (không dùng
+tới nhưng không xoá, tránh vỡ nếu sau này thêm game khoá).
+
+### 2. Đổi quà trong Tủ Quà quá dễ — tăng mặc định x6, phụ huynh chỉnh được
+
+`CATALOG` trong `shared/rewards.js` giá gốc rất rẻ so với tốc độ kiếm sao
+(trần 15 sao/ván, 50 sao/ngày) — kẹo 5 sao gần như đổi được ngay lập tức.
+- Thêm `DEFAULT_REWARD_COST_MULTIPLIER = 6` và hàm `effectiveCost(item,
+  multiplier)` (làm tròn, tối thiểu 1 sao) trong `shared/rewards.js` — có
+  test riêng trong `rewards.test.js`.
+- Thêm cột `settings.reward_cost_multiplier` (mặc định 6) — migration mới
+  `server/migrate-03-reward-multiplier.sql` (bạn cần chạy 1 lần trong
+  Supabase SQL Editor, giống 2 migration trước) + cập nhật `schema.sql` cho
+  người cài mới. `shared/api.js` (`getSettings`/`saveSettings`) đọc/ghi
+  field này, mặc định về 6 nếu gia đình chưa chạy migration.
+- **Trang Phụ Huynh** (`phu-huynh/`): thêm ô "Hệ số giá đổi quà trong Tủ Quà
+  (mặc định x6)" ngay dưới 2 cài đặt cũ (giới hạn giờ chơi, tốc độ đọc) —
+  chỉnh 1 lần áp dụng mọi máy, mọi bé trong gia đình.
+- **`tu-qua/src/app.js`**: giá hiển thị + giá kiểm tra đủ sao + giá thực trừ
+  khi mua đều dùng `effectiveCost()` theo hệ số gia đình đang cài (đọc qua
+  `api.getSettings()`, có cache `cachedSettings()` để hiện tạm thời trong
+  lúc chờ mạng).
+
+### 3. Icon/thẻ từ vựng trong nhóm "Ôn Tập Vui" quá nhỏ để thấy rõ
+
+Đối chiếu lại: nhóm "Nghe & Đoán" (9 game) vốn đã dùng lưới 2×2 với ảnh phủ
+100% ô — không nhỏ. Vấn đề chỉ nằm ở 8 game "Ôn Tập Vui" (bia/lon/cá/lỗ
+chuột/bong bóng/phím đàn/bia phi tiêu/khung thành): nút `.opt-btn` chỉ
+~58-80px, ảnh bên trong chỉ 60-70% kích thước đó, lại còn bị thu nhỏ thêm
+trên màn hình <400px — ảnh vật vựng thực tế chỉ còn ~35-45px trên điện
+thoại. Đã phóng to toàn bộ 8 game (~35-40%): `.opt-btn` lên 100-110px (giữ
+đúng tỉ lệ hình dạng riêng của từng game — bia tròn, lon chữ nhật, cá oval,
+phím đàn cao...), ảnh bên trong lên 78-85%, và làm mềm mức thu nhỏ trên màn
+hình nhỏ (không còn tụt xuống dưới ~85-90px nữa). Tăng `min-height` sân chơi
+tương ứng để không bị tràn.
+
+- `sw.js` v85 → **v86**. `npm test`: **980 ✅, 0 ❌** (979 cũ + 1 test mới
+  cho `effectiveCost`). Smoke test HTTP 200 cho 6 trang hub + `phu-huynh/` +
+  `tu-qua/` + các file JS liên quan.
+
+**Còn để ngỏ**: `migrate-03-reward-multiplier.sql` cần bạn tự chạy trong
+Supabase SQL Editor (giống 2 migration trước) — chưa chạy thì `saveSettings`
+sẽ báo lỗi cột không tồn tại khi bạn bấm "Lưu cài đặt" ở ô hệ số giá mới.
+
+## 25. GAME MỚI: 🧠 RÈN TRÍ NÃO — ĐỢT 2 (5 GAME TRÍ NHỚ/TƯ DUY HỒI XƯA) (07/2026)
+
+Khác với Đợt 1 (mượn khung `ontap.js`), 5 game này KHÔNG dùng lại được logic
+sẵn có — phải viết state machine riêng cho từng trò. Theo đúng kiến trúc
+"N trò trong 1" đã có sẵn ở `tu-duy/` (Luyện Tư Duy — 6 trò mê cung/sudoku/...):
+tạo bundle mới `ren-tri-nao/` cùng khung shell/cheer/confetti, KHÔNG động vào
+`tu-duy/` đang chạy tốt để tránh rủi ro hồi quy.
+
+- **`ren-tri-nao/src/rentrinao.js`** — logic thuần 5 trò (tách theo từng mục,
+  giống cách `tuduy.js` tách 6 trò), nhận `rng` để test tất định:
+  1. **Simon Nhớ Màu** — `nextSimonStep`/`checkSimonInput`, chuỗi dài dần.
+  2. **Ghép Số 2048** — thuật toán trượt/gộp cổ điển (`slideMergeRow` dùng
+     chung cho cả 4 hướng qua transpose/reverse), `spawnTile2048`,
+     `canMove2048` (bí thế khi đầy bàn VÀ không còn 2 ô kề bằng nhau).
+  3. **Lật Bài Nhớ Hình Nâng Cấp** — bộ bài riêng 12 cặp emoji+từ tiếng Anh+
+     nghĩa (`MEMORY_WORDS`), lật trùng cặp sẽ đọc từ + nghĩa (giữ đúng tinh
+     thần "vừa chơi vừa học" dù đây là game trí nhớ thuần).
+  4. **Bi-a Lỗ Mini** — vật lý va chạm đàn hồi thật (bảo toàn động lượng),
+     nảy tường, ma sát giảm dần vận tốc, phát hiện lọt lỗ — toàn bộ hàm
+     thuần không cần DOM/canvas nên test được chính xác từng bước.
+  5. **Ghép Khối Rơi Theo Nhóm** — thả khối màu theo cột (kiểu Connect-4),
+     `findGroup` flood-fill gom khối liền màu, `clearGroups` xoá nhóm ≥3,
+     `collapseColumns` cho khối phía trên rơi lấp chỗ trống.
+- **`ren-tri-nao/src/rentrinao.test.js`** — 23 test bao trọn cả 5 trò (kể cả
+  vật lý bi-a: bảo toàn động lượng, nảy đúng cả 4 tường, tách 2 bi chồng
+  nhau; và game trí nhớ: đúng số cặp, so khớp chỉ theo `key` không theo id).
+- **`ren-tri-nao/src/app.js`** — điều phối 5 trò theo đúng mẫu `tu-duy/app.js`
+  (màn chọn trò → màn chơi chung → `finish()` tổng kết). Bi-a dùng canvas +
+  vòng lặp `requestAnimationFrame`; 2048 nhận cả vuốt (mobile) và phím mũi
+  tên (desktop); Ghép Khối dùng hàng nút mũi tên phía trên từng cột (rõ ràng
+  hơn bấm trực tiếp vào cột đầy). Thêm cơ chế `state.ctx.cleanup()` để gỡ
+  listener bàn phím/`requestAnimationFrame` khi rời game — tu-duy chưa cần
+  cái này vì không trò nào của tu-duy dùng canvas động hay phím toàn cục.
+- Đăng ký: thẻ "🧠 Rèn Trí Não" ngay sau "Luyện Tư Duy" trên trang chủ, 27
+  khoá i18n (`rentrinao.*`, 5 ngôn ngữ), `package.json` thêm dòng test,
+  `sw.js` v86 → **v87**.
+- `npm test`: **1003 ✅, 0 ❌** (979 + 1 effectiveCost + 23 rentrinao). Smoke
+  test HTTP 200 cho `/ren-tri-nao/` và toàn bộ file JS/CSS liên quan.
+
+**Còn để ngỏ**: đã làm xong cả 2 đợt đầu của danh sách 20 game đề xuất ở mục
+22 (10/20 game). Còn Đợt 3 (Ếch Qua Đường, Nhảy Dây, Ném Rổ, Bóng Bàn,
+Bowling) và Đợt 4 (Pac-Man, Endless Runner, Bắn Cá, Breakout, Match-3 Kẹo)
+— chờ bạn duyệt đợt nào muốn làm tiếp.
+
+## 26. FIX UI RÈN TRÍ NÃO + GAME MỚI: 🏃 VẬN ĐỘNG VUI — ĐỢT 3 (07/2026)
+
+### Fix nhỏ: màn chọn trò 5 ô lẻ bị lệch trái
+
+`ren-tri-nao/` có 5 trò (số lẻ) trong lưới 2 cột — ô cuối cùng bị mặc định
+nằm lệch trái, thừa 1 ô trống bên phải rất mất cân đối. Thêm 1 rule CSS
+`.mode-card:last-child:nth-child(odd) { grid-column: 1 / -1; max-width: calc(50% - 6px); margin: 0 auto; }`
+để ô lẻ cuối cùng tự canh giữa cả hàng. Áp dụng luôn cho `van-dong-vui/`
+mới (cũng 5 trò) để không bị lỗi tương tự ngay từ đầu.
+
+### Đợt 3 — 5 game vận động vui nhộn, học nhẹ nhàng qua luật chơi
+
+Theo đúng kiến trúc "N trò trong 1" đã dùng cho `tu-duy/` và `ren-tri-nao/`:
+bundle mới `van-dong-vui/` — game trong nhóm này thiên về PHẢN XẠ/VẬN ĐỘNG
+hơn là học kiến thức cụ thể, nên bài học chính là kiên trì — thử — sai —
+thử lại, không gán ép nội dung học thuật.
+
+- **`van-dong-vui/src/vandongvui.js`** — logic thuần 5 trò, nhận rng/thời
+  gian để test tất định:
+  1. **🐸 Ếch Qua Đường An Toàn** — Frogger dạng LƯỚI RỜI RẠC (không phải
+     scroll liên tục): mỗi hàng xe là 1 mảng boolean trượt vòng (circular
+     shift) mỗi nhịp, ếch di chuyển từng ô. Qua được 3 lần là thắng.
+  2. **🪢 Nhảy Dây Đếm Nhịp** — trò chơi dân gian thật, chưa có bản nào
+     trong repo trước đó. Nhịp bấm đúng lúc dây "quét qua chân" (cửa sổ
+     ±260ms), nhịp nhanh dần theo chuỗi nhảy đúng liên tiếp.
+  3. **🏀 Ném Rổ Đếm Giờ** — thanh lực dao động hình sin liên tục, bấm SÚT
+     đúng lúc vạch nằm trong vùng ăn điểm (vị trí vùng đổi ngẫu nhiên mỗi
+     lần ném). Giới hạn 30 giây.
+  4. **🏓 Bóng Bàn Đối Kháng** — vật lý bóng nảy tường trái/phải + va vợt
+     (lệch góc theo điểm chạm gần mép vợt), máy đối kháng đuổi theo bóng
+     với tốc độ giới hạn (không "ăn gian" luôn đỡ trúng).
+  5. **🎳 Bowling Ảo** — kéo-thả ngắm hướng (giống cơ chế Bi-a Lỗ Mini ở
+     Đợt 2), 10 ki xếp hình tam giác, đơn giản hoá luật tính điểm (không
+     làm đủ luật strike/spare 10-frame chuẩn — cộng dồn số ki đổ qua 5
+     lượt, phù hợp trẻ nhỏ hơn).
+- **`van-dong-vui/src/vandongvui.test.js`** — 17 test (di chuyển làn xe,
+  thời điểm nhảy dây, dao động lực, vật lý bóng bàn nảy tường/va vợt/AI
+  giới hạn tốc độ, xếp hình + đổ ki bowling).
+- **`van-dong-vui/src/app.js`** — điều phối theo đúng mẫu 2 bundle trước.
+  Ếch Qua Đường + Bóng Bàn dùng phím mũi tên/rê chuột; Nhảy Dây dùng 1 nút
+  bấm nhịp; Ném Rổ dùng thanh lực + nút SÚT; Bowling dùng kéo-thả kiểu
+  bi-a. Toàn bộ game có timer/rAF đều gắn `state.ctx.cleanup()`.
+- Đăng ký: thẻ "🏃 Vận Động Vui" trên trang chủ (sau "Rèn Trí Não"), 33 khoá
+  i18n (`vandongvui.*`, 5 ngôn ngữ), `package.json` thêm dòng test, `sw.js`
+  v87 → **v88**.
+- `npm test`: **1020 ✅, 0 ❌** (1003 + 17 vandongvui). Smoke test HTTP 200
+  cho `/van-dong-vui/` và toàn bộ file JS/CSS liên quan.
+
+**Còn để ngỏ**: 15/20 game trong đề xuất mục 22 đã xong (Đợt 1+2+3). Còn
+Đợt 4 (Pac-Man ghép chữ, Endless Runner, Bắn Cá Ăn Xu, Đập Gạch Bóng Nảy,
+Nối Kẹo Ba) — đây là nhóm "tốn công nhất" theo đánh giá ban đầu, chờ bạn
+duyệt trước khi làm.
+
+## 27. FIX UI CANVAS + GAME MỚI: 🕹️ ARCADE XƯA — ĐỢT 4 (XONG 20/20 GAME ĐỀ XUẤT) (07/2026)
+
+### Fix nhỏ: canvas dọc (Bóng Bàn, Bowling) có thể tràn chiều cao trên màn hình thấp
+
+`.pong-canvas` (tỉ lệ 0.72, dọc) và `.bowling-canvas` (tỉ lệ 0.65, dọc) trước
+đó chỉ giới hạn theo BỀ RỘNG (`90vw`/px cứng) — trên màn hình THẤP (điện
+thoại xoay ngang, cửa sổ nhỏ) chiều cao tính ra từ tỉ lệ khung hình có thể
+vượt quá màn hình. Sửa bằng công thức `calc(58dvh * tỉ_lệ_khung_hình)` làm
+1 trong các giá trị `min(...)` của bề rộng — quy đổi "trần chiều cao 58dvh"
+thành 1 giá trị bề rộng tương ứng. Áp dụng thêm cho `.frog-board` (vuông,
+dùng trực tiếp `44dvh`). `.billiard-canvas` (tỉ lệ 1.7, ngang) vốn đã an
+toàn từ trước vì hình ngang thì bề rộng luôn là chiều giới hạn chặt hơn.
+
+### Đợt 4 — 5 game arcade cổ điển phức tạp nhất, khép lại danh sách 20 game
+
+Bundle mới `arcade-xua/`, đúng kiến trúc "N trò trong 1" lần thứ 4:
+
+- **`arcade-xua/src/arcadexua.js`** — logic thuần 5 trò:
+  1. **👻 Ăn Chấm Né Ma (ghép chữ)** — mê cung MỞ (không tường, khác Pac-Man
+     gốc) trên lưới 9×9: ăn chữ cái ĐÚNG THỨ TỰ để ghép 1 từ tiếng Anh ngắn
+     (8 từ có sẵn kèm nghĩa), né ma đuổi theo kiểu tham lam (ưu tiên trục
+     lệch nhiều hơn — cùng công thức đuổi chuột trong mê cung của `tu-duy/`).
+  2. **🛹 Nhảy Né Không Ngừng** — endless runner kiểu khủng long Chrome:
+     `jumpArc()` tính độ cao nhảy theo parabol thuần (không cần vật lý
+     phức tạp), tốc độ cuộn tăng dần theo điểm (`speedForScore`, có trần).
+  3. **🐟 Bắn Cá Ăn Xu** — cá bơi ngang 2 chiều với giá trị xu ngẫu nhiên,
+     chạm màn hình để "bắn", trúng thì cộng xu theo giá trị con cá.
+  4. **🧱 Đập Gạch Bóng Nảy (Breakout)** — vật lý bóng nảy tường/vợt (lệch
+     góc theo điểm chạm, cùng công thức với vợt Bóng Bàn ở Đợt 3) + phá
+     gạch AABB, 3 mạng, thắng khi phá hết gạch.
+  5. **🍬 Nối Kẹo Ba (Match-3)** — engine đầy đủ: sinh bàn không có sẵn
+     match, đổi chỗ 2 ô liền kề, `findMatches` dò cả hàng lẫn cột, xoá +
+     rơi lấp chỗ trống + sinh kẹo mới lặp lại tới khi hết match theo tầng
+     (cascade) — phức tạp nhất trong cả 20 game vì phải xử lý HIỆU ỨNG DÂY
+     CHUYỀN (1 lần đổi có thể kích hoạt nhiều đợt xoá liên tiếp).
+- **`arcade-xua/src/arcadexua.test.js`** — 28 test. Phát hiện 1 lỗi trong
+  chính bộ test (không phải code sản phẩm) khi soạn: dùng rng() hằng số cho
+  `makeCandyGrid` khiến vòng lặp "thử lại tới khi không tạo match" LẶP VÔ
+  HẠN vì luôn ra cùng 1 màu — phải đổi sang 1 bộ sinh số biến thiên thật
+  (LCG nhỏ) để test không treo. Đây là lý do phải luôn chạy test có
+  timeout khi thao tác với vòng lặp `do...while` phụ thuộc rng.
+- **`arcade-xua/src/app.js`** — Pac-Man dùng D-pad/phím mũi tên giống Ếch
+  Qua Đường; Runner dùng 1 nút NHẢY; Bắn Cá dùng chạm-để-bắn; Breakout dùng
+  canvas + rê ngón tay; Nối Kẹo dùng chạm-chọn-2-ô. Toàn bộ game có
+  timer/rAF gắn `state.ctx.cleanup()` như 3 bundle trước.
+- Đăng ký: thẻ "🕹️ Arcade Xưa" trên trang chủ (sau "Vận Động Vui"), 33 khoá
+  i18n (`arcadexua.*`, 5 ngôn ngữ), `package.json` thêm dòng test, `sw.js`
+  v89 → **v90**.
+- `npm test`: **1048 ✅, 0 ❌** (1020 + 28 arcadexua). Smoke test HTTP 200
+  cho `/arcade-xua/` và toàn bộ file JS/CSS liên quan.
+
+**Còn để ngỏ**: **Đủ 20/20 game** trong đề xuất mục 22 đã hoàn thành qua 4
+đợt (Ôn Tập Vui mượn khung × 5, Rèn Trí Não × 5, Vận Động Vui × 5, Arcade
+Xưa × 5) — không còn đợt nào tồn đọng từ danh sách này. Nếu muốn mở rộng
+thêm, cần đề xuất ý tưởng mới.
+
+## Bổ sung thêm chương trình học và luyệt theo unit cho việc thi Cambridge (Starters – Movers – Flyers) , KET , PET and TOEFL . Mỗi chủ đề luyện thi Cambridge (Starters – Movers – Flyers) , KET (đạt đến A2), PET (Đến B1) and TOEFL (tập trung Đến điểm đạt 700 là được hoặc Max B2 là được ) . Tôi đã tham khảo file chungchi.png nhưng cần nâng cấp lên 1 tí cho trẻ học nhiều hơn và có nền tảng chắc hơn .
+tập trung vào game ngữ pháp ,luyện đề, học theo unit, lặp lại từ vựng và ngữ pháp đến khi thuần thục , có dữ liệu có thể mở rộng , ghi nhiều ý tưởng gâme, animations minh họa ví dụ nguwx pháp quá khứ sẽ có cây thời gian , và 1 người đang chạy ở mốc quá khứ, bắt trẻ dự đoán là thì gì ? hay 2 hành động ở quá khứ , bắt trẻ đoán thì gì .... và nhiều animation khác hỗ trợ học đầy đủ ngữ pháp . 
+Có mục xuất hiện câu hỏi ngẫu nhiên trong game ..
+Lưu những câu hay sai để tăng xác xuất xuất hiện lặp lại đến khi đúng 
+Ghi thêm nhiều ý tưởng, phân thành nhiều đợt làm , Mỗi chủ đề luyện thi Cambridge (Starters – Movers – Flyers) , KET (đêbs A2), PET (Đến B1) and TOEFL (tập trung Đến điểm đạt 700 là được) .  sẽ có 1 menu chính ở Home , đễ dễ truy cập hơn . 
+Claw đề hoặc theo dõi sát đề tài và từ vựng khi thi 2 chứng chỉ này . ( chia đợt để cập nhật riêng từng đợt với claude code và không bị trùng )
+
+## 28. ĐỀ XUẤT: LUYỆN THI CAMBRIDGE MOVERS & FLYERS (07/2026)
+
+Theo yêu cầu: thu hẹp phạm vi lại **Movers + Flyers trước** (Starters/KET/
+PET/TOEFL để dành đợt sau, đúng tinh thần "chia đợt, không trùng" bạn ghi ở
+trên). Đây MỚI CHỈ LÀ ĐỀ XUẤT/NGHIÊN CỨU để bạn xem xét — CHƯA code gì.
+
+### Vì sao tách riêng Movers & Flyers trước
+
+Cambridge Young Learners English (YLE) có 3 bậc: **Starters (tiền A1) →
+Movers (A1) → Flyers (A2)**, độ khó tăng dần và ngữ pháp Flyers XÂY TRÊN NỀN
+Movers (không phải kiến thức tách biệt). Làm 2 bậc liền kề này trước sẽ tạo
+ra 1 "cột sống ngữ pháp" hoàn chỉnh (từ thì hiện tại đơn tới hiện tại hoàn
+thành) mà Starters/KET/PET/TOEFL sau này chỉ cần nối thêm hai đầu, không
+phải thiết kế lại engine.
+
+### 1. Nội dung cần phủ (dựa theo khung chương trình chính thức Cambridge YLE)
+
+**Ngữ pháp Movers (A1)** — nền tảng:
+- Hiện tại đơn (thói quen, sự thật) — khẳng định/phủ định/nghi vấn, "-s" ngôi 3
+- Hiện tại tiếp diễn (đang xảy ra) — đối lập với hiện tại đơn
+- Quá khứ đơn — động từ có quy tắc (-ed) + bất quy tắc thông dụng (went, ate, saw, had, did, made...)
+- there is/there are, there isn't/aren't
+- can/can't (khả năng & xin phép)
+- So sánh hơn đơn giản: bigger, more beautiful
+- Sở hữu cách 's + tính từ sở hữu (my/your/his/her/our/their)
+- Giới từ chỉ vị trí: in/on/under/next to/between/in front of/behind
+- Câu mệnh lệnh (Open the door. Don't run.)
+- some/any, danh từ số nhiều (quy tắc + bất quy tắc: children, feet, mice)
+- Từ để hỏi: what/where/who/when/why/how many/how much/whose
+- Trạng từ tần suất: always/usually/sometimes/never
+- Đại từ tân ngữ: me/him/her/us/them
+
+**Ngữ pháp Flyers (A2)** — xây thêm trên nền Movers:
+- Quá khứ tiếp diễn (was/were + V-ing) — **thường ra đề đối chiếu với quá khứ đơn** (đúng ý tưởng "2 hành động ở quá khứ" bạn nêu: "While I was cooking, the phone rang.")
+- Hiện tại hoàn thành (have/has + V3) — với ever/never/just/already/yet
+- So sánh hơn & so sánh nhất đầy đủ (đều + bất quy tắc: good-better-best, bad-worse-worst)
+- Tương lai "going to" (dự định) đối lập "will" (dự đoán/quyết định tức thời)
+- Động từ khuyết thiếu: must/mustn't, should/shouldn't, have to/don't have to, could (khả năng quá khứ)
+- Giới từ chỉ chuyển động: into/out of/through/along/across/past/towards
+- Liên từ nối câu: and/but/or/because/so/when/before/after
+- Trạng từ chỉ cách thức: quickly/carefully...
+- Lượng từ: a lot of/lots of/a little/a few
+
+**Chủ đề từ vựng** (đối chiếu danh sách từ vựng chính thức YLE): Animals,
+Body & face, Clothes, Colours & shapes, Family & friends, Food & drink,
+Health, Hobbies, Home, Numbers, Personal information, Places, School,
+Sports, Time (giờ/thứ/tháng/mùa), Toys & games, Transport, Weather, Work,
+World (quốc gia) — Flyers thêm: cảm xúc sâu hơn, công nghệ, thiên nhiên/môi
+trường, nghề nghiệp mở rộng, phương hướng, vật liệu, vật chứa.
+
+**Tin vui**: dự án ĐÃ CÓ SẴN phần lớn nền từ vựng này rải trong 9 game
+"Nghe & Đoán" (~825 từ, chủ đề trùng khá nhiều với danh sách trên — động
+vật, gia đình, thể thao, thời tiết, giao thông, số đếm, nghề nghiệp, đồ
+dùng, cơ thể...) — **không cần xây từ vựng lại từ đầu**, chỉ cần rà soát bổ
+sung từ còn thiếu theo đúng danh sách Movers/Flyers chính thức và gắn thêm
+lớp NGỮ PHÁP lên trên (điều hiện chưa có game nào trong dự án làm).
+
+### 2. Cơ chế "lưu câu hay sai để tăng xác suất lặp lại" — ĐÃ CÓ SẴN, chỉ cần tổng quát hoá
+
+Dự án đã có đúng cơ chế bạn mô tả — `nghe-doan-on-tap/src/misses.js`:
+sai 1 từ → +1 điểm "cần ôn"; đúng ngay lần đầu → -1 điểm; sổ "🎯 Ôn chỗ yếu"
+đọc danh sách này để ưu tiên hỏi lại. Nhưng module này lấy **từ tiếng Anh**
+làm khoá duy nhất — hợp lý cho vocab nhưng KHÔNG hợp cho câu hỏi ngữ pháp
+(1 điểm ngữ pháp có thể có nhiều câu hỏi khác nhau). Đề xuất: viết 1 module
+song song `exam-prep/src/misses.js` cùng thuật toán hệt vậy nhưng khoá theo
+`questionId` thay vì từ — tách riêng để KHÔNG đụng vào `misses.js` gốc đang
+chạy ổn định cho 9+8 game hiện có.
+
+### 3. Ý tưởng game cụ thể — chia theo dạng bài thi thật (Listening/Reading&Writing) + phần ngữ pháp riêng
+
+**A. Game minh hoạ ngữ pháp bằng animation** (đúng ý tưởng "cây thời gian" bạn nêu):
+
+1. **🕰️ Cỗ Máy Thời Gian Ngữ Pháp** — 1 thanh thời gian ngang, mốc "Bây giờ"
+   ở giữa, quá khứ bên trái, tương lai bên phải. 1 nhân vật hoạt hình thực
+   hiện 1 hành động tại 1 điểm trên trục; bé phải đoán ĐÚNG THÌ (hiện tại
+   đơn / quá khứ đơn / quá khứ tiếp diễn / hiện tại hoàn thành / going to)
+   dựa vào tín hiệu hình ảnh (đồng hồ đang quay = "đang xảy ra", dấu ✓ =
+   "đã xong", mũi tên chỉ tới tương lai = dự định).
+2. **⏳ Hai Hành Động Cùng Lúc** — đúng ý tưởng "2 hành động ở quá khứ" bạn
+   mô tả: 1 thanh DÀI (hành động nền, quá khứ tiếp diễn) bị 1 thanh NGẮN cắt
+   ngang (hành động xen vào, quá khứ đơn), 2 nhân vật hoạt hình minh hoạ
+   song song ("While A was cooking, B rang the doorbell") — bé ghép đúng
+   cấu trúc câu ứng với hình.
+3. **📈 So Sánh Hơn/Nhất Trực Quan** — 2-3 nhân vật/đồ vật với thanh đo trực
+   quan (chiều cao/tốc độ/kích thước), bé chọn câu so sánh đúng khớp hình.
+4. **🔮 Going To vs Will** — hình ảnh gợi Ý ĐỊNH có sẵn (vali đã đóng gói =
+   going to) đối lập QUYẾT ĐỊNH TỨC THỜI (chuông điện thoại reo, nhân vật
+   giật mình = will), bé chọn đúng cấu trúc.
+5. **🚦 Modal Ai Đúng** — tình huống hình ảnh (biển báo, luật lệ) + bé chọn
+   must/mustn't/should/shouldn't phù hợp — lồng ghép được cả bài học kỹ
+   năng sống.
+
+**B. Game ôn tập vui mượn khung có sẵn** (tái dùng công thức "Ôn Tập Vui"):
+
+6. **🎯 Bắn Đúng Thì** — mượn khung bắn cung/ném lon: mục tiêu là CÁC NHÃN
+   THÌ thay vì tranh vựng, máy đọc 1 câu, bé bắn trúng thì đúng của câu đó.
+7. **🃏 Lật Thẻ Ngữ Pháp** — biến thể lật-bài: lật đúng cặp "câu ví dụ ↔ tên
+   thì/cấu trúc".
+
+**C. Mô phỏng cấu trúc đề thi thật** (đã nói rõ giới hạn — xem mục 4):
+
+8. **📝 Luyện Đề Movers/Flyers** — chế độ đề thi thu nhỏ nhiều phần (nghe +
+   đọc-viết trộn), random câu hỏi có TRỌNG SỐ theo sổ "cần ôn" (câu càng
+   hay sai càng dễ xuất hiện lại — đúng yêu cầu của bạn), tính điểm cuối đề
+   kiểu "số sao" giống format 5 khiên/15 sao Cambridge thật hay dùng.
+9. **🔊 Nghe Hiểu Đề Thi** — mượn TTS có sẵn, đọc đoạn hội thoại ngắn rồi
+   hỏi ghép tranh/tên/số — đúng format "Listening Part" thật của Movers/Flyers.
+10. **📖 Đọc & Điền Từ** — đoạn văn ngắn + điền từ đúng ngữ pháp/nghĩa vào
+    chỗ trống, kiểu "Reading & Writing Part 5/6" thật.
+
+### 4. Giới hạn thành thật cần lưu ý trước khi duyệt
+
+- **Phần Speaking (thi nói)** của Movers/Flyers có giám khảo hỏi-đáp trực
+  tiếp — 1 web app offline không thể chấm điểm nói tự động chính xác. Đề
+  xuất: mượn lại tính năng ghi âm-tự nghe-so sánh đã có ở `tieng-anh/`, làm
+  thêm bộ câu hỏi ĐÚNG PHONG CÁCH speaking thật (mô tả tranh, trả lời câu
+  hỏi cá nhân) nhưng chỉ để bé LUYỆN PHÁT ÂM/PHẢN XẠ, không giả vờ "chấm
+  điểm nói" vì làm vậy dễ gây hiểu lầm cho phụ huynh.
+- Cambridge KHÔNG công bố "điểm liệt/đậu" — Movers/Flyers chỉ chấm bằng số
+  khiên (1-5), không có khái niệm rớt. Nên giữ đúng tinh thần này (khích lệ,
+  không tạo áp lực điểm số) thay vì gắn ngưỡng "đậu/rớt" giả.
+
+### 5. Đề xuất chia đợt (để bạn duyệt từng đợt, không trùng việc)
+
+- **Đợt 1 — Nền tảng dữ liệu**: định nghĩa cấu trúc `Unit` mở rộng được
+  (`{ id, level, topic, vocab, grammarPoints, questions }`), viết
+  `exam-prep/src/misses.js` (tổng quát hoá theo `questionId`), rà soát bổ
+  sung từ vựng Movers còn thiếu so với 9 game hiện có, thêm menu "🎓 Luyện
+  Thi Cambridge" ở trang chủ (chọn Movers/Flyers) — CHƯA có game chơi được,
+  chỉ dựng khung + dữ liệu.
+- **Đợt 2 — Game minh hoạ ngữ pháp cốt lõi**: Cỗ Máy Thời Gian Ngữ Pháp +
+  Hai Hành Động Cùng Lúc (hiện tại đơn/tiếp diễn, quá khứ đơn/tiếp diễn) —
+  đây là 2 game "flagship" trực quan hoá đúng ý tưởng ban đầu của bạn.
+- **Đợt 3 — Mượn khung Ôn Tập Vui cho ngữ pháp**: Bắn Đúng Thì + Lật Thẻ
+  Ngữ Pháp — tái dùng engine đã kiểm thử, nhanh như Đợt 1 của "Ôn Tập Vui".
+- **Đợt 4 — Game ngữ pháp Flyers nâng cao**: So Sánh Hơn/Nhất, Going To vs
+  Will, Modal Ai Đúng, hiện tại hoàn thành.
+- **Đợt 5 — Mô phỏng đề thi**: Luyện Đề trộn ngẫu nhiên có trọng số + Nghe
+  Hiểu Đề Thi + Đọc & Điền Từ — ghép lại toàn bộ Đợt 1-4 thành 1 trải
+  nghiệm "luyện đề" hoàn chỉnh.
+
+**Việc của bạn**: xem lại phạm vi ngữ pháp/chủ đề ở mục 1 có đúng ý muốn
+không, và duyệt bắt đầu từ Đợt nào — Đợt 1 là bắt buộc phải làm trước tiên
+vì mọi đợt sau đều dựa vào cấu trúc dữ liệu này.
+
+## 29. FIX ANIMATION "XẤU" Ở NHÓM ÔN TẬP VUI (07/2026)
+
+Bạn phản hồi: 8 game "Ôn Tập Vui" hay nhưng animation xấu/không đẹp. Rà lại
+từng game, tìm được cả vấn đề chung LẪN 1 lỗi thật sự (không phải chỉ là gu
+thẩm mỹ):
+
+### Lỗi thật: chuột chũi bị "dập" tức thời, không có animation
+
+`bat-chuot-chui-tu-vung/style.css` — rule `.opt-btn` (chuột chũi) không hề
+khai báo `transition` ở BẤT KỲ đâu (không ở rule gốc, không ở
+`.opt-btn.correct`). Khi bé đập trúng, class `correct` đổi `transform` +
+tắt animation nhấp nhô (`animation: none`) NGAY LẬP TỨC — chuột chũi bị
+"dập bẹp" tức thời như khung hình bị đứt, không hề có chuyển động mượt.
+Đây nhiều khả năng là thứ gây cảm giác "xấu" rõ nhất trong 8 game. Đã thêm
+`transition: transform 0.3s cubic-bezier(.36,0,.66,-0.56), opacity 0.3s ease;`
+vào rule gốc — giờ cú đập mượt hẳn, có cảm giác "dồn lực rồi mới bẹp xuống"
+(đường cong overshoot nhẹ) thay vì snap cứng.
+
+### Vấn đề chung: 3 chỗ làm animation "rẻ tiền" ở CẢ 8 GAME
+
+1. **Màn thắng/thua bật/tắt ĐỘT NGỘT** — `.overlay` trước giờ chỉ
+   `display: none ↔ flex`, không hề có transition, y hệt bật công tắc đèn.
+   Đổi sang điều khiển bằng `opacity` + `scale` có transition (giữ nguyên
+   hành vi ẩn/hiện, không bị bấm nhầm nhờ `pointer-events: none` khi ẩn) —
+   giờ màn kết quả mờ dần + phóng to nhẹ khi xuất hiện, mượt hơn hẳn.
+2. **Trúng đích không có phản hồi thị giác NGAY TẠI ĐIỂM CHẠM** — vật thể
+   bay tới rồi biến mất, chỉ có bia/mục tiêu đổi màu viền. Thêm hiệu ứng
+   `.impact-ring` (vòng sáng bung ra rồi mờ dần trong 0.35s) tại đúng toạ độ
+   chạm đích, gọi qua hàm `spawnImpact(x, y)` dùng chung — cảm giác "bụp"
+   rõ ràng hơn nhiều, áp dụng đồng loạt cả 8 game.
+3. **Easing bay không đồng nhất, nhiều chỗ dùng `linear`/`ease` chung
+   chung** — cảm giác máy móc, không có "trọng lượng":
+   - `cau-ca-tu-vung`: lưỡi câu trước bay CHÉO 1 mạch từ cần câu tới cá
+     (trông giả tạo với 1 dây câu thẳng đứng cố định) — đổi thành 2 chặng:
+     đu ngang tới đúng vị trí trước (nhanh, hơi lắc), RỒI mới thả thẳng
+     xuống theo đường cong trọng lực (`cubic-bezier(.55,0,1,.45)`).
+   - `go-not-tu-vung`: nốt nhạc rơi tốc độ ĐỀU (`linear`) — đổi sang đường
+     cong trọng lực thật (chậm dần đều rồi nhanh dần) + thêm lắc lư nhẹ.
+   - `nem-phi-tieu-tu-vung`: phi tiêu trước dùng emoji 🎯 (chính là hình bia
+     — bay 1 bia hướng tới 1 bia khác nhìn rất lạ!) — đổi sang 📌, thêm xoay
+     tròn dần trong lúc bay giống phi tiêu thật xoay khi được ném.
+   - `da-phat-den-tu-vung`: bóng bay thẳng không xoay — thêm xoay 420°
+     trong lúc bay để giống 1 cú sút thật.
+   - `ban-cung-tu-vung`/`nem-lon-tu-vung` vốn đã dùng cubic-bezier tốt từ
+     trước, không cần sửa.
+4. **Hiệu ứng `opt-pop` (dùng chung ở Bắn Cung/Ném Phi Tiêu/Đá Phạt Đền)
+   chỉ phóng to đều rồi thu lại** — đổi thành squash-and-stretch (phình
+   ngang-bẹp dọc rồi bẹp ngang-phình dọc rồi mới về bình thường) cho cảm
+   giác nảy tự nhiên hơn thay vì "thở phồng" đơn điệu.
+
+- `sw.js` v90 → **v91**. `npm test`: vẫn **1048 ✅, 0 ❌** (thuần CSS/hiệu
+  ứng, không đụng logic). Smoke test HTTP 200 cho cả 8 game.
+
+**Còn để ngỏ**: đây là rà soát theo phán đoán riêng (không có ảnh chụp cụ
+thể bạn chê chỗ nào) — nếu vẫn còn chỗ nhìn chưa ổn, gửi thêm chi tiết
+(quay màn hình lúc chơi hoặc chỉ đúng game/khoảnh khắc) để sửa trúng hơn.
+
+## 30. ĐỀ XUẤT: LUYỆN THI KET, PET, TOEFL JUNIOR & TOEIC — PHẦN CÒN LẠI (07/2026)
+
+Đúng — mục 28 mới làm Movers & Flyers. Đây là phần bổ sung cho **KET, PET,
+TOEFL Junior, và TOEIC** (mới thêm theo yêu cầu — IELTS trong bảng
+`chungchi.png` bạn có sẵn thì để ngỏ làm sau vì không nằm trong yêu cầu
+gốc, nhưng nội dung sẽ tái dùng được gần hết vì cùng tầm B1-B2). Đã xem
+`chungchi.png` — đối chiếu đúng bảng hiệu lực/cấp độ/mục đích bạn ghi
+(KET = Sơ cấp, PET = Sơ Trung Cấp, TOEFL/IELTS = Trung Cấp→Cao cấp). Vẫn
+CHỈ LÀ ĐỀ XUẤT — chưa code gì.
+
+### ✅ Đã xác nhận: TOEFL Junior, mục tiêu >800/900 — và bổ sung TOEIC, mục tiêu 800/990
+
+Bạn xác nhận **TOEFL Junior** (không phải iBT) với mục tiêu nâng lên
+**>800/900** (~tương đương B2 chắc, chạm ngưỡng đầu C1) — cao hơn mốc 700
+ban đầu, nghĩa là ngân hàng câu hỏi cần đủ ĐỘ KHÓ và ĐỘ PHỦ ngữ pháp/từ
+vựng ở mức trên, không dừng ở "vừa đủ qua". Đồng thời bổ sung thêm
+**TOEIC**, mục tiêu **800/990** (thang Nghe+Đọc, không tính riêng
+Nói-Viết) — mức 800+ được xem là "Working Proficiency" cao, đủ dùng tốt
+trong môi trường công sở/quốc tế.
+
+**Lưu ý thành thật về đối tượng**: TOEIC vốn thiết kế cho NGƯỜI ĐI LÀM
+(ngữ cảnh văn phòng — hợp đồng, lịch họp, hoá đơn, nhân sự...), khác hẳn
+đối tượng 4-18 tuổi của cả app. Track TOEIC này sẽ tự nhiên phù hợp hơn với
+học sinh lớn/thiếu niên hoặc người lớn dùng chung tài khoản gia đình — vẫn
+làm được, chỉ ghi rõ để bạn biết đây là nhánh "kéo dài" hơn các track còn
+lại, không phải nội dung dành cho bé nhỏ tuổi nhất của app.
+
+### 2. Nội dung cần phủ — XÂY TIẾP trên "cột sống ngữ pháp" Movers/Flyers ở mục 28 (không dạy trùng)
+
+**KET / A2 Key** (Sơ cấp — ngay sau Flyers):
+- Ngữ pháp MỚI so với Flyers: câu điều kiện loại 0 & loại 1 (if + hiện tại,
+  will + động từ nguyên mẫu), động từ + V-ing sau một số động từ (like/enjoy
+  + V-ing), đại từ phản thân (myself/yourself...), giới từ thời gian/địa
+  điểm/chuyển động đầy đủ hơn, cụm động từ (phrasal verbs) thông dụng cơ
+  bản (get up, look for, turn on...).
+- Ngữ pháp Flyers được LUYỆN SÂU hơn (không dạy mới): hiện tại hoàn thành,
+  going to/will, so sánh hơn/nhất — chỉ tăng độ khó câu hỏi.
+- Từ vựng mở rộng đời sống: mua sắm, công việc, du lịch, giải trí, công
+  nghệ, sức khoẻ & lối sống, mô tả người/địa điểm, hẹn gặp & lời mời.
+- Cấu trúc đề thật: Đọc-Viết (biển báo/thông báo thật, viết tin nhắn ngắn
+  ~25 từ), Nghe, Nói (phỏng vấn theo cặp — vẫn giữ giới hạn ở mục 4/28: chỉ
+  luyện phản xạ, không chấm điểm nói).
+
+**PET / B1 Preliminary** (Sơ Trung Cấp):
+- Ngữ pháp MỚI: câu điều kiện loại 2 (if + quá khứ, would + nguyên mẫu),
+  quá khứ hoàn thành, câu bị động (thì hiện tại đơn & quá khứ đơn), câu
+  tường thuật (reported speech) cơ bản, mệnh đề quan hệ (who/which/that),
+  động từ khuyết thiếu chỉ suy đoán (must be/might be/can't be), liên từ
+  nối câu phức (although/despite/in spite of/however).
+- Từ vựng mở rộng: giáo dục, đời sống công việc, môi trường & thiên nhiên,
+  văn hoá, truyền thông, quan hệ xã hội, du lịch, khoa học-công nghệ cơ
+  bản, diễn đạt ý kiến/cảm xúc.
+- Cấu trúc đề thật: Đọc, Viết (có phần viết đoạn văn/email ~100 từ), Nghe,
+  Nói.
+
+**TOEFL Junior (B1→B2/C1 nhẹ, mục tiêu >800/900)**:
+- Ngữ pháp MỚI so với PET: quá khứ hoàn thành tiếp diễn, tương lai hoàn
+  thành/tương lai tiếp diễn, câu điều kiện loại 3 (if + quá khứ hoàn thành,
+  would have + V3), câu bị động đầy đủ ở MỌI THÌ, câu tường thuật ĐẦY ĐỦ
+  (trần thuật/nghi vấn/mệnh lệnh), mệnh đề quan hệ xác định/không xác định,
+  liên từ phức tạp hơn (provided that/unless/as long as).
+- Vì mục tiêu NÂNG lên >800 (không chỉ "đạt"), cần thêm 1 lớp câu hỏi khó
+  hơn mức đại trà: đoạn văn dài hơn, nhiễu (distractor) tinh vi hơn giữa
+  các đáp án gần nghĩa, và trộn nhiều điểm ngữ pháp trong 1 câu thay vì 1
+  điểm/câu — đúng cách đề thi thật phân hoá điểm cao/thấp.
+- Từ vựng học thuật nhẹ + đời sống: chủ đề trường học/khoa học/xã hội mức
+  độ vừa phải (đúng tinh thần bài đọc TOEFL Junior thật — không hàn lâm như
+  iBT).
+- Cấu trúc đề thật (bản Standard — phù hợp app offline nhất): **Nghe hiểu**
+  (hội thoại/bài giảng ngắn), **Ngữ pháp-Từ vựng theo ngữ cảnh** (Language
+  Form & Meaning — điền từ/sửa lỗi trong đoạn văn), **Đọc hiểu** (ý chính,
+  chi tiết, suy luận, từ vựng theo văn cảnh, cấu trúc bài). Không có phần
+  Nói/Viết ở bản Standard — NHẸ GÁNH cho app hơn nhiều so với Movers/Flyers
+  (vốn phải "chữa cháy" phần Nói bằng ghi âm tự nghe).
+
+**TOEIC (Nghe & Đọc, mục tiêu 800/990)**:
+- Không có nhiều ngữ pháp MỚI so với TOEFL Junior (cùng tầm B2) — điểm khác
+  biệt chính là NGỮ CẢNH: toàn bộ câu hỏi đặt trong bối cảnh CÔNG SỞ/THƯƠNG
+  MẠI thay vì đời sống/học đường.
+- Từ vựng: giao tiếp văn phòng, họp & lịch làm việc, công tác & di chuyển,
+  tiếp khách, nhân sự & tuyển dụng, tài chính & ngân sách, marketing & bán
+  hàng, sản xuất & vận chuyển, công nghệ văn phòng, hợp đồng nhà đất, bảo
+  hiểm sức khoẻ nơi làm việc.
+- Cấu trúc đề thật (7 phần, Nghe 4 phần + Đọc 3 phần):
+  - Nghe: **Part 1** Mô tả tranh (nghe 4 câu, chọn câu khớp nhất với 1 bức
+    ảnh), **Part 2** Hỏi-Đáp, **Part 3** Hội thoại, **Part 4** Bài nói/thông
+    báo.
+  - Đọc: **Part 5** Hoàn thành câu (điền từ/ngữ pháp), **Part 6** Hoàn
+    thành đoạn văn, **Part 7** Đọc hiểu (đơn/nhiều văn bản — đặc trưng hiện
+    đại của TOEIC thật là dạng "chuỗi tin nhắn" giữa 2-3 người).
+
+### 3. Tái dùng đúng kiến trúc đã đề xuất ở mục 28 — không tạo hệ thống mới
+
+- Cùng cấu trúc `Unit` mở rộng (`{ id, level, topic, vocab, grammarPoints,
+  questions }`) — chỉ thêm `level: 'ket'|'pet'|'toefl-junior'|'toeic'`.
+- Cùng `exam-prep/src/misses.js` (khoá theo `questionId`) — dùng chung cho
+  cả 6 cấp (Movers/Flyers/KET/PET/TOEFL Junior/TOEIC), không tạo sổ ôn
+  riêng cho từng cấp (bé lên cấp cao hơn vẫn ôn đúng những câu từng sai ở
+  cấp thấp nếu chủ điểm ngữ pháp trùng — vd "quá khứ hoàn thành" xuất hiện
+  lại ở cả PET, TOEFL Junior và TOEIC).
+- Menu "🎓 Luyện Thi Cambridge" ở trang chủ (đã đề xuất ở mục 28) mở rộng
+  thành 6 lựa chọn: Starters~~(để sau)~~/Movers/Flyers/KET/PET/TOEFL
+  Junior/TOEIC — hoặc tách riêng 1 khu "🎓 Luyện Thi Quốc Tế" chứa TOEFL
+  Junior + TOEIC nếu muốn phân biệt rõ "thi trẻ em" (YLE+KET+PET) và "thi
+  có tính quốc tế/công sở cao hơn" (TOEFL Junior/TOEIC) — bạn chọn cách
+  nào khi duyệt.
+
+### 4. Ý tưởng game RIÊNG cho KET/PET/TOEFL Junior (khác Movers/Flyers)
+
+Ở Movers/Flyers, animation trực quan (cỗ máy thời gian, so sánh hơn/nhất...)
+là trọng tâm vì bé còn nhỏ, ngữ pháp còn cụ thể. Lên KET/PET/TOEFL Junior,
+nội dung THIÊN VỀ ĐỌC HIỂU + NGỮ CẢNH DÀI hơn, nên cần thêm nhóm game mới:
+
+11. **📰 Đọc Hiểu Có Giờ** — 1 đoạn văn ngắn (biển báo/tin nhắn/email/bài
+    báo ngắn tuỳ cấp) + câu hỏi trắc nghiệm (ý chính/chi tiết/suy luận/từ
+    vựng theo văn cảnh) — đúng 4 dạng câu hỏi đọc hiểu chuẩn quốc tế.
+12. **✂️ Sửa Lỗi Trong Đoạn Văn** — đúng dạng "Language Form & Meaning" của
+    TOEFL Junior: đoạn văn có vài chỗ sai ngữ pháp, bé chạm vào từ sai rồi
+    chọn từ đúng thay thế.
+13. **🔄 Viết Lại Câu Cùng Nghĩa** — dạng bài quen thuộc của PET: cho 1 câu,
+    bé chọn/ghép câu khác nghĩa giống hệt nhưng cấu trúc khác (chủ động ↔
+    bị động, câu trực tiếp ↔ tường thuật) — game kiểu ghép cặp.
+14. **🎧 Nghe Bài Giảng Ngắn** — mượn TTS đọc 1 đoạn hội thoại/bài giảng dài
+    hơn Movers/Flyers (30-60 giây), hỏi nhiều câu liên tiếp về cùng 1 đoạn
+    (đúng cấu trúc thi TOEFL Junior Listening).
+15. **🧩 Ghép Mệnh Đề Quan Hệ** — kéo-thả ghép 2 câu đơn thành 1 câu có mệnh
+    đề quan hệ (who/which/that) — luyện đúng điểm ngữ pháp mới của PET.
+
+**Riêng cho TOEIC** (bối cảnh công sở, bám sát 7 phần đề thật):
+
+16. **🖼️ Nghe Tả Tranh** — hiện 1 bức ảnh cảnh công sở/sinh hoạt, nghe 4
+    câu mô tả, chọn câu khớp nhất với ảnh — đúng Part 1 TOEIC thật.
+17. **💬 Chuỗi Tin Nhắn Công Sở** — đọc 1 đoạn nhắn tin/email qua lại giữa
+    đồng nghiệp, trả lời câu hỏi về ngữ cảnh/ý định người nói — đúng dạng
+    "chuỗi tin nhắn" đặc trưng của Part 7 TOEIC hiện đại.
+18. **📋 Điền Đơn/Biểu Mẫu Công Sở** — đọc 1 biểu mẫu/lịch trình/hoá đơn,
+    trả lời câu hỏi thông tin cụ thể — luyện kỹ năng skim/scan nhanh đúng
+    kiểu TOEIC thật (phần đọc TOEIC nổi tiếng chạy giờ rất gấp).
+
+(2 game "Đọc Hiểu Có Giờ" và "Sửa Lỗi Trong Đoạn Văn" ở trên dùng lại được
+cho Part 5/6/7 còn lại của TOEIC, chỉ đổi ngữ cảnh sang công sở.)
+
+### 5. Đề xuất chia đợt tiếp theo (nối tiếp Đợt 1-5 của Movers/Flyers ở mục 28)
+
+- **Đợt 6 — Dữ liệu KET**: đơn vị bài học + ngân hàng câu hỏi KET, mở rộng
+  menu chọn cấp độ.
+- **Đợt 7 — Game ngữ pháp mới của KET**: điều kiện loại 0/1, phrasal verbs,
+  đại từ phản thân (game trực quan kiểu Đợt 2/28 nếu còn hợp; nếu quá trừu
+  tượng thì chuyển sang dạng bài tập trực tiếp).
+- **Đợt 8 — Dữ liệu + game PET**: điều kiện loại 2, quá khứ hoàn thành, bị
+  động, tường thuật, mệnh đề quan hệ — cùng lúc làm game "Viết Lại Câu Cùng
+  Nghĩa" và "Ghép Mệnh Đề Quan Hệ".
+- **Đợt 9 — Dữ liệu + game TOEFL Junior**: điều kiện loại 3, bị động/tường
+  thuật đầy đủ — trọng tâm là 3 game ĐỌC/NGHE/SỬA LỖI (mục 4, ý 11-12-14)
+  vì đây là trọng số điểm chính của bài thi thật.
+- **Đợt 10 — Dữ liệu + game TOEIC**: ngân hàng câu hỏi theo đúng 7 phần đề
+  thật, trọng tâm 3 game riêng (Nghe Tả Tranh, Chuỗi Tin Nhắn Công Sở, Điền
+  Đơn/Biểu Mẫu) + tái dùng 2 game đọc/sửa lỗi cho phần còn lại.
+- **Đợt 11 — Luyện đề tổng hợp toàn bộ 6 cấp**: mở rộng "Luyện Đề" đã đề
+  xuất ở Đợt 5/mục 28 để chọn được cấp độ (Movers→TOEIC), random có trọng
+  số theo sổ "cần ôn" dùng chung — vì mục tiêu TOEFL Junior/TOEIC đều đã
+  nâng lên 800+, chế độ luyện đề nên có thêm bộ đếm giờ SÁT với đề thật
+  (TOEIC đặc biệt nổi tiếng chạy giờ gấp ở phần Đọc) để luyện đúng áp lực
+  thời gian, không chỉ đúng nội dung.
+
+**Việc của bạn**: (1) đã xác nhận TOEFL Junior >800 + TOEIC 800 — nếu còn
+mốc điểm nào khác bạn muốn chỉnh (vd TOEIC 800 tính trên thang nào, có cần
+thêm phần Nói-Viết TOEIC riêng không) thì báo thêm; (2) xem nội dung ngữ
+pháp/chủ đề mục 2 có thiếu gì so với `chungchi.png` hay ý định của bạn
+không; (3) chọn Đợt nào bắt đầu — lưu ý Đợt 1 (mục 28) VẪN LÀ NỀN chung
+cho toàn bộ Đợt 6-11 này, nên nếu muốn làm KET/PET/TOEFL/TOEIC trước
+Movers/Flyers thì cấu trúc dữ liệu ở Đợt 1 vẫn phải làm trước tiên.
+
+## 31. QUYẾT ĐỊNH: MỞ RỘNG ĐỘ TUỔI 4–18 (giải quyết băn khoăn TOEIC ở mục 30) (07/2026)
+
+Bạn xác nhận: mở rộng độ tuổi phục vụ của cả app từ 4–12 lên **4–18 tuổi**
+— "tiếng Anh có thể có nhiều tuổi học" là chủ đích, không phải giới hạn.
+Quyết định này giải quyết đúng băn khoăn đã nêu ở mục 30 (TOEIC vốn thiết
+kế cho người đi làm, "khác hẳn đối tượng 4-12 tuổi") — với phạm vi mới
+4–18, TOEIC/TOEFL Junior/PET/KET đều nằm gọn trong đối tượng phục vụ
+chính thức của app (học sinh cấp 2-3 và người mới đi làm), không còn là
+nhánh "kéo dài" ngoại lệ nữa.
+
+- Cập nhật copy hiển thị trên trang thật (không chỉ tài liệu đề xuất):
+  `i18n.js` khoá `intro.title` (5 ngôn ngữ), `index.html` (meta description
+  + tiêu đề khối giới thiệu), `gioi-thieu/index.html` (meta description +
+  đoạn mở đầu + dòng mô tả game Tiếng Anh Nâng Cao: "8–12 tuổi" →
+  **"8–18 tuổi"**) — toàn bộ đổi "4–12" → **"4–18"**.
+- Không đổi các chip mô tả độ tuổi CỤ THỂ theo từng game riêng lẻ (ví dụ
+  "Lớp lá – lớp 1" trên thẻ Học Vui) vì đó là mô tả ĐÚNG đối tượng của
+  riêng game đó, không phải giới hạn tổng của cả app.
+- `sw.js` v91 → **v92**. `npm test`: **1048 ✅, 0 ❌** (thuần đổi text hiển
+  thị). Smoke test trang chủ + `gioi-thieu/` đều 200.
+
+**Còn để ngỏ**: mục 30 (đề xuất KET/PET/TOEFL Junior/TOEIC) vẫn đang chờ
+bạn duyệt đợt bắt đầu — quyết định mở rộng tuổi ở đây không tự động bắt
+đầu code, chỉ gỡ bỏ 1 điểm băn khoăn về đối tượng đã nêu trước đó.
+
+## 32. XÁC NHẬN THÊM VỀ ĐỘ TUỔI + BẮT ĐẦU CODE MOVERS/FLYERS ĐỢT 1 (07/2026)
+
+Bạn xác nhận thêm: phạm vi 4–18 tuổi là đúng, và **"trên dưới 24 cũng ok"**
+— nghĩa là không cần đặt trần cứng ở 18, người dùng lớn hơn (đầu 20, đúng
+đối tượng track TOEIC/TOEFL Junior đã nêu băn khoăn ở mục 30) vẫn được chào
+đón, chỉ là không phải đối tượng CHÍNH được quảng bá trên trang chủ. Vì vậy
+copy hiển thị vẫn giữ **"4–18 tuổi"** (số tròn, dễ hiểu) — không đổi thành
+"4–24" hay con số lẻ nào khác; phần "trên dưới 24" được hiểu là gỡ bỏ hẳn
+tâm lý lo ngại "app này không hợp với người lớn hơn" khi làm nhánh TOEIC,
+không phải yêu cầu đổi số hiển thị.
+
+Sau đó bắt đầu code **Đợt 1 của mục 28** (nền dữ liệu Movers/Flyers) —
+nhưng làm nhiều hơn phạm vi tối thiểu đã đề xuất: thay vì chỉ dựng khung +
+dữ liệu (chưa chơi được), đã hoàn thiện luôn 1 chế độ **luyện tập trắc
+nghiệm chơi được ngay**, dùng chung cho tất cả unit hiện có và unit sẽ thêm
+sau (KET/PET/TOEFL Junior/TOEIC — mục 30/31).
+
+**`exam-prep/`** (thư mục mới):
+- **`src/units.js`** — cấu trúc `Unit` mở rộng được đúng như đề xuất
+  (`{ id, level, topic, grammarPoints, vocab, questions }`), đã có **12
+  unit** (6 Movers + 6 Flyers, mỗi unit 8 câu = **96 câu hỏi**) phủ đúng
+  các điểm ngữ pháp liệt kê ở mục 28 §1: Movers — hiện tại đơn, hiện tại
+  tiếp diễn, quá khứ đơn, there is/are + some/any, can + giới từ vị trí, so
+  sánh hơn + từ để hỏi; Flyers — **quá khứ tiếp diễn vs quá khứ đơn** (đúng
+  ý tưởng "2 hành động cùng lúc" ban đầu, dùng làm câu hỏi trắc nghiệm ở
+  Đợt 1 — animation trực quan riêng cho điểm này vẫn là việc của Đợt 2),
+  hiện tại hoàn thành, so sánh hơn/nhất đầy đủ, going to vs will, động từ
+  khuyết thiếu, giới từ chuyển động + liên từ.
+- **`src/examprep.js`** — engine logic thuần dùng chung cho MỌI cấp độ
+  (kể cả cấp thêm sau này, chỉ cần thêm mảng Unit mới + đăng ký vào
+  `UNITS_BY_LEVEL`, không sửa engine): `pickQuestions` chọn câu có TRỌNG SỐ
+  theo sổ "cần ôn" (câu sai nhiều dễ ra lại hơn hẳn — đúng yêu cầu "lưu câu
+  hay sai để tăng xác suất lặp lại") nhưng KHÔNG BAO GIỜ loại bỏ hoàn toàn
+  khả năng ra câu ngẫu nhiên khác (đúng yêu cầu "xuất hiện câu hỏi ngẫu
+  nhiên"); `answerQuiz` dùng **đúng luật chọn-lại** đã quen thuộc từ Nghe &
+  Đoán/Ôn Tập Vui (sai lần 1 → gợi ý, câu không qua; đúng sau gợi ý vẫn có
+  điểm nhưng ít hơn; sai lần 2 → lộ đáp án + giải thích).
+- **`src/misses.js`** — sổ "câu hay sai" TÁCH RIÊNG khỏi
+  `nghe-doan-on-tap/src/misses.js` (không đụng vào bản gốc đang chạy ổn
+  định cho 17 game khác), khoá theo **questionId** thay vì từ tiếng Anh
+  (đúng như mục 28 §2 đã phân tích: 1 điểm ngữ pháp có nhiều câu hỏi khác
+  nhau nên không thể dùng từ làm khoá duy nhất) — cùng cơ chế gửi lô lên
+  server, cùng giới hạn 300 mục, tương thích 100% với hạ tầng
+  Supabase/`miss_events` đã có (chỉ prefix `exam:` vào cột `word` để không
+  trộn lẫn với sổ từ vựng vốn có).
+- **`exam-prep/index.html` + `style.css` + `src/app.js`** — giao diện 3
+  màn: **chọn cấp độ** (Movers/Flyers) → **chọn unit** (lưới thẻ theo
+  topic, kèm thẻ đặc biệt "🎲 Luyện ngẫu nhiên — trộn tất cả unit" và
+  "🎯 Ôn câu hay sai" khi sổ không rỗng) → **luyện tập** (câu tiếng Anh
+  thiếu từ + 4 lựa chọn, đọc to bằng giọng en-US chậm, giải thích tiếng
+  Việt sau mỗi câu). Tông màu xanh dương học thuật (khác tông cam trẻ nhỏ
+  của `ren-tri-nao`/`van-dong-vui`) vì đối tượng game này lớn tuổi hơn.
+  Nối đủ hạ tầng chung: `mountKidFeatures()` (thanh avatar + giới hạn giờ
+  chơi), `answeredOne()` (quà mỗi 15 câu), `recordSession()` (cộng sao qua
+  server, `mode: 'exam-movers-<unitId>'` hoặc `'exam-flyers-mix'`...).
+- Đăng ký: thẻ "🎓 Luyện Thi Cambridge" trên trang chủ (giữa Ôn Tập Vui và
+  Tiếng Anh Nâng Cao), 15 khoá i18n (5 ngôn ngữ), `sw.js` v92→**v93**,
+  `package.json` thêm dòng test.
+- **22 unit test mới** (cấu trúc dữ liệu: id duy nhất/answer hợp lệ/đủ số
+  câu; engine: pickQuestions không trùng + tôn trọng trọng số + vẫn ngẫu
+  nhiên; answerQuiz đúng luật chọn-lại/điểm/kết thúc ván; misses.js cộng
+  trừ đúng). **Lưu ý kỹ thuật khi viết test trọng số**: dùng 1 bộ sinh số
+  ngẫu nhiên LIÊN TỤC (gọi lại nhiều lần) thay vì tạo seed mới cho mỗi lần
+  lặp — vì các seed liền kề của LCG (Park-Miller) cho ra kết quả lần-gọi-đầu
+  tương quan cao (gần như đơn điệu tăng), làm sai lệch thống kê phân bố nếu
+  reseed mỗi vòng lặp. `npm test` toàn bộ: **1070 ✅, 0 ❌**. Smoke test
+  `/`, `/exam-prep/` và toàn bộ file JS/CSS liên quan đều 200.
+
+**Còn để ngỏ**: đây là Đợt 1 (nền dữ liệu + 1 chế độ luyện tập chơi được) —
+Đợt 2-5 của mục 28 (Cỗ Máy Thời Gian Ngữ Pháp, Hai Hành Động Cùng Lúc dạng
+animation trực quan, Bắn Đúng Thì/Lật Thẻ Ngữ Pháp mượn khung Ôn Tập Vui, So
+Sánh Hơn/Nhất trực quan, Going To vs Will trực quan, Luyện Đề tổng hợp) vẫn
+đang chờ — cũng như toàn bộ mục 30 (KET/PET/TOEFL Junior/TOEIC). Cấu trúc
+`Unit`/`examprep.js`/`misses.js` đã đủ tổng quát để các đợt sau chỉ cần
+thêm dữ liệu + UI mới, không phải đổi nền tảng.
+
+## 33. CHIA "HỌC" vs "LUYỆN THI" + MỞ RỘNG NỘI DUNG (07/2026)
+
+Bạn phản hồi đúng chỗ thiếu: bản Đợt 1 chỉ có 1 chế độ luyện tập phẳng
+(chọn unit → làm câu hỏi), không phân biệt rõ "học kiến thức mới" và
+"luyện thi mô phỏng thật", và nội dung còn mỏng. Đã tách 2 nhánh + bổ sung
+nội dung đáng kể:
+
+**Nội dung mở rộng (`exam-prep/src/units.js`): 96 → 144 câu hỏi**
+- Thêm 2 câu ngữ pháp/unit cho cả 12 unit hiện có (8 → 10 câu/unit).
+- Thêm **2 unit từ vựng mới**: `movers-vocabulary` (12 câu, chủ đề trường
+  học/nhà cửa/giao thông/thể thao/hình khối/mùa) và `flyers-vocabulary` (12
+  câu, chủ đề nâng cao hơn: nghề nghiệp/khoa học/cảm xúc/thiên nhiên) — đúng
+  yêu cầu "bổ sung từ vựng, ngữ pháp, chọn trắc nghiệm". Mỗi câu vẫn giữ
+  đúng định dạng câu tiếng Anh có chỗ trống "___" (nhất quán với câu hỏi
+  ngữ pháp, đọc được bằng giọng en-US) thay vì hỏi trực tiếp bằng tiếng
+  Việt.
+- Mỗi unit (cả 14 unit) có thêm trường **`lesson`** (bài học): 1 câu tổng
+  quan + 2-3 quy tắc kèm ví dụ song ngữ — đây là nội dung "Học" hiển thị
+  TRƯỚC khi luyện tập, giải quyết đúng ý "có học và thi" thay vì chỉ có
+  luyện tập trần trụi.
+
+**Tách 2 nhánh rõ ràng trong `exam-prep/src/app.js` + `index.html`:**
+- **📖 Học theo Unit**: chọn 1 unit cụ thể → xem bài học (quy tắc + ví dụ
+  song ngữ) → "Bắt Đầu Luyện Tập" → làm câu hỏi CÓ GỢI Ý khi sai (giữ
+  nguyên luật chọn-lại quen thuộc `answerQuiz`), không tính giờ. Vẫn giữ 2
+  lối tắt "🎲 Luyện ngẫu nhiên" và "🎯 Ôn câu hay sai" trong màn chọn unit
+  (bỏ qua bài học, vào thẳng luyện tập trộn).
+- **⏱️ Luyện Thi (Đề Ngẫu Nhiên)**: chọn độ dài đề (10 hoặc 20 câu) → đề
+  trộn NGẪU NHIÊN toàn bộ unit của cấp độ (dùng `makeMockTest`, vẫn ưu tiên
+  câu "cần ôn" theo trọng số như luyện tập) → **CÓ TÍNH GIỜ** (~25 giây/câu,
+  đồng hồ đếm ngược hiện trên HUD, hết giờ tự nộp bài) → **MỖI CÂU CHỈ 1
+  LẦN TRẢ LỜI** (hàm mới `answerMockTest` — không có gợi ý/chọn lại, đúng
+  cảm giác áp lực phòng thi thật, khác hẳn nhánh Học) → màn **báo cáo cuối
+  đề** (`mockTestReport`): điểm, số câu đúng/phần trăm, và DANH SÁCH CHỦ
+  ĐIỂM SAI NHIỀU NHẤT (sắp giảm dần) kèm nút "Về Học Lại Chủ Điểm Yếu" đưa
+  thẳng về màn chọn unit của nhánh Học — khép vòng lặp "thi xong biết yếu
+  gì → quay lại học đúng chỗ đó".
+- Cả 2 nhánh vẫn ghi vào **cùng 1 sổ "câu hay sai"** (`misses.js`) và cùng
+  cộng sao qua `recordSession` — luyện thi sai câu nào cũng làm câu đó dễ
+  xuất hiện lại hơn ở cả 2 chế độ.
+
+**Kỹ thuật đáng chú ý:**
+- Điều hướng đổi từ 3 màn cố định sang **ngăn xếp (stack)** đơn giản
+  (`state.history`) vì giờ có tới 7 màn (cấp độ → chế độ → unit/thiết lập
+  đề → bài học/làm bài → báo cáo) — nút ◀ luôn quay đúng 1 bước trước đó
+  thay vì về cứng 1 màn cố định.
+- `answerMockTest` và `mockTestReport` là hàm THUẦN mới trong `examprep.js`,
+  tách biệt hoàn toàn khỏi `answerQuiz` (không phá luật chọn-lại của nhánh
+  Học) — **6 unit test mới** kiểm tra: trộn đúng toàn bộ unit, đúng/sai đều
+  qua câu ngay không có retry, ghi nhận đúng chủ điểm sai, không làm gì khi
+  đề đã xong, báo cáo tính đúng điểm/phần trăm/chủ điểm yếu.
+- Hết giờ giữa chừng: báo cáo chỉ tính trên số câu ĐÃ LÀM (không tính các
+  câu chưa kịp làm là sai) — tránh phần trăm bị "oan" chỉ vì làm chậm.
+- `npm test` toàn bộ: **28/28 test của exam-prep** (144 câu hỏi + lesson +
+  engine Học/Luyện Thi), tổng repo **1076 ✅, 0 ❌**. `sw.js` v93→**v94**.
+  Smoke test `/`, `/exam-prep/` và các file JS/CSS liên quan đều 200,
+  không có id trùng lặp trong HTML.
+
+**Còn để ngỏ**: đồng hồ đếm ngược hiện là mốc cố định ~25s/câu (không đổi
+theo độ khó câu hỏi); animation minh hoạ ngữ pháp trực quan (Đợt 2 của mục
+28) và mục 30 (KET/PET/TOEFL Junior/TOEIC) vẫn chưa làm.
+
+## 34. MỞ RỘNG THÊM UNIT MOVERS & FLYERS (07/2026)
+
+Bạn chọn hướng "mở rộng thêm unit/câu hỏi Movers & Flyers" (thay vì thêm
+Starters, animation trực quan, hay KET/PET/TOEFL) khi được hỏi lại. Đã rà
+soát danh sách ngữ pháp chính thức Cambridge YLE ở mục 28 §1 để tìm đúng
+những điểm CHƯA có unit riêng, tránh trùng lặp với 14 unit đã có:
+
+**+4 unit ngữ pháp mới** (`exam-prep/src/units.js`, mỗi unit 10 câu + lesson):
+- **`movers-possessives-imperatives`** — tính từ sở hữu (my/your/his/her/
+  our/their), sở hữu cách 's, câu mệnh lệnh (Open the door / Don't run).
+- **`movers-pronouns-frequency`** — đại từ tân ngữ (me/him/her/us/them),
+  trạng từ tần suất (always/usually/never — vị trí khác nhau trước động từ
+  thường vs sau 'to be'), số nhiều bất quy tắc (children/feet/mice).
+- **`flyers-adverbs-manner`** — hình thành trạng từ cách thức (quick→
+  quickly, happy→happily), bất quy tắc (good→well, fast giữ nguyên), và
+  điểm dễ nhầm: sau 'to be' dùng TÍNH TỪ chứ không phải trạng từ (Be quiet!
+  chứ không phải Be quietly!).
+- **`flyers-quantifiers`** — a lot of/lots of (cả 2 loại danh từ), many
+  (đếm được) vs much (không đếm được), a few vs a little.
+
+**Mở rộng 2 unit từ vựng đã có** (+4 câu mỗi unit, không trùng từ đã dạy):
+`movers-vocabulary` 12→16 câu (nurse, fridge, cold, puppy), `flyers-
+vocabulary` 12→16 câu (chef, achieve, cinema, modern).
+
+**Kết quả**: Movers 7→**9 unit**, Flyers 7→**9 unit**, tổng **18 unit**,
+144→**192 câu hỏi** (đã xác nhận 192 id duy nhất, không trùng). Cả 4 unit
+mới đều dùng được ngay ở CẢ 2 nhánh Học và Luyện Thi (không cần sửa
+`examprep.js`/`app.js` — đúng thiết kế mở rộng "chỉ thêm mảng Unit mới" đã
+làm từ Đợt 1). Cập nhật số liệu hiển thị ở thẻ trang chủ (144→192 câu, 18
+unit) và 2 ngưỡng test tối thiểu trong `examprep.test.js` (unit count 7→9,
+tổng câu hỏi ≥140→≥190).
+
+`sw.js` v94→**v95**. `npm test` toàn bộ: **1076 ✅, 0 ❌** (không thêm test
+mới vì đây là mở rộng NỘI DUNG thuần, không thêm engine/hành vi mới — 28
+test hiện có của exam-prep đã đủ phủ cấu trúc dữ liệu chung). Smoke test
+`/` và `/exam-prep/` đều 200.
+
+**Còn để ngỏ**: vẫn còn dư địa mở rộng Movers/Flyers nếu muốn (ví dụ: mệnh
+đề thời gian nâng cao, câu hỏi đuôi đơn giản...); Starters, animation trực
+quan (Đợt 2 mục 28), và KET/PET/TOEFL Junior/TOEIC (mục 30) vẫn đang chờ.
+
+## 35. MỞ RỘNG THÊM VÒNG 2: UNIT MOVERS & FLYERS (07/2026)
+
+Bạn xác nhận tiếp tục đúng hướng đã chọn ở mục 34 (thay vì chuyển sang
+Starters/animation/KET-PET-TOEFL-TOEIC). Rà lại các điểm ngữ pháp Movers/
+Flyers còn thiếu NGOÀI danh sách gốc ở mục 28 §1 (đã phủ hết ở mục 34) —
+chọn thêm các cấu trúc THƯỜNG GẶP trong đề thi thật nhưng chưa có unit
+riêng, tiếp tục KHÔNG trùng với các unit đã có:
+
+**+4 unit ngữ pháp mới** (mỗi unit 10 câu + lesson):
+- **`movers-time-ordinals`** — cách nói giờ (o'clock/half past/quarter
+  past/quarter to), số thứ tự (first-tenth) cho ngày tháng và xếp hạng,
+  ngày trong tuần & tháng trong năm.
+- **`movers-suggestions-requests`** — câu trả lời ngắn (Yes, I do/No, she
+  doesn't...), Let's + V (rủ rê), would like to (muốn làm gì lịch sự).
+- **`flyers-used-to-time-clauses`** — used to + V (thói quen quá khứ
+  không còn đúng, phân biệt used to/use to theo câu khẳng định/phủ định/
+  nghi vấn), mệnh đề thời gian when/before/after/until dùng HIỆN TẠI ĐƠN dù
+  đang nói về tương lai (điểm dễ sai: không dùng 'will' sau các liên từ
+  này).
+- **`flyers-suggestions-requests`** — Shall we...?/Why don't we...? (gợi
+  ý), Could/Would you...? (yêu cầu lịch sự), Would you mind...?
+
+**Mở rộng tiếp 2 unit từ vựng** (+4 câu mỗi unit, không trùng từ đã dạy ở
+bất kỳ unit nào): `movers-vocabulary` 16→20 câu (firefighter, hospital,
+swimming pool, Tuesday), `flyers-vocabulary` 16→20 câu (apologize, farm,
+nervous, mechanic).
+
+**Kết quả**: Movers 9→**11 unit**, Flyers 9→**11 unit**, tổng **22 unit**,
+192→**240 câu hỏi** (đã xác nhận 240 id duy nhất). Cập nhật số liệu hiển
+thị ở thẻ trang chủ và 3 ngưỡng test tối thiểu trong `examprep.test.js`
+(unit count 9→11, tổng câu hỏi ≥190→≥235).
+
+`sw.js` v95→**v96**. `npm test` toàn bộ: **1076 ✅, 0 ❌** (vẫn 28 test của
+exam-prep — mở rộng nội dung thuần, không thêm hành vi engine mới). Smoke
+test `/` và `/exam-prep/` đều 200.
+
+**Còn để ngỏ**: kho ngữ pháp "đại trà" của Movers/Flyers gần như đã cạn dư
+địa mở rộng thêm mà không lấn sang phạm vi KET (mệnh đề quan hệ, câu bị
+động, câu tường thuật... vốn dành cho mục 30) — nếu muốn tiếp tục "bổ sung
+Cambridge" theo hướng unit mới, bước tự nhiên tiếp theo là Starters (tiền
+A1, dễ hơn Movers) hoặc bắt đầu KET. Animation trực quan (Đợt 2 mục 28)
+vẫn đang chờ.
+
+## 36. THÊM CẤP STARTERS — TRỌN BỘ 3 BẬC CAMBRIDGE YLE (07/2026)
+
+Bạn xác nhận lần thứ 3 muốn tiếp tục đúng hướng "thêm unit/nội dung", nên
+lần này không hỏi lại — chọn thẳng **Starters** (tiền A1) vì mục 35 đã nêu
+rõ kho ngữ pháp Movers/Flyers gần cạn mà không lấn phạm vi KET, còn Starters
+vẫn nằm trọn trong khuôn khổ "unit mới cùng mức độ công việc" như 2 đợt vừa
+làm, và giúp hoàn thiện TRỌN BỘ 3 bậc chính thức của Cambridge YLE (Starters
+→ Movers → Flyers) thay vì chỉ có 2/3 bậc.
+
+**5 unit Starters mới** (`exam-prep/src/units.js`, đơn giản hơn hẳn Movers
+đúng đúng trình độ tiền A1 — câu ngắn, từ vựng cơ bản):
+- **`starters-to-be`** — động từ to be (am/is/are) khẳng định/phủ định/
+  nghi vấn theo đại từ nhân xưng.
+- **`starters-this-plurals`** — this/that/these/those (số ít/nhiều, gần/
+  xa), danh từ số nhiều quy tắc (-s/-es).
+- **`starters-there-is-are-basic`** — there is/are ở dạng ĐƠN GIẢN NHẤT
+  (không có some/any như bản Movers), câu hỏi Is there/Are there.
+- **`starters-prepositions-can`** — giới từ in/on/under, can (khả năng cơ
+  bản).
+- **`starters-vocabulary`** — 10 câu từ vựng nền tảng nhất (màu sắc, số
+  đếm 1-5, động vật, gia đình, đồ ăn) — dễ hơn hẳn 2 unit từ vựng Movers/
+  Flyers, đúng tinh thần "khởi động" của Starters.
+
+**Đăng ký hạ tầng** (đúng kiến trúc mở rộng đã có từ Đợt 1 — chỉ thêm dữ
+liệu, không sửa engine):
+- `examprep.js`: import `STARTERS_UNITS`, thêm `{ id: 'starters', label:
+  'Starters (tiền A1)', icon: '🔰' }` vào đầu mảng `LEVELS`, đăng ký vào
+  `UNITS_BY_LEVEL`.
+- `exam-prep/index.html`: thêm 1 `level-card` thứ 3 (Starters) lên ĐẦU màn
+  chọn cấp độ — không cần sửa `app.js` vì màn chọn cấp độ vốn đã dùng
+  `document.querySelectorAll('.level-card[data-level]')` tổng quát, tự
+  nhận thêm cấp mới.
+- 2 khoá i18n mới (`examprep.starters`/`examprep.starters.desc`, 5 ngôn
+  ngữ) + cập nhật số liệu thẻ trang chủ (240→**282 câu, 22→27 unit**, nói
+  rõ "trọn bộ 3 cấp").
+- Test: cập nhật số unit/tổng câu hỏi (`LEVELS` giờ có 3 phần tử, mọi chỗ
+  lặp `[...MOVERS_UNITS, ...FLYERS_UNITS]` thêm `STARTERS_UNITS`).
+
+**Kết quả**: 3 cấp độ (Starters/Movers/Flyers), **27 unit, 282 câu hỏi**
+(đã xác nhận 282 id duy nhất). Cả 2 nhánh Học và Luyện Thi đều hoạt động
+với cấp Starters ngay lập tức nhờ kiến trúc data-driven.
+
+`sw.js` v96→**v97**. `npm test` toàn bộ: **1076 ✅, 0 ❌** (vẫn 28 test của
+exam-prep — thêm data không thêm hành vi engine mới). Smoke test `/` và
+`/exam-prep/` đều 200, xác nhận 3 level-card đăng ký đúng, không id trùng
+lặp trong HTML.
+
+**Còn để ngỏ**: kho "unit mới cùng tầm Movers/Flyers/Starters" giờ đã khá
+cạn ở cả 3 cấp — bước tiếp theo nếu muốn "bổ sung Cambridge" nữa sẽ cần
+chuyển hướng thật sự: animation ngữ pháp trực quan (Đợt 2 mục 28) hoặc bắt
+đầu KET/PET/TOEFL Junior/TOEIC (mục 30, khối lượng lớn hơn hẳn).
+
+## 37. GAME MỚI: 🎬 NGỮ PHÁP TRỰC QUAN — ĐỢT 2 CỦA MỤC 28 (07/2026)
+
+Bạn chọn hướng "animation ngữ pháp trực quan" ở lần hỏi thứ 4 (thay vì bắt
+đầu KET) — đúng đợt việc đã đề xuất ở mục 28 §Đợt 2 nhưng chưa làm: "Cỗ Máy
+Thời Gian Ngữ Pháp" và "Hai Hành Động Cùng Lúc", đúng ý tưởng gốc bạn mô tả
+ban đầu ("cây thời gian và 1 người đang chạy ở mốc quá khứ, bắt trẻ dự đoán
+là thì gì? hay 2 hành động ở quá khứ, bắt trẻ đoán thì gì").
+
+**`nguphap-truc-quan/`** (bundle mới, kiến trúc "N trò trong 1" giống
+`ren-tri-nao/`/`van-dong-vui/`: 1 màn chọn trò + 1 màn chơi chung, mỗi trò
+tự dựng DOM):
+
+- **🕰️ Cỗ Máy Thời Gian Ngữ Pháp**: hiện 1 trục thời gian 3 vùng (Quá khứ |
+  Bây giờ | Tương lai), 1 nhân vật (🧒👧🐱🐶) + 1 "tín hiệu" xuất hiện đúng
+  vùng tương ứng — 🔁 lặp lại (hiện tại đơn), 🕐 quay tròn (đang diễn ra —
+  ở vùng "bây giờ" là hiện tại tiếp diễn, ở vùng "quá khứ" là quá khứ tiếp
+  diễn — ĐÚNG tình huống bạn mô tả "người đang chạy ở mốc quá khứ"), ✅ đã
+  xong (quá khứ đơn), 🔗 vừa nối quá khứ-hiện tại (hiện tại hoàn thành), 📅
+  kế hoạch (tương lai gần "going to"). Bé chọn đúng câu tiếng Anh (trong 4
+  câu cùng nhân vật/động từ, chỉ khác thì) khớp với hình.
+- **⏳ Hai Hành Động Cùng Lúc**: 2 icon hoạt hình cùng lúc — 1 hành động NỀN
+  (🍳📖🚿😴🧹, lắc lư liên tục = đang diễn ra lâu) và 1 sự kiện NGẮN xen vào
+  (📞🔔💡🐦, nhấp nháy = xảy ra đột ngột) — bé chọn đúng câu "While ... was
+  V-ing, ... V-ed." trong 4 lựa chọn (câu đúng + 3 biến thể sai: đảo vai
+  trò, cả 2 quá khứ đơn, cả 2 tiếp diễn) — đúng tình huống "2 hành động ở
+  quá khứ, bắt trẻ đoán thì gì".
+- **Kỹ thuật sinh câu**: KHÔNG hard-code sẵn từng câu — mỗi thì có 1 hàm
+  `build(character, verb)` chia động từ đúng ngữ pháp (kể cả bất quy tắc:
+  swim→swam/swum), nên 4 nhân vật × 6 động từ × 6 thì = 144 tổ hợp cho Cỗ
+  Máy Thời Gian; tương tự 3 chủ ngữ × 5 hành động nền × 4 sự kiện × 4 kiểu
+  câu cho Hai Hành Động — độ đa dạng cao mà không cần viết tay từng câu.
+- **Luật chọn-lại/thưởng giống hệt các game khác** trong dự án (sai lần 1
+  → gợi ý bằng giọng nói + giải thích tiếng Việt, chọn lại; đúng sau gợi ý
+  vẫn có điểm ít hơn; sai lần 2 → lộ đáp án qua vòng), `mountKidFeatures()`
+  + `answeredOne()` + `recordSession()` như mọi game khác.
+- **17 unit test mới** (`nguphap-truc-quan/src/nguphaptructuan.test.js`):
+  xác nhận chia động từ đúng cho từng thì (kể cả bất quy tắc), 4 lựa chọn
+  luôn dùng cùng nhân vật/động từ (chỉ khác thì), câu "correct" của Hai
+  Hành Động luôn đúng mẫu `While ... was ..., ... V-ed.`, 4 pattern luôn
+  cho 4 câu khác nhau, và toàn bộ luật chọn-lại/kết thúc ván cho cả 2 trò.
+- Đăng ký: thẻ "🎬 Ngữ Pháp Trực Quan" trên trang chủ (sau "Luyện Thi
+  Cambridge"), 16 khoá i18n (`nguphap.*` + `card.nguphap.*`, 5 ngôn ngữ),
+  `sw.js` v97→**v98**, `package.json` thêm dòng test.
+
+`npm test` toàn bộ: **1093 ✅, 0 ❌** (1076 + 17 mới). Smoke test `/` và
+`/nguphap-truc-quan/` đều 200, không id trùng lặp trong HTML.
+
+**Còn để ngỏ**: 3 ý tưởng animation còn lại trong đề xuất Đợt 2/mục 28 (So
+Sánh Hơn/Nhất Trực Quan, Going To vs Will Trực Quan, Modal Ai Đúng) chưa
+làm — có thể thêm vào bundle này như trò thứ 3/4/5 nếu muốn tiếp tục hướng
+này. Ngoài ra Đợt 3 (mượn khung Ôn Tập Vui cho ngữ pháp: Bắn Đúng Thì/Lật
+Thẻ Ngữ Pháp), Đợt 5 (Luyện Đề tổng hợp toàn bộ ngữ pháp), và mục 30 (KET/
+PET/TOEFL Junior/TOEIC) vẫn đang chờ.
+
+## 38. HOÀN THÀNH ĐỢT 2 MỤC 28: THÊM 3 TRÒ ANIMATION CÒN LẠI (07/2026)
+
+Bạn xác nhận "tiếp tục" ngay sau khi mục 37 liệt kê rõ 3 ý tưởng animation
+còn thiếu — không hỏi lại vì đây là tiếp nối trực tiếp (không phải fork
+mới) của hướng đã chọn. Bundle `nguphap-truc-quan/` từ 2 trò lên **5 trò**,
+hoàn tất toàn bộ 5 ý tưởng animation ngữ pháp đã đề xuất ở mục 28 §Đợt 2:
+
+- **📈 So Sánh Hơn/Nhất Trực Quan**: mỗi vòng NGẪU NHIÊN 50/50 giữa 2 dạng
+  — so sánh HƠN (2 thực thể, 2 thanh đo chiều cao khác nhau, 4 lựa chọn:
+  đúng/đảo vai trò/"as...as" sai/dùng từ trái nghĩa sai) và so sánh NHẤT (3
+  thực thể, 4 lựa chọn: đúng thực thể hạng nhất/2 thực thể sai/dùng so
+  sánh hơn thay vì nhất — kiểm tra cả nhận diện thực thể LẪN đúng ngữ pháp
+  hơn-vs-nhất). Thanh đo vẽ bằng chiều cao div tỉ lệ với giá trị ngẫu nhiên
+  1-5, icon thuộc tính (📏⚡📦⭐) nổi trên đầu thanh.
+- **🔮 Going To vs Will Trực Quan**: 6 tình huống có tín hiệu hình ảnh rõ
+  ràng (🧳 vali đã đóng gói, 📞 điện thoại reo, ⛈️ mây đen, 🔮 dự đoán mơ hồ,
+  📝 đã đặt vé, 🤝 lời hứa) — đúng ý tưởng gốc bạn mô tả. 4 lựa chọn gồm cả
+  nhiễu NGỮ PHÁP (chia sai động từ to be theo chủ ngữ: "I is going to..."
+  thay vì "I am going to...") lẫn nhiễu THỜI ĐIỂM (was/were going to — ý
+  định trong quá khứ, sai ngữ cảnh hiện tại) — không chỉ kiểm tra khái
+  niệm going-to-vs-will mà cả chia động từ chính xác.
+- **🚦 Modal Ai Đúng**: 8 tình huống biển báo/lời khuyên (🚭🦺🥦🍬📵🛏️🎟️🍭),
+  4 lựa chọn = ĐÚNG 4 modal cố định (must/mustn't/should/shouldn't) — khớp
+  tự nhiên với định dạng 4 lựa chọn của cả bundle, không cần thêm nhiễu
+  nhân tạo vì bản thân 4 modal đã đủ gây nhầm lẫn về mức độ bắt buộc.
+- **Tái cấu trúc (refactor)**: rút phần luật chọn-lại/tính điểm/kết thúc
+  ván (từng lặp lại y hệt ở `answerTimeMachine`/`answerTwoActions`) thành 1
+  hàm dùng chung `answerGeneric(game, chosenKey, getCorrectKey)` — cả 5 trò
+  giờ chỉ cần 1 dòng gọi hàm này với đúng cách lấy khoá đúng của từng trò,
+  giảm trùng lặp mà không đổi hành vi (17 test cũ vẫn xanh nguyên sau khi
+  refactor, xác nhận không phá vỡ gì).
+- **13 unit test mới** cho 3 trò thêm: xác nhận vòng chơi sinh đúng cả 2
+  dạng so sánh hơn/nhất qua nhiều lần chơi, câu đúng luôn gán đúng thực thể
+  có thanh đo lớn hơn/lớn nhất, chia động từ to be đúng theo chủ ngữ (I→am,
+  We/They→are, còn lại→is) trong Going To vs Will, modal luôn đúng 1 trong
+  4 giá trị cố định, và luật chọn-lại/kết thúc ván cho cả 3 trò.
+- Đăng ký: 3 mode-card mới (📈🔮🚦, tổng 5 trò — số lẻ nên áp dụng lại rule
+  CSS "ô cuối canh giữa" đã dùng ở `ren-tri-nao/`), 13 khoá i18n mới, cập
+  nhật mô tả thẻ trang chủ (2→5 trò), `sw.js` v98→**v99**.
+
+`npm test` toàn bộ: **1106 ✅, 0 ❌** (1093 + 13 mới). Smoke test `/` và
+`/nguphap-truc-quan/` đều 200, xác nhận đủ 5 mode-card, không id trùng lặp.
+
+**Còn để ngỏ**: cả 5 ý tưởng animation của Đợt 2/mục 28 đã hoàn thành. Các
+bước tiếp theo nếu muốn tiếp tục mảng Cambridge: Đợt 3 (mượn khung Ôn Tập
+Vui cho ngữ pháp: Bắn Đúng Thì/Lật Thẻ Ngữ Pháp), Đợt 5 (Luyện Đề tổng hợp
+trộn cả animation lẫn trắc nghiệm), hoặc mục 30 (KET/PET/TOEFL Junior/
+TOEIC, khối lượng lớn hơn hẳn).
+
+## 39. GOM MENU: "🎓 THI CHỨNG CHỈ ANH" THAY CHO 2 THẺ RỜI RẠC (07/2026)
+
+Bạn yêu cầu gom `exam-prep/` (Luyện Thi Cambridge) và `nguphap-truc-quan/`
+(Ngữ Pháp Trực Quan) — trước đó là 2 thẻ RIÊNG BIỆT trên trang chủ — vào
+**1 mục duy nhất "Thi Chứng Chỉ Anh"**, bên trong chia theo nhiều khu.
+
+**`thi-chung-chi-anh/`** (hub mới, cùng khuôn mẫu tĩnh HTML/CSS như
+`goc-tieng-anh/`/`on-tap-vui/` — không phụ thuộc `i18n.js` cho nội dung
+chính, chỉ nhúng để dùng chung script sửa nút back): tông màu xanh dương
+học thuật (khác tông cam của `goc-tieng-anh/`) vì đối tượng lớn tuổi hơn.
+- **Khu "Cambridge Young Learners English (YLE)"**: 2 thẻ thật —
+  `exam-prep/` (Luyện Thi Cambridge YLE, 282 câu/27 unit) và
+  `nguphap-truc-quan/` (Ngữ Pháp Trực Quan, 5 trò animation).
+- **Khu "Sắp có"**: 1 khối ghi chú (KHÔNG phải thẻ bấm được — tránh gây
+  hiểu lầm có nội dung chưa tồn tại) liệt kê KET/PET/TOEFL Junior/TOEIC
+  đang chuẩn bị, dùng chung engine "Học + Luyện Thi" đã có.
+- Trang chủ (`index.html`): xoá 2 thẻ `card-examprep`/`card-nguphap` cũ,
+  thay bằng **1 thẻ "🎓 Thi Chứng Chỉ Anh"** trỏ tới `thi-chung-chi-anh/`.
+- `i18n.js`: xoá 6 khoá orphan (`card.examprep.*`, `card.nguphap.*` — không
+  còn HTML nào tham chiếu), thêm 3 khoá `card.thichungchi.*` (5 ngôn ngữ).
+- `sw.js` v99→**v100** (+precache `thi-chung-chi-anh/index.html`).
+
+`npm test` toàn bộ: **1106 ✅, 0 ❌** (đổi thuần HTML/CSS/i18n, không đụng
+logic game). Smoke test `/`, `/thi-chung-chi-anh/`, `/exam-prep/`,
+`/nguphap-truc-quan/` đều 200; xác nhận không còn tham chiếu
+"examprep"/"nguphap" nào sót lại trong `index.html`.
+
+**Lưu ý kỹ thuật chưa xử lý**: `exam-prep/` và `nguphap-truc-quan/` hiện
+CHƯA có nút "◀ quay lại hub" kiểu referrer-rewrite như các game trong
+`goc-tieng-anh/` (mục 17) — nút `🏠` của 2 game này vẫn trỏ thẳng về `/`
+(trang chủ), còn nút `◀` sẵn có là điều hướng NỘI BỘ giữa các màn (cấp độ→
+unit→quiz, hoặc trò→màn chơi), không phải nút quay về hub. Nghĩa là từ
+trong game bấm `🏠` sẽ về thẳng trang chủ thay vì quay lại
+`/thi-chung-chi-anh/` — chấp nhận được vì đây vẫn là hành vi nhất quán với
+MỌI game khác trong repo (🏠 luôn về trang chủ), chỉ là chưa có thêm 1 bước
+"quay lại đúng hub" tiện hơn. Có thể bổ sung sau nếu cần.
+
+## 40. TIẾP TỤC: BẮT ĐẦU KET (A2 KEY) — ĐỢT 6 CỦA MỤC 30 (07/2026)
+
+Sau khi gom menu (mục 39), bạn yêu cầu "tiếp tục" — vì bạn vừa nhắc tên cả
+"cambridge ket pet toefl toeic" trong cùng 1 câu, đi tiếp bằng cách **bắt
+đầu KET** (chứng chỉ tiếp theo chưa code trong danh sách, và là track GẦN
+NHẤT với Flyers nên rủi ro thấp nhất) thay vì hỏi lại lần nữa.
+
+**4 unit KET đầu tiên** (`exam-prep/src/units.js`, mỗi unit 10 câu + lesson
+— chỉ chọn điểm ngữ pháp THỰC SỰ MỚI so với Flyers, đúng danh sách đã phân
+tích ở mục 30 §2, không lặp lại hiện tại hoàn thành/going to-will/so sánh
+đã luyện sâu ở Flyers):
+- **`ket-conditionals`** — câu điều kiện loại 0 (If + hiện tại đơn, hiện
+  tại đơn — sự thật hiển nhiên) và loại 1 (If + hiện tại đơn, will + V —
+  có thể xảy ra ở tương lai).
+- **`ket-gerunds`** — động từ + V-ing (like/enjoy/love/hate/finish/stop),
+  đối chiếu với want/decide + to + V để tránh nhầm lẫn.
+- **`ket-reflexive-prepositions`** — đại từ phản thân (myself/herself/
+  themselves/ourselves...), giới từ thời gian (at/on/in) và chuyển động
+  (towards/away from).
+- **`ket-phrasal-verbs`** — cụm động từ cơ bản (get up, look for, turn on/
+  off, put on/take off, give up, look after, hand in).
+
+**Đăng ký đúng kiến trúc mở rộng đã dùng cho Starters** (không sửa engine):
+- `examprep.js`: import `KET_UNITS`, thêm `{ id: 'ket', label: 'KET (A2
+  Key)', icon: '🎫' }` vào `LEVELS`, đăng ký vào `UNITS_BY_LEVEL`.
+- `exam-prep/index.html`: thêm level-card thứ 4 (KET) vào màn chọn cấp độ.
+- 2 khoá i18n mới (`examprep.ket`/`examprep.ket.desc`, 5 ngôn ngữ).
+- `examprep.test.js`: cập nhật mọi chỗ lặp `[...STARTERS_UNITS,
+  ...MOVERS_UNITS, ...FLYERS_UNITS]` thêm `KET_UNITS`; sửa test
+  `unitsForLevel('ket')` (trước đây kỳ vọng RỖNG vì 'ket' chưa tồn tại —
+  giờ đổi sang kiểm tra đúng 4 unit, và đổi cấp "chưa tồn tại" dùng để test
+  fallback rỗng sang `'pet'`).
+- `thi-chung-chi-anh/`: cập nhật thẻ "Luyện Thi Cambridge YLE" → **"Luyện
+  Thi Cambridge"** (bỏ chữ YLE vì giờ đã có cả KET không thuộc YLE), số
+  liệu 282 câu/27 unit → 322 câu/31 unit; xoá "KET" khỏi khối "Sắp có" (chỉ
+  còn PET/TOEFL Junior/TOEIC).
+- Trang chủ: cập nhật mô tả thẻ "Thi Chứng Chỉ Anh" (Starters·Movers·
+  Flyers·KET, sắp có PET/TOEFL Junior/TOEIC). `sw.js` v100→**v101**.
+
+**Kết quả**: 4 cấp độ (Starters/Movers/Flyers/KET), **31 unit, 322 câu
+hỏi** (đã xác nhận duy nhất). Cả 2 nhánh Học và Luyện Thi hoạt động với
+KET ngay lập tức nhờ kiến trúc data-driven — không cần thêm dòng code
+engine nào.
+
+`npm test` toàn bộ: **1106 ✅, 0 ❌** (mở rộng nội dung + sửa assertion,
+không thêm test case mới vì không có hành vi engine mới). Smoke test `/`,
+`/thi-chung-chi-anh/`, `/exam-prep/` đều 200, xác nhận đủ 4 level-card.
+
+**Còn để ngỏ**: KET mới có 4 unit khởi đầu (so với Movers/Flyers có 11
+unit mỗi cấp) — có thể mở rộng thêm KET (thêm unit ngữ pháp/từ vựng, hoặc
+Reading/Writing-style câu hỏi theo đúng cấu trúc đề KET thật như mục 30 §4
+đã đề xuất — Đọc Hiểu Có Giờ, Sửa Lỗi Trong Đoạn Văn, Viết Lại Câu Cùng
+Nghĩa). PET/TOEFL Junior/TOEIC (mục 30) vẫn đang chờ bắt đầu.
+
+## 41. TIẾP TỤC MỞ RỘNG KET (07/2026)
+
+Bạn xác nhận "tiếp tục" lần nữa — đúng mẫu hình đã lặp lại xuyên suốt
+phiên làm việc này (mỗi khi có lựa chọn "mở rộng nội dung hiện có" vs "bắt
+đầu mảng lớn mới", bạn luôn chọn vế đầu), nên đi tiếp bằng cách mở rộng
+KET giống hệt cách đã làm với Movers/Flyers (mục 34-35) thay vì hỏi lại
+hay nhảy sang PET/TOEFL Junior/TOEIC.
+
+- **+2 câu cho mỗi 4 unit ngữ pháp KET đã có** (10 → 12 câu/unit): thêm
+  điều kiện loại 0/1 với ngữ cảnh mới (metal expands/feel cold), thêm
+  avoid/promise cho nhóm V-ing vs to-V, thêm giới từ "in the mirror" +
+  himself cho đại từ phản thân, thêm fill in/take off (nghĩa thứ 2: cất
+  cánh — cố tình dùng lại cụm từ đã dạy với nghĩa khác để dạy tính đa nghĩa
+  theo ngữ cảnh của phrasal verb, ghi rõ trong `explain`).
+- **+1 unit từ vựng mới `ket-vocabulary`** (12 câu) — theo đúng mẫu đã có
+  ở Movers/Flyers (mỗi cấp đều có 1 unit từ vựng riêng, KET trước đó thiếu
+  unit này): mua sắm (fitting room, on sale), du lịch (passport, airport),
+  công nghệ & sức khỏe (wireless, charge, fit), hẹn gặp & mô tả người/nơi
+  chốn (appointment, friendly, crowded) — đúng phạm vi "từ vựng mở rộng
+  đời sống" đã liệt kê ở mục 30 §2 cho KET.
+- **Kết quả**: KET 4→**5 unit**, 40→**60 câu hỏi**. Tổng toàn hệ thống:
+  31→**32 unit**, 322→**342 câu hỏi** (đã xác nhận 342 id duy nhất).
+- Cập nhật: `examprep.test.js` (KET_UNITS.length 4→5, ngưỡng tổng câu hỏi
+  ≥315→≥335, `unitsForLevel('ket').length` 4→5), thẻ `thi-chung-chi-anh/`
+  (322→342 câu, 31→32 unit), `sw.js` v101→**v102**.
+
+`npm test` toàn bộ: **1106 ✅, 0 ❌** (mở rộng nội dung thuần, không thêm
+test case mới). Smoke test `/`, `/thi-chung-chi-anh/`, `/exam-prep/` đều
+200.
+
+**Còn để ngỏ**: KET giờ đã cân đối hơn (5 unit, gần bằng Starters). Các
+hướng tiếp theo: mở rộng KET thêm nữa (Reading/Writing-style theo đề thật
+— mục 30 §4), hoặc bắt đầu PET/TOEFL Junior/TOEIC (mục 30, khối lượng lớn
+hơn hẳn, cần dữ liệu unit hoàn toàn mới).
+
+## 42. CƠ CHẾ MỚI: ĐỌC HIỂU CÓ ĐOẠN VĂN CHO KET (07/2026)
+
+Bạn tiếp tục xác nhận đi đúng hướng "mở rộng nội dung hiện có" một lần
+nữa — nhưng lần này chọn ý còn lại đã nêu ở mục 41 (Reading/Writing-style
+theo mục 30 §4) thay vì lặp lại kiểu "thêm câu trắc nghiệm ngữ pháp" đã
+làm 3 lần liên tiếp (mục 34/35/41), vì thêm mãi cùng 1 dạng bài sẽ giảm
+giá trị — đây là **cơ chế MỚI** (Đọc Hiểu Có Giờ) chứ không phải thêm câu
+hỏi cùng khuôn cũ.
+
+**Mở rộng cấu trúc dữ liệu (`exam-prep/src/units.js`)**: thêm trường TUỲ
+CHỌN `passage: { title, text }` vào Unit — 1 đoạn văn tiếng Anh ngắn dùng
+CHUNG cho nhiều câu hỏi `type: 'reading'` của cùng unit đó (khác câu hỏi
+grammar/vocab vốn luôn có "___" độc lập từng câu). Unit mới
+**`ket-reading-comprehension`**: đoạn văn ~100 từ "Maria's Day at the
+Market" (kể chuyện đi chợ cuối tuần, đúng độ khó/độ dài đề KET Reading
+thật) + 6 câu hỏi đọc hiểu đúng 3 dạng đã liệt kê ở mục 30 §4: **ý chính**
+(favourite part), **chi tiết** (khi nào, vì sao), **suy luận** (tại sao
+buồn — không nói thẳng "vì hết bánh" mà phải suy ra từ ngữ cảnh).
+
+**Đường dẫn passage từ dữ liệu ra giao diện** (không phá vỡ hành vi cũ):
+- `examprep.js`: `allQuestions()` và nhánh `makeQuiz(level, unitId,...)`
+  giờ gắn thêm `unitPassage: unit.passage` vào mỗi câu hỏi khi làm phẳng
+  (flatten) — unit không có `passage` thì trường này là `undefined`, không
+  ảnh hưởng câu hỏi grammar/vocab hiện có.
+- `exam-prep/index.html` + `style.css`: thêm khối `#quizPassage` (tiêu đề +
+  đoạn văn, cuộn được, ẩn mặc định) phía trên `#quizPrompt` trong màn làm
+  bài — DÙNG CHUNG cho cả nhánh Học lẫn Luyện Thi vì cùng 1 màn `quizScreen`.
+- `exam-prep/src/app.js`: `renderQuestion()` hiện/ẩn `#quizPassage` theo
+  `q.unitPassage` mỗi khi đổi câu — đoạn văn ở lại trên màn hình xuyên suốt
+  các câu hỏi cùng 1 bài đọc (khi luyện tập đúng unit `ket-reading-
+  comprehension`), hoặc hiện lại đúng lúc nếu câu đọc hiểu xen giữa các câu
+  khác khi luyện ngẫu nhiên/làm đề trộn toàn KET.
+- Đã cân nhắc: KHÔNG đọc to đoạn văn bằng giọng nói (khác mọi câu hỏi khác
+  trong app vốn luôn có TTS) — vì đây là bài tập ĐỌC, đọc to sẽ đi ngược
+  mục đích rèn kỹ năng đọc hiểu; chỉ câu hỏi/lựa chọn vẫn dùng TTS như cũ.
+
+**Kết quả**: KET 5→**6 unit**, 60→**66 câu hỏi**. Tổng hệ thống:
+32→**33 unit**, 342→**348 câu hỏi** (348 id duy nhất, đã xác nhận). **3
+test mới**: unit `ket-reading-comprehension` có `passage` hợp lệ (đủ dài,
+đúng title/text) và câu hỏi `type:'reading'` không cần "___"; nới lỏng
+assertion cũ ("mọi câu hỏi phải có ___") để bỏ qua riêng loại `reading`;
+`allQuestions()`/`makeQuiz()` gắn đúng `unitPassage` cho câu reading và
+KHÔNG gắn cho unit không có passage (tránh rò rỉ trường `undefined` gây
+nhầm lẫn UI). `sw.js` v102→**v103**.
+
+`npm test` toàn bộ: **1109 ✅, 0 ❌** (1106 + 3 test mới). Smoke test `/`,
+`/thi-chung-chi-anh/`, `/exam-prep/` đều 200, không id trùng lặp trong
+`exam-prep/index.html` (42 id, thêm 3 id mới cho khối passage).
+
+**Còn để ngỏ**: mới có 1 đoạn văn đọc hiểu — có thể thêm nhiều đoạn văn
+khác (chủ đề khác, độ dài/độ khó tăng dần) nếu muốn tiếp tục hướng này;
+"Sửa Lỗi Trong Đoạn Văn" và "Viết Lại Câu Cùng Nghĩa" (2 ý còn lại ở mục
+30 §4) vẫn chưa làm. PET/TOEFL Junior/TOEIC (mục 30) vẫn đang chờ bắt đầu.
+
+## 43. BẮT ĐẦU PET (B1 PRELIMINARY) — ĐỢT 8 CỦA MỤC 30 (07/2026)
+
+Bạn xác nhận "tiếp" lần nữa. Lần này KHÔNG tiếp tục đào sâu KET thêm nữa —
+tự nhận định rằng 2 ý tưởng còn lại ở mục 30 §4 ("Sửa Lỗi Trong Đoạn Văn",
+"Viết Lại Câu Cùng Nghĩa") thực ra đúng ra thuộc phạm vi NGỮ PHÁP PET
+(câu bị động, câu tường thuật — chính đề xuất gốc ở mục 30 §4 cũng ghi rõ
+"Sửa Lỗi..." là dạng bài TOEFL Junior và "Viết Lại Câu..." là dạng bài
+PET), không phải KET — ép 2 cơ chế này vào KET sẽ sai tầm ngữ pháp. Vì
+vậy quyết định đi tiếp sang **PET**, việc chưa code tiếp theo được nêu tên
+trực tiếp trong yêu cầu gốc của bạn ("cambridge ket pet toefl toeic"),
+thay vì tiếp tục vá thêm nội dung KET không đúng chỗ.
+
+**6 unit PET đầu tiên** (`exam-prep/src/units.js`, mỗi unit 10-12 câu +
+lesson — đúng các điểm ngữ pháp THỰC SỰ MỚI so với KET theo mục 30 §2):
+- **`pet-conditional-2`** — câu điều kiện loại 2 (If + quá khứ đơn, would
+  + V — giả định không có thật ở hiện tại/tương lai; "were" dùng cho mọi
+  chủ ngữ trong văn viết trang trọng).
+- **`pet-past-perfect`** — quá khứ hoàn thành (had + V3 — hành động xảy ra
+  TRƯỚC 1 hành động/thời điểm khác trong quá khứ).
+- **`pet-passive-voice`** — câu bị động ở hiện tại đơn (is/are + V3) và
+  quá khứ đơn (was/were + V3).
+- **`pet-reported-speech`** — câu tường thuật cơ bản (khẳng định + câu
+  hỏi, lùi thì: am→was, will→would, have→had, saw→had seen).
+- **`pet-relative-clauses`** — mệnh đề quan hệ who/which/whose/where.
+- **`pet-vocabulary`** (12 câu) — từ vựng đời sống-xã hội mở rộng: giáo
+  dục, công việc (graduate, apply), môi trường (polluted, recycling), văn
+  hoá & truyền thông (culture, media), quan hệ xã hội (relationship), du
+  lịch & công nghệ (tourist, technology) — đúng phạm vi đã liệt kê ở mục
+  30 §2 cho PET.
+
+**Đăng ký đúng kiến trúc mở rộng đã dùng cho Starters/KET** (không sửa
+engine, không cần CSS mới vì màn chọn cấp độ là danh sách dọc, không phải
+lưới — không bị vấn đề "ô lẻ" như các bundle dùng grid):
+- `examprep.js`: import `PET_UNITS`, thêm `{ id: 'pet', label: 'PET (B1
+  Preliminary)', icon: '🏅' }` vào `LEVELS`, đăng ký vào `UNITS_BY_LEVEL`.
+- `exam-prep/index.html`: thêm level-card thứ 5 (PET).
+- 2 khoá i18n mới (`examprep.pet`/`examprep.pet.desc`, 5 ngôn ngữ).
+- `examprep.test.js`: cập nhật mọi chỗ lặp union unit thêm `PET_UNITS`;
+  sửa `unitsForLevel('pet')` (trước kỳ vọng RỖNG — giờ đúng 6 unit) và đổi
+  cấp "chưa tồn tại" dùng để test fallback rỗng sang `'toefl-junior'`.
+- `thi-chung-chi-anh/`: cập nhật thẻ Cambridge (410 câu/39 unit, thêm PET
+  vào danh sách cấp), xoá "PET" khỏi khối "Sắp có" (chỉ còn TOEFL Junior/
+  TOEIC). Trang chủ: cập nhật mô tả + chip thẻ "Thi Chứng Chỉ Anh".
+  `sw.js` v103→**v104**.
+
+**Kết quả**: 5 cấp độ (Starters/Movers/Flyers/KET/PET), **39 unit, 410 câu
+hỏi** (đã xác nhận duy nhất). Cả 2 nhánh Học và Luyện Thi hoạt động với
+PET ngay lập tức, kể cả cơ chế đọc-hiểu-có-đoạn-văn mới thêm ở mục 42 vẫn
+tương thích nguyên vẹn (PET chưa dùng `passage` nhưng có thể thêm sau).
+
+`npm test` toàn bộ: **1109 ✅, 0 ❌** (mở rộng nội dung + sửa assertion,
+không thêm test case mới vì không có hành vi engine mới). Smoke test `/`,
+`/thi-chung-chi-anh/`, `/exam-prep/` đều 200, xác nhận đủ 5 level-card,
+không id trùng lặp.
+
+**Còn để ngỏ**: PET mới có 6 unit khởi đầu (tương đương KET) — có thể mở
+rộng thêm PET (thêm unit, hoặc thêm đoạn văn đọc hiểu dài/khó hơn KET đúng
+tầm B1, hoặc bắt đầu 2 cơ chế "Sửa Lỗi Trong Đoạn Văn"/"Viết Lại Câu Cùng
+Nghĩa" giờ đã đúng chỗ vì PET đã có bị động + tường thuật để paraphrase).
+TOEFL Junior/TOEIC (mục 30) vẫn đang chờ bắt đầu.
+
+## 44. HOÀN THÀNH 2 CƠ CHẾ CÒN LẠI CỦA MỤC 30 §4 CHO PET (07/2026)
+
+Bạn xác nhận "tiếp tục" — đúng như mục 43 đã dự đoán, giờ PET đã có bị
+động + tường thuật nên 2 ý tưởng còn lại ở mục 30 §4 mới thực sự đúng chỗ.
+Triển khai cả 2 trong 1 đợt, **+2 unit PET** (6→8):
+
+- **`pet-cloze-passage`** (Điền Từ Trong Đoạn Văn) — đúng dạng "Reading
+  Part 6: Open Cloze" thật của PET: 1 đoạn nhật ký "My Weekend Diary" (~110
+  từ, mạch chuyện liền lạc: thăm bà ở quê, hái rau, chơi với gà, bà tặng
+  gạo, hứa quay lại) + **8 câu hỏi điền từ NẰM TRONG CHÍNH đoạn văn đó**
+  (ôn tập tổng hợp: quá khứ đơn, mệnh đề quan hệ "who", quá khứ hoàn thành
+  "had grown" — xảy ra TRƯỚC hành động "gave", liên từ "Before", và tường
+  thuật lùi thì "will→would" trong câu "we promised... we would visit").
+  Tái dùng NGUYÊN VẸN cơ chế `Unit.passage` vừa xây cho
+  `ket-reading-comprehension` ở mục 42 — không cần thêm dòng code UI nào.
+  **Quyết định đặt tên trung thực**: đề xuất gốc gọi đây là "Sửa Lỗi Trong
+  Đoạn Văn" (error correction — chỉ ra và SỬA từ sai, không có lựa chọn),
+  nhưng cơ chế thực sự xây được trong app (chọn 1 trong 4 từ cho ô trống)
+  đúng là dạng "cloze/gap-fill" (PET Reading Part 6 thật), khác bản chất
+  với "chỉ ra lỗi sai không gợi ý" (gần với PET Writing Part 3/TOEFL Junior
+  Language Form hơn — cần giao diện chấm câu chữ tự do, không làm ở đợt
+  này) — nên đặt tên ĐÚNG là "Điền Từ Trong Đoạn Văn" thay vì gắn nhãn "sửa
+  lỗi" sai bản chất.
+- **`pet-rewrite-sentences`** (Viết Lại Câu Cùng Nghĩa) — đúng dạng "Key
+  Word Transformation" quen thuộc của PET: 10 câu, mỗi câu là 1 câu gốc +
+  mũi tên (`"Câu gốc. → ___"`) rồi chọn đúng 1 trong 4 câu viết lại cùng
+  nghĩa (chủ động→bị động: "Someone built this house in 1990." → "This
+  house was built in 1990."; trực tiếp→tường thuật: "I will help you," he
+  said." → "He said he would help me."). **Kỹ thuật gọn**: thêm `type:
+  'rewrite'` mới vào schema Question, nhưng KHÔNG cần sửa engine/UI nào vì
+  prompt vẫn giữ đúng quy ước có "___" (nhúng trong mũi tên "→ ___") — cả
+  `answerQuiz`/`answerMockTest`/`renderQuestion` đều dùng chung không phân
+  biệt type, y hệt cách `type: 'vocab'` đã hoạt động từ đầu.
+
+**2 test mới**: xác nhận `pet-cloze-passage` có `passage` hợp lệ và MỌI
+câu vẫn giữ "___" dù đi kèm đoạn văn (khác `ket-reading-comprehension`
+không có "___"); xác nhận `pet-rewrite-sentences` toàn bộ `type: 'rewrite'`
+và luôn có mẫu "→ ___" trong prompt.
+
+**Kết quả**: PET 6→**8 unit**, 62→**80 câu hỏi**. Tổng hệ thống:
+39→**41 unit**, 410→**428 câu hỏi** (428 id duy nhất, đã xác nhận). Cập
+nhật thẻ `thi-chung-chi-anh/` (428 câu/41 unit, nhắc rõ 3 dạng bài mới:
+đọc hiểu đoạn văn, điền từ trong đoạn văn, viết lại câu). `sw.js`
+v104→**v105**.
+
+`npm test` toàn bộ: **1111 ✅, 0 ❌** (1109 + 2 test mới). Smoke test `/`,
+`/thi-chung-chi-anh/`, `/exam-prep/` đều 200, cú pháp `units.js`/
+`examprep.js` sạch.
+
+**Còn để ngỏ**: cả 3 ý tưởng "dạng bài đọc/viết theo cấu trúc đề thật" ở
+mục 30 §4 áp dụng cho KET/PET nay đã xong (đọc hiểu, điền từ đoạn văn,
+viết lại câu). Việc "chỉ ra và tự sửa lỗi không gợi ý" (error correction
+đúng nghĩa đen, không có lựa chọn) vẫn để ngỏ vì cần giao diện nhập/chọn
+từ trong câu khác hẳn UI trắc nghiệm hiện tại. TOEFL Junior/TOEIC (mục 30)
+vẫn đang chờ bắt đầu — đây sẽ là lần đầu cần dựng LEVEL HOÀN TOÀN MỚI từ
+đầu (TOEFL Junior/TOEIC không nằm trong họ Cambridge YLE/KET/PET, ngữ
+cảnh khác hẳn — TOEFL Junior học thuật, TOEIC công sở).
+
+## 45. BẮT ĐẦU TOEFL JUNIOR (>800/900) — ĐỢT 9 CỦA MỤC 30 (07/2026)
+
+Bạn xác nhận "tiếp tục" — đi tiếp sang **TOEFL Junior**, cấp ĐẦU TIÊN nằm
+ngoài họ Cambridge YLE/KET/PET (khác ngữ cảnh: học thuật nhẹ thay vì thi
+trẻ em). Việc chưa cần bắt đầu mảng dữ liệu hoàn toàn mới lạ — vẫn dùng
+đúng kiến trúc `Unit`/`examprep.js` đã kiểm chứng qua 5 cấp trước, chỉ
+thêm mảng `TOEFL_JUNIOR_UNITS` mới.
+
+**7 unit TOEFL Junior đầu tiên** (mỗi unit 8 câu + lesson — đúng các điểm
+ngữ pháp THỰC SỰ MỚI so với PET theo mục 30 §2):
+- **`toefl-junior-past-perfect-continuous`** — had been + V-ing, nhấn
+  mạnh KHOẢNG THỜI GIAN 1 hành động diễn ra liên tục trước 1 mốc khác
+  trong quá khứ (khác quá khứ hoàn thành thường chỉ nói việc đã xong).
+- **`toefl-junior-future-perfect-continuous`** — tương lai tiếp diễn
+  (will be + V-ing) và tương lai hoàn thành (will have + V3).
+- **`toefl-junior-conditional-3`** — câu điều kiện loại 3 (If + had + V3,
+  would have + V3 — giả định trái với quá khứ, không thể thay đổi).
+- **`toefl-junior-passive-all-tenses`** — bị động ở hiện tại hoàn thành
+  (has/have been + V3), tương lai (will be + V3), và với động từ khuyết
+  thiếu (must/should/can + be + V3) — mở rộng từ bị động hiện tại/quá khứ
+  đơn đã học ở PET.
+- **`toefl-junior-conjunctions-advanced`** — liên từ nâng cao: provided
+  that/as long as (miễn là), unless (trừ khi), even though/although
+  (mặc dù).
+- **`toefl-junior-vocabulary`** (12 câu) — từ vựng học thuật nhẹ: khoa
+  học (scientific, hypothesis, analyze), đánh giá & xã hội (evaluate,
+  community, global, significant).
+- **`toefl-junior-reading`** — đoạn đọc hiểu học thuật "Why Do Bees
+  Matter?" (~120 từ, tái dùng cơ chế `passage` đã có) + 8 câu hỏi, LẦN ĐẦU
+  có dạng câu hỏi mới **"từ vựng theo văn cảnh"** (kiểu TOEFL thật: "The
+  word 'vital'... is closest in meaning to ___") bên cạnh ý chính/chi
+  tiết/suy luận đã quen từ KET.
+
+**Đăng ký đúng kiến trúc mở rộng** (không sửa engine): `examprep.js` thêm
+`{ id: 'toefl-junior', label: 'TOEFL Junior (>800/900)', icon: '📘' }` vào
+`LEVELS` + `UNITS_BY_LEVEL`; `exam-prep/index.html` thêm level-card thứ 6;
+2 khoá i18n mới; `examprep.test.js` cập nhật union unit + thêm test riêng
+cho `toefl-junior-reading` (xác nhận có câu hỏi "closest in meaning to");
+đổi cấp dùng để test fallback rỗng từ `'toefl-junior'` (giờ đã tồn tại)
+sang `'toeic'`.
+
+**Cập nhật hub `thi-chung-chi-anh/`**: đổi tên khu từ "Cambridge Young
+Learners English (YLE)" — không còn chính xác vì đã bao gồm cả KET/PET/
+TOEFL Junior nằm ngoài YLE — thành **"Luyện Thi & Ngữ Pháp (Cambridge →
+TOEFL Junior)"**; cập nhật số liệu thẻ (488 câu/48 unit, 6 cấp); rút gọn
+khối "Sắp có" chỉ còn TOEIC. `sw.js` v105→**v106**.
+
+**Kết quả**: 6 cấp độ (Starters/Movers/Flyers/KET/PET/TOEFL Junior),
+**48 unit, 488 câu hỏi** (488 id duy nhất, đã xác nhận). `npm test` toàn
+bộ: **1112 ✅, 0 ❌** (1111 + 1 test mới). Smoke test `/`,
+`/thi-chung-chi-anh/`, `/exam-prep/` đều 200, đủ 6 level-card, không id
+trùng lặp.
+
+**Còn để ngỏ**: TOEFL Junior mới có 7 unit khởi đầu — có thể mở rộng
+thêm (nghe hiểu — TOEFL Junior thật có phần Listening riêng mà app hiện
+chưa mô phỏng, hoặc thêm đoạn đọc hiểu học thuật khác). **TOEIC** (mục 30)
+là track CUỐI CÙNG còn lại trong yêu cầu gốc "cambridge ket pet toefl
+toeic" — ngữ cảnh công sở/thương mại, khác hẳn mọi cấp đã làm (đối tượng
+người lớn/thiếu niên đi làm, không phải học sinh).
+
+## 46. TÁCH RIÊNG KET/PET/TOEFL JUNIOR KHỎI MÀN CHỌN CẤP ĐỘ GỘP CHUNG (07/2026)
+
+Bạn phản hồi: gộp cả 6 cấp độ (Starters/Movers/Flyers/KET/PET/TOEFL
+Junior) trong CÙNG 1 màn chọn cấp độ của `exam-prep/` khiến bé dễ rối —
+yêu cầu tách KET/PET/TOEFL Junior thành các mục RIÊNG BIỆT ở home/hub,
+không gộp chung.
+
+**Quyết định kiến trúc**: KHÔNG viết lại engine — `exam-prep/src/
+examprep.js` và `units.js` (Unit/misses.js) giữ NGUYÊN VẸN, vẫn là nguồn
+dữ liệu/logic DUY NHẤT cho cả 6 cấp (đây là lý do khi thêm PET/TOEFL
+Junior trước đó chỉ mất vài dòng code). Thay đổi chỉ ở TẦNG GIAO DIỆN:
+- **`exam-prep/`** thu hẹp lại đúng phạm vi gốc — chỉ còn 3 level-card
+  Starters/Movers/Flyers (Cambridge YLE), xoá 3 level-card KET/PET/TOEFL
+  Junior khỏi màn chọn cấp độ.
+- **3 mục mới hoàn toàn tách biệt**, mỗi mục là 1 app riêng với URL riêng:
+  `luyen-thi-ket/`, `luyen-thi-pet/`, `luyen-thi-toefl-junior/` — mỗi app
+  **KHOÁ CỨNG 1 LEVEL_ID** (hằng số ở đầu file `app.js`) và **bỏ hẳn màn
+  chọn cấp độ** khỏi luồng UI: bấm vào mục là vào THẲNG màn "Học hay Luyện
+  Thi?" của đúng cấp đó, không phải chọn cấp trước như cũ.
+- **Cách tái dùng logic**: `app.js` của cả 3 mục mới import trực tiếp từ
+  `../../exam-prep/src/examprep.js` và `../../exam-prep/src/misses.js`
+  (cùng kiểu cross-folder import đã dùng cho `nghe-doan-on-tap` gộp 9
+  game trước đây) — chỉ đổi `LEVEL_ID`/`LEVEL_LABEL` và rút gọn state
+  machine (bỏ khoá `'level'` khỏi `SCREEN_ELS`, màn gốc đổi từ `level`
+  thành `mode`, `goBack()` khi hết history quay về `'mode'` thay vì
+  `'level'`). Sổ "câu hay sai" (`misses.js`) dùng CHUNG cho cả 4 app (kể
+  cả `exam-prep/`) vì id câu hỏi đã duy nhất toàn hệ thống — bé làm sai ở
+  bất kỳ app nào cũng ghi vào cùng 1 sổ ôn tập tổng.
+- `style.css` mỗi mục là 1 bản sao độc lập (đúng quy ước mọi game trong
+  repo — CSS không share qua href liên thư mục), chỉ đổi dòng comment đầu
+  file; nội dung style giống hệt `exam-prep/style.css`.
+- Mỗi mục mới có `package.json` riêng (`"type": "module"`) để nhất quán
+  với `exam-prep/` (dù không có file test, package.json vẫn giúp công cụ
+  kiểm tra cú pháp ESM nhận diện đúng).
+
+**Đăng ký**: 6 khoá i18n mới (`examket.title/help`, `expet.title/help`,
+`extofljr.title/help`, 5 ngôn ngữ mỗi khoá); `thi-chung-chi-anh/index.html`
+đổi từ 1 thẻ gộp "Luyện Thi Cambridge & TOEFL Junior" + 1 thẻ Ngữ Pháp
+Trực Quan thành **5 thẻ riêng biệt**: Cambridge YLE, KET, PET, TOEFL
+Junior, Ngữ Pháp Trực Quan — đổi tiêu đề khu thành "Từng Cấp Độ Riêng Biệt
+— dễ chọn, không gộp chung cho khỏi rối" (giải thích rõ LÝ DO tách, không
+chỉ liệt kê). `sw.js` v106→**v107** (+9 file precache cho 3 mục mới).
+
+`npm test` toàn bộ: **1112 ✅, 0 ❌** (không đổi — đây thuần là tái cấu
+trúc UI, dữ liệu/logic engine không đổi 1 dòng nên không có test nào cần
+sửa). Smoke test xác nhận: `exam-prep/` chỉ còn đúng 3 level-card
+(starters/movers/flyers); cả 3 mục mới (`/luyen-thi-ket/`,
+`/luyen-thi-pet/`, `/luyen-thi-toefl-junior/`) cùng file JS/CSS đều 200;
+đường dẫn import cross-folder từ `luyen-thi-ket/src/` tới
+`exam-prep/src/examprep.js` v.v. đều tồn tại đúng; không id trùng lặp
+trong bất kỳ file HTML nào (41 id/file, không trùng).
+
+**Còn để ngỏ**: chưa bổ sung dữ liệu mới trong lượt này (toàn bộ effort
+dành cho việc tách cấu trúc) — "tiếp tục bổ sung dữ liệu" bạn yêu cầu
+cùng lúc sẽ thực hiện ở lượt kế tiếp (mở rộng TOEFL Junior, hoặc bắt đầu
+TOEIC — track cuối cùng còn lại).
+
+**Bổ sung dữ liệu cùng lượt này** (phần "tiếp tục bổ sung dữ liệu" bạn
+yêu cầu chung 1 câu với việc tách mục): rà lại danh sách ngữ pháp TOEFL
+Junior ở mục 30 §2, phát hiện 2 điểm còn thiếu so với PET mà 7 unit ban
+đầu (mục 45) chưa phủ tới — **+2 unit TOEFL Junior mới**:
+- **`toefl-junior-reported-commands`** — câu tường thuật MỆNH LỆNH
+  (told/asked + O + to/not to + V) — PET mới dạy tường thuật khẳng định +
+  câu hỏi, còn thiếu dạng mệnh lệnh ("Sit down," → told the students to
+  sit down) mà mục 30 §2 ghi rõ TOEFL Junior cần "câu tường thuật ĐẦY ĐỦ
+  (trần thuật/nghi vấn/mệnh lệnh)".
+- **`toefl-junior-relative-clauses-nondefining`** — mệnh đề quan hệ KHÔNG
+  XÁC ĐỊNH (dùng dấu phẩy, thông tin thêm không thiết yếu, KHÔNG dùng
+  "that") — PET mới dạy mệnh đề xác định, còn thiếu "mệnh đề quan hệ xác
+  định/KHÔNG xác định" mà mục 30 §2 đã liệt kê cho TOEFL Junior. 1 câu hỏi
+  cố tình đối chiếu lại: mệnh đề XÁC ĐỊNH (không dấu phẩy) vẫn dùng được
+  "that" — giúp bé phân biệt rõ 2 loại thay vì học tách rời.
+
+**Kết quả**: TOEFL Junior 7→**9 unit**, 60→**76 câu hỏi**. Tổng hệ thống:
+48→**50 unit**, 488→**504 câu hỏi** (504 id duy nhất, đã xác nhận).
+`examprep.test.js` cập nhật số liệu unit/tổng câu hỏi tương ứng.
+
+`npm test` toàn bộ: **1112 ✅, 0 ❌** (chỉ cập nhật assertion số liệu,
+không thêm test case mới vì không có hành vi engine mới). Smoke test `/`,
+`/thi-chung-chi-anh/`, `/luyen-thi-toefl-junior/` đều 200. `sw.js`
+v107→**v108**.
+
+**Còn để ngỏ**: TOEFL Junior giờ đã phủ đủ toàn bộ điểm ngữ pháp liệt kê ở
+mục 30 §2. **TOEIC** vẫn là track CUỐI CÙNG chưa bắt đầu trong yêu cầu gốc
+"cambridge ket pet toefl toeic" — sẽ cần 1 mục riêng biệt thứ 6
+(`luyen-thi-toeic/`) theo đúng cấu trúc tách-mục vừa làm ở lượt này, không
+gộp vào cùng màn với các cấp khác.
+
+## 47. BẮT ĐẦU TOEIC — HOÀN TẤT TRỌN VẸN "CAMBRIDGE KET PET TOEFL TOEIC" (07/2026)
+
+Bạn xác nhận "tiếp tục" lần nữa — đi tiếp bằng **TOEIC**, track CUỐI CÙNG
+còn lại trong yêu cầu gốc bạn liệt kê ngay từ đầu ("cambridge ket pet
+toefl toeic"). Sau đợt này, toàn bộ 5 chứng chỉ được nêu tên đều đã có
+nội dung chơi được.
+
+**5 unit TOEIC đầu tiên** — đúng nhận định ở mục 30 §2: TOEIC không có
+nhiều ngữ pháp MỚI so với TOEFL Junior (cùng tầm B2), khác biệt chính là
+NGỮ CẢNH công sở/thương mại thay vì đời sống/học đường:
+- **`toeic-vocabulary-office`** (12 câu) — từ vựng văn phòng cơ bản:
+  colleague, deadline, memo, agenda, client, intern, cafeteria...
+- **`toeic-vocabulary-business`** (12 câu) — từ vựng kinh doanh: contract,
+  revenue, invoice, budget, discount, shipment, warranty, negotiate,
+  shareholder...
+- **`toeic-grammar-context`** (10 câu) — đúng dạng **Part 5 "Incomplete
+  Sentences"** thật của TOEIC: KHÔNG dạy ngữ pháp mới, chỉ đặt lại đúng
+  các điểm đã học (thì, bị động, điều kiện, liên từ) vào ngữ cảnh công
+  sở ("All employees must attend...", "The contract was signed...").
+- **`toeic-reading-email`** — đọc hiểu 1 email công sở thật ("Team
+  Meeting Reminder") + 6 câu hỏi ý chính/chi tiết/suy luận, tái dùng cơ
+  chế `passage` đã có.
+- **`toeic-message-chain`** — đúng ý tưởng "chuỗi tin nhắn công sở" đã đề
+  xuất ở mục 30 §4 (đặc trưng Part 7 hiện đại của TOEIC thật): 6 tin nhắn
+  qua lại giữa Anna và Mark về việc dời lịch gọi khách hàng, kèm mốc thời
+  gian từng tin — 6 câu hỏi kiểm tra khả năng theo dõi ai nói gì khi nào.
+
+**Đăng ký đúng cấu trúc tách-mục vừa làm ở mục 46**: thêm `TOEIC_UNITS`
+vào `units.js`, đăng ký `{ id: 'toeic', label: 'TOEIC (800/990)', icon:
+'💼' }` vào `LEVELS`/`UNITS_BY_LEVEL` trong `examprep.js`; tạo folder
+**`luyen-thi-toeic/`** (index.html/style.css/src/app.js/package.json)
+theo đúng khuôn "khoá cứng LEVEL_ID, bỏ màn chọn cấp độ" đã dùng cho KET/
+PET/TOEFL Junior — sao chép + đổi 3 hằng số (LEVEL_ID/LEVEL_LABEL/khoá
+i18n), không viết lại logic. 2 khoá i18n mới (`extoeic.title/help`).
+
+**Cập nhật hub `thi-chung-chi-anh/`**: thêm thẻ "Luyện Thi TOEIC" thứ 6,
+**xoá hẳn khối "Sắp có"** vì không còn track nào trong danh sách gốc chưa
+làm. Cập nhật mô tả thẻ trang chủ "Thi Chứng Chỉ Anh" (bỏ "sắp có TOEIC").
+`sw.js` v108→**v109**.
+
+**Kết quả**: 7 cấp độ (Starters/Movers/Flyers/KET/PET/TOEFL Junior/
+TOEIC), **55 unit, 550 câu hỏi** (550 id duy nhất, đã xác nhận). 6 mục
+riêng biệt trên hub (Cambridge YLE, KET, PET, TOEFL Junior, TOEIC, Ngữ
+Pháp Trực Quan) + engine dữ liệu dùng chung 1 nguồn duy nhất.
+
+**1 test mới**: xác nhận `toeic-message-chain` có `passage` hợp lệ và mọi
+câu đều `type: 'reading'`. `npm test` toàn bộ: **1113 ✅, 0 ❌**. Smoke
+test `/`, `/thi-chung-chi-anh/` (đủ 6 thẻ, không trùng href), `/luyen-thi-
+toeic/` cùng file JS/CSS đều 200.
+
+**Còn để ngỏ**: toàn bộ 5 chứng chỉ trong yêu cầu gốc đã có nội dung.
+Hướng mở rộng tiếp theo (nếu muốn): làm sâu thêm từng cấp (đặc biệt TOEIC/
+TOEFL Junior mới có 5/9 unit, mỏng hơn Movers/Flyers/KET/PET), thêm IELTS
+(chưa từng được yêu cầu, chỉ nhắc đến trong `chungchi.png` tham khảo ban
+đầu), hoặc quay lại Đợt 3/Đợt 5 của mục 28 (mượn khung Ôn Tập Vui cho ngữ
+pháp, Luyện Đề tổng hợp trộn nhiều cấp).
+
+## 48. ĐÀO SÂU TOEIC — CẤP MỎNG NHẤT (07/2026)
+
+Bạn "tiếp tục" lần nữa, không nêu track cụ thể — theo đúng nếp đã làm ở
+mục 41/45 (mỗi lần "tiếp tục" trống, đào sâu cấp đang MỎNG nhất), lần này
+là **TOEIC** (5 unit/46 câu, ít hơn hẳn KET 6/66 và PET 8/80).
+
+**Mở rộng unit có sẵn**: `toeic-grammar-context` (Part 5 "Incomplete
+Sentences") +2 câu, 10 → 12 câu — vẫn giữ đúng tinh thần "không dạy ngữ
+pháp mới, chỉ đặt lại ngữ cảnh công sở".
+
+**2 unit TOEIC hoàn toàn mới**:
+- **`toeic-vocabulary-travel-hr`** (12 câu) — từ vựng công tác & nhân sự:
+  itinerary, boarding pass, reservation, applicant, interview, promotion,
+  resign, salary... — mảng từ vựng TOEIC thật chưa chạm tới ở 2 unit từ
+  vựng văn phòng/kinh doanh trước đó.
+- **`toeic-reading-notice`** — đọc hiểu thông báo nội bộ công sở ("Notice:
+  Office Renovation", ~120 từ) + 6 câu hỏi ý chính/chi tiết/suy luận, tái
+  dùng cơ chế `passage` (thể loại văn bản thứ 3 của TOEIC sau email và
+  chuỗi tin nhắn, đúng phổ văn bản Part 7 thật).
+
+**Kết quả TOEIC**: 5 → **7 unit**, 46 → **66 câu hỏi**. Toàn hệ thống 7
+cấp: 55 → **57 unit**, 550 → **570 câu hỏi** (570 id duy nhất, đã xác
+nhận không trùng qua node dynamic-import).
+
+**Cập nhật test**: `examprep.test.js` — số unit TOEIC 5→7 (2 chỗ:
+tổng hợp unit + `unitsForLevel`), ngưỡng tổng câu hỏi tối thiểu 540→560.
+`sw.js` v109→**v110**. `npm test` toàn bộ: **381 ✅, 0 ❌**. Smoke test
+`/`, `/thi-chung-chi-anh/`, `/luyen-thi-toeic/` cùng
+`luyen-thi-toeic/src/app.js`, `exam-prep/src/units.js`, `sw.js` đều 200.
+
+**Còn để ngỏ**: TOEIC vẫn mỏng nhất hệ thống (7 unit so với 9-11 của các
+cấp trên). Có thể tiếp tục thêm unit TOEIC (ví dụ: đọc hiểu quảng cáo/
+thông báo tuyển dụng, từ vựng tài chính/ngân hàng) hoặc chuyển sang đào
+sâu TOEFL Junior (9 unit, đứng thứ nhì về độ mỏng).

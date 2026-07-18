@@ -37,7 +37,7 @@ body {
 }
 
 .top { display: flex; align-items: center; gap: 8px; }
-.top h1 { font-size: 1.05rem; flex: 1; }
+.top h1 { font-size: 1.05rem; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chip-stat {
   font-weight: 900; font-size: 1rem; color: var(--muted);
   background: var(--panel);
@@ -48,7 +48,7 @@ body {
 .chip-stat.score { color: var(--accent-deep); }
 
 .round-btn {
-  width: 44px; height: 44px;
+  width: 44px; height: 44px; flex-shrink: 0;
   border-radius: 50%;
   border: 2px solid var(--line);
   background: var(--panel);
