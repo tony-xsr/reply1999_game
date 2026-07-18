@@ -5,7 +5,11 @@
 // DOM). Luật chọn-lại/thưởng giống hệt các game khác trong dự án.
 
 import {
-  TENSES,
+  CHARACTERS, VERBS, TENSES, BG_SUBJECTS, BG_ACTIONS, INTERRUPT_EVENTS, COMPARE_ENTITIES, ATTRIBUTES,
+  GOING_TO_WILL_SCENARIOS, GOING_TO_WILL_QUESTION_COUNT, MODAL_SITUATIONS, MODAL_SUBJECTS,
+  CONDITIONAL_SITUATIONS, SENTENCE_BUILDER_POOL,
+  PASSIVE_SCENARIOS, PASSIVE_TENSES, REPORTED_SPEECH_SCENARIOS, QUANTIFIER_NOUNS,
+  POS_WORDS, POS_CATEGORIES,
   makeTimeMachineGame, currentTimeMachineRound, answerTimeMachine,
   makeTwoActionsGame, currentTwoActionsRound, answerTwoActions,
   makeComparativeGame, currentComparativeRound, answerComparative,
@@ -13,11 +17,44 @@ import {
   makeModalGame, currentModalRound, answerModal,
   makeConditionalGame, currentConditionalRound, answerConditional,
   makeSentenceBuilderGame, currentSentenceBuilderRound, tapSentenceBuilderChip,
+  makePassiveGame, currentPassiveRound, answerPassive,
+  makeReportedGame, currentReportedRound, answerReported,
+  makeQuantifierGame, currentQuantifierRound, answerQuantifier,
+  makePosGame, currentPosRound, answerPos,
 } from './nguphaptructuan.js';
 import { speak, speakSequence, bindMute } from '../../to-mau/src/speech.js';
 import { sfx } from '../../pokemon/src/sfx.js';
 import { mountKidFeatures, answeredOne } from '../../shared/kid-bar.js';
 import { currentProfile, recordSession } from '../../pokemon/src/stats.js';
+import {
+  _setProfileIdGetter, markLearned, progressPercent, learnedCount,
+} from './progress.js';
+
+_setProfileIdGetter(() => currentProfile().id);
+
+// Mỗi trò tra vào 1 mảng dữ liệu gốc để biết TỔNG số mục (mẫu số % tiến độ)
+// và cách tìm INDEX của mục vừa trả lời đúng trong mảng đó (tử số). Two
+// Actions/So Sánh dùng mảng "chủ đề" (BG_ACTIONS/ATTRIBUTES) làm mẫu số
+// thay vì con số tổ hợp nhân lên (quá lớn, gần như không bao giờ đạt 100%).
+const PROGRESS_SOURCES = {
+  timemachine: { total: () => TENSES.length, indexOf: (round) => TENSES.findIndex((t) => t.id === round.correctTenseId) },
+  twoactions: { total: () => BG_ACTIONS.length, indexOf: (round) => BG_ACTIONS.indexOf(round.bg) },
+  comparative: { total: () => ATTRIBUTES.length, indexOf: (round) => ATTRIBUTES.indexOf(round.attr) },
+  goingtowill: { total: () => GOING_TO_WILL_SCENARIOS.length, indexOf: (round) => GOING_TO_WILL_SCENARIOS.indexOf(round.scenario) },
+  modal: { total: () => MODAL_SITUATIONS.length, indexOf: (round) => MODAL_SITUATIONS.indexOf(round.situation) },
+  conditional: { total: () => CONDITIONAL_SITUATIONS.length, indexOf: (round) => CONDITIONAL_SITUATIONS.indexOf(round.scenario) },
+  sentencebuilder: { total: () => SENTENCE_BUILDER_POOL.length, indexOf: (round) => SENTENCE_BUILDER_POOL.indexOf(round.item) },
+  passive: { total: () => PASSIVE_SCENARIOS.length, indexOf: (round) => PASSIVE_SCENARIOS.indexOf(round.scenario) },
+  reported: { total: () => REPORTED_SPEECH_SCENARIOS.length, indexOf: (round) => REPORTED_SPEECH_SCENARIOS.indexOf(round.scenario) },
+  quantifier: { total: () => QUANTIFIER_NOUNS.length, indexOf: (round) => QUANTIFIER_NOUNS.indexOf(round.noun) },
+  posgame: { total: () => POS_WORDS.length, indexOf: (round) => POS_WORDS.indexOf(round.item) },
+};
+
+function markRoundLearned(gameKey, round) {
+  const src = PROGRESS_SOURCES[gameKey];
+  if (!src) return;
+  markLearned(gameKey, src.indexOf(round));
+}
 
 const t = (key, fallback) => {
   const v = window.I18N?.t(key);
@@ -26,7 +63,7 @@ const t = (key, fallback) => {
 
 const $ = (id) => document.getElementById(id);
 const els = {
-  title: $('title'), subLine: $('subLine'),
+  title: $('title'), subLine: $('subLine'), overallProgress: $('overallProgress'),
   home: $('homeScreen'), play: $('playScreen'),
   btnBack: $('btnBack'), btnHelp: $('btnHelp'), btnSound: $('btnSound'),
   cheer: $('cheer'), cheerEmoji: $('cheerEmoji'), cheerText: $('cheerText'),
@@ -89,9 +126,12 @@ function showHome() {
   els.home.classList.remove('hidden');
   els.play.classList.add('hidden');
   els.cheer.classList.add('hidden');
+  els.overallProgress.classList.remove('hidden');
   els.btnBack.hidden = true;
   els.btnHelp.hidden = true;
   els.subLine.textContent = '';
+  renderModeProgress();
+  renderOverallProgress();
 }
 
 function startGame(game) {
@@ -101,6 +141,7 @@ function startGame(game) {
   els.home.classList.add('hidden');
   els.play.classList.remove('hidden');
   els.cheer.classList.add('hidden');
+  els.overallProgress.classList.add('hidden');
   els.btnBack.hidden = false;
   els.btnHelp.hidden = false;
   els.play.innerHTML = '';
@@ -194,6 +235,15 @@ function startTimeMachine() {
       timeline.appendChild(arrow);
       zonePast.parentElement.classList.add('tm-zone--active');
       zoneNow.parentElement.classList.add('tm-zone--active');
+    } else if (round.timelineMark === 'now-to-future') {
+      zoneNow.innerHTML = `<span class="tm-char">${round.character.emoji}</span>`;
+      zoneFuture.innerHTML = `<span class="tm-cue">${round.cue}</span>`;
+      const arrow = document.createElement('span');
+      arrow.className = 'tm-link-arrow tm-link-arrow--future';
+      arrow.textContent = '➡️';
+      timeline.appendChild(arrow);
+      zoneNow.parentElement.classList.add('tm-zone--active');
+      zoneFuture.parentElement.classList.add('tm-zone--active');
     }
     explain.textContent = '';
     renderOptions(options, round.options, (o) => o.sentence, onPick);
@@ -223,7 +273,7 @@ function startTimeMachine() {
 
     markOptions(options, round.options, round.correctTenseId, (o) => o.tenseId, ev.correct ? null : btn);
     explain.textContent = `${tense.label} — ${tense.hint}`;
-    if (ev.correct) sfx.match(1); else sfx.fail();
+    if (ev.correct) { sfx.match(1); markRoundLearned('timemachine', round); } else sfx.fail();
     updateHud();
     answeredOne();
 
@@ -318,7 +368,7 @@ function startTwoActions() {
 
     markOptions(options, round.options, round.correctPattern, (o) => o.pattern, ev.correct ? null : btn);
     explain.textContent = GENERIC_EXPLAIN;
-    if (ev.correct) sfx.match(1); else sfx.fail();
+    if (ev.correct) { sfx.match(1); markRoundLearned('twoactions', round); } else sfx.fail();
     updateHud();
     answeredOne();
 
@@ -419,7 +469,7 @@ function startComparative() {
 
     markOptions(options, round.options, round.correctKey, (o) => o.key, ev.correct ? null : btn);
     explain.textContent = explainText;
-    if (ev.correct) sfx.match(1); else sfx.fail();
+    if (ev.correct) { sfx.match(1); markRoundLearned('comparative', round); } else sfx.fail();
     updateHud();
     answeredOne();
 
@@ -502,7 +552,7 @@ function startGoingToWill() {
 
     markOptions(options, round.options, round.correctKey, (o) => o.key, ev.correct ? null : btn);
     explain.textContent = explainText;
-    if (ev.correct) sfx.match(1); else sfx.fail();
+    if (ev.correct) { sfx.match(1); markRoundLearned('goingtowill', round); } else sfx.fail();
     updateHud();
     answeredOne();
 
@@ -581,7 +631,7 @@ function startModal() {
 
     markOptions(options, round.options, round.correctModal, (o) => o.modal, ev.correct ? null : btn);
     explain.textContent = explainText;
-    if (ev.correct) sfx.match(1); else sfx.fail();
+    if (ev.correct) { sfx.match(1); markRoundLearned('modal', round); } else sfx.fail();
     updateHud();
     answeredOne();
 
@@ -660,7 +710,7 @@ function startConditional() {
 
     markOptions(options, round.options, round.correctKey, (o) => o.key, ev.correct ? null : btn);
     explain.textContent = RULE;
-    if (ev.correct) sfx.match(1); else sfx.fail();
+    if (ev.correct) { sfx.match(1); markRoundLearned('conditional', round); } else sfx.fail();
     updateHud();
     answeredOne();
 
@@ -787,12 +837,346 @@ function startSentenceBuilder() {
     explain.textContent = round.item.en;
     updateHud();
     answeredOne();
+    markRoundLearned('sentencebuilder', round);
     speakSequence([
       { text: 'Đúng rồi, bé ghép câu giỏi quá!', lang: 'vi-VN', rate: 0.92 },
       { text: round.item.en, lang: 'en-US', rate: 0.85 },
     ], () => {
       state.busy = false;
       if (ev.gameDone) finish(game.score, game.bestStreak, game.won, 'sentencebuilder');
+      else { renderScene(); updateHud(); }
+    });
+  }
+
+  renderScene();
+  updateHud();
+  state.ctx.cleanup = null;
+}
+
+/* ===== 8. Chủ Động vs Bị Động ===== */
+
+function startPassive() {
+  const hud = document.createElement('div');
+  hud.className = 'gr-hud';
+  hud.innerHTML = `<span>⭐ <b class="pv-score">0</b></span><span class="pv-round">0/8</span><span>🔥 <b class="pv-streak">0</b></span>`;
+  els.play.appendChild(hud);
+
+  const scene = document.createElement('div');
+  scene.className = 'pv-scene';
+  els.play.appendChild(scene);
+
+  const options = document.createElement('div');
+  options.className = 'gr-options';
+  els.play.appendChild(options);
+
+  const explain = document.createElement('div');
+  explain.className = 'gr-explain';
+  els.play.appendChild(explain);
+
+  const game = makePassiveGame(8, Math.random);
+  const RULE = 'Câu bị động: đồ vật/người NHẬN tác động lên làm chủ ngữ + to be (is/are/was/were) + động từ ở dạng quá khứ phân từ + "by" + người thực hiện.';
+
+  function updateHud() {
+    hud.querySelector('.pv-score').textContent = game.score;
+    hud.querySelector('.pv-round').textContent = `${game.index}/${game.rounds.length}`;
+    hud.querySelector('.pv-streak').textContent = game.streak;
+  }
+
+  function renderScene() {
+    const round = currentPassiveRound(game);
+    if (!round) return;
+    scene.innerHTML = `<span class="pv-agent">${round.scenario.agentIcon}</span><span class="pv-arrow">➡️</span><span class="pv-object">${round.scenario.objectIcon}</span>`;
+    explain.textContent = '';
+    renderOptions(options, round.options, (o) => o.sentence, onPick);
+  }
+
+  function onPick(opt, btn) {
+    if (state.busy) return;
+    if (!game || game.over) return;
+    state.busy = true;
+    sfx.select();
+    const round = currentPassiveRound(game);
+    const ev = answerPassive(game, opt.key);
+
+    if (ev.retry) {
+      btn.classList.add('wrong');
+      btn.disabled = true;
+      explain.textContent = RULE;
+      sfx.fail();
+      updateHud();
+      speakSequence([
+        { text: 'Chưa đúng, thử lại nhé.', lang: 'vi-VN', rate: 0.92 },
+        { text: RULE, lang: 'vi-VN', rate: 0.88 },
+      ], () => { state.busy = false; });
+      return;
+    }
+
+    markOptions(options, round.options, round.correctKey, (o) => o.key, ev.correct ? null : btn);
+    explain.textContent = RULE;
+    if (ev.correct) { sfx.match(1); markRoundLearned('passive', round); } else sfx.fail();
+    updateHud();
+    answeredOne();
+
+    const seq = ev.correct
+      ? [{ text: 'Đúng rồi, bé giỏi quá!', lang: 'vi-VN', rate: 0.92 }, { text: RULE, lang: 'vi-VN', rate: 0.88 }]
+      : [{ text: 'Chưa đúng.', lang: 'vi-VN', rate: 0.92 }, { text: RULE, lang: 'vi-VN', rate: 0.88 }];
+    speakSequence(seq, () => {
+      state.busy = false;
+      if (ev.gameDone) finish(game.score, game.bestStreak, game.won, 'passive');
+      else { renderScene(); updateHud(); }
+    });
+  }
+
+  renderScene();
+  updateHud();
+  state.ctx.cleanup = null;
+}
+
+/* ===== 9. Lời Nói Trực Tiếp → Gián Tiếp ===== */
+
+function startReported() {
+  const hud = document.createElement('div');
+  hud.className = 'gr-hud';
+  hud.innerHTML = `<span>⭐ <b class="rp-score">0</b></span><span class="rp-round">0/8</span><span>🔥 <b class="rp-streak">0</b></span>`;
+  els.play.appendChild(hud);
+
+  const scene = document.createElement('div');
+  scene.className = 'rp-scene';
+  els.play.appendChild(scene);
+
+  const options = document.createElement('div');
+  options.className = 'gr-options';
+  els.play.appendChild(options);
+
+  const explain = document.createElement('div');
+  explain.className = 'gr-explain';
+  els.play.appendChild(explain);
+
+  const game = makeReportedGame(8, Math.random);
+  const RULE = 'Câu tường thuật: đổi đại từ "I" theo đúng người nói, và LÙI THÌ động từ về quá khứ (am/is→was, will→would, can→could, have→had).';
+
+  function updateHud() {
+    hud.querySelector('.rp-score').textContent = game.score;
+    hud.querySelector('.rp-round').textContent = `${game.index}/${game.rounds.length}`;
+    hud.querySelector('.rp-streak').textContent = game.streak;
+  }
+
+  function renderScene() {
+    const round = currentReportedRound(game);
+    if (!round) return;
+    scene.innerHTML = `<span class="rp-icon">${round.scenario.icon}</span><span class="rp-bubble">${round.scenario.quote}</span>`;
+    explain.textContent = '';
+    renderOptions(options, round.options, (o) => o.sentence, onPick);
+  }
+
+  function onPick(opt, btn) {
+    if (state.busy) return;
+    if (!game || game.over) return;
+    state.busy = true;
+    sfx.select();
+    const round = currentReportedRound(game);
+    const ev = answerReported(game, opt.key);
+
+    if (ev.retry) {
+      btn.classList.add('wrong');
+      btn.disabled = true;
+      explain.textContent = RULE;
+      sfx.fail();
+      updateHud();
+      speakSequence([
+        { text: 'Chưa đúng, thử lại nhé.', lang: 'vi-VN', rate: 0.92 },
+        { text: RULE, lang: 'vi-VN', rate: 0.88 },
+      ], () => { state.busy = false; });
+      return;
+    }
+
+    markOptions(options, round.options, round.correctKey, (o) => o.key, ev.correct ? null : btn);
+    explain.textContent = RULE;
+    if (ev.correct) { sfx.match(1); markRoundLearned('reported', round); } else sfx.fail();
+    updateHud();
+    answeredOne();
+
+    const seq = ev.correct
+      ? [{ text: 'Đúng rồi, bé giỏi quá!', lang: 'vi-VN', rate: 0.92 }, { text: RULE, lang: 'vi-VN', rate: 0.88 }]
+      : [{ text: 'Chưa đúng.', lang: 'vi-VN', rate: 0.92 }, { text: RULE, lang: 'vi-VN', rate: 0.88 }];
+    speakSequence(seq, () => {
+      state.busy = false;
+      if (ev.gameDone) finish(game.score, game.bestStreak, game.won, 'reported');
+      else { renderScene(); updateHud(); }
+    });
+  }
+
+  renderScene();
+  updateHud();
+  state.ctx.cleanup = null;
+}
+
+/* ===== 10. Lượng Từ Đúng ===== */
+
+function startQuantifier() {
+  const hud = document.createElement('div');
+  hud.className = 'gr-hud';
+  hud.innerHTML = `<span>⭐ <b class="qt-score">0</b></span><span class="qt-round">0/8</span><span>🔥 <b class="qt-streak">0</b></span>`;
+  els.play.appendChild(hud);
+
+  const scene = document.createElement('div');
+  scene.className = 'qt-scene';
+  els.play.appendChild(scene);
+
+  const grid = document.createElement('div');
+  grid.className = 'qt-grid';
+  els.play.appendChild(grid);
+
+  const options = document.createElement('div');
+  options.className = 'gr-options';
+  els.play.appendChild(options);
+
+  const explain = document.createElement('div');
+  explain.className = 'gr-explain';
+  els.play.appendChild(explain);
+
+  const game = makeQuantifierGame(8, Math.random);
+  const RULE = '"All/Some/None of the ___ are..." dùng với danh từ SỐ NHIỀU. "Every ___ is..." chỉ dùng với danh từ SỐ ÍT — không dùng "every" với danh từ số nhiều.';
+
+  function updateHud() {
+    hud.querySelector('.qt-score').textContent = game.score;
+    hud.querySelector('.qt-round').textContent = `${game.index}/${game.rounds.length}`;
+    hud.querySelector('.qt-streak').textContent = game.streak;
+  }
+
+  function renderScene() {
+    const round = currentQuantifierRound(game);
+    if (!round) return;
+    scene.textContent = t('nguphap.qt.question', 'Bao nhiêu cái được tô đỏ?');
+    grid.innerHTML = '';
+    for (let i = 0; i < round.total; i++) {
+      const item = document.createElement('span');
+      item.className = i < round.highlighted ? 'qt-item qt-item--on' : 'qt-item';
+      item.textContent = round.noun.emoji;
+      grid.appendChild(item);
+    }
+    explain.textContent = '';
+    renderOptions(options, round.options, (o) => o.sentence, onPick);
+  }
+
+  function onPick(opt, btn) {
+    if (state.busy) return;
+    if (!game || game.over) return;
+    state.busy = true;
+    sfx.select();
+    const round = currentQuantifierRound(game);
+    const ev = answerQuantifier(game, opt.key);
+
+    if (ev.retry) {
+      btn.classList.add('wrong');
+      btn.disabled = true;
+      explain.textContent = RULE;
+      sfx.fail();
+      updateHud();
+      speakSequence([
+        { text: 'Chưa đúng, thử lại nhé.', lang: 'vi-VN', rate: 0.92 },
+        { text: RULE, lang: 'vi-VN', rate: 0.88 },
+      ], () => { state.busy = false; });
+      return;
+    }
+
+    markOptions(options, round.options, round.correctKey, (o) => o.key, ev.correct ? null : btn);
+    explain.textContent = RULE;
+    if (ev.correct) { sfx.match(1); markRoundLearned('quantifier', round); } else sfx.fail();
+    updateHud();
+    answeredOne();
+
+    const seq = ev.correct
+      ? [{ text: 'Đúng rồi, bé giỏi quá!', lang: 'vi-VN', rate: 0.92 }, { text: RULE, lang: 'vi-VN', rate: 0.88 }]
+      : [{ text: 'Chưa đúng.', lang: 'vi-VN', rate: 0.92 }, { text: RULE, lang: 'vi-VN', rate: 0.88 }];
+    speakSequence(seq, () => {
+      state.busy = false;
+      if (ev.gameDone) finish(game.score, game.bestStreak, game.won, 'quantifier');
+      else { renderScene(); updateHud(); }
+    });
+  }
+
+  renderScene();
+  updateHud();
+  state.ctx.cleanup = null;
+}
+
+/* ===== 11. Nhận Biết Từ Loại (Parts of Speech) ===== */
+
+function startPos() {
+  const hud = document.createElement('div');
+  hud.className = 'gr-hud';
+  hud.innerHTML = `<span>⭐ <b class="pg-score">0</b></span><span class="pg-round">0/8</span><span>🔥 <b class="pg-streak">0</b></span>`;
+  els.play.appendChild(hud);
+
+  const scene = document.createElement('div');
+  scene.className = 'pg-scene';
+  els.play.appendChild(scene);
+
+  const options = document.createElement('div');
+  options.className = 'gr-options';
+  els.play.appendChild(options);
+
+  const explain = document.createElement('div');
+  explain.className = 'gr-explain';
+  els.play.appendChild(explain);
+
+  const game = makePosGame(8, Math.random);
+
+  function updateHud() {
+    hud.querySelector('.pg-score').textContent = game.score;
+    hud.querySelector('.pg-round').textContent = `${game.index}/${game.rounds.length}`;
+    hud.querySelector('.pg-streak').textContent = game.streak;
+  }
+
+  function renderScene() {
+    const round = currentPosRound(game);
+    if (!round) return;
+    const { sentence, word } = round.item;
+    const idx = sentence.indexOf(word);
+    const before = sentence.slice(0, idx);
+    const after = sentence.slice(idx + word.length);
+    scene.innerHTML = `
+      <p class="pg-sentence">${before}<mark class="pg-highlight">${word}</mark>${after}</p>
+      <p class="pg-question">${t('nguphap.pg.question', 'Từ được tô đậm là từ loại gì?')}</p>`;
+    explain.textContent = '';
+    renderOptions(options, round.options, (o) => o.label, onPick);
+  }
+
+  function onPick(opt, btn) {
+    if (state.busy) return;
+    if (!game || game.over) return;
+    state.busy = true;
+    sfx.select();
+    const round = currentPosRound(game);
+    const ev = answerPos(game, opt.posId);
+    const hint = round.item.hint;
+
+    if (ev.retry) {
+      btn.classList.add('wrong');
+      btn.disabled = true;
+      explain.textContent = hint;
+      sfx.fail();
+      updateHud();
+      speakSequence([
+        { text: 'Chưa đúng, thử lại nhé.', lang: 'vi-VN', rate: 0.92 },
+        { text: hint, lang: 'vi-VN', rate: 0.88 },
+      ], () => { state.busy = false; });
+      return;
+    }
+
+    markOptions(options, round.options, round.correctPosId, (o) => o.posId, ev.correct ? null : btn);
+    explain.textContent = hint;
+    if (ev.correct) { sfx.match(1); markRoundLearned('posgame', round); } else sfx.fail();
+    updateHud();
+    answeredOne();
+
+    const seq = ev.correct
+      ? [{ text: 'Đúng rồi, bé giỏi quá!', lang: 'vi-VN', rate: 0.92 }, { text: hint, lang: 'vi-VN', rate: 0.88 }]
+      : [{ text: 'Chưa đúng.', lang: 'vi-VN', rate: 0.92 }, { text: hint, lang: 'vi-VN', rate: 0.88 }];
+    speakSequence(seq, () => {
+      state.busy = false;
+      if (ev.gameDone) finish(game.score, game.bestStreak, game.won, 'posgame');
       else { renderScene(); updateHud(); }
     });
   }
@@ -812,6 +1196,10 @@ const GAMES = {
   modal: startModal,
   conditional: startConditional,
   sentencebuilder: startSentenceBuilder,
+  passive: startPassive,
+  reported: startReported,
+  quantifier: startQuantifier,
+  posgame: startPos,
 };
 
 const HELP_TEXT = {
@@ -822,7 +1210,88 @@ const HELP_TEXT = {
   modal: t('nguphap.modal.help', 'Nhìn biển báo hoặc tình huống: biển cấm dùng mustn\'t, biển bắt buộc dùng must, lời khuyên nên làm dùng should, lời khuyên không nên làm dùng shouldn\'t. Bé chọn đúng động từ khuyết thiếu.'),
   conditional: t('nguphap.conditional.help', 'Nhìn nguyên nhân (biểu tượng) dẫn tới kết quả gì. Mệnh đề "if" chia hiện tại đơn, mệnh đề kết quả dùng "will" + V nguyên mẫu. Bé chọn đúng câu, tránh nhầm dùng "will" ngay trong mệnh đề "if".'),
   sentencebuilder: t('nguphap.sentencebuilder.help', 'Đọc nghĩa tiếng Việt, rồi bấm từng từ tiếng Anh theo đúng thứ tự để dựng lại câu. Bấm sai 1 lần sẽ có từ đúng sáng lên gợi ý, bấm sai lần 2 thì câu sẽ được ghép sẵn cho bé xem.'),
+  passive: t('nguphap.passive.help', 'Nhìn mũi tên nối người làm việc tới đồ vật bị tác động. Bé chọn đúng câu BỊ ĐỘNG: đồ vật + to be (is/are/was/were) + động từ ở cột thứ 3 + "by" + người làm.'),
+  reported: t('nguphap.reported.help', 'Nhìn bong bóng thoại — nhân vật vừa nói 1 câu trực tiếp. Bé chọn đúng câu TƯỜNG THUẬT: đổi đại từ "I" và lùi thì động từ về quá khứ (am/is→was, will→would, can→could, have→had).'),
+  quantifier: t('nguphap.quantifier.help', 'Đếm xem trong lưới có bao nhiêu cái được tô đỏ: tất cả (All), một phần (Some), hay không cái nào (None). Bé chọn đúng câu — tránh nhầm dùng "Every" (chỉ đi với danh từ số ít) cho cả nhóm số nhiều.'),
+  posgame: t('nguphap.posgame.help', 'Đọc câu tiếng Anh, nhìn từ được tô đậm. Đa số danh/động/tính/trạng từ nhận ra qua ĐUÔI (vd "-tion"/"-ment" là danh từ, "-ly" là trạng từ) — xem gợi ý nếu chọn sai. Giới/đại/liên/thán từ không có đuôi cố định, phải hiểu VAI TRÒ của từ đó trong câu.'),
 };
+
+// Số câu/tình huống trong dữ liệu mỗi trò — tính TRỰC TIẾP từ độ dài mảng
+// dữ liệu thật (không hard-code số), để bé/phụ huynh biết mỗi trò có bao
+// nhiêu BÀI HỌC, và số này tự đúng khi dữ liệu được bổ sung thêm sau này.
+// "Số câu hỏi" ở đây là TỔNG SỐ CÂU KHÁC NHAU trò có thể hỏi — với trò
+// sinh câu bằng công thức (Cỗ Máy Thời Gian, Hai Hành Động), đây là TÍCH
+// của các mảng thành phần (nhân vật × động từ × thì...), KHÔNG PHẢI chỉ độ
+// dài 1 mảng — trước đó huy hiệu chỉ hiện "X thì"/"X tình huống" khiến bé/
+// phụ huynh tưởng lầm số câu hỏi ít hơn thực tế rất nhiều.
+const fmtNum = (n) => n.toLocaleString('vi-VN');
+const MODE_COUNTS = {
+  timemachine: `${TENSES.length} thì · ${fmtNum(CHARACTERS.length * VERBS.length * TENSES.length)} câu hỏi`,
+  twoactions: `${fmtNum(BG_SUBJECTS.length * BG_ACTIONS.length * INTERRUPT_EVENTS.length)} câu hỏi`,
+  comparative: `${COMPARE_ENTITIES.length} nhân vật · ${ATTRIBUTES.length} thang đo`,
+  goingtowill: `${fmtNum(GOING_TO_WILL_QUESTION_COUNT)} câu hỏi`,
+  modal: `${fmtNum(MODAL_SITUATIONS.length * MODAL_SUBJECTS.length)} câu hỏi`,
+  conditional: `${fmtNum(CONDITIONAL_SITUATIONS.length)} câu hỏi`,
+  sentencebuilder: `${fmtNum(SENTENCE_BUILDER_POOL.length)} câu hỏi`,
+  passive: `${fmtNum(PASSIVE_SCENARIOS.length * PASSIVE_TENSES.length)} câu hỏi`,
+  reported: `${fmtNum(REPORTED_SPEECH_SCENARIOS.length)} câu hỏi`,
+  quantifier: `${QUANTIFIER_NOUNS.length} đồ vật`,
+  posgame: `${fmtNum(POS_WORDS.length)} câu hỏi`,
+};
+
+// Gắn 1 lần lúc khởi động: huy hiệu số bài học (không đổi trong phiên chơi).
+function renderModeCounts() {
+  document.querySelectorAll('.mode-card').forEach((btn) => {
+    const label = MODE_COUNTS[btn.dataset.game];
+    if (!label) return;
+    const badge = document.createElement('span');
+    badge.className = 'mc-count';
+    badge.textContent = label;
+    btn.appendChild(badge);
+    const bar = document.createElement('span');
+    bar.className = 'mc-progress';
+    bar.innerHTML = '<span class="mc-progress-fill"></span>';
+    const pct = document.createElement('span');
+    pct.className = 'mc-progress-pct';
+    btn.appendChild(bar);
+    btn.appendChild(pct);
+  });
+  renderModeProgress();
+}
+
+// Gọi lại MỖI LẦN quay về màn chọn trò (showHome) — % tiến độ của bé có
+// thể vừa tăng lên sau ván vừa chơi xong, cần vẽ lại thanh bar mới nhất.
+function renderModeProgress() {
+  document.querySelectorAll('.mode-card').forEach((btn) => {
+    const src = PROGRESS_SOURCES[btn.dataset.game];
+    const fill = btn.querySelector('.mc-progress-fill');
+    const pctEl = btn.querySelector('.mc-progress-pct');
+    if (!src || !fill || !pctEl) return;
+    const pct = progressPercent(btn.dataset.game, src.total());
+    fill.style.width = `${pct}%`;
+    pctEl.textContent = `${pct}%`;
+  });
+}
+
+// Tổng tiến độ CẢ N TRÒ gộp lại — cộng dồn "đã học" và "tổng số" của từng
+// trò rồi tính 1 % chung, hiện phía trên lưới chọn trò. N tính TRỰC TIẾP
+// từ số key trong PROGRESS_SOURCES (trước đây hard-code "9 trò" nên bị
+// lệch số ngay khi thêm trò thứ 10).
+function renderOverallProgress() {
+  if (!els.overallProgress) return;
+  let learned = 0;
+  let total = 0;
+  const gameCount = Object.keys(PROGRESS_SOURCES).length;
+  for (const [gameKey, src] of Object.entries(PROGRESS_SOURCES)) {
+    total += src.total();
+    learned += learnedCount(gameKey);
+  }
+  const pct = total ? Math.round((learned / total) * 100) : 0;
+  els.overallProgress.innerHTML = `
+    <div class="op-label">🌟 Tổng tiến độ cả ${gameCount} trò: <b>${pct}%</b> (${learned}/${total} bài học)</div>
+    <div class="op-bar"><span class="op-bar-fill" style="width:${pct}%"></span></div>
+  `;
+}
 
 document.querySelectorAll('.mode-card').forEach((btn) => {
   btn.addEventListener('click', () => {
@@ -845,6 +1314,7 @@ els.btnHome2.addEventListener('click', () => { sfx.select(); showHome(); });
 
 els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
 showHome();
+renderModeCounts();
 mountKidFeatures(); // thanh avatar bé + kiểm tra giới hạn phút/ngày
 sayInstruction(t('nguphap.help', 'Đây là Ngữ Pháp Trực Quan! Chọn Cỗ Máy Thời Gian để đoán thì qua hình ảnh trục thời gian, hoặc Hai Hành Động Cùng Lúc để ghép đúng câu khi có 2 việc xảy ra cùng lúc trong quá khứ.'));
 
