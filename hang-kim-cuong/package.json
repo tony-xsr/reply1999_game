@@ -1,0 +1,8 @@
+{
+  "name": "hang-kim-cuong",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/hangkim.test.js"
+  }
+}
