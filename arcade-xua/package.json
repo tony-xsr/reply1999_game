@@ -1,0 +1,8 @@
+{
+  "name": "arcade-xua",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/arcadexua.test.js"
+  }
+}
