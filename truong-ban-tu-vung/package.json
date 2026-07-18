@@ -1,0 +1,8 @@
+{
+  "name": "truong-ban-tu-vung",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/truongban.test.js"
+  }
+}
