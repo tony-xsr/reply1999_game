@@ -389,7 +389,8 @@ export async function openReward(reward) {
 export async function getSettings() {
   const fam = await ensureFamily();
   const rows = await get(`settings?select=*&family_id=eq.${fam.id}`);
-  const s = rows[0] || { family_id: fam.id, tts_rate: 1.0, daily_limit_min: 45 };
+  const s = rows[0] || { family_id: fam.id, tts_rate: 1.0, daily_limit_min: 45, reward_cost_multiplier: 6 };
+  if (s.reward_cost_multiplier == null) s.reward_cost_multiplier = 6; // gia dinh cu chua chay migrate-03
   try { localStorage.setItem('r99-settings-cache', JSON.stringify({ ...s, cachedAt: Date.now() })); } catch { /* ignore */ }
   return s;
 }
@@ -399,10 +400,10 @@ export function cachedSettings() {
   try { return JSON.parse(localStorage.getItem('r99-settings-cache')); } catch { return null; }
 }
 
-export async function saveSettings({ tts_rate, daily_limit_min }) {
+export async function saveSettings({ tts_rate, daily_limit_min, reward_cost_multiplier }) {
   const fam = await ensureFamily();
   await post('settings', {
-    family_id: fam.id, tts_rate, daily_limit_min, updated_at: new Date().toISOString(),
+    family_id: fam.id, tts_rate, daily_limit_min, reward_cost_multiplier, updated_at: new Date().toISOString(),
   }, { Prefer: 'return=minimal,resolution=merge-duplicates' });
 }
 
@@ -428,6 +429,21 @@ export async function touchDevice(label) {
 
 export async function listDevices() {
   return get('devices?select=*&order=last_seen.desc');
+}
+
+/* ===== Nhật ký đăng nhập của bé (thông báo cho phụ huynh) ===== */
+
+/** Ghi 1 lần bé đăng nhập thành công (chọn hồ sơ ở /chon-be/). */
+export async function recordKidLogin(profileId, { device = '', browser = '' } = {}) {
+  const fam = await ensureFamily();
+  await post('kid_logins', {
+    family_id: fam.id, profile_id: profileId, device, browser,
+  }, { Prefer: 'return=minimal' });
+}
+
+/** Các lần đăng nhập gần nhất của CẢ NHÀ (cho trang Phụ Huynh). */
+export async function recentKidLogins(limit = 15) {
+  return get(`kid_logins?select=profile_id,device,browser,ts&order=ts.desc&limit=${limit}`);
 }
 
 /** Xuất toàn bộ dữ liệu gia đình (backup JSON tải về). */

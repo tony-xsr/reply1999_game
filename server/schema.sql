@@ -87,10 +87,11 @@ create table if not exists manual_rewards (
 
 -- Cai dat chung ca gia dinh (ap dung dong loat moi may).
 create table if not exists settings (
-  family_id       uuid primary key references families(id) on delete cascade,
-  tts_rate        real not null default 1.0,
-  daily_limit_min int  not null default 45,
-  updated_at      timestamptz not null default now()
+  family_id              uuid primary key references families(id) on delete cascade,
+  tts_rate               real not null default 1.0,
+  daily_limit_min        int  not null default 45,
+  reward_cost_multiplier real not null default 6,
+  updated_at             timestamptz not null default now()
 );
 
 -- May da lien ket (chi de hien thi/quan ly, khong phai co che bao mat).
@@ -100,6 +101,17 @@ create table if not exists devices (
   label      text not null default 'Thiết bị',
   last_seen  timestamptz not null default now()
 );
+
+-- Nhat ky dang nhap cua be (thong bao cho phu huynh: luc nao, may nao, trinh duyet nao).
+create table if not exists kid_logins (
+  id         bigint generated always as identity primary key,
+  family_id  uuid not null references families(id) on delete cascade,
+  profile_id uuid not null references profiles(id) on delete cascade,
+  device     text not null default '',
+  browser    text not null default '',
+  ts         timestamptz not null default now()
+);
+create index if not exists kid_logins_fam_ts on kid_logins (family_id, ts desc);
 
 -- ===== View =================================================================
 
@@ -141,7 +153,7 @@ do $$
 declare t text;
 begin
   foreach t in array array['profiles','sessions','miss_events','reward_ledger',
-                           'purchases','manual_rewards','settings','devices']
+                           'purchases','manual_rewards','settings','devices','kid_logins']
   loop
     execute format('drop policy if exists %I_fam on %I', t, t);
     execute format(
@@ -197,4 +209,6 @@ begin
   from old
   group by profile_id
   having sum(delta) <> 0;
+
+  delete from kid_logins where family_id = fam and ts < now() - interval '30 days';
 end $$;

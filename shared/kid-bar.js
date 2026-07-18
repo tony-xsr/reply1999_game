@@ -9,6 +9,7 @@
 
 import * as api from './api.js';
 import { newGiftCount, randomSmallGift } from './rewards.js';
+import { missCount } from '../nghe-doan-on-tap/src/misses.js';
 
 function todayKey() {
   const d = new Date();
@@ -29,19 +30,51 @@ function speakVi(text) {
 
 function mountBar(kid) {
   if (document.getElementById('kidBar')) return;
-  const bar = document.createElement('a');
-  bar.id = 'kidBar';
-  bar.href = '/chon-be/';
-  bar.title = `Đang chơi: ${kid.name} — chạm để đổi bé`;
-  bar.textContent = `${kid.avatar} ${kid.name}`;
-  bar.style.cssText = [
-    'position:fixed', 'left:10px', 'bottom:10px', 'z-index:70',
+  const chipCss = [
     'background:#fffaf2', 'border:2px solid #a8834a', 'border-radius:999px',
     'padding:5px 12px', 'font:800 13px -apple-system,Segoe UI,Roboto,Arial,sans-serif',
     'color:#241e2e', 'text-decoration:none', 'box-shadow:0 2px 8px rgba(90,60,20,.25)',
     'opacity:.92',
   ].join(';');
+
+  const bar = document.createElement('a');
+  bar.id = 'kidBar';
+  bar.href = '/chon-be/';
+  bar.title = `Đang chơi: ${kid.name} — chạm để đổi bé`;
+  bar.textContent = `${kid.avatar} ${kid.name}`;
+  bar.style.cssText = `position:fixed;left:10px;bottom:10px;z-index:70;${chipCss}`;
   document.body.appendChild(bar);
+
+  // Hiện SỐ SAO hiện có của bé trên thanh (cache 5 phút cho đỡ tốn request).
+  showStars(kid, bar);
+
+  // Huy hiệu 🎯 "từ cần ôn" (đọc sổ cục bộ, không tốn mạng) — chạm là vào Ôn Tập.
+  const weak = missCount();
+  if (weak > 0) {
+    const badge = document.createElement('a');
+    badge.id = 'kidWeakBadge';
+    badge.href = '/nghe-doan-on-tap/';
+    badge.title = `Bé còn ${weak} từ cần ôn — chạm để vào Ôn Tập!`;
+    badge.textContent = `🎯 ${weak} từ cần ôn`;
+    badge.style.cssText = `position:fixed;left:10px;bottom:48px;z-index:70;${chipCss};color:#c2410c`;
+    document.body.appendChild(badge);
+  }
+}
+
+async function showStars(kid, bar) {
+  try {
+    const key = `r99-stars-cache:${kid.id}`;
+    let stars = null;
+    try {
+      const cached = JSON.parse(localStorage.getItem(key));
+      if (cached && Date.now() - cached.ts < 5 * 60000) stars = cached.stars;
+    } catch { /* ignore */ }
+    if (stars === null && (await api.ready())) {
+      stars = await api.starBalance(kid.id);
+      try { localStorage.setItem(key, JSON.stringify({ stars, ts: Date.now() })); } catch { /* ignore */ }
+    }
+    if (stars !== null) bar.textContent = `${kid.avatar} ${kid.name} · ⭐${stars}`;
+  } catch { /* mất mạng: chỉ hiện tên */ }
 }
 
 /* ===== Toast quà ===== */

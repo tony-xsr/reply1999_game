@@ -62,3 +62,15 @@ export function randomSmallGift(rng = Math.random) {
 export function catalogItem(id) {
   return CATALOG.find((c) => c.id === id) || null;
 }
+
+// Giá gốc trong CATALOG quá rẻ so với tốc độ kiếm sao (trần 15 sao/ván, 50
+// sao/ngày) khiến bé đổi được quà gần như ngay lập tức — nhân hệ số mặc định
+// x6 để mỗi món quà thành mục tiêu dài hơi hơn. Phụ huynh chỉnh được số này
+// qua Trang Phụ Huynh (lưu trong settings.reward_cost_multiplier).
+export const DEFAULT_REWARD_COST_MULTIPLIER = 6;
+
+/** Giá đổi THỰC TẾ = giá gốc × hệ số (làm tròn, tối thiểu 1 sao). */
+export function effectiveCost(item, multiplier = DEFAULT_REWARD_COST_MULTIPLIER) {
+  const m = Number(multiplier) > 0 ? Number(multiplier) : DEFAULT_REWARD_COST_MULTIPLIER;
+  return Math.max(1, Math.round(item.cost * m));
+}
