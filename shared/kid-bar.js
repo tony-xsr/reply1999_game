@@ -45,9 +45,6 @@ function mountBar(kid) {
   bar.style.cssText = `position:fixed;left:10px;bottom:10px;z-index:70;${chipCss}`;
   document.body.appendChild(bar);
 
-  // Hiện SỐ SAO hiện có của bé trên thanh (cache 5 phút cho đỡ tốn request).
-  showStars(kid, bar);
-
   // Huy hiệu 🎯 "từ cần ôn" (đọc sổ cục bộ, không tốn mạng) — chạm là vào Ôn Tập.
   const weak = missCount();
   if (weak > 0) {
@@ -61,7 +58,9 @@ function mountBar(kid) {
   }
 }
 
-async function showStars(kid, bar) {
+/** Lấy số sao hiện có của bé — cache 5 phút cho đỡ tốn request, dùng chung
+ * cho cả thanh avatar góc dưới VÀ huy hiệu sao trên header. */
+async function fetchStars(kid) {
   try {
     const key = `r99-stars-cache:${kid.id}`;
     let stars = null;
@@ -73,8 +72,37 @@ async function showStars(kid, bar) {
       stars = await api.starBalance(kid.id);
       try { localStorage.setItem(key, JSON.stringify({ stars, ts: Date.now() })); } catch { /* ignore */ }
     }
-    if (stars !== null) bar.textContent = `${kid.avatar} ${kid.name} · ⭐${stars}`;
-  } catch { /* mất mạng: chỉ hiện tên */ }
+    return stars;
+  } catch {
+    return null; // mất mạng: không hiện số sao
+  }
+}
+
+/** Gắn huy hiệu "⭐ N" vào header của game (mọi game dùng chung <header
+ * class="top">) — để bé/phụ huynh luôn thấy số sao hiện tại ngay trên đầu
+ * màn hình, không chỉ ở thanh avatar góc dưới. Không tìm thấy header thì
+ * bỏ qua êm, không phá game (vài game như pokemon dùng header khác). */
+function mountHeaderStars() {
+  const header = document.querySelector('header.top');
+  if (!header || document.getElementById('kidHeaderStars')) return null;
+  // Header của mỗi game vốn đã có sẵn 3-4 nút tròn cố định (44px) + tiêu đề —
+  // trên màn hình hẹp, hàng flex "nowrap" mặc định khiến huy hiệu ⭐ (thêm
+  // SAU CÙNG) bị đẩy tràn ra NGOÀI khung nhìn, không có thanh cuộn ngang nên
+  // bé/phụ huynh không thấy được. Ép hàng header cho phép xuống dòng — huy
+  // hiệu sẽ tự rơi xuống dòng 2 khi không đủ chỗ, thay vì mất hút ngoài màn.
+  header.style.flexWrap = 'wrap';
+  const badge = document.createElement('span');
+  badge.id = 'kidHeaderStars';
+  badge.title = 'Số sao hiện có của bé';
+  badge.style.cssText = [
+    'display:inline-flex', 'align-items:center', 'flex-shrink:0',
+    'background:#fffaf2', 'border:2px solid #a8834a', 'border-radius:999px',
+    'padding:4px 10px', 'font:800 13px -apple-system,Segoe UI,Roboto,Arial,sans-serif',
+    'color:#241e2e', 'box-shadow:0 2px 6px rgba(90,60,20,.2)',
+  ].join(';');
+  badge.textContent = '⭐ …';
+  header.appendChild(badge);
+  return badge;
 }
 
 /* ===== Toast quà ===== */
@@ -205,11 +233,24 @@ async function checkParentGifts() {
   } catch { /* mất mạng: lần sau hiện */ }
 }
 
-/** Gọi 1 lần khi game khởi động: thanh avatar + giới hạn ngày + quà bố mẹ chờ mở. */
+/** Gọi 1 lần khi game khởi động: thanh avatar + huy hiệu sao trên header +
+ * giới hạn ngày + quà bố mẹ chờ mở. */
 export function mountKidFeatures() {
   try {
     const kid = api.currentKidInfo();
-    if (kid) mountBar(kid);
+    if (kid) {
+      mountBar(kid);
+      const headerBadge = mountHeaderStars();
+      fetchStars(kid).then((stars) => {
+        if (stars === null) {
+          if (headerBadge) headerBadge.remove(); // mất mạng: bỏ hẳn huy hiệu, khỏi kẹt ở "⭐ …"
+          return;
+        }
+        const bar = document.getElementById('kidBar');
+        if (bar) bar.textContent = `${kid.avatar} ${kid.name} · ⭐${stars}`;
+        if (headerBadge) headerBadge.textContent = `⭐ ${stars}`;
+      });
+    }
     checkDailyLimit();
     checkParentGifts();
   } catch { /* không bao giờ làm hỏng game */ }

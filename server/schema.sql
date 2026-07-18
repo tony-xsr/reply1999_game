@@ -65,12 +65,13 @@ create index if not exists reward_ledger_profile on reward_ledger (profile_id, t
 
 -- Qua da doi bang sao.
 create table if not exists purchases (
-  id         uuid primary key,
-  family_id  uuid not null references families(id) on delete cascade,
-  profile_id uuid not null references profiles(id) on delete cascade,
-  item_id    text not null,
-  cost       int  not null,
-  ts         timestamptz not null default now()
+  id           uuid primary key,
+  family_id    uuid not null references families(id) on delete cascade,
+  profile_id   uuid not null references profiles(id) on delete cascade,
+  item_id      text not null,
+  cost         int  not null,
+  ts           timestamptz not null default now(),
+  delivered_at timestamptz -- null = bo me chua giao qua tay cho be; phu huynh bam "Da giao" de danh dau
 );
 
 -- Thuong tay cua bo me (kem loi nhan); be mo qua thi ghi opened_at.

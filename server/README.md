@@ -7,7 +7,7 @@ riêng, không cần build.
 > ⚠️ KHÔNG ghi mật khẩu database vào bất kỳ file nào trong repo — mật khẩu đó
 > chỉ dùng khi kết nối Postgres trực tiếp, ứng dụng này không cần đến. Nếu lỡ
 > ghi/commit, hãy đổi mật khẩu trong Supabase → Project Settings → Database.
-lythong12A@
+...12A@
 ## Bước 1 — Tạo project
 1. Vào https://supabase.com → đăng ký/đăng nhập (miễn phí).
 2. **New project** → đặt tên (ví dụ `reply1999-games`), chọn region `Southeast Asia (Singapore)`, đặt mật khẩu database (giữ kỹ) → **Create**.

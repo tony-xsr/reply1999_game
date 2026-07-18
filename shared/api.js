@@ -357,6 +357,17 @@ export async function kidPurchases(profileId) {
   return get(`purchases?select=*&profile_id=eq.${profileId}&order=ts.desc`);
 }
 
+/** Phụ huynh đánh dấu 1 quà đã đổi là ĐÃ GIAO tận tay bé (vd đã đưa socola).
+ * Chỉ để lưu vết — không hoàn/trừ sao, vì sao đã bị trừ lúc đổi quà rồi. */
+export async function markPurchaseDelivered(purchaseId) {
+  await patch(`purchases?id=eq.${purchaseId}`, { delivered_at: new Date().toISOString() });
+}
+
+/** Phụ huynh lỡ tay đánh dấu nhầm — bỏ đánh dấu đã giao (đưa về "chưa giao"). */
+export async function unmarkPurchaseDelivered(purchaseId) {
+  await patch(`purchases?id=eq.${purchaseId}`, { delivered_at: null });
+}
+
 /** Quà MIỄN PHÍ "học chăm" (hộp quà mỗi 15 câu) — vào tủ quà với cost 0. */
 export async function recordFreeGift(profileId, itemId) {
   const fam = await ensureFamily();

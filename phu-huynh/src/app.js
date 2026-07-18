@@ -6,6 +6,7 @@ import * as api from '../../shared/api.js';
 import {
   buildWeeklyReport, formatReportVi, minutesByGroup, minutesByTimeOfDay, weeklyWinRate, weekStart,
 } from '../../shared/report.js';
+import { catalogItem } from '../../shared/rewards.js';
 
 const $ = (id) => document.getElementById(id);
 const AVATARS = ['🐰', '🐯', '🐸', '🦄', '🐼', '🐥', '🦊', '🐨', '🐷', '🦁', '🐳', '🦖'];
@@ -341,7 +342,43 @@ async function renderKidStats(k) {
     ? `<table>${ledger.slice(0, 25).map((r) =>
         `<tr><td>${(r.ts || '').slice(0, 10)}</td><td>${r.delta > 0 ? '+' : ''}${r.delta}⭐</td><td>${viReason(r.reason)}</td></tr>`).join('')}</table>`
     : '<i style="color:var(--ink-dim)">Chưa có giao dịch sao nào.</i>';
+
+  renderPurchaseLog(purchases);
 }
+
+// Quà đã đổi bằng sao (đồ THẬT như kẹo/hoa/thú bông) — bố mẹ cần tự tay giao
+// cho bé ngoài đời, rồi bấm "Đã giao" để đánh dấu, khỏi quên món nào chưa đưa.
+function renderPurchaseLog(purchases) {
+  const box = $('purchaseLog');
+  if (!purchases.length) {
+    box.innerHTML = '<i style="color:var(--ink-dim)">Bé chưa đổi quà nào.</i>';
+    return;
+  }
+  box.innerHTML = purchases.slice(0, 40).map((p) => {
+    const item = catalogItem(p.item_id) || { icon: '🎁', name: p.item_id };
+    const date = (p.ts || '').slice(0, 10);
+    const status = p.delivered_at
+      ? `<span style="color:var(--good)">✅ Đã giao ${(p.delivered_at || '').slice(0, 10)}</span>
+         <button class="ghost" data-action="undeliver" data-id="${p.id}" style="margin:0 0 0 8px;padding:2px 9px;font-size:12px">Bỏ đánh dấu</button>`
+      : `<span style="color:var(--bad, #c2410c)">⏳ Chưa giao</span>
+         <button data-action="deliver" data-id="${p.id}" style="margin:0 0 0 8px;padding:2px 9px;font-size:12px">✅ Đánh dấu đã giao</button>`;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)">
+      <span>${item.icon} ${item.name} <span style="color:var(--ink-dim);font-size:12px">(${date})</span></span>
+      <span style="white-space:nowrap">${status}</span>
+    </div>`;
+  }).join('');
+}
+
+$('purchaseLog').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-action]');
+  if (!btn || !state.kid) return;
+  btn.disabled = true;
+  try {
+    if (btn.dataset.action === 'deliver') await api.markPurchaseDelivered(btn.dataset.id);
+    else await api.unmarkPurchaseDelivered(btn.dataset.id);
+    await renderKidStats(state.kid);
+  } catch { btn.disabled = false; }
+});
 
 async function apiLedger(profileId) {
   // Chỉ tải sổ sao của đúng bé này (kidLedger) — không kéo cả database như trước.
