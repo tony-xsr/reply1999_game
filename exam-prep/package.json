@@ -1,0 +1,8 @@
+{
+  "name": "exam-prep",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/examprep.test.js"
+  }
+}
