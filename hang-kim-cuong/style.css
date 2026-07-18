@@ -29,7 +29,10 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 10px max(12px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  /* Dưới cùng chừa thêm chỗ cho thanh avatar bé + huy hiệu "từ cần ôn" nổi cố
+       định ở góc dưới-trái (shared/kid-bar.js, position:fixed) — nếu không,
+       2 huy hiệu đó sẽ đè lên UI dưới cùng của trò. */
+    padding: 10px max(12px, env(safe-area-inset-right)) calc(74px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
   max-width: 460px;
   margin: 0 auto;
 }
