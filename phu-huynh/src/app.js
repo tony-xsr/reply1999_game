@@ -119,7 +119,37 @@ async function loadKids() {
     tabs.appendChild(b);
   }
   renderCompare();
+  renderLoginLog();
   if (!state.kid) selectKid(state.kids[0]);
+}
+
+/* ===== Nhật ký đăng nhập của bé ===== */
+
+let loginLogRenderedAt = 0;
+
+async function renderLoginLog() {
+  if (Date.now() - loginLogRenderedAt < 30000) return;
+  loginLogRenderedAt = Date.now();
+  const box = $('loginLog');
+  try {
+    const rows = await api.recentKidLogins(15);
+    if (!rows.length) {
+      box.innerHTML = '<i style="color:var(--ink-dim)">Chưa có lần đăng nhập nào — bé chọn avatar ở /chon-be/ là sẽ hiện ở đây.</i>';
+      return;
+    }
+    const kidOf = new Map(state.kids.map((k) => [k.id, k]));
+    box.innerHTML = rows.map((r) => {
+      const k = kidOf.get(r.profile_id);
+      const t = new Date(r.ts);
+      const p = (n) => String(n).padStart(2, '0');
+      const when = `${p(t.getDate())}/${p(t.getMonth() + 1)} ${p(t.getHours())}:${p(t.getMinutes())}`;
+      return `${k ? `${k.avatar} <b>${k.name}</b>` : 'Bé (đã xóa)'} — ${when} — 📱 ${r.device || '?'} · ${r.browser || '?'}`;
+    }).join('<br>');
+  } catch (e) {
+    box.innerHTML = /kid_logins/.test(e.message) || /404/.test(e.message)
+      ? '<i style="color:var(--ink-dim)">Cần chạy <code>server/migrate-02-kid-logins.sql</code> trong Supabase SQL Editor để bật tính năng này.</i>'
+      : `<i style="color:var(--ink-dim)">Không tải được (${e.message})</i>`;
+  }
 }
 
 $('btnAddKid').addEventListener('click', async () => {
@@ -437,6 +467,7 @@ $('liveToggle').addEventListener('change', (e) => {
   if (e.target.checked) {
     liveTimer = setInterval(() => {
       if (state.kid) renderKidStats(state.kid).catch(() => {});
+      renderLoginLog();
     }, 15000);
   }
 });
@@ -462,6 +493,7 @@ async function loadSettings() {
   const s = await api.getSettings();
   $('setLimit').value = s.daily_limit_min;
   $('setRate').value = s.tts_rate;
+  $('setRewardMult').value = s.reward_cost_multiplier ?? 6;
 }
 
 $('btnSaveSettings').addEventListener('click', async () => {
@@ -470,6 +502,7 @@ $('btnSaveSettings').addEventListener('click', async () => {
     await api.saveSettings({
       daily_limit_min: Number($('setLimit').value) || 45,
       tts_rate: Number($('setRate').value) || 1.0,
+      reward_cost_multiplier: Number($('setRewardMult').value) || 6,
     });
     $('setOk').textContent = 'Đã lưu — áp dụng cho mọi máy của gia đình.';
   } catch (e) { $('setOk').textContent = `Lỗi: ${e.message}`; }

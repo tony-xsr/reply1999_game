@@ -132,6 +132,11 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
       <div id="compareBox"></div>
     </div>
 
+    <div class="card">
+      <h2>🔔 Bé đăng nhập gần đây</h2>
+      <div id="loginLog" style="font-size:13.5px;line-height:2">Đang tải…</div>
+    </div>
+
     <div id="kidPanel" class="hidden">
       <div class="card">
         <h2 id="kidTitle"></h2>
@@ -210,6 +215,7 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
         <h2>⚙️ Cài đặt (áp dụng mọi máy)</h2>
         <label>Giới hạn chơi mỗi ngày (phút)</label><input id="setLimit" type="number" min="5" max="480" value="45" />
         <label>Tốc độ đọc TTS (0.6 chậm — 1.4 nhanh)</label><input id="setRate" type="number" min="0.6" max="1.4" step="0.1" value="1.0" />
+        <label>Hệ số giá đổi quà trong Tủ Quà (mặc định x6 — số càng lớn, quà càng khó đổi)</label><input id="setRewardMult" type="number" min="1" max="50" step="0.5" value="6" />
         <div class="ok" id="setOk"></div>
         <button id="btnSaveSettings">Lưu cài đặt</button>
       </div>
