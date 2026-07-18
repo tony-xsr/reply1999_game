@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {
   starsFromScore, capDailyStars, newGiftCount, randomSmallGift, catalogItem,
   CATALOG, DAILY_STAR_CAP, GIFT_EVERY, effectiveCost, DEFAULT_REWARD_COST_MULTIPLIER,
+  isFlatRewardMode, starsForSession, FLAT_REWARD_MODES, FLAT_REWARD_STARS,
 } from './rewards.js';
 
 let passed = 0;
@@ -74,6 +75,33 @@ check('effectiveCost: applies default x6 multiplier, rounds, floors at 1', () =>
   assert.equal(effectiveCost({ cost: 1 }, 0), 6, 'zero/invalid multiplier falls back to default');
   assert.equal(effectiveCost({ cost: 1 }, -3), 6, 'negative multiplier falls back to default');
   assert.ok(effectiveCost({ cost: 1 }, 0.1) >= 1, 'never rounds down to 0');
+});
+
+check('isFlatRewardMode: pure entertainment games (đào vàng, khủng long, arcade cổ...) are flagged flat-reward', () => {
+  assert.ok(isFlatRewardMode('daovang'));
+  assert.ok(isFlatRewardMode('khunglong'));
+  assert.ok(isFlatRewardMode('cocaro'));
+  assert.ok(isFlatRewardMode('classic'), 'Pikachu Classic/Onet dùng thẳng state.mode');
+  assert.ok(isFlatRewardMode('arcadexua-whack'), 'arcade-xua ghép tên minigame con vào mode');
+  assert.ok(isFlatRewardMode('vandongvui-jump'), 'van-dong-vui ghép tên minigame con vào mode');
+  assert.ok(!isFlatRewardMode('nghedoan5'), 'game Nghe & Đoán vẫn thưởng theo điểm');
+  assert.ok(!isFlatRewardMode('banbongtuvung'), 'game từ vựng vẫn thưởng theo điểm');
+  assert.ok(!isFlatRewardMode('nguphap-goingtowill'), 'game ngữ pháp vẫn thưởng theo điểm');
+});
+
+check('starsForSession: flat 1 sao cho game giải trí thuần bất kể điểm số, theo điểm cho game có học', () => {
+  assert.equal(starsForSession('daovang', 0), FLAT_REWARD_STARS, 'chơi xong dù thua/điểm thấp vẫn được 1 sao');
+  assert.equal(starsForSession('daovang', 999), FLAT_REWARD_STARS, 'điểm cao cũng chỉ 1 sao, không ăn theo điểm');
+  assert.equal(starsForSession('khunglong', 5), FLAT_REWARD_STARS);
+  assert.equal(starsForSession('nghedoan5', 95), starsFromScore(95), 'game có học vẫn thưởng theo điểm như cũ');
+  assert.equal(starsForSession('nghedoan5', 5), 0, 'game có học điểm quá thấp vẫn 0 sao như cũ');
+});
+
+check('FLAT_REWARD_MODES: không rỗng và không lẫn mode nào rõ ràng là game học', () => {
+  assert.ok(FLAT_REWARD_MODES.size >= 30);
+  for (const m of FLAT_REWARD_MODES) {
+    assert.ok(!m.includes('tuvung') && !m.includes('nghedoan') && !m.includes('nguphap'), `mode "${m}" nghe như game học, không nên nằm trong danh sách giải trí thuần`);
+  }
 });
 
 console.log(`\n${passed} checks passed`);

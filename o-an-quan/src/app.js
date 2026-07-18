@@ -5,6 +5,7 @@ import { createGame, play, aiMove, legalMoves, SIDES, isQuanCell } from './oanqu
 import { speak, bindMute } from '../../to-mau/src/speech.js';
 import { sfx } from '../../pokemon/src/sfx.js';
 import { currentProfile, recordSession } from '../../pokemon/src/stats.js';
+import { mountKidFeatures } from '../../shared/kid-bar.js';
 
 const t = (key, fallback) => {
   const v = window.I18N?.t(key);
@@ -235,3 +236,5 @@ newGame();
 
 // Hook cho e2e test
 window.__oanquan = { state, newGame, doMove, onCell, legalMoves };
+
+mountKidFeatures(); // thanh avatar bé + huy hiệu sao header + kiểm tra giới hạn phút/ngày (áp dụng cho mọi game, kể cả game giải trí thuần)
