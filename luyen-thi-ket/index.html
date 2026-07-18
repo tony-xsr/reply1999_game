@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#eef3ff">
+  <title>Luyện Thi KET</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <a class="round-btn" href="/thi-chung-chi-anh/" data-i18n-title="examhub.back" title="Thi Chứng Chỉ Anh">🏠</a>
+      <h1 id="title" data-i18n="examket.title">🎫 Luyện Thi KET</h1>
+      <button class="round-btn" id="btnBack" data-i18n-title="hocvui.back" title="Quay lại" hidden>◀</button>
+      <button class="round-btn" id="btnHelp" data-i18n-title="pika.btn.help" title="Cách chơi" hidden>❓</button>
+      <button class="round-btn" id="btnSound" data-i18n-title="pika.btn.sound" title="Âm thanh">🔊</button>
+    </header>
+
+    <div class="sub-line" id="subLine"></div>
+
+    <!-- Màn 1 (màn gốc): Học hay Luyện Thi? -->
+    <main class="screen" id="modeScreen">
+      <button class="mode-big-card" id="btnGoStudy">
+        <span class="lc-icon">📖</span>
+        <span class="lc-name" data-i18n="examprep.mode.study">Học theo Unit</span>
+        <span class="lc-desc" data-i18n="examprep.mode.study.desc">Đọc bài học ngữ pháp + ví dụ, rồi luyện tập có gợi ý khi sai — không tính giờ</span>
+      </button>
+      <button class="mode-big-card mode-big-card--test" id="btnGoMock">
+        <span class="lc-icon">⏱️</span>
+        <span class="lc-name" data-i18n="examprep.mode.test">Luyện Thi (Đề Ngẫu Nhiên)</span>
+        <span class="lc-desc" data-i18n="examprep.mode.test.desc">Đề trộn ngẫu nhiên toàn bộ unit, tính giờ, mỗi câu chỉ 1 lần trả lời — giống thi thật</span>
+      </button>
+    </main>
+
+    <!-- Màn 2: chọn unit (nhánh Học) -->
+    <main class="screen hidden" id="unitScreen">
+      <div class="unit-grid" id="unitGrid"></div>
+    </main>
+
+    <!-- Màn 3: bài học của 1 unit (nhánh Học) -->
+    <main class="screen hidden" id="lessonScreen">
+      <div class="lesson-card">
+        <div class="lesson-topic" id="lessonTopic"></div>
+        <div class="lesson-intro" id="lessonIntro"></div>
+        <div class="lesson-points" id="lessonPoints"></div>
+      </div>
+      <button class="big-btn" id="btnStartPractice" data-i18n="examprep.startPractice">BẮT ĐẦU LUYỆN TẬP ▶</button>
+    </main>
+
+    <!-- Màn 4: chọn độ dài đề (nhánh Luyện Thi) -->
+    <main class="screen hidden" id="mockSetupScreen">
+      <button class="level-card" data-count="10">
+        <span class="lc-icon">📝</span>
+        <span class="lc-name" data-i18n="examprep.mock.quick">Đề Nhanh — 10 câu</span>
+        <span class="lc-desc" data-i18n="examprep.mock.quick.desc">Khoảng 4 phút, trộn ngẫu nhiên toàn bộ unit</span>
+      </button>
+      <button class="level-card" data-count="20">
+        <span class="lc-icon">📋</span>
+        <span class="lc-name" data-i18n="examprep.mock.full">Đề Đầy Đủ — 20 câu</span>
+        <span class="lc-desc" data-i18n="examprep.mock.full.desc">Khoảng 8 phút, mô phỏng 1 đề luyện thi trọn vẹn</span>
+      </button>
+    </main>
+
+    <!-- Màn 5: luyện tập / làm đề (dùng chung cho cả 2 nhánh) -->
+    <main class="screen hidden" id="quizScreen">
+      <div class="quiz-hud">
+        <span>⭐ <b id="hudScore">0</b></span>
+        <span id="hudRound">0/8</span>
+        <span id="hudTimerWrap" class="hidden">⏱️ <b id="hudTimer">0:00</b></span>
+        <span>🔥 <b id="hudStreak">0</b></span>
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-unit" id="quizUnitLabel"></div>
+        <div class="quiz-passage hidden" id="quizPassage">
+          <div class="quiz-passage-title" id="quizPassageTitle"></div>
+          <div class="quiz-passage-text" id="quizPassageText"></div>
+        </div>
+        <div class="quiz-prompt" id="quizPrompt"></div>
+        <div class="quiz-options" id="quizOptions"></div>
+        <div class="quiz-explain" id="quizExplain"></div>
+      </div>
+      <button class="pick-btn" id="btnListen">🔊 <span data-i18n="nghedoan.listen">Đọc lại</span></button>
+    </main>
+
+    <!-- Màn 6: báo cáo cuối đề luyện thi -->
+    <main class="screen hidden" id="reportScreen">
+      <div class="report-card">
+        <div class="report-score" id="reportScore"></div>
+        <div class="report-percent" id="reportPercent"></div>
+        <div class="report-weak" id="reportWeak"></div>
+      </div>
+      <button class="big-btn" id="btnMockAgain" data-i18n="examprep.mock.again">LÀM ĐỀ KHÁC ▶</button>
+      <button class="big-btn big-btn--ghost" id="btnStudyWeak" data-i18n="examprep.mock.study">VỀ HỌC LẠI CHỦ ĐIỂM YẾU</button>
+    </main>
+
+    <div class="cheer hidden" id="cheer">
+      <div class="cheer-emoji" id="cheerEmoji">🏆</div>
+      <div class="cheer-text" id="cheerText"></div>
+      <button class="big-btn" id="btnAgain" data-i18n="hocvui.again">CHƠI TIẾP ▶</button>
+      <button class="big-btn big-btn--ghost" id="btnHome2" data-i18n="hocvui.pick">CHỌN UNIT KHÁC</button>
+    </div>
+  </div>
+
+  <script src="/i18n.js"></script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
