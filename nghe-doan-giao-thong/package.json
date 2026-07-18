@@ -1,0 +1,8 @@
+{
+  "name": "nghe-doan-giao-thong",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/giaothong.test.js"
+  }
+}
