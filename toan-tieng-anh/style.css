@@ -1,0 +1,157 @@
+/* Học Tiếng Anh Qua Toán — phép cộng trừ đọc to bằng tiếng Anh (kèm đáp
+   án), bé nghe rồi chọn đúng con số. */
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #fff6e8;
+  --panel: #fffaf2;
+  --ink: #241e2e;
+  --muted: #5d5370;
+  --accent: #ff8a3d;
+  --accent-deep: #c2410c;
+  --good: #15803d;
+  --line: #a8834a;
+}
+
+html, body { height: 100%; }
+body {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, #ffe9c8 0%, transparent 70%),
+    var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.shell {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  /* Dưới cùng chừa thêm chỗ cho thanh avatar bé nổi cố định (shared/kid-bar.js). */
+  padding: 10px max(12px, env(safe-area-inset-right)) calc(74px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.top { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.top h1 { font-size: 1.1rem; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.round-btn {
+  width: 44px; height: 44px; flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: var(--panel);
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 2px 5px rgba(90, 60, 20, 0.12);
+}
+.round-btn:active { transform: scale(0.93); }
+
+.dots { display: flex; gap: 6px; justify-content: center; }
+.dot { width: 12px; height: 12px; border-radius: 50%; background: var(--line); }
+.dot.now { background: var(--accent-deep); transform: scale(1.25); }
+.dot.ok { background: var(--good); }
+
+.stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  position: relative;
+}
+.question { text-align: center; font-size: 1.25rem; font-weight: 900; min-height: 1.4em; }
+
+.field {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.eq {
+  display: flex; gap: 10px; align-items: center;
+  font-size: 2.6rem; font-weight: 900;
+}
+.eq .blank {
+  min-width: 64px;
+  border: 3px dashed var(--accent);
+  border-radius: 14px;
+  color: var(--accent-deep);
+  background: #fff1e2;
+  text-align: center;
+  padding: 2px 8px;
+}
+.eq .blank.filled { border-style: solid; border-color: var(--good); background: #ecfaf0; color: var(--good); animation: pop 0.4s ease-out; }
+
+.tray { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; max-width: 520px; }
+.tile-btn {
+  min-width: 76px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--panel);
+  border: 3px solid var(--line);
+  color: var(--ink);
+  font-size: 1.7rem; font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 3px 7px rgba(90, 60, 20, 0.15);
+}
+.tile-btn:active { transform: scale(0.94); }
+.tile-btn.shake { animation: shake 0.3s; }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-7px); }
+  75% { transform: translateX(7px); }
+}
+@keyframes pop {
+  from { transform: scale(0.6); }
+  60% { transform: scale(1.2); }
+  to { transform: scale(1); }
+}
+
+.cheer {
+  position: absolute; inset: 0;
+  background: rgba(255, 250, 240, 0.96);
+  border-radius: 16px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 12px; text-align: center; padding: 16px;
+  z-index: 10;
+}
+.cheer.hidden { display: none; }
+.cheer-emoji { font-size: 4rem; animation: pop 0.5s ease-out; }
+.cheer-text { font-size: 1.3rem; font-weight: 900; }
+.big-btn {
+  background: linear-gradient(180deg, #ee6f1a, #c2410c);
+  color: #fff;
+  border: none; border-radius: 14px;
+  font-size: 1.1rem; font-weight: 900;
+  padding: 13px 30px; cursor: pointer;
+  box-shadow: 0 4px 10px rgba(194, 65, 12, 0.4);
+}
+.big-btn:active { transform: translateY(2px); }
+
+.confetti-piece {
+  position: fixed;
+  top: -12px; left: var(--x);
+  width: 10px; height: 14px;
+  z-index: 60;
+  animation: confetti-fall 2.2s var(--delay) ease-in forwards;
+}
+@keyframes confetti-fall {
+  to { transform: translateY(105vh) rotate(var(--rot)); }
+}
+
+@media (max-width: 560px) {
+  .eq { font-size: 2rem; }
+  .tile-btn { min-width: 64px; font-size: 1.4rem; }
+}
