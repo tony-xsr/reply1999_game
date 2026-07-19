@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#e6f3e0">
+  <title>Bắn Trứng Khủng Long</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <a class="round-btn" href="/thi-chung-chi-anh/" data-i18n-title="examhub.back" title="Thi Chứng Chỉ Anh">🏠</a>
+      <h1 data-i18n="bantrung.title">🥚 Bắn Trứng Khủng Long</h1>
+      <div class="chip-stat" id="clock">45s</div>
+      <div class="chip-stat score" id="score">0</div>
+      <button class="round-btn" id="btnHelp" data-i18n-title="pika.btn.help" title="Cách chơi">❓</button>
+      <button class="round-btn" id="btnSound" data-i18n-title="pika.btn.sound" title="Âm thanh">🔊</button>
+    </header>
+
+    <div class="target-line">
+      <span data-i18n="bantrung.only">Bắn trúng trứng mang từ</span>
+      <b id="targetTag">🍎 apple</b>
+    </div>
+
+    <main class="stage">
+      <div class="sky" id="sky">
+        <div class="dinos" id="dinos"></div>
+        <div class="lanes" id="lanes"></div>
+      </div>
+      <div class="overlay" id="overlay">
+        <div class="ov-emoji" id="ovEmoji">🦕</div>
+        <div class="ov-text" id="ovText" data-i18n="bantrung.help">Khủng long mẹ thả trứng rơi xuống theo từng cột, mỗi quả mang 1 từ tiếng Anh. Máy sẽ đọc to từ mục tiêu — bé chỉ bắn trúng quả trứng mang ĐÚNG từ đó trước khi nó rơi chạm đất! Bắn đúng 3 lần liên tiếp thì đổi từ mục tiêu khác.</div>
+        <button class="big-btn" id="btnPlay" data-i18n="ran.play">CHƠI ▶</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="/i18n.js"></script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

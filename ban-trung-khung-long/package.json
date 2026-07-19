@@ -1,0 +1,8 @@
+{
+  "name": "ban-trung-khung-long",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/bantrung.test.js"
+  }
+}
