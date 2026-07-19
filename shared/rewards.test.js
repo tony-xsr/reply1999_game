@@ -68,13 +68,13 @@ check('catalogItem: finds by id, null for unknown', () => {
   assert.equal(catalogItem('nope'), null);
 });
 
-check('effectiveCost: applies default x6 multiplier, rounds, floors at 1', () => {
-  assert.equal(DEFAULT_REWARD_COST_MULTIPLIER, 6);
-  assert.equal(effectiveCost({ cost: 5 }), 30);
-  assert.equal(effectiveCost({ cost: 200 }), 1200);
+check('effectiveCost: applies default x12 multiplier, rounds, floors at 1', () => {
+  assert.equal(DEFAULT_REWARD_COST_MULTIPLIER, 12);
+  assert.equal(effectiveCost({ cost: 5 }), 60);
+  assert.equal(effectiveCost({ cost: 200 }), 2400);
   assert.equal(effectiveCost({ cost: 5 }, 2), 10, 'parent-adjusted multiplier overrides default');
-  assert.equal(effectiveCost({ cost: 1 }, 0), 6, 'zero/invalid multiplier falls back to default');
-  assert.equal(effectiveCost({ cost: 1 }, -3), 6, 'negative multiplier falls back to default');
+  assert.equal(effectiveCost({ cost: 1 }, 0), 12, 'zero/invalid multiplier falls back to default');
+  assert.equal(effectiveCost({ cost: 1 }, -3), 12, 'negative multiplier falls back to default');
   assert.ok(effectiveCost({ cost: 1 }, 0.1) >= 1, 'never rounds down to 0');
 });
 
@@ -85,6 +85,9 @@ check('isFlatRewardMode: pure entertainment games (đào vàng, khủng long, ar
   assert.ok(isFlatRewardMode('classic'), 'Pikachu Classic/Onet dùng thẳng state.mode');
   assert.ok(isFlatRewardMode('arcadexua-whack'), 'arcade-xua ghép tên minigame con vào mode');
   assert.ok(isFlatRewardMode('vandongvui-jump'), 'van-dong-vui ghép tên minigame con vào mode');
+  assert.ok(isFlatRewardMode('rentrinao-simon'), 'ren-tri-nao ghép tên minigame con vào mode, thuần arcade');
+  assert.ok(isFlatRewardMode('gopsovui'), 'Gộp Số Vui là bản 2048, không có nội dung học');
+  assert.ok(isFlatRewardMode('tuduy'), 'Luyện Tư Duy là các trò giải đố thuần, không có nội dung học');
   assert.ok(!isFlatRewardMode('nghedoan5'), 'game Nghe & Đoán vẫn thưởng theo điểm');
   assert.ok(!isFlatRewardMode('banbongtuvung'), 'game từ vựng vẫn thưởng theo điểm');
   assert.ok(!isFlatRewardMode('nguphap-goingtowill'), 'game ngữ pháp vẫn thưởng theo điểm');

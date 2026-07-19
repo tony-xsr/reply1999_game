@@ -30,12 +30,23 @@ export const FLAT_REWARD_MODES = new Set([
   'vudieu', 'taydua', 'thucung', 'vodai', 'pokedaichien', 'vuonrau',
   'behai', 'betimban', 'stylist', 'phongxinh', 'oanquan', 'cangua',
   'coganh', 'cocaro', 'dientu', 'troxua',
+  // Rà lại 07/2026 (yêu cầu giảm lạm phát sao): 2 game này KHÔNG có nội dung
+  // từ vựng/kiến thức nào dù trước đó bị xếp nhầm vào diện "học theo điểm" —
+  // "Gộp Số Vui" là bản sao game 2048 thuần túy, "Luyện Tư Duy" là 6 trò
+  // mê cung/sudoku/tìm khác biệt/nối hình thuần giải đố, không có giọng đọc
+  // dạy từ/kiến thức gì. Chuyển về diện giải trí thuần 1 sao/lượt.
+  'gopsovui', 'tuduy',
   // Pikachu Classic/Onet (pokemon/) truyền thẳng state.mode làm mode:
   'classic', 'zen', 'daily', 'duel',
 ]);
-// arcade-xua/ và van-dong-vui/ ghép thêm tên minigame con vào mode, vd
-// "arcadexua-whack" — so khớp theo tiền tố thay vì so khớp đúng chuỗi.
-const FLAT_REWARD_MODE_PREFIXES = ['arcadexua-', 'vandongvui-'];
+// arcade-xua/, van-dong-vui/ và ren-tri-nao/ ghép thêm tên minigame con vào
+// mode, vd "arcadexua-whack" — so khớp theo tiền tố thay vì so khớp đúng
+// chuỗi. ren-tri-nao/ (Simon nhớ màu, 2048, bi-a mini, khối rơi...) đa số là
+// arcade cổ điển thuần giải trí — riêng 1/5 trò con (lật bài nhớ hình có
+// nghe từ tiếng Anh) bị xếp CHUNG vào diện flat luôn cho đơn giản/nhất
+// quán, chấp nhận đánh đổi nhỏ này giống cách arcade-xua/van-dong-vui đã
+// làm trước đó.
+const FLAT_REWARD_MODE_PREFIXES = ['arcadexua-', 'vandongvui-', 'rentrinao-'];
 
 export const FLAT_REWARD_STARS = 1;
 
@@ -98,9 +109,12 @@ export function catalogItem(id) {
 
 // Giá gốc trong CATALOG quá rẻ so với tốc độ kiếm sao (trần 5 sao/ván, 50
 // sao/ngày) khiến bé đổi được quà gần như ngay lập tức — nhân hệ số mặc định
-// x6 để mỗi món quà thành mục tiêu dài hơi hơn. Phụ huynh chỉnh được số này
+// để mỗi món quà thành mục tiêu dài hơi hơn. Phụ huynh chỉnh được số này
 // qua Trang Phụ Huynh (lưu trong settings.reward_cost_multiplier).
-export const DEFAULT_REWARD_COST_MULTIPLIER = 6;
+// Tăng x6→x12 (07/2026, yêu cầu "tăng x2 sao cần đổi quà" để chống lạm phát
+// sau khi đã giảm trần sao/ván 15→5) — chống lạm phát từ CẢ 2 phía: hạ tốc
+// độ kiếm (trần sao/ván) VÀ nâng chi phí tiêu (hệ số đổi quà).
+export const DEFAULT_REWARD_COST_MULTIPLIER = 12;
 
 /** Giá đổi THỰC TẾ = giá gốc × hệ số (làm tròn, tối thiểu 1 sao). */
 export function effectiveCost(item, multiplier = DEFAULT_REWARD_COST_MULTIPLIER) {

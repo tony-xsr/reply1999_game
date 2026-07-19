@@ -6,7 +6,7 @@ import * as api from '../../shared/api.js';
 import {
   buildWeeklyReport, formatReportVi, minutesByGroup, minutesByTimeOfDay, weeklyWinRate, weekStart,
 } from '../../shared/report.js';
-import { catalogItem } from '../../shared/rewards.js';
+import { catalogItem, DEFAULT_REWARD_COST_MULTIPLIER } from '../../shared/rewards.js';
 
 const $ = (id) => document.getElementById(id);
 const AVATARS = ['🐰', '🐯', '🐸', '🦄', '🐼', '🐥', '🦊', '🐨', '🐷', '🦁', '🐳', '🦖'];
@@ -391,6 +391,10 @@ function viReason(reason) {
   if (reason.startsWith('doi:')) return `Đổi quà (${reason.slice(4)})`;
   if (reason === 'bo-me-thuong') return 'Bố mẹ thưởng 🎁';
   if (reason === 'qua-hoc-cham') return 'Quà chăm học';
+  if (reason.startsWith('phu-huynh:')) {
+    const note = reason.slice(10);
+    return note && note !== 'dieu-chinh' ? `Phụ huynh chỉnh tay (${note})` : 'Phụ huynh chỉnh tay';
+  }
   return reason;
 }
 
@@ -524,13 +528,44 @@ $('btnGift').addEventListener('click', async () => {
   } catch (e) { $('giftOk').textContent = `Lỗi: ${e.message}`; }
 });
 
+// Chỉnh tay số sao hiện có của bé — cộng (số dương) hoặc trừ (số âm) NGAY
+// LẬP TỨC vào số dư, khác với "Thưởng cho bé" ở trên (chỉ cộng, và bé phải
+// tự mở hộp quà trong game mới được cộng). Dùng lại đúng hàm grantStars()
+// (ghi thẳng vào reward_ledger) đã có sẵn cho các luồng thưởng/trừ khác.
+$('btnAdjustStars').addEventListener('click', async () => {
+  if (!state.kid) return;
+  $('adjustOk').textContent = '';
+  const delta = Math.trunc(Number($('adjustStars').value));
+  if (!delta) {
+    $('adjustOk').textContent = 'Nhập số sao muốn cộng (số dương) hoặc trừ (số âm), khác 0.';
+    return;
+  }
+  try {
+    if (delta < 0) {
+      const balance = await api.starBalance(state.kid.id);
+      if (balance + delta < 0) {
+        $('adjustOk').textContent = `Bé chỉ có ${balance} sao, không thể trừ ${-delta} sao.`;
+        return;
+      }
+    }
+    const note = $('adjustNote').value.trim();
+    await api.grantStars(state.kid.id, delta, `phu-huynh:${note || 'dieu-chinh'}`);
+    $('adjustOk').textContent = delta > 0
+      ? `Đã cộng thêm ${delta} sao cho bé ${state.kid.name}.`
+      : `Đã trừ ${-delta} sao của bé ${state.kid.name}.`;
+    $('adjustStars').value = '';
+    $('adjustNote').value = '';
+    await renderKidStats(state.kid);
+  } catch (e) { $('adjustOk').textContent = `Lỗi: ${e.message}`; }
+});
+
 /* ===== Cài đặt + thiết bị + quản trị ===== */
 
 async function loadSettings() {
   const s = await api.getSettings();
   $('setLimit').value = s.daily_limit_min;
   $('setRate').value = s.tts_rate;
-  $('setRewardMult').value = s.reward_cost_multiplier ?? 6;
+  $('setRewardMult').value = s.reward_cost_multiplier ?? DEFAULT_REWARD_COST_MULTIPLIER;
 }
 
 $('btnSaveSettings').addEventListener('click', async () => {
@@ -539,7 +574,7 @@ $('btnSaveSettings').addEventListener('click', async () => {
     await api.saveSettings({
       daily_limit_min: Number($('setLimit').value) || 45,
       tts_rate: Number($('setRate').value) || 1.0,
-      reward_cost_multiplier: Number($('setRewardMult').value) || 6,
+      reward_cost_multiplier: Number($('setRewardMult').value) || DEFAULT_REWARD_COST_MULTIPLIER,
     });
     $('setOk').textContent = 'Đã lưu — áp dụng cho mọi máy của gia đình.';
   } catch (e) { $('setOk').textContent = `Lỗi: ${e.message}`; }
