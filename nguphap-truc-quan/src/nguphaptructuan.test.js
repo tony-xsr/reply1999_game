@@ -1199,4 +1199,54 @@ check('bổ sung dữ liệu vòng 15: áp chuẩn >=1000 câu hỏi/từ vựng
   assert.equal(new Set(modalVerbs3).size, modalVerbs3.length);
 });
 
+check('bổ sung dữ liệu vòng 16: áp chuẩn >=1150 câu hỏi/từ vựng cho 8/8 trò (yêu cầu "ít nhất lên 1150 câu hỏi" của user)', () => {
+  assert.ok(GOING_TO_WILL_QUESTION_COUNT >= 1150, `Going To vs Will chỉ có ${GOING_TO_WILL_QUESTION_COUNT}`);
+  assert.ok(MODAL_SITUATIONS.length * MODAL_SUBJECTS.length >= 1150, `Modal chỉ có ${MODAL_SITUATIONS.length * MODAL_SUBJECTS.length}`);
+  assert.ok(CONDITIONAL_SITUATIONS.length >= 1150, `Câu Điều Kiện chỉ có ${CONDITIONAL_SITUATIONS.length}`);
+  assert.ok(SENTENCE_BUILDER_POOL.length >= 1150, `Ghép Câu chỉ có ${SENTENCE_BUILDER_POOL.length}`);
+  assert.ok(PASSIVE_SCENARIOS.length * PASSIVE_TENSES.length >= 1150, `Bị Động chỉ có ${PASSIVE_SCENARIOS.length * PASSIVE_TENSES.length}`);
+  assert.ok(REPORTED_SPEECH_SCENARIOS.length >= 1150, `Lời Nói Gián Tiếp chỉ có ${REPORTED_SPEECH_SCENARIOS.length}`);
+  assert.ok(QUANTIFIER_NOUNS.length >= 1150, `Lượng Từ Đúng chỉ có ${QUANTIFIER_NOUNS.length}`);
+  assert.ok(POS_WORDS.length >= 1150, `Nhận Biết Từ Loại chỉ có ${POS_WORDS.length}`);
+
+  // Quét lại toàn bộ các khoá chống trùng lặp đã dùng ở vòng 12/13/14/15, áp
+  // dụng cho dữ liệu MỚI của vòng 16 — cùng seed khác để phủ thêm trường hợp.
+  const rngCheck4 = seeded(160016);
+  for (let i = 0; i < 300; i++) {
+    const round = makePassiveRound(rngCheck4);
+    const sentences = round.options.map((o) => o.sentence);
+    assert.equal(new Set(sentences).size, 4, `câu trùng nhau (scenario base===pp?): ${JSON.stringify(sentences)}`);
+  }
+  const condKeys4 = CONDITIONAL_SITUATIONS.map((s) => `${s.ifPresent}|${s.resultWill}`);
+  assert.equal(new Set(condKeys4).size, condKeys4.length);
+  let badPair3 = 0;
+  for (const s of CONDITIONAL_SITUATIONS) if (s.ifPresent === s.ifPast) badPair3++;
+  assert.equal(badPair3, 0);
+  const sbEn4 = SENTENCE_BUILDER_POOL.map((x) => x.en);
+  assert.equal(new Set(sbEn4).size, sbEn4.length);
+  let shortSentence3 = 0;
+  for (const x of SENTENCE_BUILDER_POOL) if (x.en.replace(/\.$/, '').split(' ').length < 4) shortSentence3++;
+  assert.equal(shortSentence3, 0);
+  const passiveCombos4 = PASSIVE_SCENARIOS.map((s) => `${s.agentNoun}|${s.objectNoun}|${s.base}`);
+  assert.equal(new Set(passiveCombos4).size, passiveCombos4.length);
+  const repKeys4 = ['correct', 'noBackshift', 'wrongPronoun', 'wrongReportingVerb'];
+  for (const k of repKeys4) {
+    const vals = REPORTED_SPEECH_SCENARIOS.map((s) => s[k]);
+    assert.equal(new Set(vals).size, vals.length, `trùng câu "${k}"`);
+  }
+  const qWords4 = QUANTIFIER_NOUNS.map((n) => n.plural);
+  const qEmojis4 = QUANTIFIER_NOUNS.map((n) => n.emoji);
+  assert.equal(new Set(qWords4).size, qWords4.length);
+  assert.equal(new Set(qEmojis4).size, qEmojis4.length);
+  const posSentences5 = POS_WORDS.map((w) => w.sentence);
+  assert.equal(new Set(posSentences5).size, posSentences5.length);
+  for (const w of POS_WORDS) {
+    assert.ok(w.sentence.includes(w.word), `từ "${w.word}" không nằm trong câu "${w.sentence}"`);
+  }
+  const goingToVerbs4 = GOING_TO_WILL_SCENARIOS.map((s) => s.verb);
+  assert.equal(new Set(goingToVerbs4).size, goingToVerbs4.length);
+  const modalVerbs4 = MODAL_SITUATIONS.map((s) => s.verb);
+  assert.equal(new Set(modalVerbs4).size, modalVerbs4.length);
+});
+
 console.log(`\n${passed} passed`);

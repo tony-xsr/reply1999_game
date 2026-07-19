@@ -49,10 +49,15 @@ export function makeGame() {
   };
 }
 
-/** Thả 1 quả trứng mới vào 1 cột ngẫu nhiên, tối đa LANES quả cùng lúc. */
-export function spawnEgg(game, rng = Math.random) {
+/** Thả 1 quả trứng mới vào 1 cột còn trống, tối đa LANES quả cùng lúc.
+ * `busyLanes` (tuỳ chọn) liệt kê các cột đang có trứng rơi, tránh thả chồng
+ * 2 quả cùng cột. */
+export function spawnEgg(game, rng = Math.random, busyLanes = []) {
   if (game.over || game.items.length >= LANES) return null;
-  const lane = Math.floor(rng() * LANES);
+  const free = [];
+  for (let i = 0; i < LANES; i++) if (!busyLanes.includes(i)) free.push(i);
+  if (!free.length) return null;
+  const lane = free[Math.floor(rng() * free.length)];
   const word = makeEggWord(game.target, rng);
   const item = {
     uid: game.nextUid++, lane, word,

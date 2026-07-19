@@ -1,6 +1,6 @@
 /* Reply1999 Games — root service worker.
    Scope = '/'. Cache hub + các game khi truy cập lần đầu. */
-const CACHE = 'reply1999-v139';
+const CACHE = 'reply1999-v141';
 const PRECACHE = [
   './', './index.html', './manifest.json', './i18n.js', './server-config.js',
   './shared/api.js',
@@ -96,6 +96,22 @@ const PRECACHE = [
   './toan-tieng-anh/style.css',
   './toan-tieng-anh/src/toananh.js',
   './toan-tieng-anh/src/app.js',
+  './dao-vang-tu-vung/index.html',
+  './dao-vang-tu-vung/style.css',
+  './dao-vang-tu-vung/src/daovangtuvung.js',
+  './dao-vang-tu-vung/src/app.js',
+  './ho-ca-tu-vung/index.html',
+  './ho-ca-tu-vung/style.css',
+  './ho-ca-tu-vung/src/hoca.js',
+  './ho-ca-tu-vung/src/app.js',
+  './truong-ban-tu-vung/index.html',
+  './truong-ban-tu-vung/style.css',
+  './truong-ban-tu-vung/src/truongban.js',
+  './truong-ban-tu-vung/src/app.js',
+  './ban-trung-khung-long/index.html',
+  './ban-trung-khung-long/style.css',
+  './ban-trung-khung-long/src/bantrung.js',
+  './ban-trung-khung-long/src/app.js',
   './o-an-quan/index.html',
   './o-an-quan/style.css',
   './o-an-quan/src/oanquan.js',
