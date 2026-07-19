@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#eaf6e0">
+  <title>Ốc Sên Phiêu Lưu</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <a class="round-btn" href="/thi-chung-chi-anh/" data-i18n-title="examhub.back" title="Thi Chứng Chỉ Anh">🏠</a>
+      <h1 data-i18n="ocsen.title">🐌 Ốc Sên Phiêu Lưu</h1>
+      <div class="chip-stat" id="levelChip">1/8</div>
+      <div class="chip-stat score" id="scoreChip">0</div>
+      <button class="round-btn" id="btnHelp" data-i18n-title="pika.btn.help" title="Cách chơi">❓</button>
+      <button class="round-btn" id="btnSound" data-i18n-title="pika.btn.sound" title="Âm thanh">🔊</button>
+    </header>
+
+    <main class="stage">
+      <div class="trail" id="trail">
+        <div class="snail" id="snail">🐌</div>
+        <div class="foods" id="foods"></div>
+      </div>
+      <div class="overlay" id="overlay">
+        <div class="ov-emoji" id="ovEmoji">🐌</div>
+        <div class="ov-text" id="ovText" data-i18n="ocsen.help">Chạm vào món ăn trên đường để chú ốc sên bò tới ăn — máy sẽ đọc to tên tiếng Anh của món đó! Ăn hết cả hàng là qua màn mới, đi hết 8 màn là hoàn thành cuộc phiêu lưu. Không có đáp án sai, ăn món nào cũng được nhé!</div>
+        <button class="big-btn" id="btnPlay" data-i18n="ran.play">CHƠI ▶</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="/i18n.js"></script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

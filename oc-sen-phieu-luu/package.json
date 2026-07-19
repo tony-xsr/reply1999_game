@@ -1,0 +1,8 @@
+{
+  "name": "oc-sen-phieu-luu",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/ocsen.test.js"
+  }
+}
