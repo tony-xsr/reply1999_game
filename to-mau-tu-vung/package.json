@@ -1,0 +1,8 @@
+{
+  "name": "to-mau-tu-vung",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/tomautuvung.test.js"
+  }
+}
