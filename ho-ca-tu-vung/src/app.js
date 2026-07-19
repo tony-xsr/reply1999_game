@@ -90,7 +90,7 @@ function spawnFish() {
     lane.fishUid = uid;
     const fishEl = document.createElement('div');
     fishEl.className = 'fish';
-    fishEl.innerHTML = `<span class="tag">${word.emoji} ${word.en}</span><span>🐟</span>`;
+    fishEl.innerHTML = `<span class="tag">${word.emoji} ${word.en}</span><span class="fish-body">🐟</span>`;
     const swimMs = SWIM_MS_MIN + Math.random() * (SWIM_MS_MAX - SWIM_MS_MIN);
     fishEl.style.animationDuration = `${swimMs}ms`;
     fishEl.addEventListener('pointerdown', () => catchFish(laneIdx, uid, word, fishEl));

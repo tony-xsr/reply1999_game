@@ -18,7 +18,8 @@ const t = (key, fallback) => {
 
 const $ = (id) => document.getElementById(id);
 const els = {
-  range: $('range'),
+  stage: document.querySelector('.stage'),
+  range: $('range'), gun: $('gun'),
   levelChip: $('levelChip'), scoreChip: $('scoreChip'), targetTag: $('targetTag'),
   overlay: $('overlay'), ovEmoji: $('ovEmoji'), ovText: $('ovText'), btnPlay: $('btnPlay'),
   btnHelp: $('btnHelp'), btnSound: $('btnSound'),
@@ -57,7 +58,7 @@ function renderRange() {
     const btn = document.createElement('button');
     btn.className = 'can';
     btn.innerHTML = `<span class="em">${tg.word.emoji}</span><span class="word">${tg.word.en}</span>`;
-    btn.addEventListener('click', (ev) => onShoot(tg.uid, btn, ev));
+    btn.addEventListener('click', () => onShoot(tg.uid, btn));
     els.range.appendChild(btn);
     state.canEls.set(tg.uid, btn);
   }
@@ -65,42 +66,77 @@ function renderRange() {
   announceCurrent();
 }
 
-/* ===== Bắn ===== */
+/* ===== Bắn: viên đạn bay từ khẩu súng tới mục tiêu vừa chạm ===== */
 
 function impactRing(x, y) {
   const ring = document.createElement('div');
   ring.className = 'impact-ring';
   ring.style.left = `${x}px`;
   ring.style.top = `${y}px`;
-  document.body.appendChild(ring);
+  els.stage.appendChild(ring);
   setTimeout(() => ring.remove(), 420);
 }
 
-function onShoot(uid, btn, ev) {
+function shootBulletTo(targetBtn, done) {
+  const stageRect = els.stage.getBoundingClientRect();
+  const gunRect = els.gun.getBoundingClientRect();
+  const tgtRect = targetBtn.getBoundingClientRect();
+  const startX = gunRect.left + gunRect.width / 2 - stageRect.left;
+  const startY = gunRect.top + gunRect.height / 2 - stageRect.top;
+  const endX = tgtRect.left + tgtRect.width / 2 - stageRect.left;
+  const endY = tgtRect.top + tgtRect.height / 2 - stageRect.top;
+  const angleDeg = (Math.atan2(endY - startY, endX - startX) * 180) / Math.PI;
+
+  els.gun.classList.add('shoot');
+  const bullet = document.createElement('div');
+  bullet.className = 'bullet';
+  bullet.textContent = '•';
+  bullet.style.left = `${startX}px`;
+  bullet.style.top = `${startY}px`;
+  bullet.style.transform = `translate(-50%, -50%) rotate(${angleDeg}deg)`;
+  els.stage.appendChild(bullet);
+
+  requestAnimationFrame(() => {
+    bullet.style.transition = 'left .22s linear, top .22s linear';
+    bullet.style.left = `${endX}px`;
+    bullet.style.top = `${endY}px`;
+  });
+  setTimeout(() => {
+    bullet.remove();
+    impactRing(endX, endY);
+    els.gun.classList.remove('shoot');
+    done();
+  }, 230);
+}
+
+function onShoot(uid, btn) {
   if (state.busy || !state.game || state.game.over) return;
-  const rect = btn.getBoundingClientRect ? btn.getBoundingClientRect() : { left: 0, top: 0, width: 0, height: 0 };
-  impactRing((ev?.clientX) ?? rect.left + rect.width / 2, (ev?.clientY) ?? rect.top + rect.height / 2);
+  state.busy = true;
+  sfx.select();
 
-  const res = shoot(state.game, uid);
-  if (!res) return;
+  shootBulletTo(btn, () => {
+    const res = shoot(state.game, uid);
+    if (!res) { state.busy = false; return; }
 
-  if (res.correct) {
-    sfx.match(1);
-    answeredOne();
-    btn.classList.add('down');
-    speak(res.target.word.en, { lang: 'en-US', rate: 0.75 });
-    updateHud();
-    if (res.roundDone) {
-      state.busy = true;
-      setTimeout(() => { state.busy = false; levelComplete(); }, 700);
+    if (res.correct) {
+      sfx.match(1);
+      answeredOne();
+      btn.classList.add('down');
+      speak(res.target.word.en, { lang: 'en-US', rate: 0.75 });
+      updateHud();
+      if (res.roundDone) {
+        setTimeout(() => { state.busy = false; levelComplete(); }, 700);
+      } else {
+        announceCurrent();
+        state.busy = false;
+      }
     } else {
-      announceCurrent();
+      sfx.fail();
+      btn.classList.add('wrongHit');
+      setTimeout(() => btn.classList.remove('wrongHit'), 350);
+      state.busy = false;
     }
-  } else {
-    sfx.fail();
-    btn.classList.add('wrongHit');
-    setTimeout(() => btn.classList.remove('wrongHit'), 350);
-  }
+  });
 }
 
 function levelComplete() {

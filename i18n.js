@@ -28,6 +28,8 @@
     /* ---- Hub (main index.html) ---- */
     'hub.title':            { vi: 'Reply1999',                    en: 'Reply1999 Games',                  ja: 'ゲームコレクション',                zh: '游戏合集',                       ar: 'مجموعة الألعاب' },
     'hub.subtitle':         { vi: 'Học&luyện tư duy', en: 'Học&luyện tư duy', ja: 'オフラインで遊べる思考力ゲーム集', zh: '离线益智游戏合集',               ar: 'مجموعة ألعاب تفكير دون إنترنت' },
+    'hub.shop.label':       { vi: '🎁 Đổi Quà',                          en: '🎁 Redeem',                          ja: '🎁 こうかん',                       zh: '🎁 兑换奖励',                    ar: '🎁 استبدال الجوائز' },
+    'hub.shop.title':       { vi: 'Đổi sao lấy quà',                     en: 'Redeem stars for prizes',            ja: 'ほしを こうかんする',              zh: '用星星兑换奖品',                ar: 'استبدل النجوم بالجوائز' },
     'hub.lang.label':       { vi: 'Ngôn ngữ',                            en: 'Language',                         ja: '言語',                             zh: '语言',                           ar: 'اللغة' },
     'hub.cta.play':         { vi: 'Chơi ▶',                              en: 'Play ▶',                           ja: 'プレイ ▶',                          zh: '开始 ▶',                         ar: '▶ ابدأ' },
     'hub.play':             { vi: 'Chơi ▶',                              en: 'Play ▶',                           ja: 'プレイ ▶',                          zh: '开始 ▶',                         ar: '▶ ابدأ' },

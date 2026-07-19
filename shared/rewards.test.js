@@ -21,8 +21,9 @@ check('starsFromScore: 10 points = 1 star, capped per session', () => {
   assert.equal(starsFromScore(0), 0);
   assert.equal(starsFromScore(9), 0);
   assert.equal(starsFromScore(10), 1);
-  assert.equal(starsFromScore(95), 9);
-  assert.equal(starsFromScore(999), 15, 'session cap');
+  assert.equal(starsFromScore(45), 4);
+  assert.equal(starsFromScore(50), 5, 'exactly at session cap');
+  assert.equal(starsFromScore(999), 5, 'session cap');
   assert.equal(starsFromScore(-50), 0, 'negative score never grants stars');
 });
 

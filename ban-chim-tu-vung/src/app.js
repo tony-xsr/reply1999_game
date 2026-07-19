@@ -18,7 +18,8 @@ const t = (key, fallback) => {
 
 const $ = (id) => document.getElementById(id);
 const els = {
-  sky: $('sky'), clock: $('clock'), score: $('score'),
+  stage: document.querySelector('.stage'),
+  sky: $('sky'), gun: $('gun'), clock: $('clock'), score: $('score'),
   targetTag: $('targetTag'),
   overlay: $('overlay'), ovEmoji: $('ovEmoji'), ovText: $('ovText'), btnPlay: $('btnPlay'),
   btnHelp: $('btnHelp'), btnSound: $('btnSound'),
@@ -56,6 +57,7 @@ for (let i = 0; i < SKY_SLOTS; i++) {
     el: cloud,
     tagEl: cloud.querySelector('.tag'),
     up: false,
+    firing: false,
     word: null,
     hideTimer: null,
   });
@@ -98,30 +100,74 @@ function popScore(cloud, text, good) {
   setTimeout(() => el.remove(), 700);
 }
 
+function shootBulletTo(targetEl, done) {
+  const stageRect = els.stage.getBoundingClientRect();
+  const gunRect = els.gun.getBoundingClientRect();
+  const tgtRect = targetEl.getBoundingClientRect();
+  const startX = gunRect.left + gunRect.width / 2 - stageRect.left;
+  const startY = gunRect.top + gunRect.height / 2 - stageRect.top;
+  const endX = tgtRect.left + tgtRect.width / 2 - stageRect.left;
+  const endY = tgtRect.top + tgtRect.height / 2 - stageRect.top;
+  const angleDeg = (Math.atan2(endY - startY, endX - startX) * 180) / Math.PI;
+
+  els.gun.classList.add('shoot');
+  const bullet = document.createElement('div');
+  bullet.className = 'bullet';
+  bullet.textContent = '•';
+  bullet.style.left = `${startX}px`;
+  bullet.style.top = `${startY}px`;
+  bullet.style.transform = `translate(-50%, -50%) rotate(${angleDeg}deg)`;
+  els.stage.appendChild(bullet);
+
+  requestAnimationFrame(() => {
+    bullet.style.transition = 'left .18s linear, top .18s linear';
+    bullet.style.left = `${endX}px`;
+    bullet.style.top = `${endY}px`;
+  });
+  setTimeout(() => {
+    bullet.remove();
+    els.gun.classList.remove('shoot');
+    done();
+  }, 190);
+}
+
 function shoot(i) {
   const cloud = state.clouds[i];
-  if (!state.running || !cloud.up) return;
-  const { delta, good } = hitScore(cloud.word, state.target);
-  state.score = Math.max(0, state.score + delta);
-  els.score.textContent = state.score;
-  popScore(cloud, `${delta > 0 ? '+' : ''}${delta}`, good);
+  if (!state.running || !cloud.up || cloud.firing) return;
+  // Khoá riêng "đang bắn" (không đụng tới `up`) để chặn bắn trùng lặp con
+  // chim này trong lúc đạn còn bay, nhưng vẫn giữ nguyên hành vi gốc: bắn
+  // trượt thì chim vẫn đứng yên trên trời, có thể bắn lại cho tới khi tự
+  // hết hạn (hideTimer) — animation chỉ trì hoãn lúc TÍNH điểm, không đổi
+  // luật chơi.
+  cloud.firing = true;
+  const word = cloud.word;
 
-  if (good) {
-    state.hits++;
-    sfx.match(2);
-    answeredOne();
-    cloud.el.classList.add('bonk');
-    setTimeout(() => sink(cloud), 240);
-    speak(cloud.word.en, { lang: 'en-US', rate: 0.75 });
-    if (++state.targetHits >= TARGET_HITS_TO_CHANGE) {
-      setTarget(pickTarget(state.target));
+  shootBulletTo(cloud.el, () => {
+    cloud.firing = false;
+    if (!cloud.up) return; // chim đã tự ẩn (hết hạn) trong lúc đạn bay
+
+    const { delta, good } = hitScore(word, state.target);
+    state.score = Math.max(0, state.score + delta);
+    els.score.textContent = state.score;
+    popScore(cloud, `${delta > 0 ? '+' : ''}${delta}`, good);
+
+    if (good) {
+      state.hits++;
+      sfx.match(2);
+      answeredOne();
+      cloud.el.classList.add('bonk');
+      setTimeout(() => sink(cloud), 240);
+      speak(word.en, { lang: 'en-US', rate: 0.75 });
+      if (++state.targetHits >= TARGET_HITS_TO_CHANGE) {
+        setTarget(pickTarget(state.target));
+      }
+    } else {
+      sfx.fail();
+      cloud.el.classList.add('wrongHit');
+      setTimeout(() => cloud.el.classList.remove('wrongHit'), 350);
+      speak(`Find the ${state.target.en}!`, { lang: 'en-US', rate: 0.85 });
     }
-  } else {
-    sfx.fail();
-    cloud.el.classList.add('wrongHit');
-    setTimeout(() => cloud.el.classList.remove('wrongHit'), 350);
-    speak(`Find the ${state.target.en}!`, { lang: 'en-US', rate: 0.85 });
-  }
+  });
 }
 
 function tickClock() {

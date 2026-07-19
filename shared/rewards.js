@@ -8,9 +8,9 @@
 export const DAILY_STAR_CAP = 50;
 export const GIFT_EVERY = 15; // giữa khoảng 10–20 câu bạn yêu cầu
 export const STARS_PER_10_POINTS = 1;
-export const SESSION_STAR_CAP = 15;
+export const SESSION_STAR_CAP = 5;
 
-/** Sao kiếm được từ điểm của 1 ván (10 điểm = 1 sao, trần 15 sao/ván). */
+/** Sao kiếm được từ điểm của 1 ván (10 điểm = 1 sao, trần 5 sao/ván). */
 export function starsFromScore(score) {
   const s = Math.floor(Math.max(0, score | 0) / 10) * STARS_PER_10_POINTS;
   return Math.min(SESSION_STAR_CAP, s);
@@ -96,7 +96,7 @@ export function catalogItem(id) {
   return CATALOG.find((c) => c.id === id) || null;
 }
 
-// Giá gốc trong CATALOG quá rẻ so với tốc độ kiếm sao (trần 15 sao/ván, 50
+// Giá gốc trong CATALOG quá rẻ so với tốc độ kiếm sao (trần 5 sao/ván, 50
 // sao/ngày) khiến bé đổi được quà gần như ngay lập tức — nhân hệ số mặc định
 // x6 để mỗi món quà thành mục tiêu dài hơi hơn. Phụ huynh chỉnh được số này
 // qua Trang Phụ Huynh (lưu trong settings.reward_cost_multiplier).

@@ -138,6 +138,26 @@ body {
   to { transform: translate(-50%, -24px); opacity: 0; }
 }
 
+.gun {
+  position: absolute;
+  left: 50%; bottom: 6px;
+  transform: translateX(-50%);
+  font-size: 2.6rem;
+  z-index: 4;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.25));
+  transition: transform 0.15s ease-out;
+}
+.gun.shoot { transform: translateX(-50%) scale(0.85) rotate(-6deg); }
+
+.bullet {
+  position: absolute;
+  z-index: 4;
+  font-size: 1.3rem;
+  pointer-events: none;
+  will-change: left, top;
+}
+
 .overlay {
   position: absolute; inset: 0;
   background: rgba(255, 250, 240, 0.93);

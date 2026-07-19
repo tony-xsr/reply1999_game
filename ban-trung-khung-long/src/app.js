@@ -17,7 +17,8 @@ const t = (key, fallback) => {
 
 const $ = (id) => document.getElementById(id);
 const els = {
-  dinos: $('dinos'), lanes: $('lanes'), clock: $('clock'), score: $('score'), targetTag: $('targetTag'),
+  stage: document.querySelector('.stage'),
+  dinos: $('dinos'), lanes: $('lanes'), gun: $('gun'), clock: $('clock'), score: $('score'), targetTag: $('targetTag'),
   overlay: $('overlay'), ovEmoji: $('ovEmoji'), ovText: $('ovText'), btnPlay: $('btnPlay'),
   btnHelp: $('btnHelp'), btnSound: $('btnSound'),
 };
@@ -97,36 +98,79 @@ function trySpawn() {
       landEgg(state.game, item.uid);
       removeEgg(item.uid);
     }, fallMs);
-    state.eggEls.set(item.uid, { el: eggEl, laneIdx: item.lane, hideTimer });
+    state.eggEls.set(item.uid, {
+      el: eggEl, laneIdx: item.lane, hideTimer, firing: false,
+    });
   }
   state.timers.spawn = setTimeout(trySpawn, 900);
+}
+
+function shootBulletTo(targetEl, done) {
+  const stageRect = els.stage.getBoundingClientRect();
+  const gunRect = els.gun.getBoundingClientRect();
+  const tgtRect = targetEl.getBoundingClientRect();
+  const startX = gunRect.left + gunRect.width / 2 - stageRect.left;
+  const startY = gunRect.top + gunRect.height / 2 - stageRect.top;
+  const endX = tgtRect.left + tgtRect.width / 2 - stageRect.left;
+  const endY = tgtRect.top + tgtRect.height / 2 - stageRect.top;
+  const angleDeg = (Math.atan2(endY - startY, endX - startX) * 180) / Math.PI;
+
+  els.gun.classList.add('shoot');
+  const bullet = document.createElement('div');
+  bullet.className = 'bullet';
+  bullet.textContent = '•';
+  bullet.style.left = `${startX}px`;
+  bullet.style.top = `${startY}px`;
+  bullet.style.transform = `translate(-50%, -50%) rotate(${angleDeg}deg)`;
+  els.stage.appendChild(bullet);
+
+  requestAnimationFrame(() => {
+    bullet.style.transition = 'left .16s linear, top .16s linear';
+    bullet.style.left = `${endX}px`;
+    bullet.style.top = `${endY}px`;
+  });
+  setTimeout(() => {
+    bullet.remove();
+    els.gun.classList.remove('shoot');
+    done();
+  }, 170);
 }
 
 function onShoot(uid) {
   if (!state.running) return;
   const entry = state.eggEls.get(uid);
-  if (!entry) return;
-  const res = shootEgg(state.game, uid);
-  if (!res) return;
-  popScore(state.laneEls[entry.laneIdx], `${res.delta > 0 ? '+' : ''}${res.delta}`, res.good);
-  els.score.textContent = state.game.score;
+  if (!entry || entry.firing) return;
+  entry.firing = true;
 
-  if (res.good) {
-    state.hits++;
-    sfx.match(2);
-    answeredOne();
-    entry.el.classList.add('popped');
-    speak(res.word.en, { lang: 'en-US', rate: 0.75 });
-    if (res.targetChanged) {
-      els.targetTag.textContent = `${state.game.target.emoji} ${state.game.target.en}`;
-      speak(`Find the ${state.game.target.en}!`, { lang: 'en-US', rate: 0.85 });
+  shootBulletTo(entry.el, () => {
+    // Trứng có thể đã rơi chạm đất tự nhiên trong lúc đạn còn bay (rơi rất
+    // nhanh) — kiểm tra lại cho chắc trước khi tính điểm.
+    const stillEntry = state.eggEls.get(uid);
+    if (!stillEntry) return;
+    stillEntry.firing = false;
+
+    const res = shootEgg(state.game, uid);
+    if (!res) return;
+    popScore(state.laneEls[stillEntry.laneIdx], `${res.delta > 0 ? '+' : ''}${res.delta}`, res.good);
+    els.score.textContent = state.game.score;
+
+    if (res.good) {
+      state.hits++;
+      sfx.match(2);
+      answeredOne();
+      stillEntry.el.classList.add('popped');
+      speak(res.word.en, { lang: 'en-US', rate: 0.75 });
+      if (res.targetChanged) {
+        els.targetTag.textContent = `${state.game.target.emoji} ${state.game.target.en}`;
+        speak(`Find the ${state.game.target.en}!`, { lang: 'en-US', rate: 0.85 });
+      }
+    } else {
+      sfx.fail();
+      stillEntry.el.classList.add('wrongHit');
     }
-  } else {
-    sfx.fail();
-    entry.el.classList.add('wrongHit');
-  }
-  clearTimeout(entry.hideTimer);
-  setTimeout(() => removeEgg(uid), 260);
+    clearTimeout(stillEntry.hideTimer);
+    setTimeout(() => removeEgg(uid), 260);
+  });
 }
 
 function tickClock() {
