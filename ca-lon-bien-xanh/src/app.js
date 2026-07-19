@@ -24,7 +24,11 @@ const els = {
 const ctx = els.canvas.getContext('2d');
 
 /* ===== Sprite Kenney Fish Pack (CC0 — xem images/CREDITS.md) ===== */
-const SIZE_SPRITE = { 1: 'fish_grey', 2: 'fish_green', 3: 'fish_pink', 4: 'fish_red', 5: 'fish_grey_long_a' };
+// size 5 (to nhất) dùng "fish_grey_long_a" — ảnh này chỉ là 1 khối viên
+// thuốc màu xám trơn, không có mắt/vây/đuôi, trông không giống cá thật so
+// với 4 sprite còn lại. Đổi sang "fish_brown" (cá nóc, đã có sẵn trong
+// IMAGES, chi tiết rõ mắt/gai) để cá lớn nhất trông đúng là 1 con cá.
+const SIZE_SPRITE = { 1: 'fish_grey', 2: 'fish_green', 3: 'fish_pink', 4: 'fish_red', 5: 'fish_brown' };
 const IMAGES = {};
 for (const name of [
   'fish_orange', 'fish_grey', 'fish_green', 'fish_pink', 'fish_red', 'fish_brown', 'fish_grey_long_a',

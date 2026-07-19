@@ -48,7 +48,7 @@ function updateHud() {
 
 function renderLevel() {
   els.foods.innerHTML = '';
-  els.snail.style.transform = 'translateX(0)';
+  els.snail.style.transform = 'translateX(0) scaleX(-1)';
   for (const food of state.game.foods) {
     const btn = document.createElement('button');
     btn.className = `food-btn${food.eaten ? ' eaten' : ''}`;
@@ -63,7 +63,9 @@ function moveSnailTo(btn) {
   const trailRect = els.trail.getBoundingClientRect();
   const btnRect = btn.getBoundingClientRect();
   const offset = btnRect.left - trailRect.left;
-  els.snail.style.transform = `translateX(${offset}px)`;
+  // scaleX(-1) lật emoji 🐌 (vốn quay đầu về trái) để đầu luôn hướng đúng
+  // chiều bò tới (sang phải), không bò lùi/đuôi đi trước.
+  els.snail.style.transform = `translateX(${offset}px) scaleX(-1)`;
 }
 
 /* ===== Ăn thức ăn ===== */
