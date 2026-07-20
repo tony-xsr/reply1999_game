@@ -1,0 +1,243 @@
+/* Vận Động Vui — 5 trò trong 1 (Đợt 3 game hồi xưa), tông pastel trẻ em
+   chung, cùng bộ khung với tu-duy/ và ren-tri-nao/ (shell/header/cheer). */
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #fff6e8;
+  --panel: #fffaf2;
+  --ink: #241e2e;
+  --muted: #5d5370;
+  --accent: #ff8a3d;
+  --accent-deep: #c2410c;
+  --good: #15803d;
+  --bad: #c02a2a;
+  --line: #a8834a;
+}
+
+html, body { height: 100%; }
+body {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, #ffe9c8 0%, transparent 70%),
+    var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.shell {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* Dưới cùng chừa thêm chỗ cho thanh avatar bé + huy hiệu "từ cần ôn" nổi cố
+       định ở góc dưới-trái (shared/kid-bar.js, position:fixed) — nếu không,
+       2 huy hiệu đó sẽ đè lên UI dưới cùng của trò. */
+    padding: 10px max(12px, env(safe-area-inset-right)) calc(74px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  max-width: 640px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.top { display: flex; align-items: center; gap: 8px; }
+.top h1 { font-size: 1.05rem; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.round-btn {
+  width: 44px; height: 44px; flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: var(--panel);
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 2px 5px rgba(90, 60, 20, 0.12);
+}
+.round-btn:active { transform: scale(0.93); }
+.round-btn[hidden] { display: none; }
+
+.sub-line { text-align: center; font-size: 0.95rem; font-weight: 800; color: var(--muted); min-height: 1.3em; }
+.sub-line b { color: var(--accent-deep); }
+
+.screen { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; justify-content: center; align-items: center; }
+.screen.hidden { display: none; }
+
+/* Màn chọn trò: lưới 2 cột — 5 trò là số lẻ nên ô cuối được canh giữa riêng */
+#homeScreen {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-content: center;
+}
+#homeScreen.hidden { display: none; }
+.mode-card:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+  max-width: calc(50% - 6px);
+  margin: 0 auto;
+}
+.mode-card {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  background: var(--panel);
+  border: 3px solid var(--line);
+  border-radius: 20px;
+  padding: 20px 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(90, 60, 20, 0.12);
+  transition: transform 0.12s;
+}
+.mode-card:active { transform: scale(0.96); }
+.mc-icon { font-size: 2.8rem; }
+.mc-name { font-size: 1.02rem; font-weight: 900; color: var(--ink); text-align: center; }
+
+.game-hud { display: flex; gap: 14px; align-items: center; font-weight: 900; color: var(--muted); flex-wrap: wrap; justify-content: center; }
+.game-hud b { color: var(--accent-deep); font-size: 1.15rem; }
+
+/* ===== 1. Ếch Qua Đường ===== */
+.frog-board {
+  display: grid;
+  gap: 3px;
+  width: min(88vw, 380px, 44dvh);
+  aspect-ratio: 1;
+  background: #333;
+  border-radius: 12px;
+  padding: 4px;
+}
+.frog-cell {
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem;
+}
+.frog-cell.goal { background: #1a6b3a; }
+.frog-cell.safe { background: #d9c9a8; }
+.frog-cell.road { background: #4a4a52; }
+.frog-cell.car { background: #e5484d; border-radius: 6px; }
+.frog-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: min(100%, 220px); }
+.frog-pad-btn {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  background: var(--panel);
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+.frog-pad-btn:active { transform: scale(0.94); }
+.frog-pad-btn.center { visibility: hidden; }
+
+/* ===== 2. Nhảy Dây Đếm Nhịp ===== */
+.rope-stage {
+  position: relative;
+  width: min(100%, 80vw, 260px);
+  height: 220px;
+  background: linear-gradient(180deg, #cdeafd 0%, #cdeafd 78%, #7fc98a 78%, #5aa85e 100%);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.rope-kid { position: absolute; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 3rem; transition: transform 0.15s; }
+.rope-kid.jump { transform: translateX(-50%) translateY(-38px); }
+.rope-line { position: absolute; left: 0; right: 0; height: 6px; background: #6b4423; border-radius: 3px; bottom: 34px; transform-origin: center; opacity: 0.5; }
+.rope-line.swinging { animation: rope-swing linear; }
+@keyframes rope-swing {
+  0%, 100% { transform: translateY(0) scaleY(1); opacity: 0.5; }
+  50% { transform: translateY(-16px) scaleY(0.7); opacity: 1; }
+}
+.rope-tap-btn {
+  background: linear-gradient(180deg, #34b566, #1e7a45);
+  color: #fff;
+  border: none; border-radius: 999px;
+  font-size: 1.2rem; font-weight: 900;
+  padding: 16px 40px; cursor: pointer;
+  box-shadow: 0 4px 10px rgba(30, 122, 69, 0.4);
+}
+.rope-tap-btn:active { transform: translateY(2px); }
+
+/* ===== 3. Ném Rổ Đếm Giờ ===== */
+.hoop-stage {
+  position: relative;
+  width: min(100%, 80vw, 280px);
+  height: 200px;
+  background: linear-gradient(180deg, #cdeafd 0%, #cdeafd 100%);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.hoop-ring { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); font-size: 2.6rem; }
+.hoop-ball { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 2.2rem; transition: none; }
+.power-bar-wrap { width: min(100%, 280px); height: 26px; background: #eee; border-radius: 999px; border: 2px solid var(--line); overflow: hidden; position: relative; }
+.power-bar-fill { position: absolute; inset: 0; background: linear-gradient(90deg, #e5484d, #eab308 40%, #22c55e 50%, #eab308 60%, #e5484d); }
+.power-bar-target { position: absolute; top: 0; bottom: 0; background: rgba(255,255,255,0.55); border-left: 2px dashed #333; border-right: 2px dashed #333; }
+.power-bar-needle { position: absolute; top: -4px; bottom: -4px; width: 4px; background: #241e2e; border-radius: 2px; }
+
+/* ===== 4. Bóng Bàn Đối Kháng ===== */
+.pong-canvas {
+  /* 3 gia tri cuoi cung deu la BE HON: gioi han theo be rong (90vw/340px) va
+     theo be cao man hinh (58dvh quy doi qua ty le khung hinh doc 0.72) de
+     khong bi tran chieu cao tren man hinh thap (dien thoai xoay ngang...). */
+  width: min(90vw, 340px, calc(58dvh * 0.72));
+  aspect-ratio: 0.72;
+  background: #1a3d6b;
+  border: 6px solid #0e2748;
+  border-radius: 10px;
+  touch-action: none;
+  cursor: pointer;
+}
+
+/* ===== 5. Bowling Ảo ===== */
+.bowling-canvas {
+  width: min(90vw, 320px, calc(58dvh * 0.65));
+  aspect-ratio: 0.65;
+  background: linear-gradient(180deg, #d9c08a 0%, #c9a96a 100%);
+  border-radius: 10px;
+  touch-action: none;
+  cursor: pointer;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+@keyframes pop {
+  from { transform: scale(0.6); }
+  60% { transform: scale(1.15); }
+  to { transform: scale(1); }
+}
+.shake { animation: shake 0.3s; }
+
+.cheer {
+  position: absolute; inset: 0;
+  background: rgba(255, 250, 240, 0.96);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 12px; text-align: center; padding: 16px;
+  z-index: 10;
+  border-radius: 16px;
+}
+.cheer.hidden { display: none; }
+.cheer-emoji { font-size: 4rem; animation: pop 0.5s ease-out; }
+.cheer-text { font-size: 1.3rem; font-weight: 900; }
+.big-btn {
+  background: linear-gradient(180deg, #ee6f1a, #c2410c);
+  color: #fff;
+  border: none; border-radius: 14px;
+  font-size: 1.05rem; font-weight: 900;
+  padding: 12px 28px; cursor: pointer;
+  box-shadow: 0 4px 10px rgba(194, 65, 12, 0.4);
+}
+.big-btn--ghost { background: var(--panel); color: var(--accent-deep); border: 2px solid var(--accent-deep); box-shadow: none; }
+.big-btn:active { transform: translateY(2px); }
+
+.confetti-piece {
+  position: fixed;
+  top: -12px; left: var(--x);
+  width: 10px; height: 14px;
+  z-index: 60;
+  animation: confetti-fall 2.2s var(--delay) ease-in forwards;
+}
+@keyframes confetti-fall {
+  to { transform: translateY(105vh) rotate(var(--rot)); }
+}
+
+@media (max-width: 560px) {
+  .mc-icon { font-size: 2.2rem; }
+  .mc-name { font-size: 0.9rem; }
+}
