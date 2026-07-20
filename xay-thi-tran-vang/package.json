@@ -1,0 +1,8 @@
+{
+  "name": "xay-thi-tran-vang",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/xaythitran.test.js"
+  }
+}
