@@ -1,0 +1,8 @@
+{
+  "name": "nha-tham-hiem-ti-hon",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/thamhiem.test.js"
+  }
+}
