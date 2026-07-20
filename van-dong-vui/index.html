@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#fff6e8">
+  <title>Vận Động Vui</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <a class="round-btn" href="/" data-i18n-title="pika.btn.home" title="TRANG CHỦ">🏠</a>
+      <h1 id="title" data-i18n="vandongvui.title">🏃 Vận Động Vui</h1>
+      <button class="round-btn" id="btnBack" data-i18n-title="hocvui.back" title="Chọn trò khác" hidden>◀</button>
+      <button class="round-btn" id="btnNew" data-i18n-title="pika.btn.new" title="Chơi lại" hidden>🔄</button>
+      <button class="round-btn" id="btnHelp" data-i18n-title="pika.btn.help" title="Cách chơi" hidden>❓</button>
+      <button class="round-btn" id="btnSound" data-i18n-title="pika.btn.sound" title="Âm thanh">🔊</button>
+    </header>
+
+    <div class="sub-line" id="subLine"></div>
+
+    <!-- Màn chọn trò -->
+    <main class="screen" id="homeScreen">
+      <button class="mode-card" data-game="frogger"><span class="mc-icon">🐸</span><span class="mc-name" data-i18n="vandongvui.frogger">Ếch Qua Đường</span></button>
+      <button class="mode-card" data-game="jumprope"><span class="mc-icon">🪢</span><span class="mc-name" data-i18n="vandongvui.jumprope">Nhảy Dây Đếm Nhịp</span></button>
+      <button class="mode-card" data-game="hoop"><span class="mc-icon">🏀</span><span class="mc-name" data-i18n="vandongvui.hoop">Ném Rổ Đếm Giờ</span></button>
+      <button class="mode-card" data-game="pong"><span class="mc-icon">🏓</span><span class="mc-name" data-i18n="vandongvui.pong">Bóng Bàn Đối Kháng</span></button>
+      <button class="mode-card" data-game="bowling"><span class="mc-icon">🎳</span><span class="mc-name" data-i18n="vandongvui.bowling">Bowling Ảo</span></button>
+    </main>
+
+    <!-- Màn chơi chung: từng trò tự dựng nội dung -->
+    <main class="screen hidden" id="playScreen"></main>
+
+    <div class="cheer hidden" id="cheer">
+      <div class="cheer-emoji" id="cheerEmoji">🏆</div>
+      <div class="cheer-text" id="cheerText"></div>
+      <button class="big-btn" id="btnAgain" data-i18n="hocvui.again">CHƠI TIẾP ▶</button>
+      <button class="big-btn big-btn--ghost" id="btnHome2" data-i18n="hocvui.pick">CHỌN TRÒ KHÁC</button>
+    </div>
+  </div>
+
+  <script src="/i18n.js"></script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

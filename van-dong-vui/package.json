@@ -1,0 +1,8 @@
+{
+  "name": "van-dong-vui",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/vandongvui.test.js"
+  }
+}
