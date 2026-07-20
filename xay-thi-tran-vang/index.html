@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#fff6e8">
+  <title>Xây Thị Trấn Vàng</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <a class="round-btn" href="/game-mini/" data-i18n-title="hocvui.back" title="Chọn trò khác">◀</a>
+      <h1 data-i18n="xaytt.title">🏘️ Xây Thị Trấn Vàng</h1>
+      <button class="round-btn" id="btnHelp" data-i18n-title="pika.btn.help" title="Cách chơi">❓</button>
+      <button class="round-btn" id="btnSound" data-i18n-title="pika.btn.sound" title="Âm thanh">🔊</button>
+    </header>
+
+    <div class="hud">
+      <div class="hud-chip money"><span>💰</span><b id="hudGold">0</b></div>
+      <div class="hud-chip trips"><span>🚂</span><b id="hudTrips">0</b></div>
+      <div class="hud-chip level" id="hudTown">Thị trấn 1</div>
+    </div>
+
+    <main class="stage">
+      <div class="board-wrap" id="boardWrap">
+        <canvas id="gameCanvas" width="640" height="480"></canvas>
+        <div class="run-hud hidden" id="runHud">
+          <div class="run-time" id="runTime">45</div>
+          <div class="run-carried" id="runCarried">💰 0</div>
+        </div>
+      </div>
+      <div class="build-panel" id="buildPanel">
+        <button class="go-mine-btn" id="btnGoMine">⛏️ ĐI CHỞ VÀNG ▶</button>
+        <div class="build-list" id="buildList"></div>
+      </div>
+    </main>
+
+    <div class="cheer hidden" id="cheer">
+      <div class="cheer-emoji" id="cheerEmoji">🚂</div>
+      <div class="cheer-text" id="cheerText"></div>
+      <button class="big-btn" id="btnCheerGo">VỀ THỊ TRẤN ▶</button>
+    </div>
+  </div>
+
+  <script src="/i18n.js"></script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
