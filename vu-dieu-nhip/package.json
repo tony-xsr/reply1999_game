@@ -1,0 +1,8 @@
+{
+  "name": "vu-dieu-nhip",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/vudieu.test.js"
+  }
+}
