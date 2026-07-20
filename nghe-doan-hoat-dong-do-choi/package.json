@@ -1,0 +1,8 @@
+{
+  "name": "nghe-doan-hoat-dong-do-choi",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/hoatdongdochoi.test.js"
+  }
+}
