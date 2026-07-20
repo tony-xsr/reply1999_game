@@ -1,0 +1,8 @@
+{
+  "name": "tay-dua-nhi",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node src/taydua.test.js"
+  }
+}
