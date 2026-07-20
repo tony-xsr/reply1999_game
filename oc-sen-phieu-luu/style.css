@@ -1,0 +1,155 @@
+/* Ốc Sên Phiêu Lưu Ăn Từ Vựng — chú ốc sên bò dọc hàng thức ăn, chạm vào món
+   nào là ăn món đó + nghe tên tiếng Anh. Không có đáp án sai. */
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #eaf6e0;
+  --panel: #fffaf2;
+  --ink: #241e2e;
+  --muted: #5d5370;
+  --accent: #4caf50;
+  --accent-deep: #2e7d32;
+  --line: #8bc98f;
+}
+
+html, body { height: 100%; }
+body {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, #d7f0d0 0%, transparent 70%),
+    var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.shell {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* Dưới cùng chừa thêm chỗ cho thanh avatar bé + huy hiệu "từ cần ôn" nổi cố
+     định ở góc dưới-trái (shared/kid-bar.js, position:fixed). */
+  padding: 10px max(12px, env(safe-area-inset-right)) calc(74px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.top { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.top h1 { font-size: 1.05rem; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip-stat {
+  font-weight: 900; font-size: 1rem; color: var(--muted);
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  padding: 7px 13px;
+}
+.chip-stat.score { color: var(--accent-deep); }
+
+.round-btn {
+  width: 44px; height: 44px; flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: var(--panel);
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 2px 5px rgba(30, 80, 30, 0.15);
+}
+.round-btn:active { transform: scale(0.93); }
+
+.stage { flex: 1; min-height: 0; display: flex; position: relative; }
+.trail {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  background: linear-gradient(180deg, #eaffe0 0%, #cdeec0 100%);
+  border: 4px solid #7cb87e;
+  border-radius: 22px;
+  padding: 18px 14px;
+  overflow-x: auto;
+}
+.snail {
+  font-size: 2.6rem;
+  /* Emoji 🐌 mặc định quay đầu về bên TRÁI — app.js luôn ghép thêm
+     scaleX(-1) vào mọi giá trị transform để đầu hướng đúng chiều bò (sang
+     phải), không bò lùi/đuôi đi trước. */
+  transition: transform 0.5s ease-out;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.2));
+}
+.foods {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  min-height: 4rem;
+}
+.food-btn {
+  flex-shrink: 0;
+  width: 58px; height: 58px;
+  border-radius: 16px;
+  border: 3px solid var(--line);
+  background: var(--panel);
+  font-size: 2rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 3px 7px rgba(30, 80, 30, 0.15);
+}
+.food-btn:active { transform: scale(0.94); }
+.food-btn.eaten {
+  animation: eaten-pop 0.35s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes eaten-pop {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.7; }
+  100% { transform: scale(0); opacity: 0; }
+}
+
+.overlay {
+  position: absolute; inset: 0;
+  background: rgba(255, 250, 240, 0.94);
+  border-radius: 20px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px; text-align: center;
+  z-index: 5;
+  padding: 14px;
+}
+.overlay.hidden { display: none; }
+.ov-emoji { font-size: 4rem; animation: pop 0.5s ease-out; }
+.ov-text { font-size: 1.05rem; font-weight: 800; white-space: pre-line; color: var(--muted); }
+@keyframes pop {
+  from { transform: scale(0.5); }
+  60% { transform: scale(1.15); }
+  to { transform: scale(1); }
+}
+.big-btn {
+  background: linear-gradient(180deg, #66bb6a, var(--accent-deep));
+  color: #fff;
+  border: none; border-radius: 14px;
+  font-size: 1.1rem; font-weight: 900;
+  padding: 13px 30px; cursor: pointer;
+  box-shadow: 0 4px 10px rgba(46, 125, 50, 0.4);
+}
+.big-btn:active { transform: translateY(2px); }
+
+.confetti-piece {
+  position: fixed;
+  top: -12px; left: var(--x);
+  width: 10px; height: 14px;
+  z-index: 60;
+  animation: confetti-fall 2.2s var(--delay) ease-in forwards;
+}
+@keyframes confetti-fall {
+  to { transform: translateY(105vh) rotate(var(--rot)); }
+}
+
+@media (max-width: 400px) {
+  .top h1 { font-size: 0.85rem; }
+  .food-btn { width: 50px; height: 50px; font-size: 1.7rem; }
+}
