@@ -6,7 +6,7 @@
 // /server-config.js hoặc chưa đăng nhập, các hàm ghi trở thành no-op để game
 // không hỏng — trang Phụ Huynh sẽ hướng dẫn cài đặt.
 
-import { starsForSession, capDailyStars } from './rewards.js';
+import { starsForSession, capDailyStars, DEFAULT_REWARD_COST_MULTIPLIER } from './rewards.js';
 
 const SESSION_KEY = 'r99-session';
 const KID_KEY = 'r99-kid';
@@ -400,8 +400,12 @@ export async function openReward(reward) {
 export async function getSettings() {
   const fam = await ensureFamily();
   const rows = await get(`settings?select=*&family_id=eq.${fam.id}`);
-  const s = rows[0] || { family_id: fam.id, tts_rate: 1.0, daily_limit_min: 45, reward_cost_multiplier: 6 };
-  if (s.reward_cost_multiplier == null) s.reward_cost_multiplier = 6; // gia dinh cu chua chay migrate-03
+  const s = rows[0] || {
+    family_id: fam.id, tts_rate: 1.0, daily_limit_min: 45,
+    reward_cost_multiplier: DEFAULT_REWARD_COST_MULTIPLIER, custom_item_costs: {},
+  };
+  if (s.reward_cost_multiplier == null) s.reward_cost_multiplier = DEFAULT_REWARD_COST_MULTIPLIER; // gia dinh cu chua chay migrate-03
+  if (s.custom_item_costs == null) s.custom_item_costs = {}; // gia dinh cu chua chay migrate-04
   try { localStorage.setItem('r99-settings-cache', JSON.stringify({ ...s, cachedAt: Date.now() })); } catch { /* ignore */ }
   return s;
 }
@@ -411,11 +415,20 @@ export function cachedSettings() {
   try { return JSON.parse(localStorage.getItem('r99-settings-cache')); } catch { return null; }
 }
 
-export async function saveSettings({ tts_rate, daily_limit_min, reward_cost_multiplier }) {
+// Chỉ ghi những trường THẬT SỰ được truyền vào (bỏ qua `undefined`) — form
+// "Cài đặt chung" (tts_rate/daily_limit_min/reward_cost_multiplier) và form
+// "Chỉnh giá quà" (custom_item_costs) lưu ĐỘC LẬP nhau; nếu luôn ghi đè cả
+// 4 cột mỗi lần gọi, lưu form này sẽ vô tình XOÁ TRẮNG dữ liệu form kia.
+export async function saveSettings({
+  tts_rate, daily_limit_min, reward_cost_multiplier, custom_item_costs,
+} = {}) {
   const fam = await ensureFamily();
-  await post('settings', {
-    family_id: fam.id, tts_rate, daily_limit_min, reward_cost_multiplier, updated_at: new Date().toISOString(),
-  }, { Prefer: 'return=minimal,resolution=merge-duplicates' });
+  const payload = { family_id: fam.id, updated_at: new Date().toISOString() };
+  if (tts_rate !== undefined) payload.tts_rate = tts_rate;
+  if (daily_limit_min !== undefined) payload.daily_limit_min = daily_limit_min;
+  if (reward_cost_multiplier !== undefined) payload.reward_cost_multiplier = reward_cost_multiplier;
+  if (custom_item_costs !== undefined) payload.custom_item_costs = custom_item_costs;
+  await post('settings', payload, { Prefer: 'return=minimal,resolution=merge-duplicates' });
 }
 
 /** Tổng số GIÂY bé đã chơi hôm nay (để áp giới hạn giờ chơi). */

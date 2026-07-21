@@ -6,7 +6,9 @@ import * as api from '../../shared/api.js';
 import {
   buildWeeklyReport, formatReportVi, minutesByGroup, minutesByTimeOfDay, weeklyWinRate, weekStart,
 } from '../../shared/report.js';
-import { catalogItem, DEFAULT_REWARD_COST_MULTIPLIER } from '../../shared/rewards.js';
+import {
+  catalogItem, CATALOG, effectiveCost, DEFAULT_REWARD_COST_MULTIPLIER,
+} from '../../shared/rewards.js';
 
 const $ = (id) => document.getElementById(id);
 const AVATARS = ['🐰', '🐯', '🐸', '🦄', '🐼', '🐥', '🦊', '🐨', '🐷', '🦁', '🐳', '🦖'];
@@ -566,6 +568,7 @@ async function loadSettings() {
   $('setLimit').value = s.daily_limit_min;
   $('setRate').value = s.tts_rate;
   $('setRewardMult').value = s.reward_cost_multiplier ?? DEFAULT_REWARD_COST_MULTIPLIER;
+  renderPriceEditor(s);
 }
 
 $('btnSaveSettings').addEventListener('click', async () => {
@@ -577,7 +580,55 @@ $('btnSaveSettings').addEventListener('click', async () => {
       reward_cost_multiplier: Number($('setRewardMult').value) || DEFAULT_REWARD_COST_MULTIPLIER,
     });
     $('setOk').textContent = 'Đã lưu — áp dụng cho mọi máy của gia đình.';
+    await loadSettings(); // giá riêng từng món hiển thị lại đúng theo hệ số chung MỚI
   } catch (e) { $('setOk').textContent = `Lỗi: ${e.message}`; }
+});
+
+/* ===== Chỉnh giá riêng từng món quà (ghi đè hệ số chung, riêng cho gia đình này) ===== */
+
+function renderPriceEditor(settings) {
+  const overrides = settings.custom_item_costs || {};
+  const multiplier = settings.reward_cost_multiplier ?? DEFAULT_REWARD_COST_MULTIPLIER;
+  $('priceEditor').innerHTML = CATALOG.map((item) => {
+    const current = effectiveCost(item, multiplier, overrides);
+    const isCustom = Object.prototype.hasOwnProperty.call(overrides, item.id) && Number(overrides[item.id]) > 0;
+    return `<div style="display:flex;align-items:center;gap:8px;margin:5px 0">
+      <span style="font-size:20px;flex:none">${item.icon}</span>
+      <span style="flex:1">${item.name}${isCustom ? ' <b style="color:var(--gold2)">(đã chỉnh)</b>' : ''}</span>
+      <input type="number" min="1" step="1" data-item-id="${item.id}" value="${current}" style="width:80px" />
+    </div>`;
+  }).join('');
+}
+
+$('btnSavePrices').addEventListener('click', async () => {
+  $('priceOk').textContent = '';
+  try {
+    const settings = await api.getSettings();
+    const multiplier = settings.reward_cost_multiplier ?? DEFAULT_REWARD_COST_MULTIPLIER;
+    const overrides = {};
+    for (const input of $('priceEditor').querySelectorAll('input[data-item-id]')) {
+      const id = input.dataset.itemId;
+      const item = catalogItem(id);
+      const val = Number(input.value);
+      if (!item || !(val > 0)) continue;
+      // Chỉ lưu override nếu KHÁC giá mặc định (chưa chỉnh gì) — để nếu sau
+      // này đổi hệ số chung, món chưa chỉnh vẫn tự động ăn theo hệ số mới.
+      const defaultVal = effectiveCost(item, multiplier, null);
+      if (val !== defaultVal) overrides[id] = val;
+    }
+    await api.saveSettings({ custom_item_costs: overrides });
+    $('priceOk').textContent = 'Đã lưu giá quà riêng cho Tủ Quà của gia đình!';
+    await loadSettings();
+  } catch (e) { $('priceOk').textContent = `Lỗi: ${e.message}`; }
+});
+
+$('btnResetPrices').addEventListener('click', async () => {
+  $('priceOk').textContent = '';
+  try {
+    await api.saveSettings({ custom_item_costs: {} });
+    $('priceOk').textContent = 'Đã đưa mọi giá quà về mặc định.';
+    await loadSettings();
+  } catch (e) { $('priceOk').textContent = `Lỗi: ${e.message}`; }
 });
 
 async function loadDevices() {

@@ -228,9 +228,17 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
         <h2>⚙️ Cài đặt (áp dụng mọi máy)</h2>
         <label>Giới hạn chơi mỗi ngày (phút)</label><input id="setLimit" type="number" min="5" max="480" value="45" />
         <label>Tốc độ đọc TTS (0.6 chậm — 1.4 nhanh)</label><input id="setRate" type="number" min="0.6" max="1.4" step="0.1" value="1.0" />
-        <label>Hệ số giá đổi quà trong Tủ Quà (mặc định x12 — số càng lớn, quà càng khó đổi)</label><input id="setRewardMult" type="number" min="1" max="50" step="0.5" value="12" />
+        <label>Hệ số giá đổi quà chung trong Tủ Quà (mặc định x36 — số càng lớn, quà càng khó đổi)</label><input id="setRewardMult" type="number" min="1" max="100" step="0.5" value="36" />
         <div class="ok" id="setOk"></div>
         <button id="btnSaveSettings">Lưu cài đặt</button>
+      </div>
+      <div class="card">
+        <h2>🏷️ Chỉnh giá riêng từng món quà</h2>
+        <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 8px">Ghi đè hệ số chung ở trên cho TỪNG món — để trống hoặc đưa về đúng giá mặc định thì món đó lại tính theo hệ số chung như bình thường.</p>
+        <div id="priceEditor" style="font-size:13px;max-height:280px;overflow:auto;margin-bottom:8px">Đang tải…</div>
+        <div class="ok" id="priceOk"></div>
+        <button id="btnSavePrices">Lưu giá quà</button>
+        <button id="btnResetPrices" class="ghost">↺ Đưa tất cả về giá mặc định</button>
       </div>
       <div class="card">
         <h2>💾 Dữ liệu & thiết bị</h2>

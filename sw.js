@@ -1,6 +1,6 @@
 /* Reply1999 Games — root service worker.
    Scope = '/'. Cache hub + các game khi truy cập lần đầu. */
-const CACHE = 'reply1999-v145';
+const CACHE = 'reply1999-v148';
 const PRECACHE = [
   './', './index.html', './manifest.json', './i18n.js', './server-config.js',
   './shared/api.js',
@@ -734,29 +734,24 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
-// Dev: luôn lấy từ mạng để sửa file thấy ngay — không chỉ localhost mà cả
-// khi test qua IP LAN trên điện thoại/máy tính bảng thật (192.168.x.x,
-// 10.x.x.x, 172.16-31.x.x), vì đó mới là cách test thực tế trên thiết bị
-// của bé. Thiếu điều kiện này khiến SW cache-first "đóng băng" bản cũ trên
-// điện thoại test dù code trên máy chủ dev đã sửa xong từ lâu.
-function isDevHost(hostname) {
-  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') return true;
-  if (hostname.endsWith('.local')) return true;
-  if (/^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname)) return true;
-  if (/^192\.168\.\d{1,3}\.\d{1,3}$/.test(hostname)) return true;
-  if (/^172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}$/.test(hostname)) return true;
-  return false;
-}
-
+// LƯU Ý QUAN TRỌNG (07/2026): bản trước đây có "isDevHost()" khiến SW BỎ HẲN
+// cache khi truy cập qua IP LAN (192.168.x.x...) — tưởng là chỉ ảnh hưởng lúc
+// dev/test, nhưng đây CHÍNH LÀ cách nhà mình chơi thật: máy tính bảng của bé
+// nối cùng WiFi nhà, gõ IP LAN của máy chủ (app "offline", không có internet).
+// Kết quả: bé chơi KHÔNG BAO GIỜ có cache, mỗi game phải tải lại toàn bộ
+// chuỗi file (index.html → app.js → nhiều file shared/*.js) qua WiFi mỗi lần
+// vào — nút Play/Chơi "đơ", bấm không phản hồi trong lúc chờ tải, y hệt lỗi
+// bạn báo. Sửa bằng stale-while-revalidate: LUÔN trả lời từ cache trước (tức
+// thời) rồi âm thầm tải bản mới từ mạng để cập nhật cache cho lần sau — vừa
+// nhanh khi bé chơi thật, vừa tự cập nhật code mới (kết hợp với việc bump số
+// CACHE ở đầu file mỗi khi có bản sửa, đã là quy ước sẵn có của dự án).
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
   if (url.origin !== location.origin) return;
-  if (isDevHost(url.hostname)) return;
   e.respondWith(
     caches.match(e.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(e.request)
+      const network = fetch(e.request)
         .then((resp) => {
           if (resp && resp.status === 200 && resp.type === 'basic') {
             const clone = resp.clone();
@@ -765,6 +760,11 @@ self.addEventListener('fetch', (e) => {
           return resp;
         })
         .catch(() => cached);
+      if (cached) {
+        e.waitUntil(network);
+        return cached;
+      }
+      return network;
     })
   );
 });

@@ -91,9 +91,13 @@ create table if not exists settings (
   family_id              uuid primary key references families(id) on delete cascade,
   tts_rate               real not null default 1.0,
   daily_limit_min        int  not null default 45,
-  reward_cost_multiplier real not null default 6,
+  reward_cost_multiplier real not null default 36,
+  custom_item_costs      jsonb not null default '{}',
   updated_at             timestamptz not null default now()
 );
+-- Migrate-04 (07/2026): gia dinh da tao truoc do can them cot gia rieng
+-- tung mon qua (phu huynh tu chinh gia cho "cua hang" cua minh trong Tu Qua).
+alter table settings add column if not exists custom_item_costs jsonb not null default '{}';
 
 -- May da lien ket (chi de hien thi/quan ly, khong phai co che bao mat).
 create table if not exists devices (

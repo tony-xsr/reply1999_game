@@ -80,6 +80,14 @@ export function newGiftCount(prevAnswered, newAnswered, every = GIFT_EVERY) {
   return Math.floor(b / every) - Math.floor(a / every);
 }
 
+// Quà loại "voucher"/"drink" là đồ THẬT quy đổi theo giá trị tiền mặt ước
+// lượng, không hợp lý nếu nhân thêm hệ số đổi quà chung (multiplier) như
+// kẹo/hoa/thú/danh hiệu — nên đánh dấu `fixedCost: true`: `cost` ở đây LÀ
+// giá sao cuối cùng bé phải trả, effectiveCost() sẽ không nhân hệ số nữa.
+// Neo giá theo 2 mốc phụ huynh cho: phiếu 20k=400 sao, phiếu 50k=900 sao
+// (~16-20 sao/1.000đ) — nội suy cùng tỉ lệ cho nước ngọt/trà xanh/trà sữa.
+// Phụ huynh có thể tự chỉnh lại TỪNG giá này riêng cho gia đình mình ở
+// Trang Phụ Huynh (xem `custom_item_costs` trong `settings`).
 /** Danh mục quà đổi bằng sao trong "Tủ quà của bé". */
 export const CATALOG = [
   { id: 'candy1', icon: '🍬', name: 'Kẹo ngọt', cost: 5, type: 'candy' },
@@ -94,6 +102,11 @@ export const CATALOG = [
   { id: 'pet2', icon: '🐰', name: 'Thỏ con', cost: 100, type: 'pet' },
   { id: 'pet3', icon: '🐼', name: 'Gấu trúc', cost: 150, type: 'pet' },
   { id: 'badge1', icon: '👑', name: 'Danh hiệu Vua Từ Vựng', cost: 200, type: 'badge' },
+  { id: 'drink1', icon: '🥤', name: 'Nước ngọt', cost: 270, type: 'drink', fixedCost: true },
+  { id: 'drink2', icon: '🍵', name: 'Trà xanh', cost: 320, type: 'drink', fixedCost: true },
+  { id: 'drink3', icon: '🧋', name: 'Trà sữa', cost: 480, type: 'drink', fixedCost: true },
+  { id: 'voucher20k', icon: '🧸', name: 'Phiếu mua đồ chơi 20k', cost: 400, type: 'voucher', fixedCost: true },
+  { id: 'voucher50k', icon: '🎮', name: 'Phiếu mua đồ chơi 50k', cost: 900, type: 'voucher', fixedCost: true },
 ];
 
 /** Quà ngẫu nhiên loại kẹo cho hộp quà "học đủ 15 câu" (không tốn sao). */
@@ -111,13 +124,26 @@ export function catalogItem(id) {
 // sao/ngày) khiến bé đổi được quà gần như ngay lập tức — nhân hệ số mặc định
 // để mỗi món quà thành mục tiêu dài hơi hơn. Phụ huynh chỉnh được số này
 // qua Trang Phụ Huynh (lưu trong settings.reward_cost_multiplier).
-// Tăng x6→x12 (07/2026, yêu cầu "tăng x2 sao cần đổi quà" để chống lạm phát
-// sau khi đã giảm trần sao/ván 15→5) — chống lạm phát từ CẢ 2 phía: hạ tốc
-// độ kiếm (trần sao/ván) VÀ nâng chi phí tiêu (hệ số đổi quà).
-export const DEFAULT_REWARD_COST_MULTIPLIER = 12;
+// Tăng x6→x12→x36 (07/2026, 2 đợt liên tiếp: "tăng x2" rồi "tăng thêm x3
+// nữa trên mức đang có" để chống lạm phát) — chống lạm phát từ CẢ 2 phía:
+// hạ tốc độ kiếm (trần sao/ván 15→5) VÀ nâng chi phí tiêu (hệ số đổi quà).
+export const DEFAULT_REWARD_COST_MULTIPLIER = 36;
 
-/** Giá đổi THỰC TẾ = giá gốc × hệ số (làm tròn, tối thiểu 1 sao). */
-export function effectiveCost(item, multiplier = DEFAULT_REWARD_COST_MULTIPLIER) {
+/**
+ * Giá đổi THỰC TẾ 1 món quà — có 3 tầng ưu tiên, tầng trên đè tầng dưới:
+ * 1. `overrides[item.id]` — giá phụ huynh TỰ CHỈNH riêng cho gia đình mình
+ *    (lưu ở `settings.custom_item_costs`), luôn thắng nếu có đặt.
+ * 2. `item.fixedCost` — quà quy đổi theo giá trị tiền mặt thật (phiếu mua
+ *    đồ chơi, nước uống...) thì `item.cost` CHÍNH LÀ giá sao cuối cùng,
+ *    không nhân thêm hệ số chung.
+ * 3. Mặc định: `item.cost` × hệ số chung (làm tròn, tối thiểu 1 sao).
+ */
+export function effectiveCost(item, multiplier = DEFAULT_REWARD_COST_MULTIPLIER, overrides = null) {
+  if (overrides && Object.prototype.hasOwnProperty.call(overrides, item.id)) {
+    const custom = Number(overrides[item.id]);
+    if (custom > 0) return Math.max(1, Math.round(custom));
+  }
+  if (item.fixedCost) return Math.max(1, Math.round(item.cost));
   const m = Number(multiplier) > 0 ? Number(multiplier) : DEFAULT_REWARD_COST_MULTIPLIER;
   return Math.max(1, Math.round(item.cost * m));
 }

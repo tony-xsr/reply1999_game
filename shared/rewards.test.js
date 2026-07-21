@@ -44,7 +44,7 @@ check('newGiftCount: one gift each GIFT_EVERY answered questions, crossing bound
   assert.equal(newGiftCount(30, 25), 0, 'never negative even with weird input');
 });
 
-check('CATALOG: ids unique, costs positive, has all 4 gift types', () => {
+check('CATALOG: ids unique, costs positive, has all 6 gift types', () => {
   const ids = new Set(CATALOG.map((c) => c.id));
   assert.equal(ids.size, CATALOG.length);
   for (const c of CATALOG) {
@@ -52,7 +52,7 @@ check('CATALOG: ids unique, costs positive, has all 4 gift types', () => {
     assert.ok(c.icon && c.name, `icon+name required for ${c.id}`);
   }
   const types = new Set(CATALOG.map((c) => c.type));
-  for (const t of ['candy', 'flower', 'pet', 'badge']) assert.ok(types.has(t), `missing type ${t}`);
+  for (const t of ['candy', 'flower', 'pet', 'badge', 'voucher', 'drink']) assert.ok(types.has(t), `missing type ${t}`);
 });
 
 check('randomSmallGift: always returns a candy from the catalog', () => {
@@ -68,14 +68,31 @@ check('catalogItem: finds by id, null for unknown', () => {
   assert.equal(catalogItem('nope'), null);
 });
 
-check('effectiveCost: applies default x12 multiplier, rounds, floors at 1', () => {
-  assert.equal(DEFAULT_REWARD_COST_MULTIPLIER, 12);
-  assert.equal(effectiveCost({ cost: 5 }), 60);
-  assert.equal(effectiveCost({ cost: 200 }), 2400);
+check('effectiveCost: applies default x36 multiplier, rounds, floors at 1', () => {
+  assert.equal(DEFAULT_REWARD_COST_MULTIPLIER, 36);
+  assert.equal(effectiveCost({ cost: 5 }), 180);
+  assert.equal(effectiveCost({ cost: 200 }), 7200);
   assert.equal(effectiveCost({ cost: 5 }, 2), 10, 'parent-adjusted multiplier overrides default');
-  assert.equal(effectiveCost({ cost: 1 }, 0), 12, 'zero/invalid multiplier falls back to default');
-  assert.equal(effectiveCost({ cost: 1 }, -3), 12, 'negative multiplier falls back to default');
+  assert.equal(effectiveCost({ cost: 1 }, 0), 36, 'zero/invalid multiplier falls back to default');
+  assert.equal(effectiveCost({ cost: 1 }, -3), 36, 'negative multiplier falls back to default');
   assert.ok(effectiveCost({ cost: 1 }, 0.1) >= 1, 'never rounds down to 0');
+});
+
+check('effectiveCost: fixedCost items ignore the multiplier entirely', () => {
+  const voucher = { id: 'voucher20k', cost: 400, fixedCost: true };
+  assert.equal(effectiveCost(voucher, 36), 400, 'fixedCost items are NOT multiplied');
+  assert.equal(effectiveCost(voucher, 1), 400);
+  assert.equal(effectiveCost(voucher), 400, 'still 400 with default multiplier');
+});
+
+check('effectiveCost: per-item override (phụ huynh tự chỉnh) wins over multiplier AND fixedCost', () => {
+  const candy = { id: 'candy1', cost: 5 };
+  const voucher = { id: 'voucher20k', cost: 400, fixedCost: true };
+  assert.equal(effectiveCost(candy, 36, { candy1: 50 }), 50, 'override wins over multiplier');
+  assert.equal(effectiveCost(voucher, 36, { voucher20k: 350 }), 350, 'override wins over fixedCost too');
+  assert.equal(effectiveCost(candy, 36, { candy1: 0 }), 180, 'override of 0/invalid falls back to normal calc');
+  assert.equal(effectiveCost(candy, 36, { flower1: 999 }), 180, 'override for a DIFFERENT item id is ignored');
+  assert.equal(effectiveCost(candy, 36, null), 180, 'no overrides object at all still works (back-compat)');
 });
 
 check('isFlatRewardMode: pure entertainment games (đào vàng, khủng long, arcade cổ...) are flagged flat-reward', () => {

@@ -46,17 +46,20 @@ async function boot() {
 
 let balance = 0;
 let rewardMultiplier = DEFAULT_REWARD_COST_MULTIPLIER;
+let customCosts = {};
 
 async function refresh() {
   try {
     const kidId = api.getCurrentKidId();
     const cached = api.cachedSettings();
     if (cached?.reward_cost_multiplier) rewardMultiplier = cached.reward_cost_multiplier;
+    if (cached?.custom_item_costs) customCosts = cached.custom_item_costs;
     const [stars, purchases, settings] = await Promise.all([
       api.starBalance(kidId), api.kidPurchases(kidId), api.getSettings(),
     ]);
     balance = stars;
     rewardMultiplier = settings.reward_cost_multiplier ?? DEFAULT_REWARD_COST_MULTIPLIER;
+    customCosts = settings.custom_item_costs || {};
     $('starBox').textContent = `⭐ ${stars}`;
     renderCollection(purchases);
     renderShop();
@@ -66,7 +69,11 @@ async function refresh() {
 }
 
 function renderCollection(purchases) {
-  const byType = { flower: [], pet: [], candy: [], badge: [] };
+  // Khởi tạo đủ 1 khóa cho MỌI type đang có trong CATALOG (không cứng 4
+  // loại nữa) — quà loại mới (voucher/drink) thêm sau này sẽ không làm
+  // `byType[item.type].push` bị lỗi vì thiếu khóa.
+  const byType = {};
+  for (const item of CATALOG) if (!byType[item.type]) byType[item.type] = [];
   for (const p of purchases) {
     const item = catalogItem(p.item_id);
     if (item) byType[item.type].push(item);
@@ -81,13 +88,19 @@ function renderCollection(purchases) {
   $('badgeRow').textContent = byType.badge.length
     ? `Danh hiệu: ${byType.badge.map((b) => `${b.icon} ${b.name}`).join(', ')}`
     : '';
+  $('drinkRow').textContent = byType.drink.length
+    ? `Nước uống đã đổi: ${byType.drink.map((d) => d.icon).join(' ')}`
+    : '';
+  $('voucherRow').textContent = byType.voucher.length
+    ? `Phiếu mua đồ chơi đã đổi: ${byType.voucher.map((v) => `${v.icon} ${v.name}`).join(', ')}`
+    : '';
 }
 
 function renderShop() {
   const shop = $('shop');
   shop.innerHTML = '';
   for (const item of CATALOG) {
-    const cost = effectiveCost(item, rewardMultiplier);
+    const cost = effectiveCost(item, rewardMultiplier, customCosts);
     const div = document.createElement('div');
     div.className = 'item';
     div.innerHTML = `<div class="icon">${item.icon}</div><div class="name">${item.name}</div>`;
