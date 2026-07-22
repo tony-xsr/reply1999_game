@@ -1,7 +1,7 @@
 // Unit test cho Xây Thị Trấn Vàng. Chạy: node src/xaythitran.test.js
 
 import {
-  FIELD_W, CART_W, RUN_MS, STUN_MS, DROPS, BUILDINGS,
+  FIELD_W, CART_W, CART_Y, RUN_MS, STUN_MS, DROPS, BUILDINGS,
   costOf, makeTown, buyUpgrade, townComplete, nextTown, serializeTown, deserializeTown,
   makeRun, moveCart, stepRun, bankRun,
 } from './xaythitran.js';
@@ -88,7 +88,7 @@ check('xe kẹp trong biên hầm', (() => {
 check('vàng rơi trúng lòng xe → chở thêm đúng giá trị', (() => {
   const run = makeRun(0);
   run.spawnEveryMs = 999999;
-  run.items = [{ kind: 'gem', x: run.cartX, y: 560, vy: 3 }];
+  run.items = [{ kind: 'gem', x: run.cartX, y: CART_Y - 10, vy: 3 }];
   let got = 0;
   for (let i = 0; i < 30; i++) got += stepRun(run, 16.67, seeded()).caught.reduce((s, c2) => s + c2.value, 0);
   return got === DROPS.gem.value && run.carried === DROPS.gem.value;
@@ -98,11 +98,11 @@ check('đá rơi trúng xe → văng mất 30% vàng đang chở + choáng (đan
   const run = makeRun(0);
   run.spawnEveryMs = 999999;
   run.carried = 100;
-  run.items = [{ kind: 'rock', x: run.cartX, y: 560, vy: 3 }];
+  run.items = [{ kind: 'rock', x: run.cartX, y: CART_Y - 10, vy: 3 }];
   let hit = false;
   for (let i = 0; i < 30 && !hit; i++) hit = stepRun(run, 16.67, seeded()).hitRock;
   if (!hit || run.carried !== 70 || run.stunMs <= 0) return false;
-  run.items = [{ kind: 'coin', x: run.cartX, y: 560, vy: 3 }];
+  run.items = [{ kind: 'coin', x: run.cartX, y: CART_Y - 10, vy: 3 }];
   let got = 0;
   for (let i = 0; i < 20; i++) got += stepRun(run, 16.67, seeded()).caught.length;
   return got === 0; // đang choáng — xu rơi xuyên qua
@@ -111,7 +111,7 @@ check('đá rơi trúng xe → văng mất 30% vàng đang chở + choáng (đan
 check('vật rơi lệch xa xe thì không hứng được', (() => {
   const run = makeRun(0);
   run.spawnEveryMs = 999999;
-  run.items = [{ kind: 'coin', x: run.cartX + CART_W, y: 560, vy: 3 }];
+  run.items = [{ kind: 'coin', x: run.cartX + CART_W, y: CART_Y - 10, vy: 3 }];
   for (let i = 0; i < 40; i++) stepRun(run, 16.67, seeded());
   return run.carried === 0;
 })());

@@ -4,7 +4,7 @@
 // → xây dựng" thuộc thể loại chung; toàn bộ công trình tự thiết kế/tự vẽ. Thuần logic.
 
 export const FIELD_W = 640;
-export const FIELD_H = 640;
+export const FIELD_H = 480; // phải khớp thuộc tính height của <canvas> (index.html) — khác đi thì xe goòng/vạch ray bị vẽ NGOÀI khung canvas, vô hình dù logic vẫn chạy đúng
 export const CART_Y = FIELD_H - 70;
 export const CART_W = 96;
 export const CART_H = 46;

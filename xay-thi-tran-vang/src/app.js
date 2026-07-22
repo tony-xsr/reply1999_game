@@ -532,14 +532,16 @@ function startRun() {
 
 /* ===== Điều khiển xe ===== */
 
+// Đo rect() 1 lần lúc pointerdown, tránh đo lại mỗi pointermove (layout thrashing).
+let cartRect = null;
 function posX(e) {
-  const rect = els.canvas.getBoundingClientRect();
-  return ((e.clientX - rect.left) / rect.width) * FIELD_W;
+  return ((e.clientX - cartRect.left) / cartRect.width) * FIELD_W;
 }
 let dragging = false;
 els.wrap.addEventListener('pointerdown', (e) => {
   if (state.mode !== 'run' || !state.run) return;
   dragging = true;
+  cartRect = els.canvas.getBoundingClientRect();
   moveCart(state.run, posX(e));
 });
 els.wrap.addEventListener('pointermove', (e) => {
