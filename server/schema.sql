@@ -95,8 +95,9 @@ create table if not exists settings (
   custom_item_costs      jsonb not null default '{}',
   updated_at             timestamptz not null default now()
 );
--- Migrate-04 (07/2026): gia dinh da tao truoc do can them cot gia rieng
--- tung mon qua (phu huynh tu chinh gia cho "cua hang" cua minh trong Tu Qua).
+-- Gia dinh da tao truoc 07/2026 can chay server/migrate-05-custom-item-costs.sql
+-- (Supabase SQL Editor) de them cot gia rieng tung mon qua nay - dong ALTER
+-- duoi day chi ap dung cho project MOI tao (chay schema.sql lan dau).
 alter table settings add column if not exists custom_item_costs jsonb not null default '{}';
 
 -- May da lien ket (chi de hien thi/quan ly, khong phai co che bao mat).
