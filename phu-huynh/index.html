@@ -76,6 +76,19 @@ td,th{padding:6px 8px;border-bottom:1px solid #eadbbe;text-align:left}
 .cmp .kname{font-weight:800;white-space:nowrap}
 .cmp .track{background:var(--panel2);border-radius:999px;height:14px;overflow:hidden;min-width:60px}
 .cmp .fill{height:100%;border-radius:999px;min-width:2px}
+/* Tab con trong màn từng bé — tách chart/từ sai/báo cáo/sổ quà/cài đặt ra
+   từng mục để không phải kéo dài 1 màn mới thấy hết. */
+.sub-tabs{display:flex;gap:2px;flex-wrap:wrap;margin:2px 0 14px;border-bottom:2px solid var(--line)}
+.sub-tab{background:none;border:none;border-bottom:3px solid transparent;border-radius:0;color:var(--ink-dim);
+  font-weight:800;font-size:13.5px;padding:9px 13px;margin:0;cursor:pointer;white-space:nowrap}
+.sub-tab.active{color:var(--gold2);border-bottom-color:var(--gold2)}
+/* Tab lớn ở đầu trang: "Các bé" vs "Cài đặt" — tách khối cài đặt chung cả
+   nhà (đăng nhập gần đây, dữ liệu & thiết bị, giá quà, cài đặt chung) ra
+   khỏi khối theo dõi/thao tác từng bé, đỡ phải kéo qua hết mới tới. */
+.main-tabs{display:flex;gap:8px;margin-bottom:14px}
+.main-tab{flex:1;border:2px solid var(--line);background:var(--panel);border-radius:12px;padding:11px 16px;
+  font-weight:900;font-size:15px;cursor:pointer;color:var(--ink);margin-top:0;text-align:center}
+.main-tab.active{background:var(--gold2);color:#fff;border-color:transparent}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:560px){.grid2{grid-template-columns:1fr}}
 code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
@@ -114,139 +127,190 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
 
   <!-- Bảng điều khiển -->
   <div id="viewMain" class="hidden">
-    <div class="card">
-      <h2>👨‍👩‍👧 Các bé <span id="who" style="font-weight:400;font-size:12px;color:var(--ink-dim)"></span>
-        <button id="btnSignOut" class="ghost" style="float:right;margin:0;padding:5px 12px;font-size:12px">Đăng xuất</button></h2>
-      <div class="kid-tabs" id="kidTabs"></div>
-      <details id="addKidBox">
-        <summary style="cursor:pointer;font-size:13px;color:var(--gold2);font-weight:700">➕ Thêm bé mới</summary>
-        <label>Tên bé (biệt danh)</label><input id="kidName" maxlength="20" />
-        <label>Chọn avatar</label><div class="avatars" id="avatarPick"></div>
-        <div class="err" id="kidErr"></div>
-        <button id="btnAddKid">Tạo hồ sơ bé</button>
-      </details>
+    <div class="card" style="padding:10px 16px">
+      <span id="who" style="font-size:12px;color:var(--ink-dim)"></span>
+      <button id="btnSignOut" class="ghost" style="float:right;margin:0;padding:5px 12px;font-size:12px">Đăng xuất</button>
     </div>
 
-    <div class="card hidden" id="compareCard">
-      <h2>👀 So sánh các bé (7 ngày qua)</h2>
-      <div id="compareBox"></div>
+    <div class="main-tabs" id="mainTabs">
+      <button type="button" class="main-tab" data-maintab="kids">👨‍👩‍👧 Các bé</button>
+      <button type="button" class="main-tab" data-maintab="settings">⚙️ Cài đặt</button>
     </div>
 
-    <div class="card">
-      <h2>🔔 Bé đăng nhập gần đây</h2>
-      <div id="loginLog" style="font-size:13.5px;line-height:2">Đang tải…</div>
-    </div>
+    <div class="main-tab-panel" data-maintab="kids">
+      <div class="card">
+        <h2>👨‍👩‍👧 Các bé</h2>
+        <div class="kid-tabs" id="kidTabs"></div>
+        <details id="addKidBox">
+          <summary style="cursor:pointer;font-size:13px;color:var(--gold2);font-weight:700">➕ Thêm bé mới</summary>
+          <label>Tên bé (biệt danh)</label><input id="kidName" maxlength="20" />
+          <label>Chọn avatar</label><div class="avatars" id="avatarPick"></div>
+          <div class="err" id="kidErr"></div>
+          <button id="btnAddKid">Tạo hồ sơ bé</button>
+        </details>
+      </div>
 
-    <div id="kidPanel" class="hidden">
+      <div class="card hidden" id="compareCard">
+        <h2>👀 So sánh các bé</h2>
+        <h3 class="mini-h">7 ngày qua</h3>
+        <div id="compareBox"></div>
+        <h3 class="mini-h" style="margin-top:14px">Tiến bộ 4 tuần (tỷ lệ trả lời thắng)</h3>
+        <div id="compareTrend"></div>
+        <h3 class="mini-h" style="margin-top:14px">Hoạt động gần đây (gộp cả nhà)</h3>
+        <div id="compareActivity" style="font-size:13px;max-height:260px;overflow:auto"></div>
+      </div>
+
+      <div id="kidPanel" class="hidden">
       <div class="card">
         <h2 id="kidTitle"></h2>
         <div class="stats-row" id="statsRow"></div>
-        <div class="bars" id="bars"></div>
-        <div class="bar-labels" id="barLabels"></div>
       </div>
 
-      <div class="card">
-        <h2>📊 Phân tích chi tiết</h2>
-        <div class="grid2">
-          <div>
-            <h3 class="mini-h">Bé chơi gì nhiều nhất? (30 ngày)</h3>
-            <div class="donut-row"><svg id="donut" viewBox="0 0 42 42" width="110" height="110"></svg>
-              <div id="donutLegend" class="legend"></div></div>
+      <div class="sub-tabs" id="kidSubTabs">
+        <button type="button" class="sub-tab" data-tab="stats">📊 Thống kê</button>
+        <button type="button" class="sub-tab" data-tab="exam">🎓 Thi Chứng Chỉ</button>
+        <button type="button" class="sub-tab" data-tab="weak">🎯 Từ hay sai</button>
+        <button type="button" class="sub-tab" data-tab="report">📈 Báo cáo tuần</button>
+        <button type="button" class="sub-tab" data-tab="ledger">🧾 Sổ quà & sao</button>
+        <button type="button" class="sub-tab" data-tab="settings">⚙️ Cài đặt bé</button>
+      </div>
+
+      <div class="kp-tab" data-kptab="stats">
+        <div class="card">
+          <h3 class="mini-h">7 ngày qua</h3>
+          <div class="bars" id="bars"></div>
+          <div class="bar-labels" id="barLabels"></div>
+        </div>
+        <div class="card">
+          <h2>📊 Phân tích chi tiết</h2>
+          <div class="grid2">
+            <div>
+              <h3 class="mini-h">Bé chơi gì nhiều nhất? (30 ngày)</h3>
+              <div class="donut-row"><svg id="donut" viewBox="0 0 42 42" width="110" height="110"></svg>
+                <div id="donutLegend" class="legend"></div></div>
+            </div>
+            <div>
+              <h3 class="mini-h">Bé hay chơi lúc nào? (30 ngày)</h3>
+              <div id="todBars" class="hbars"></div>
+            </div>
           </div>
-          <div>
-            <h3 class="mini-h">Bé hay chơi lúc nào? (30 ngày)</h3>
-            <div id="todBars" class="hbars"></div>
+          <h3 class="mini-h" style="margin-top:14px">Tiến bộ: tỷ lệ trả lời thắng 4 tuần gần đây</h3>
+          <div id="trendBars" class="trend"></div>
+        </div>
+      </div>
+
+      <div class="kp-tab hidden" data-kptab="exam">
+        <div class="card">
+          <h2>🎓 Tiến độ Thi Chứng Chỉ Anh</h2>
+          <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 10px">Gộp theo từng cấp độ (Cambridge YLE, KET, PET, TOEFL Junior, TOEIC, Ngữ Pháp Trực Quan) — tổng phút học, số ván, lần chơi gần nhất, và xu hướng hiệu quả (so tỷ lệ thắng nửa đầu với nửa sau các ván gần đây).</p>
+          <div id="examProgress"><i style="font-size:13px;color:var(--ink-dim)">Đang tải…</i></div>
+        </div>
+      </div>
+
+      <div class="kp-tab hidden" data-kptab="weak">
+        <div class="card">
+          <h2>🎯 Từ hay sai (bấm 🔊 để nghe)</h2>
+          <div class="words" id="weakWords"><i style="font-size:13px;color:var(--ink-dim)">Đang tải…</i></div>
+        </div>
+      </div>
+
+      <div class="kp-tab hidden" data-kptab="report">
+        <div class="card">
+          <h2>📈 Báo cáo tuần
+            <button id="btnCopyReport" class="ghost" style="float:right;margin:0;padding:4px 10px;font-size:12px">📋 Sao chép</button>
+            <label style="float:right;margin:4px 10px 0 0;font-size:12px;font-weight:600;color:var(--ink-dim);cursor:pointer"
+                   title="Tự tải lại số liệu mỗi 15 giây — xem bé học 'trực tiếp' từ máy khác">
+              <input type="checkbox" id="liveToggle" style="width:auto;vertical-align:middle"> 🔴 Trực tiếp
+            </label></h2>
+          <pre id="weeklyReport" style="white-space:pre-wrap;font:inherit;font-size:14px;line-height:1.8;margin:0">Đang tải…</pre>
+          <div class="ok" id="copyOk"></div>
+        </div>
+      </div>
+
+      <div class="kp-tab hidden" data-kptab="ledger">
+        <div class="grid2">
+          <div class="card">
+            <h2>🧾 Sổ quà & sao</h2>
+            <div id="rewardLog" style="font-size:13px;max-height:320px;overflow:auto">Đang tải…</div>
+          </div>
+          <div class="card">
+            <h2>📦 Quà đã đổi (đồ thật cần giao tận tay bé)</h2>
+            <div id="purchaseLog" style="font-size:13px;max-height:320px;overflow:auto">Đang tải…</div>
           </div>
         </div>
-        <h3 class="mini-h" style="margin-top:14px">Tiến bộ: tỷ lệ trả lời thắng 4 tuần gần đây</h3>
-        <div id="trendBars" class="trend"></div>
       </div>
 
-      <div class="card">
-        <h2>🎯 Từ hay sai (bấm 🔊 để nghe)</h2>
-        <div class="words" id="weakWords"><i style="font-size:13px;color:var(--ink-dim)">Đang tải…</i></div>
+      <div class="kp-tab hidden" data-kptab="settings">
+        <div class="grid2">
+          <div class="card">
+            <h2>✏️ Hồ sơ & cài đặt riêng của bé</h2>
+            <label>Tên bé</label><input id="editKidName" maxlength="20" />
+            <label>Avatar</label><div class="avatars" id="editAvatarPick"></div>
+            <label>Màu yêu thích</label><div class="avatars" id="editColorPick"></div>
+            <label>Mã đăng nhập 6 số (bé nhập khi chọn hồ sơ ở máy khác — bỏ trống = chạm avatar là vào)</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input id="editKidCode" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="ví dụ 123456" style="flex:1" />
+              <button id="btnGenCode" class="ghost" style="margin:0;white-space:nowrap">🎲 Tạo mã</button>
+            </div>
+            <label>Giới hạn phút/ngày RIÊNG (bỏ trống = dùng chung)</label>
+            <input id="editKidLimit" type="number" min="0" max="480" placeholder="dùng cài đặt chung" />
+            <div class="ok" id="editKidOk"></div>
+            <button id="btnSaveKid">Lưu hồ sơ bé</button>
+            <button id="btnDeleteKid" class="danger">🗑️ Xóa bé này</button>
+          </div>
+          <div class="card">
+            <h2>🎁 Thưởng cho bé</h2>
+            <label>Số sao tặng kèm</label><input id="giftStars" type="number" min="0" max="100" value="10" />
+            <label>Lời nhắn (máy sẽ đọc cho bé nghe)</label>
+            <textarea id="giftMsg" rows="2" placeholder="Mẹ thưởng vì con tự giác học!"></textarea>
+            <div class="ok" id="giftOk"></div>
+            <button id="btnGift">Gửi quà 🎁</button>
+          </div>
+          <div class="card">
+            <h2>⭐ Chỉnh lại số sao</h2>
+            <label>Số sao muốn cộng/trừ (điền số âm để trừ, vd -10)</label>
+            <input id="adjustStars" type="number" step="1" placeholder="vd 20 hoặc -10" />
+            <label>Lý do (tùy chọn, để dễ nhớ sau này)</label>
+            <input id="adjustNote" maxlength="60" placeholder="vd sửa lỗi cộng nhầm, thưởng thêm..." />
+            <div class="ok" id="adjustOk"></div>
+            <button id="btnAdjustStars">Áp dụng</button>
+          </div>
+        </div>
       </div>
+    </div>
+    </div> <!-- /main-tab-panel kids -->
 
+    <div class="main-tab-panel hidden" data-maintab="settings">
       <div class="card">
-        <h2>📈 Báo cáo tuần
-          <button id="btnCopyReport" class="ghost" style="float:right;margin:0;padding:4px 10px;font-size:12px">📋 Sao chép</button>
-          <label style="float:right;margin:4px 10px 0 0;font-size:12px;font-weight:600;color:var(--ink-dim);cursor:pointer"
-                 title="Tự tải lại số liệu mỗi 15 giây — xem bé học 'trực tiếp' từ máy khác">
-            <input type="checkbox" id="liveToggle" style="width:auto;vertical-align:middle"> 🔴 Trực tiếp
-          </label></h2>
-        <pre id="weeklyReport" style="white-space:pre-wrap;font:inherit;font-size:14px;line-height:1.8;margin:0">Đang tải…</pre>
-        <div class="ok" id="copyOk"></div>
+        <h2>🔔 Bé đăng nhập gần đây</h2>
+        <div id="loginLog" style="font-size:13.5px;line-height:2">Đang tải…</div>
       </div>
 
       <div class="grid2">
         <div class="card">
-          <h2>✏️ Hồ sơ & cài đặt riêng của bé</h2>
-          <label>Tên bé</label><input id="editKidName" maxlength="20" />
-          <label>Avatar</label><div class="avatars" id="editAvatarPick"></div>
-          <label>Màu yêu thích</label><div class="avatars" id="editColorPick"></div>
-          <label>Mã đăng nhập 6 số (bé nhập khi chọn hồ sơ ở máy khác — bỏ trống = chạm avatar là vào)</label>
-          <div style="display:flex;gap:8px;align-items:center">
-            <input id="editKidCode" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="ví dụ 123456" style="flex:1" />
-            <button id="btnGenCode" class="ghost" style="margin:0;white-space:nowrap">🎲 Tạo mã</button>
-          </div>
-          <label>Giới hạn phút/ngày RIÊNG (bỏ trống = dùng chung)</label>
-          <input id="editKidLimit" type="number" min="0" max="480" placeholder="dùng cài đặt chung" />
-          <div class="ok" id="editKidOk"></div>
-          <button id="btnSaveKid">Lưu hồ sơ bé</button>
-          <button id="btnDeleteKid" class="danger">🗑️ Xóa bé này</button>
+          <h2>⚙️ Cài đặt (áp dụng mọi máy)</h2>
+          <label>Giới hạn chơi mỗi ngày (phút)</label><input id="setLimit" type="number" min="5" max="480" value="45" />
+          <label>Tốc độ đọc TTS (0.6 chậm — 1.4 nhanh)</label><input id="setRate" type="number" min="0.6" max="1.4" step="0.1" value="1.0" />
+          <label>Hệ số giá đổi quà chung trong Tủ Quà (mặc định x36 — số càng lớn, quà càng khó đổi)</label><input id="setRewardMult" type="number" min="1" max="100" step="0.5" value="36" />
+          <div class="ok" id="setOk"></div>
+          <button id="btnSaveSettings">Lưu cài đặt</button>
         </div>
         <div class="card">
-          <h2>🎁 Thưởng cho bé</h2>
-          <label>Số sao tặng kèm</label><input id="giftStars" type="number" min="0" max="100" value="10" />
-          <label>Lời nhắn (máy sẽ đọc cho bé nghe)</label>
-          <textarea id="giftMsg" rows="2" placeholder="Mẹ thưởng vì con tự giác học!"></textarea>
-          <div class="ok" id="giftOk"></div>
-          <button id="btnGift">Gửi quà 🎁</button>
+          <h2>🏷️ Chỉnh giá riêng từng món quà</h2>
+          <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 8px">Ghi đè hệ số chung ở trên cho TỪNG món — để trống hoặc đưa về đúng giá mặc định thì món đó lại tính theo hệ số chung như bình thường.</p>
+          <div id="priceEditor" style="font-size:13px;max-height:280px;overflow:auto;margin-bottom:8px">Đang tải…</div>
+          <div class="ok" id="priceOk"></div>
+          <button id="btnSavePrices">Lưu giá quà</button>
+          <button id="btnResetPrices" class="ghost">↺ Đưa tất cả về giá mặc định</button>
         </div>
         <div class="card">
-          <h2>⭐ Chỉnh lại số sao</h2>
-          <label>Số sao muốn cộng/trừ (điền số âm để trừ, vd -10)</label>
-          <input id="adjustStars" type="number" step="1" placeholder="vd 20 hoặc -10" />
-          <label>Lý do (tùy chọn, để dễ nhớ sau này)</label>
-          <input id="adjustNote" maxlength="60" placeholder="vd sửa lỗi cộng nhầm, thưởng thêm..." />
-          <div class="ok" id="adjustOk"></div>
-          <button id="btnAdjustStars">Áp dụng</button>
+          <h2>💾 Dữ liệu & thiết bị</h2>
+          <div id="deviceList" style="font-size:13px;margin-bottom:8px">…</div>
+          <button id="btnImportLegacy" class="ghost hidden">📥 Nhập dữ liệu cũ trên máy này</button>
+          <button id="btnExport" class="ghost">⬇️ Xuất toàn bộ (JSON)</button>
+          <button id="btnDeleteAll" class="danger">🗑️ Xóa toàn bộ dữ liệu gia đình</button>
+          <div class="err" id="adminErr"></div>
         </div>
-        <div class="card">
-          <h2>🧾 Sổ quà & sao</h2>
-          <div id="rewardLog" style="font-size:13px;max-height:220px;overflow:auto">Đang tải…</div>
-        </div>
-        <div class="card">
-          <h2>📦 Quà đã đổi (đồ thật cần giao tận tay bé)</h2>
-          <div id="purchaseLog" style="font-size:13px;max-height:260px;overflow:auto">Đang tải…</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid2">
-      <div class="card">
-        <h2>⚙️ Cài đặt (áp dụng mọi máy)</h2>
-        <label>Giới hạn chơi mỗi ngày (phút)</label><input id="setLimit" type="number" min="5" max="480" value="45" />
-        <label>Tốc độ đọc TTS (0.6 chậm — 1.4 nhanh)</label><input id="setRate" type="number" min="0.6" max="1.4" step="0.1" value="1.0" />
-        <label>Hệ số giá đổi quà chung trong Tủ Quà (mặc định x36 — số càng lớn, quà càng khó đổi)</label><input id="setRewardMult" type="number" min="1" max="100" step="0.5" value="36" />
-        <div class="ok" id="setOk"></div>
-        <button id="btnSaveSettings">Lưu cài đặt</button>
-      </div>
-      <div class="card">
-        <h2>🏷️ Chỉnh giá riêng từng món quà</h2>
-        <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 8px">Ghi đè hệ số chung ở trên cho TỪNG món — để trống hoặc đưa về đúng giá mặc định thì món đó lại tính theo hệ số chung như bình thường.</p>
-        <div id="priceEditor" style="font-size:13px;max-height:280px;overflow:auto;margin-bottom:8px">Đang tải…</div>
-        <div class="ok" id="priceOk"></div>
-        <button id="btnSavePrices">Lưu giá quà</button>
-        <button id="btnResetPrices" class="ghost">↺ Đưa tất cả về giá mặc định</button>
-      </div>
-      <div class="card">
-        <h2>💾 Dữ liệu & thiết bị</h2>
-        <div id="deviceList" style="font-size:13px;margin-bottom:8px">…</div>
-        <button id="btnImportLegacy" class="ghost hidden">📥 Nhập dữ liệu cũ trên máy này</button>
-        <button id="btnExport" class="ghost">⬇️ Xuất toàn bộ (JSON)</button>
-        <button id="btnDeleteAll" class="danger">🗑️ Xóa toàn bộ dữ liệu gia đình</button>
-        <div class="err" id="adminErr"></div>
       </div>
     </div>
   </div>

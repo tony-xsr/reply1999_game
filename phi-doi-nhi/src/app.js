@@ -167,13 +167,18 @@ function startLevel() {
 
 /* ===== Điều khiển: kéo tay lái máy bay trái/phải ===== */
 
+// Đo rect() 1 lần lúc pointerdown, tránh đo lại mỗi pointermove (layout thrashing).
+let planeRect = null;
 function posX(e) {
-  const rect = els.canvas.getBoundingClientRect();
-  return ((e.clientX - rect.left) / rect.width) * FIELD_W;
+  return ((e.clientX - planeRect.left) / planeRect.width) * FIELD_W;
 }
 
 let dragging = false;
-els.wrap.addEventListener('pointerdown', (e) => { dragging = true; if (state.game) movePlane(state.game, posX(e) - state.game.plane.x); });
+els.wrap.addEventListener('pointerdown', (e) => {
+  dragging = true;
+  planeRect = els.canvas.getBoundingClientRect();
+  if (state.game) movePlane(state.game, posX(e) - state.game.plane.x);
+});
 els.wrap.addEventListener('pointermove', (e) => { if (dragging && state.game) movePlane(state.game, posX(e) - state.game.plane.x); });
 els.wrap.addEventListener('pointerup', () => { dragging = false; });
 els.wrap.addEventListener('pointercancel', () => { dragging = false; });
