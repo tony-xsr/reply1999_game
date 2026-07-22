@@ -307,12 +307,13 @@ function startBricks() {
     state.raf = requestAnimationFrame(loop);
   };
 
+  // Đo rect() 1 lần lúc pointerdown, tránh đo lại mỗi pointermove (layout thrashing).
+  let paddleRect = canvas.getBoundingClientRect();
   const movePaddle = (e) => {
-    const rect = canvas.getBoundingClientRect();
-    g.paddleX = Math.max(BK.PADDLE_W / 2, Math.min(640 - BK.PADDLE_W / 2, ((e.clientX - rect.left) / rect.width) * 640));
+    g.paddleX = Math.max(BK.PADDLE_W / 2, Math.min(640 - BK.PADDLE_W / 2, ((e.clientX - paddleRect.left) / paddleRect.width) * 640));
   };
   canvas.addEventListener('pointermove', movePaddle);
-  canvas.addEventListener('pointerdown', movePaddle);
+  canvas.addEventListener('pointerdown', (e) => { paddleRect = canvas.getBoundingClientRect(); movePaddle(e); });
 
   els.subLine.textContent = '';
   hud();
