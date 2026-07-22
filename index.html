@@ -118,6 +118,13 @@ header .shop-btn:active{transform:translateY(1px)}
   padding:6px 8px;border-radius:9px;font-weight:800;font-size:12px;
   box-shadow:0 2px 7px rgba(194,65,12,.3), inset 0 1px 0 rgba(255,255,255,.25);
 }
+.fav-btn{
+  position:absolute;top:6px;right:6px;z-index:2;width:26px;height:26px;border-radius:50%;
+  background:rgba(255,250,242,.9);border:1px solid var(--line);color:var(--gold2);
+  font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;
+  box-shadow:0 2px 6px rgba(90,60,20,.2);
+}
+.fav-btn.active{background:#ffd54f;border-color:#c9a227}
 
 footer{margin-top:36px;color:var(--ink-dim);font-size:12px;text-align:center;line-height:1.6}
 footer a{color:var(--gold2)}
@@ -246,6 +253,9 @@ footer a{color:var(--gold2)}
 
   <div class="grid">
 
+    <h2 class="sec" id="secFav" style="display:none">⭐ Game Yêu Thích</h2>
+    <div id="favGrid" style="display:contents"></div>
+
     <h2 class="sec sec-toggle" id="secFamily" role="button" tabindex="0" aria-expanded="false">
       <span class="chev">▶</span> <span data-i18n="sec.family">👨‍👩‍👧 Góc Gia Đình — hồ sơ bé, quà thưởng, phụ huynh</span>
     </h2>
@@ -299,10 +309,22 @@ footer a{color:var(--gold2)}
       <div class="gc-title"><span data-i18n="card.hubtienganh.title">Góc Tiếng Anh</span> <span class="chip gold" data-i18n="hub.chip.new">Mới</span></div><div class="gc-stars">⭐ tối đa 3/lượt</div>
       <div class="gc-desc" data-i18n="card.hubtienganh.desc">Học từ vựng &amp; câu tiếng Anh qua trò chơi: đánh vần, ghép câu, phát âm, thay đồ búp bê, trang trí phòng — giọng đọc en-US thật.</div>
       <div class="gc-meta">
-        <span class="chip" data-i18n="card.hubtienganh.chip">28 game tiếng Anh</span>
+        <span class="chip" data-i18n="card.hubtienganh.chip">7 game tiếng Anh</span>
         <span class="chip" data-i18n="hub.chip.offline">Offline</span>
       </div>
       <div class="gc-cta"><button class="info-btn" type="button" aria-label="Thông tin trò chơi">ℹ️</button><a class="play" href="goc-tieng-anh/" data-i18n="hub.cta.play">Chơi ▶</a></div>
+    </div>
+    <div class="game-card" data-href="game-mini-tu-vung/">
+      <div class="gc-art">
+        <div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.5)">🎯🔤🏹</div>
+      </div>
+      <div class="gc-title"><span data-i18n="card.gameminitv.title">Game Mini Từ Vựng</span> <span class="chip gold" data-i18n="hub.chip.new">Mới</span></div><div class="gc-stars">⭐ tối đa 3/lượt</div>
+      <div class="gc-desc" data-i18n="card.gameminitv.desc">23 game nhỏ luyện từ vựng kiểu bắn/đào/câu/nghe-đoán (Bắn Chim Từ Vựng, Đào Vàng Từ Vựng, cả 10 game Nghe &amp; Đoán...) — giọng đọc en-US thật.</div>
+      <div class="gc-meta">
+        <span class="chip" data-i18n="card.gameminitv.chip">23 game</span>
+        <span class="chip" data-i18n="hub.chip.offline">Offline</span>
+      </div>
+      <div class="gc-cta"><button class="info-btn" type="button" aria-label="Thông tin trò chơi">ℹ️</button><a class="play" href="game-mini-tu-vung/" data-i18n="hub.cta.play">Chơi ▶</a></div>
     </div>
     <div class="game-card" data-href="on-tap-vui/">
       <div class="gc-art">
@@ -633,7 +655,10 @@ document.querySelectorAll('.game-card:not(.locked)').forEach(card => {
   });
 })();
 
-// Thẻ game gọn: chạm thẻ (trừ nút ℹ️) vào thẳng game; nút ℹ️ mở modal thông tin đầy đủ
+// Thẻ game gọn: chạm thẻ (trừ nút ℹ️/⭐) vào thẳng game; nút ℹ️ mở modal thông
+// tin đầy đủ; nút ⭐ đánh dấu/bỏ đánh dấu game yêu thích (lưu localStorage,
+// ghim lên khu "⭐ Game Yêu Thích" đầu trang — không áp dụng cho 3 thẻ tiện
+// ích ở Góc Gia Đình vì đó không phải "game").
 (function(){
   const overlay = document.getElementById('infoModalOverlay');
   const imArt = document.getElementById('imArt');
@@ -655,9 +680,12 @@ document.querySelectorAll('.game-card:not(.locked)').forEach(card => {
   }
   function closeInfo(){ overlay.classList.remove('open'); }
 
-  document.querySelectorAll('.game-card[data-href]').forEach(card => {
+  function wireCard(card){
+    if (card.dataset.wired) return; // tránh gắn listener 2 lần (thẻ ghim ⭐ gọi lại hàm này)
+    card.dataset.wired = '1';
     card.addEventListener('click', (e) => {
       if (e.target.closest('.info-btn')) return; // nút ℹ️ tự xử lý riêng
+      if (e.target.closest('.fav-btn')) return;   // nút ⭐ tự xử lý riêng
       if (e.target.closest('a.play')) return;     // để thẻ <a> tự điều hướng
       window.location.href = card.dataset.href;
     });
@@ -667,10 +695,74 @@ document.querySelectorAll('.game-card:not(.locked)').forEach(card => {
       e.stopPropagation();
       openInfo(card);
     });
-  });
+  }
+
+  document.querySelectorAll('.game-card[data-href]').forEach(wireCard);
   imClose.addEventListener('click', closeInfo);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) closeInfo(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeInfo(); });
+
+  /* ===== ⭐ Game yêu thích ===== */
+  const FAV_KEY = 'r99-favorites';
+  const favGrid = document.getElementById('favGrid');
+  const secFav = document.getElementById('secFav');
+  function readFavs(){ try { return JSON.parse(localStorage.getItem(FAV_KEY)) || []; } catch { return []; } }
+  function writeFavs(list){ try { localStorage.setItem(FAV_KEY, JSON.stringify(list)); } catch { /* private mode */ } }
+  let favs = readFavs();
+  const isFav = (href) => favs.includes(href);
+
+  // Thẻ "game" thật sự (loại 3 thẻ tiện ích trong #famCards: chọn bé/tủ quà/phụ huynh).
+  function realGameCards(){
+    return [...document.querySelectorAll('.game-card[data-href]')].filter((c) => !c.closest('#famCards') && c !== favGrid && !favGrid.contains(c));
+  }
+
+  function addStarButton(card){
+    const old = card.querySelector('.fav-btn');
+    if (old) old.remove(); // gỡ nút cũ (vd khi nhân bản thẻ) rồi gắn lại listener mới cho chắc
+    const href = card.dataset.href;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = `fav-btn${isFav(href) ? ' active' : ''}`;
+    btn.setAttribute('aria-label', 'Đánh dấu yêu thích');
+    btn.textContent = isFav(href) ? '⭐' : '☆';
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      favs = isFav(href) ? favs.filter((h) => h !== href) : [...favs, href];
+      writeFavs(favs);
+      syncStars();
+      renderFavSection();
+    });
+    card.appendChild(btn);
+  }
+
+  function syncStars(){
+    for (const card of realGameCards()) {
+      const btn = card.querySelector('.fav-btn');
+      if (!btn) continue;
+      const active = isFav(card.dataset.href);
+      btn.textContent = active ? '⭐' : '☆';
+      btn.classList.toggle('active', active);
+    }
+  }
+
+  function renderFavSection(){
+    favGrid.innerHTML = '';
+    const originals = realGameCards();
+    for (const href of favs) {
+      const src = originals.find((c) => c.dataset.href === href);
+      if (!src) continue;
+      const clone = src.cloneNode(true);
+      delete clone.dataset.wired;
+      addStarButton(clone);
+      wireCard(clone);
+      favGrid.appendChild(clone);
+    }
+    secFav.style.display = favs.length ? '' : 'none';
+  }
+
+  for (const card of realGameCards()) addStarButton(card);
+  renderFavSection();
 })();
 </script>
 </body>

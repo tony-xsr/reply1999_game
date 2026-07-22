@@ -124,11 +124,13 @@ function startLevel() {
 
 /* ===== Kéo tay nối đường ===== */
 
+// Đo rect() 1 lần lúc pointerdown, tránh đo lại mỗi pointermove (layout
+// thrashing) — nguyên nhân gây lag khi kéo nối đường đã sửa ở Phòng Xinh.
+let boardRect = null;
 function cellFromEvent(e) {
   const g = state.game;
-  const rect = els.board.getBoundingClientRect();
-  const c = Math.floor(((e.clientX - rect.left) / rect.width) * g.size);
-  const r = Math.floor(((e.clientY - rect.top) / rect.height) * g.size);
+  const c = Math.floor(((e.clientX - boardRect.left) / boardRect.width) * g.size);
+  const r = Math.floor(((e.clientY - boardRect.top) / boardRect.height) * g.size);
   if (r < 0 || c < 0 || r >= g.size || c >= g.size) return null;
   return [r, c];
 }
@@ -159,9 +161,12 @@ function dragTo(r, c) {
   renderPaths();
 }
 
+let pendingCell = null;
+let rafDrag = false;
 els.wrap.addEventListener('pointerdown', (e) => {
   const g = state.game;
   if (!g || g.won) return;
+  boardRect = els.board.getBoundingClientRect();
   const cell = cellFromEvent(e);
   if (!cell) return;
   const i = startPath(g, cell[0], cell[1]);
@@ -171,7 +176,15 @@ els.wrap.addEventListener('pointerdown', (e) => {
 els.wrap.addEventListener('pointermove', (e) => {
   if (state.active < 0 || !state.game || state.game.won) return;
   const cell = cellFromEvent(e);
-  if (cell) dragTo(cell[0], cell[1]);
+  if (!cell) return;
+  pendingCell = cell;
+  if (!rafDrag) {
+    rafDrag = true;
+    requestAnimationFrame(() => {
+      rafDrag = false;
+      if (pendingCell) { dragTo(pendingCell[0], pendingCell[1]); pendingCell = null; }
+    });
+  }
 });
 els.wrap.addEventListener('pointerup', () => { state.active = -1; });
 els.wrap.addEventListener('pointercancel', () => { state.active = -1; });
