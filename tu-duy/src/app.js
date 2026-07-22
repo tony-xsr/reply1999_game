@@ -204,15 +204,34 @@ function startMaze() {
   };
 
   let dragging = false;
+  // Đo rect() 1 lần lúc pointerdown + gom pointermove qua rAF, tránh layout
+  // thrashing và vẽ lại nhiều hơn tốc độ khung hình thật sự cần.
+  let mazeRect = null;
+  let pendingCell = null;
+  let rafMaze = false;
   const toCell = (e) => {
-    const rect = canvas.getBoundingClientRect();
     return [
-      Math.max(0, Math.min(n - 1, Math.floor(((e.clientX - rect.left) / rect.width) * n))),
-      Math.max(0, Math.min(n - 1, Math.floor(((e.clientY - rect.top) / rect.height) * n))),
+      Math.max(0, Math.min(n - 1, Math.floor(((e.clientX - mazeRect.left) / mazeRect.width) * n))),
+      Math.max(0, Math.min(n - 1, Math.floor(((e.clientY - mazeRect.top) / mazeRect.height) * n))),
     ];
   };
-  canvas.addEventListener('pointerdown', (e) => { dragging = true; tryStep(...toCell(e)); draw(); });
-  canvas.addEventListener('pointermove', (e) => { if (dragging) { tryStep(...toCell(e)); draw(); } });
+  canvas.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    mazeRect = canvas.getBoundingClientRect();
+    tryStep(...toCell(e));
+    draw();
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    pendingCell = toCell(e);
+    if (!rafMaze) {
+      rafMaze = true;
+      requestAnimationFrame(() => {
+        rafMaze = false;
+        if (pendingCell) { tryStep(...pendingCell); pendingCell = null; draw(); }
+      });
+    }
+  });
   canvas.addEventListener('pointerup', () => { dragging = false; });
 
   els.subLine.textContent = t('tuduy.maze.hint', 'Rê tay dắt chuột 🐭 đến miếng phô mai 🧀');

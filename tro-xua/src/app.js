@@ -243,18 +243,35 @@ function startMarble() {
     }
   };
 
-  const pos = (e) => {
-    const rect = canvas.getBoundingClientRect();
+  // LƯU Ý HIỆU NĂNG: đo rect() 1 LẦN lúc bắt đầu kéo (pointerdown) thay vì đo
+  // lại mỗi lần pointermove — đo lại liên tục ép trình duyệt tính lại bố cục
+  // (layout thrashing), chính là nguyên nhân gây lag khi kéo ngắm đã sửa ở
+  // Phòng Xinh trước đây. Đồng thời gom pointermove qua requestAnimationFrame
+  // để không vẽ lại nhiều hơn tốc độ khung hình thật sự cần.
+  let rect = null;
+  let pendingAim = null;
+  let rafAim = false;
+  const pos = (e) => ({
     // Không kẹp về 0-640: kéo tay ra ngoài mép canvas vẫn tính đúng khoảng cách/lực
-    return { x: ((e.clientX - rect.left) / rect.width) * 640, y: ((e.clientY - rect.top) / rect.height) * 640 };
+    x: ((e.clientX - rect.left) / rect.width) * 640,
+    y: ((e.clientY - rect.top) / rect.height) * 640,
+  });
+  const applyAim = () => {
+    rafAim = false;
+    if (pendingAim) { aim = pendingAim; pendingAim = null; draw(); }
   };
   canvas.addEventListener('pointerdown', (e) => {
+    rect = canvas.getBoundingClientRect();
     if (!rolling && board.shots > 0) aim = pos(e);
     // Giữ pointer dù tay kéo ra khỏi canvas — bi ở gần mép dưới nên cần kéo ra ngoài mới đủ lực
     canvas.setPointerCapture(e.pointerId);
     draw();
   });
-  canvas.addEventListener('pointermove', (e) => { if (aim && !rolling) { aim = pos(e); draw(); } });
+  canvas.addEventListener('pointermove', (e) => {
+    if (!aim || rolling) return;
+    pendingAim = pos(e);
+    if (!rafAim) { rafAim = true; requestAnimationFrame(applyAim); }
+  });
   canvas.addEventListener('pointerup', () => {
     if (!aim || rolling || board.shots <= 0) return;
     // kéo về phía nào bắn về phía NGƯỢC lại (ná cao su)
@@ -359,16 +376,30 @@ function startCans() {
     }
   };
 
-  const pos = (e) => {
-    const rect = canvas.getBoundingClientRect();
-    return { x: ((e.clientX - rect.left) / rect.width) * 640, y: ((e.clientY - rect.top) / rect.height) * 640 };
+  // Xem ghi chú hiệu năng ở startMarble() phía trên — cùng cách sửa: đo rect
+  // 1 lần lúc pointerdown, gom pointermove qua requestAnimationFrame.
+  let rect = null;
+  let pendingAim = null;
+  let rafAim = false;
+  const pos = (e) => ({
+    x: ((e.clientX - rect.left) / rect.width) * 640,
+    y: ((e.clientY - rect.top) / rect.height) * 640,
+  });
+  const applyAim = () => {
+    rafAim = false;
+    if (pendingAim) { aim = pendingAim; pendingAim = null; draw(); }
   };
   canvas.addEventListener('pointerdown', (e) => {
+    rect = canvas.getBoundingClientRect();
     if (!flying && game.throws > 0) aim = pos(e);
     canvas.setPointerCapture(e.pointerId);
     draw();
   });
-  canvas.addEventListener('pointermove', (e) => { if (aim && !flying) { aim = pos(e); draw(); } });
+  canvas.addEventListener('pointermove', (e) => {
+    if (!aim || flying) return;
+    pendingAim = pos(e);
+    if (!rafAim) { rafAim = true; requestAnimationFrame(applyAim); }
+  });
   canvas.addEventListener('pointerup', () => {
     if (!aim || flying || game.throws <= 0) return;
     const dx = aim.x - 60;

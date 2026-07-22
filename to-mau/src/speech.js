@@ -10,13 +10,18 @@ export function bindMute(fn) { mutedFn = fn; }
 export function speak(text, { rate = 0.9, lang = 'vi-VN' } = {}) {
   try {
     if (mutedFn() || !window.speechSynthesis) return;
+    const prefix = lang.split('-')[0];
+    const voice = speechSynthesis.getVoices().find((v) => v.lang?.startsWith(prefix));
+    // Một số máy (vài dòng Samsung) KHÔNG có gói giọng đúng ngôn ngữ cài sẵn —
+    // nếu cứ đọc mà không gán `voice` thì máy tự lấy giọng mặc định (thường
+    // là tiếng Anh) để đọc chữ tiếng Việt, nghe sai hoàn toàn. Im lặng còn
+    // hơn đọc sai giọng như vậy — đúng như thiết kế ban đầu của file này.
+    if (!voice) return;
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = lang;
     u.rate = rate;
-    const prefix = lang.split('-')[0];
-    const voice = speechSynthesis.getVoices().find((v) => v.lang?.startsWith(prefix));
-    if (voice) u.voice = voice;
+    u.voice = voice;
     speechSynthesis.speak(u);
   } catch { /* trình duyệt không hỗ trợ */ }
 }
@@ -43,12 +48,15 @@ export function speakSequence(parts, onDone) {
     const speakNext = () => {
       if (i >= parts.length) { settle(); return; }
       const { text, lang = 'vi-VN', rate = 0.9 } = parts[i++];
+      const prefix = lang.split('-')[0];
+      const voice = speechSynthesis.getVoices().find((v) => v.lang?.startsWith(prefix));
+      // Không có giọng đúng ngôn ngữ cho ĐOẠN NÀY (vd máy thiếu giọng tiếng
+      // Việt) -> bỏ qua im lặng, đọc tiếp đoạn sau, thay vì đọc sai giọng.
+      if (!voice) { speakNext(); return; }
       const u = new SpeechSynthesisUtterance(text);
       u.lang = lang;
       u.rate = rate;
-      const prefix = lang.split('-')[0];
-      const voice = speechSynthesis.getVoices().find((v) => v.lang?.startsWith(prefix));
-      if (voice) u.voice = voice;
+      u.voice = voice;
       u.onend = speakNext;
       u.onerror = speakNext;
       speechSynthesis.speak(u);

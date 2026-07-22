@@ -9,9 +9,16 @@ const $ = (id) => document.getElementById(id);
 
 function speakVi(text) {
   try {
+    if (!window.speechSynthesis) return;
+    // Vài máy (một số dòng Samsung) thiếu gói giọng tiếng Việt cài sẵn -> nếu
+    // không gán `voice` rõ ràng, máy tự lấy giọng mặc định (thường là tiếng
+    // Anh) đọc chữ tiếng Việt, nghe sai hoàn toàn. Im lặng còn hơn đọc sai giọng.
+    const voice = speechSynthesis.getVoices().find((v) => v.lang?.startsWith('vi'));
+    if (!voice) return;
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'vi-VN';
     u.rate = 0.95;
+    u.voice = voice;
     speechSynthesis.cancel();
     speechSynthesis.speak(u);
   } catch { /* ignore */ }

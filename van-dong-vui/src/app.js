@@ -468,12 +468,16 @@ function startPong() {
     if (!over) animId = requestAnimationFrame(loop);
   }
 
+  // Đo rect() 1 lần lúc pointerdown, tránh đo lại mỗi pointermove (layout thrashing).
+  let pongRect = canvas.getBoundingClientRect();
   function toX(e) {
-    const rect = canvas.getBoundingClientRect();
-    return ((e.clientX - rect.left) / rect.width) * W;
+    return ((e.clientX - pongRect.left) / pongRect.width) * W;
   }
   canvas.addEventListener('pointermove', (e) => { youX = Math.max(PAD_W / 2, Math.min(W - PAD_W / 2, toX(e))); });
-  canvas.addEventListener('pointerdown', (e) => { youX = Math.max(PAD_W / 2, Math.min(W - PAD_W / 2, toX(e))); });
+  canvas.addEventListener('pointerdown', (e) => {
+    pongRect = canvas.getBoundingClientRect();
+    youX = Math.max(PAD_W / 2, Math.min(W - PAD_W / 2, toX(e)));
+  });
 
   els.subLine.textContent = t('vandongvui.pong.hint', 'Rê ngón tay để đỡ bóng — ai thua 5 bàn trước sẽ chịu thua!');
   sayInstruction(t('vandongvui.pong.help', 'Rê ngón tay trái phải để di chuyển vợt của bé ở phía dưới, đỡ bóng đừng để rơi khỏi màn hình. Ai để lọt lưới 5 lần trước là thua!'));
@@ -582,12 +586,16 @@ function startBowling() {
     animId = requestAnimationFrame(loop);
   }
 
+  // Đo rect() 1 lần lúc pointerdown + gom pointermove qua rAF, tránh layout
+  // thrashing và vẽ lại nhiều hơn tốc độ khung hình thật sự cần.
+  let bwRect = null;
+  let rafAim = false;
   function toXY(e) {
-    const rect = canvas.getBoundingClientRect();
-    return { x: ((e.clientX - rect.left) / rect.width) * W, y: ((e.clientY - rect.top) / rect.height) * H };
+    return { x: ((e.clientX - bwRect.left) / bwRect.width) * W, y: ((e.clientY - bwRect.top) / bwRect.height) * H };
   }
   canvas.addEventListener('pointerdown', (e) => {
     if (rolling || over) return;
+    bwRect = canvas.getBoundingClientRect();
     const p = toXY(e);
     aiming = true;
     aimDx = p.x - ball.x;
@@ -599,7 +607,7 @@ function startBowling() {
     const p = toXY(e);
     aimDx = p.x - ball.x;
     aimDy = p.y - ball.y;
-    draw();
+    if (!rafAim) { rafAim = true; requestAnimationFrame(() => { rafAim = false; draw(); }); }
   });
   canvas.addEventListener('pointerup', () => {
     if (!aiming) return;
