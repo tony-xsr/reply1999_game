@@ -335,22 +335,32 @@ function startLevel() {
 
 /* ===== Kéo ná & phóng ===== */
 
+// LƯU Ý HIỆU NĂNG: trước đây fieldPos() đo lại getBoundingClientRect() trên
+// MỖI lần pointermove — ép trình duyệt tính lại bố cục liên tục (layout
+// thrashing), cùng lớp lỗi đã sửa ở Phòng Xinh/Trò Xưa. Đã sửa: chỉ đo 1 lần
+// lúc pointerdown. Đồng thời phát hiện draw() KHÔNG hề được gọi trong lúc
+// đang kéo (chỉ gọi trong vòng lặp vật lý sau khi bắn) — nghĩa là dây ngắm
+// không cập nhật hình khi bé rê tay, cảm giác như bấm không phản hồi/đơ dù
+// state vẫn đổi đúng bên trong. Đã gọi draw() lại (gom qua rAF) mỗi khi kéo.
+let fieldRect = null;
+let rafDrag = false;
 function fieldPos(e) {
-  const rect = els.canvas.getBoundingClientRect();
   return {
-    x: ((e.clientX - rect.left) / rect.width) * FIELD_W,
-    y: ((e.clientY - rect.top) / rect.height) * FIELD_H,
+    x: ((e.clientX - fieldRect.left) / fieldRect.width) * FIELD_W,
+    y: ((e.clientY - fieldRect.top) / fieldRect.height) * FIELD_H,
   };
 }
 
 els.wrap.addEventListener('pointerdown', (e) => {
   const g = state.game;
   if (!g || g.over || g.ball || g.shotsLeft <= 0) return;
+  fieldRect = els.canvas.getBoundingClientRect();
   const p = fieldPos(e);
   if (Math.hypot(p.x - SLING_X, p.y - SLING_Y) < 120) {
     state.dragging = true;
     state.dragX = p.x;
     state.dragY = p.y;
+    draw();
   }
 });
 els.wrap.addEventListener('pointermove', (e) => {
@@ -364,19 +374,20 @@ els.wrap.addEventListener('pointermove', (e) => {
   const k = d > max ? max / d : 1;
   state.dragX = SLING_X + dx * k;
   state.dragY = SLING_Y + dy * k;
+  if (!rafDrag) { rafDrag = true; requestAnimationFrame(() => { rafDrag = false; draw(); }); }
 });
 els.wrap.addEventListener('pointerup', () => {
   if (!state.dragging) return;
   state.dragging = false;
   const vx = (SLING_X - state.dragX) * POWER_PER_PX;
   const vy = (SLING_Y - state.dragY) * POWER_PER_PX;
-  if (Math.hypot(vx, vy) < 2) return; // kéo quá nhẹ thì thôi
+  if (Math.hypot(vx, vy) < 2) { draw(); return; } // kéo quá nhẹ thì thôi — vẽ lại để xoá dây ngắm còn sót
   if (launch(state.game, vx, vy)) {
     sfx.shuffle();
     updateHud();
   }
 });
-els.wrap.addEventListener('pointercancel', () => { state.dragging = false; });
+els.wrap.addEventListener('pointercancel', () => { state.dragging = false; draw(); });
 
 /* ===== Nút ===== */
 
