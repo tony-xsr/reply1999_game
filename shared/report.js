@@ -127,6 +127,79 @@ export function weeklyWinRate(sessions, weeks = 4, now = new Date()) {
   return out;
 }
 
+// Tất cả session của khu "Thi Chứng Chỉ Anh" đều có mode bắt đầu bằng
+// "exam-<levelId>-..." (exam-prep + 4 mục luyen-thi-ket/pet/toefl-junior/
+// toeic, cùng dùng chung engine shared/../exam-prep/src/examprep.js) hoặc
+// "nguphap-<trò>" (nguphap-truc-quan/). unitId của mỗi câu hỏi LUÔN được đặt
+// tên bắt đầu bằng chính levelId (vd "movers-possessives-imperatives"), nên
+// không thể tách level bằng cách chẻ theo dấu "-" đơn giản — phải so khớp
+// với danh sách levelId đã biết (kiểm tra dài nhất trước để "toefl-junior"
+// không bị nhầm cắt cụt).
+const EXAM_LEVELS = ['toefl-junior', 'starters', 'movers', 'flyers', 'toeic', 'ket', 'pet'];
+
+export const EXAM_LEVEL_LABELS = {
+  starters: 'Starters', movers: 'Movers', flyers: 'Flyers', ket: 'KET', pet: 'PET',
+  'toefl-junior': 'TOEFL Junior', toeic: 'TOEIC', nguphap: 'Ngữ Pháp Trực Quan',
+};
+
+/** Cấp độ Thi Chứng Chỉ Anh của 1 mode, hoặc null nếu không thuộc khu này. */
+export function examLevelOfMode(mode) {
+  if (!mode) return null;
+  if (mode.startsWith('nguphap-')) return 'nguphap';
+  if (!mode.startsWith('exam-')) return null;
+  const rest = mode.slice(5);
+  for (const lvl of EXAM_LEVELS) {
+    if (rest === lvl || rest.startsWith(`${lvl}-`)) return lvl;
+  }
+  return null;
+}
+
+/**
+ * Theo dõi tiến độ khu Thi Chứng Chỉ Anh — gộp theo TỪNG cấp độ: tổng phút
+ * học, số ván, lần chơi gần nhất (mấy ngày trước), và xu hướng HIỆU QUẢ
+ * (so tỷ lệ thắng nửa ĐẦU với nửa SAU các ván gần đây — cần ít nhất 6 ván
+ * mới đủ tin cậy để kết luận, ít hơn thì trả về 'not-enough-data' thay vì
+ * đoán bừa). Trả về mảng đã sắp theo tổng phút học giảm dần.
+ */
+export function examProgressReport(sessions, now = new Date()) {
+  const byLevel = new Map();
+  for (const s of sessions || []) {
+    const lvl = examLevelOfMode(s.mode);
+    if (!lvl) continue;
+    if (!byLevel.has(lvl)) byLevel.set(lvl, []);
+    byLevel.get(lvl).push(s);
+  }
+  const winRate = (arr) => {
+    const decided = arr.filter((s) => s.result === 'win' || s.result === 'loss');
+    if (!decided.length) return null;
+    return decided.filter((s) => s.result === 'win').length / decided.length;
+  };
+  const out = [];
+  for (const [lvl, list] of byLevel) {
+    const sorted = [...list].sort((a, b) => new Date(a.played_at || 0) - new Date(b.played_at || 0));
+    const minutes = Math.round(sorted.reduce((sum, s) => sum + (s.seconds || 0), 0) / 60);
+    const lastPlayed = sorted[sorted.length - 1]?.played_at || null;
+    const daysSinceLast = lastPlayed ? Math.floor((now.getTime() - new Date(lastPlayed).getTime()) / 86400000) : null;
+    let trend = 'not-enough-data';
+    if (sorted.length >= 6) {
+      const mid = Math.floor(sorted.length / 2);
+      const before = winRate(sorted.slice(0, mid));
+      const after = winRate(sorted.slice(mid));
+      if (before !== null && after !== null) {
+        const diff = after - before;
+        if (diff >= 0.1) trend = 'improving';
+        else if (diff <= -0.1) trend = 'declining';
+        else trend = 'stable';
+      }
+    }
+    out.push({
+      level: lvl, label: EXAM_LEVEL_LABELS[lvl] || lvl, minutes, sessions: sorted.length,
+      lastPlayed, daysSinceLast, trend,
+    });
+  }
+  return out.sort((a, b) => b.minutes - a.minutes);
+}
+
 /** Bản văn bản tiếng Việt để bố mẹ sao chép/chia sẻ. */
 export function formatReportVi(kidName, r) {
   const lines = [

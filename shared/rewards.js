@@ -8,7 +8,12 @@
 export const DAILY_STAR_CAP = 50;
 export const GIFT_EVERY = 15; // giữa khoảng 10–20 câu bạn yêu cầu
 export const STARS_PER_10_POINTS = 1;
-export const SESSION_STAR_CAP = 5;
+// Giảm 5→3 (07/2026, yêu cầu phụ huynh): áp dụng ĐỒNG THỜI cho MỌI game
+// (kể cả toàn bộ khu Thi Chứng Chỉ Anh — exam-prep/luyen-thi-ket/pet/
+// toefl-junior/toeic/nguphap-truc-quan đều tính sao qua ĐÚNG hàm
+// starsFromScore() này, không có luồng tính điểm riêng) — "tối đa 3 sao/bài
+// học" và "tối đa 5 sao giảm còn 3" là CÙNG 1 thay đổi, không phải 2 việc.
+export const SESSION_STAR_CAP = 3;
 
 /** Sao kiếm được từ điểm của 1 ván (10 điểm = 1 sao, trần 5 sao/ván). */
 export function starsFromScore(score) {
@@ -30,6 +35,9 @@ export const FLAT_REWARD_MODES = new Set([
   'vudieu', 'taydua', 'thucung', 'vodai', 'pokedaichien', 'vuonrau',
   'behai', 'betimban', 'stylist', 'phongxinh', 'oanquan', 'cangua',
   'coganh', 'cocaro', 'dientu', 'troxua',
+  // troxua/ tách thành 4 game riêng (07/2026) — giữ đúng flat-reward như
+  // game gộp cũ, mỗi game con vẫn chỉ 1 sao/lượt bất kể thắng thua.
+  'oantuti', 'banbi', 'nemlonxua', 'nhaydayxua',
   // Rà lại 07/2026 (yêu cầu giảm lạm phát sao): 2 game này KHÔNG có nội dung
   // từ vựng/kiến thức nào dù trước đó bị xếp nhầm vào diện "học theo điểm" —
   // "Gộp Số Vui" là bản sao game 2048 thuần túy, "Luyện Tư Duy" là 6 trò

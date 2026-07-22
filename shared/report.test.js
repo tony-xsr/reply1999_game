@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {
   weekStart, buildWeeklyReport, formatReportVi,
   groupOfMode, minutesByGroup, minutesByTimeOfDay, dailyMinutes, weeklyWinRate,
+  examLevelOfMode, examProgressReport, EXAM_LEVEL_LABELS,
 } from './report.js';
 
 let passed = 0;
@@ -150,6 +151,97 @@ check('weeklyWinRate: 4 weeks old to new, null when no decided games', () => {
   assert.equal(rows[3].rate, 0.5);
   assert.equal(rows[2].rate, 1, 'ván 10 ngày trước thuộc tuần thứ 2');
   assert.equal(rows[0].rate, null);
+});
+
+check('examLevelOfMode: nhận đúng cấp độ dù unitId trùng tiền tố level, kể cả toefl-junior có gạch nối', () => {
+  assert.equal(examLevelOfMode('exam-movers-mix'), 'movers');
+  assert.equal(examLevelOfMode('exam-movers-movers-possessives-imperatives'), 'movers');
+  assert.equal(examLevelOfMode('exam-toefl-junior-mock'), 'toefl-junior');
+  assert.equal(examLevelOfMode('exam-toefl-junior-toefl-junior-past-perfect-continuous'), 'toefl-junior');
+  assert.equal(examLevelOfMode('exam-ket-ket-conditionals'), 'ket');
+  assert.equal(examLevelOfMode('exam-pet-mix'), 'pet');
+  assert.equal(examLevelOfMode('exam-toeic-mock'), 'toeic');
+  assert.equal(examLevelOfMode('exam-starters-mix'), 'starters');
+  assert.equal(examLevelOfMode('exam-flyers-mix'), 'flyers');
+  assert.equal(examLevelOfMode('nguphap-timemachine'), 'nguphap');
+  assert.equal(examLevelOfMode('daovang'), null, 'game ngoài khu Thi Chứng Chỉ Anh không tính');
+  assert.equal(examLevelOfMode(''), null);
+  assert.equal(examLevelOfMode(null), null);
+});
+
+check('EXAM_LEVEL_LABELS: đủ nhãn tiếng Việt/tên riêng cho mọi cấp độ', () => {
+  for (const lvl of ['starters', 'movers', 'flyers', 'ket', 'pet', 'toefl-junior', 'toeic', 'nguphap']) {
+    assert.ok(EXAM_LEVEL_LABELS[lvl], `thiếu nhãn cho ${lvl}`);
+  }
+});
+
+check('examProgressReport: gộp đúng theo cấp độ, tính phút/số ván/lần chơi gần nhất, bỏ qua game khác', () => {
+  const sessions = [
+    { mode: 'exam-movers-mix', played_at: iso(5), seconds: 300, result: 'win' },
+    { mode: 'exam-movers-movers-vocabulary', played_at: iso(2), seconds: 600, result: 'loss' },
+    { mode: 'nguphap-modal', played_at: iso(1), seconds: 120, result: 'win' },
+    { mode: 'daovang', played_at: iso(0), seconds: 999, result: 'win' }, // không thuộc khu này
+  ];
+  const rows = examProgressReport(sessions, NOW);
+  const movers = rows.find((r) => r.level === 'movers');
+  const nguphap = rows.find((r) => r.level === 'nguphap');
+  return (() => {
+    assert.equal(rows.length, 2, 'chỉ 2 cấp độ xuất hiện (bỏ qua daovang)');
+    assert.equal(movers.label, 'Movers');
+    assert.equal(movers.sessions, 2);
+    assert.equal(movers.minutes, 15, '(300+600)/60 = 15 phút');
+    assert.equal(movers.daysSinceLast, 2, 'ván gần nhất của movers là 2 ngày trước');
+    assert.equal(nguphap.sessions, 1);
+    assert.equal(nguphap.daysSinceLast, 1);
+  })();
+});
+
+check('examProgressReport: xu hướng hiệu quả cần đủ 6 ván mới tính, thiếu thì "not-enough-data"', () => {
+  const few = [
+    { mode: 'exam-ket-mix', played_at: iso(3), seconds: 60, result: 'win' },
+    { mode: 'exam-ket-mix', played_at: iso(2), seconds: 60, result: 'loss' },
+  ];
+  const rowsFew = examProgressReport(few, NOW);
+  assert.equal(rowsFew[0].trend, 'not-enough-data');
+
+  // 6 ván: 3 đầu toàn thua (0%), 3 sau toàn thắng (100%) → cải thiện rõ rệt
+  const improving = [
+    { mode: 'exam-pet-mix', played_at: iso(6), seconds: 60, result: 'loss' },
+    { mode: 'exam-pet-mix', played_at: iso(5), seconds: 60, result: 'loss' },
+    { mode: 'exam-pet-mix', played_at: iso(4), seconds: 60, result: 'loss' },
+    { mode: 'exam-pet-mix', played_at: iso(3), seconds: 60, result: 'win' },
+    { mode: 'exam-pet-mix', played_at: iso(2), seconds: 60, result: 'win' },
+    { mode: 'exam-pet-mix', played_at: iso(1), seconds: 60, result: 'win' },
+  ];
+  const rowsImproving = examProgressReport(improving, NOW);
+  assert.equal(rowsImproving[0].trend, 'improving');
+
+  // Đảo ngược: đầu toàn thắng, sau toàn thua → xu hướng giảm
+  const declining = improving.map((s) => ({ ...s, result: s.result === 'win' ? 'loss' : 'win' }));
+  const rowsDeclining = examProgressReport(declining, NOW);
+  assert.equal(rowsDeclining[0].trend, 'declining');
+
+  // Tỷ lệ thắng không đổi rõ rệt giữa 2 nửa → ổn định
+  const stable = [
+    { mode: 'exam-toeic-mix', played_at: iso(6), seconds: 60, result: 'win' },
+    { mode: 'exam-toeic-mix', played_at: iso(5), seconds: 60, result: 'loss' },
+    { mode: 'exam-toeic-mix', played_at: iso(4), seconds: 60, result: 'win' },
+    { mode: 'exam-toeic-mix', played_at: iso(3), seconds: 60, result: 'loss' },
+    { mode: 'exam-toeic-mix', played_at: iso(2), seconds: 60, result: 'win' },
+    { mode: 'exam-toeic-mix', played_at: iso(1), seconds: 60, result: 'loss' },
+  ];
+  const rowsStable = examProgressReport(stable, NOW);
+  assert.equal(rowsStable[0].trend, 'stable');
+});
+
+check('examProgressReport: sắp theo tổng phút học giảm dần', () => {
+  const sessions = [
+    { mode: 'exam-ket-mix', played_at: iso(1), seconds: 60, result: 'win' },
+    { mode: 'exam-pet-mix', played_at: iso(1), seconds: 600, result: 'win' },
+    { mode: 'nguphap-modal', played_at: iso(1), seconds: 300, result: 'win' },
+  ];
+  const rows = examProgressReport(sessions, NOW);
+  assert.deepEqual(rows.map((r) => r.level), ['pet', 'nguphap', 'ket']);
 });
 
 console.log(`\n${passed} checks passed`);
