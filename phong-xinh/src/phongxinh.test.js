@@ -1,9 +1,10 @@
 // Unit test cho Phòng Xinh Của Bé. Chạy: node src/phongxinh.test.js
 
 import {
-  ROOM_W, ROOM_H, WALL_H, MAX_ITEMS, FURNITURE, WALL_COLORS, FLOOR_COLORS, CONTAINERS,
+  ROOM_W, ROOM_H, WALL_H, MAX_ITEMS, FURNITURE, WALL_COLORS, FLOOR_COLORS, CONTAINERS, ROOM_STYLES,
   furnitureById, clampPos, makeRoom, addItem, moveItem, flipItem, removeItem,
   setWall, setFloor, drawOrder, serializeRoom, deserializeRoom, randomRoom,
+  roomStyleById, applyRoomStyle,
 } from './phongxinh.js';
 
 let passed = 0;
@@ -246,6 +247,31 @@ check('serialize → deserialize giữ nguyên quan hệ cha-con (kể cả khi 
   const books2 = room2.items.find((it) => it.id === 'books');
   return room2.items.length === 2 && books2.parentUid === shelf2.uid && books2.slotIndex === books.slotIndex;
 })());
+
+console.log('— Kiểu phòng dựng sẵn —');
+
+check('mọi kiểu phòng: id duy nhất, đủ icon/tên EN+VI, wall/floor trỏ đúng bảng màu hợp lệ', (() => {
+  const ids = new Set(ROOM_STYLES.map((s) => s.id));
+  return ids.size === ROOM_STYLES.length && ROOM_STYLES.length >= 5
+    && ROOM_STYLES.every((s) => s.icon && s.en && s.vi
+      && WALL_COLORS.some((w) => w.id === s.wall) && FLOOR_COLORS.some((f) => f.id === s.floor));
+})());
+
+check('applyRoomStyle: đổi đúng CẢ tường lẫn sàn theo preset, trả về cụm từ đọc to', (() => {
+  const room = makeRoom();
+  const phrase = applyRoomStyle(room, 'ocean');
+  const ocean = roomStyleById('ocean');
+  return room.wall === ocean.wall && room.floor === ocean.floor
+    && phrase.en === ocean.en && phrase.vi === ocean.vi;
+})());
+
+check('applyRoomStyle: id không tồn tại trả về null, phòng không đổi', (() => {
+  const room = makeRoom();
+  const before = serializeRoom(room);
+  return applyRoomStyle(room, 'khong_co') === null && serializeRoom(room) === before;
+})());
+
+check('roomStyleById: id lạ trả về null (không rơi về mặc định như characterById)', (() => roomStyleById('khong_co') === null));
 
 console.log(`\nKết quả: ${passed} pass, ${failed} fail`);
 if (failed > 0) process.exit(1);

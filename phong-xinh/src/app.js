@@ -3,9 +3,9 @@
 // thời gian chơi (nhóm "chơi để chơi", cùng engine tinh thần với Bé Làm Stylist).
 
 import {
-  ROOM_W, ROOM_H, WALL_H, FURNITURE, WALL_COLORS, FLOOR_COLORS,
+  ROOM_W, ROOM_H, WALL_H, FURNITURE, WALL_COLORS, FLOOR_COLORS, ROOM_STYLES,
   furnitureById, makeRoom, addItem, moveItem, flipItem, removeItem,
-  setWall, setFloor, drawOrder, serializeRoom, deserializeRoom, randomRoom,
+  setWall, setFloor, drawOrder, serializeRoom, deserializeRoom, randomRoom, applyRoomStyle,
 } from './phongxinh.js';
 import { speak, bindMute } from '../../to-mau/src/speech.js';
 import { sfx } from '../../pokemon/src/sfx.js';
@@ -21,7 +21,7 @@ const $ = (id) => document.getElementById(id);
 const els = {
   room: $('room'), roomWall: $('roomWall'), roomFloor: $('roomFloor'),
   selTools: $('selTools'), btnFlip: $('btnFlip'), btnRemove: $('btnRemove'),
-  palette: $('palette'), wallRow: $('wallRow'), floorRow: $('floorRow'),
+  palette: $('palette'), styleRow: $('styleRow'), wallRow: $('wallRow'), floorRow: $('floorRow'),
   sayBubble: $('sayBubble'),
   btnRandom: $('btnRandom'), btnSave: $('btnSave'), btnHelp: $('btnHelp'), btnSound: $('btnSound'),
 };
@@ -71,6 +71,7 @@ for (const tab of document.querySelectorAll('.room-tab')) {
       t2.classList.toggle('active', Number(t2.dataset.room) === slot);
     }
     render();
+    buildStyles();
     buildSwatches();
     speak(`${t('phongxinh.room', 'Phòng số')} ${slot}!`);
   });
@@ -117,39 +118,61 @@ function render() {
 
 /* ===== Kéo-thả + chọn ===== */
 
-function roomPos(e) {
-  const rect = els.room.getBoundingClientRect();
-  return {
-    x: ((e.clientX - rect.left) / rect.width) * ROOM_W,
-    y: ((e.clientY - rect.top) / rect.height) * ROOM_H,
-  };
-}
-
+// LƯU Ý HIỆU NĂNG (07/2026): bản trước gọi getBoundingClientRect() (ép trình
+// duyệt reflow đồng bộ) + ghi style.left/top (%, ép layout lại) trên MỖI SỰ
+// KIỆN pointermove thô — đây là nguyên nhân chính gây "lag" khi kéo đồ mà bạn
+// báo. Sửa bằng 3 việc: (1) đo khung phòng đúng 1 LẦN lúc bắt đầu kéo thay vì
+// đo lại mỗi lần di chuyển, (2) gom các lần di chuyển thô lại, chỉ áp dụng 1
+// lần/khung hình qua requestAnimationFrame, (3) trong lúc kéo chỉ dịch chuyển
+// bằng CSS transform (chỉ tốn compositor, không ép layout) — left/top % thật
+// chỉ tính lại DUY NHẤT lúc thả tay, qua render().
 function bindItemDrag(el, uid) {
   el.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     e.stopPropagation();
     el.setPointerCapture(e.pointerId);
-    const start = roomPos(e);
+    const rect = els.room.getBoundingClientRect();
+    const scaleX = rect.width / ROOM_W;
+    const scaleY = rect.height / ROOM_H;
+    const toRoom = (ev) => ({
+      x: (ev.clientX - rect.left) / scaleX,
+      y: (ev.clientY - rect.top) / scaleY,
+    });
+    const start = toRoom(e);
     let dragged = false;
-    const onMove = (e2) => {
-      const p = roomPos(e2);
-      if (!dragged && Math.hypot(p.x - start.x, p.y - start.y) < 6) return;
-      dragged = true;
+    let pending = null;
+    let rafId = null;
+
+    const applyPending = () => {
+      rafId = null;
+      if (!pending) return;
+      const p = pending;
+      pending = null;
       moveItem(state.room, uid, p.x, p.y);
       const item = state.room.items.find((it) => it.uid === uid);
-      el.style.left = pctX(item.x);
-      el.style.top = pctY(item.y);
+      const dx = (item.x - start.x) * scaleX;
+      const dy = (item.y - start.y) * scaleY;
+      el.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px)`;
+    };
+
+    const onMove = (e2) => {
+      const p = toRoom(e2);
+      if (!dragged && Math.hypot(p.x - start.x, p.y - start.y) < 6) return;
+      dragged = true;
+      pending = p;
+      if (rafId === null) rafId = requestAnimationFrame(applyPending);
     };
     const onUp = () => {
       el.removeEventListener('pointermove', onMove);
       el.removeEventListener('pointerup', onUp);
       el.removeEventListener('pointercancel', onUp);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      el.style.transform = ''; // trả lại transform căn giữa mặc định của .room .item
       state.selected = uid;
       if (dragged) {
         sfx.select();
         persist();
-        render(); // sắp lại thứ tự che khuất theo y mới
+        render(); // sắp lại thứ tự che khuất theo y mới + gán đúng left/top %
       } else {
         // chạm nhẹ (không kéo): chọn + đọc to tên tiếng Anh
         const def = furnitureById(state.room.items.find((it) => it.uid === uid).id);
@@ -213,6 +236,29 @@ function buildPalette() {
   }
 }
 
+/** "Kiểu phòng" dựng sẵn — đổi CẢ tường lẫn sàn cùng lúc theo 1 preset gợi ý,
+ * vẫn tự chỉnh lại từng màu riêng ở 2 hàng bên dưới như bình thường sau đó. */
+function buildStyles() {
+  els.styleRow.innerHTML = '';
+  for (const s of ROOM_STYLES) {
+    const btn = document.createElement('button');
+    const active = state.room.wall === s.wall && state.room.floor === s.floor;
+    btn.className = `style-btn${active ? ' active' : ''}`;
+    btn.innerHTML = `<span class="icon">${s.icon}</span><span>${s.vi}</span>`;
+    btn.addEventListener('click', () => {
+      const phrase = applyRoomStyle(state.room, s.id);
+      if (!phrase) return;
+      sfx.match(1);
+      announce(phrase);
+      persist();
+      renderColors();
+      buildStyles();
+      buildSwatches();
+    });
+    els.styleRow.appendChild(btn);
+  }
+}
+
 function buildSwatches() {
   els.wallRow.innerHTML = '<span class="tag">🧱</span>';
   for (const c of WALL_COLORS) {
@@ -226,6 +272,7 @@ function buildSwatches() {
       announce(phrase);
       persist();
       renderColors();
+      buildStyles();
       buildSwatches();
     });
     els.wallRow.appendChild(dot);
@@ -242,6 +289,7 @@ function buildSwatches() {
       announce(phrase);
       persist();
       renderColors();
+      buildStyles();
       buildSwatches();
     });
     els.floorRow.appendChild(dot);
@@ -256,6 +304,7 @@ els.btnRandom.addEventListener('click', () => {
   state.selected = null;
   persist();
   render();
+  buildStyles();
   buildSwatches();
   announce({ en: 'Surprise!', vi: 'Bất ngờ chưa!' });
 });
@@ -288,6 +337,7 @@ window.addEventListener('pagehide', () => {
 
 els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
 buildPalette();
+buildStyles();
 buildSwatches();
 render();
 sayInstruction(t('phongxinh.help', 'Chạm món đồ trên kệ để đặt vào phòng — máy đọc tên bằng tiếng Anh! Kéo món đồ tới chỗ bé thích, tranh với đồng hồ thì treo trên tường. Chọn món rồi bấm mũi tên để lật, thùng rác để cất đi. Đổi màu tường màu sàn, bấm máy ảnh lưu căn phòng xinh nhé!'));

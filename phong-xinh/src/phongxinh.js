@@ -105,6 +105,17 @@ export const FURNITURE = [
   { id: 'diplomaframe', en: 'diploma', vi: 'bằng khen đóng khung', zone: 'wall', size: 48 },
   { id: 'windsock', en: 'windsock', vi: 'cờ gió hình ống', zone: 'wall', size: 44 },
   { id: 'lanternstring', en: 'string of lanterns', vi: 'dây đèn lồng trang trí', zone: 'wall', size: 66 },
+  // ----- Bổ sung vòng mở rộng thứ 3 -----
+  { id: 'bicycle', en: 'bicycle', vi: 'xe đạp', zone: 'floor', size: 62 },
+  { id: 'blocks', en: 'building blocks', vi: 'khối xếp hình', zone: 'floor', size: 46 },
+  { id: 'puzzle', en: 'jigsaw puzzle', vi: 'mảnh ghép hình', zone: 'floor', size: 40 },
+  { id: 'bunny', en: 'stuffed bunny', vi: 'thỏ bông', zone: 'floor', size: 44 },
+  { id: 'stroller', en: 'doll stroller', vi: 'xe đẩy búp bê', zone: 'floor', size: 54 },
+  { id: 'piggybank', en: 'piggy bank', vi: 'heo đất tiết kiệm', zone: 'floor', size: 46 },
+  { id: 'slide', en: 'slide', vi: 'cầu tuột', zone: 'floor', size: 58 },
+  { id: 'curtain', en: 'curtain', vi: 'rèm cửa', zone: 'wall', size: 56 },
+  { id: 'poster', en: 'poster', vi: 'áp phích trang trí', zone: 'wall', size: 54 },
+  { id: 'nightlight', en: 'night light', vi: 'đèn ngủ hình ngôi sao', zone: 'wall', size: 40 },
 ];
 
 // Món đồ LỚN có thể "chứa"/"đặt lên" những món đồ NHỎ khác — vd tủ sách chứa
@@ -169,6 +180,32 @@ export const FLOOR_COLORS = [
   { id: 'lavender', en: 'lavender floor', vi: 'sàn tím oải hương', hex: '#dccfec' },
   { id: 'blue', en: 'blue floor', vi: 'sàn xanh biển', hex: '#b8d8ec' },
 ];
+
+// Bộ phối màu tường/sàn dựng sẵn theo "kiểu phòng" quen thuộc — bấm 1 cái là
+// đổi CẢ tường lẫn sàn cùng lúc, khỏi phải tự chọn tay từng ô màu riêng. Đây
+// chỉ là preset gợi ý nhanh — bấm xong vẫn tự chỉnh lại tường/sàn riêng như
+// bình thường ở 2 hàng màu bên dưới (không khoá gì cả).
+export const ROOM_STYLES = [
+  { id: 'living', icon: '🛋️', vi: 'Phòng khách ấm áp', en: 'cozy living room', wall: 'yellow', floor: 'wood' },
+  { id: 'bedroom', icon: '🌙', vi: 'Phòng ngủ đêm sao', en: 'starry bedroom', wall: 'purple', floor: 'lavender' },
+  { id: 'princess', icon: '🎀', vi: 'Phòng công chúa', en: 'princess room', wall: 'pink', floor: 'peach' },
+  { id: 'ocean', icon: '🌊', vi: 'Phòng biển xanh', en: 'ocean room', wall: 'sky', floor: 'blue' },
+  { id: 'garden', icon: '🌿', vi: 'Phòng khu vườn', en: 'garden room', wall: 'green', floor: 'mint' },
+];
+
+export function roomStyleById(id) {
+  return ROOM_STYLES.find((s) => s.id === id) || null;
+}
+
+/** Áp 1 kiểu phòng dựng sẵn (đổi cả màu tường lẫn sàn cùng lúc). Trả về cụm
+ * từ EN/VI để đọc to, hoặc null nếu id không hợp lệ. */
+export function applyRoomStyle(room, styleId) {
+  const s = roomStyleById(styleId);
+  if (!s) return null;
+  room.wall = s.wall;
+  room.floor = s.floor;
+  return { en: s.en, vi: s.vi };
+}
 
 export function furnitureById(id) {
   return FURNITURE.find((f) => f.id === id) || null;
