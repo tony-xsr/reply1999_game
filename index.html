@@ -70,6 +70,7 @@ header .shop-btn:active{transform:translateY(1px)}
   box-shadow:0 3px 10px rgba(194,65,12,.08);
   transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
   color:inherit;cursor:pointer;overflow:hidden;
+  touch-action:manipulation; /* bỏ độ trễ ~300ms trước khi bấm ăn trên tablet/mobile */
 }
 .game-card:hover{
   transform:translateY(-3px);
@@ -295,7 +296,7 @@ footer a{color:var(--gold2)}
       <div class="gc-art">
         <div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.5)">🇬🇧🔤🗣️</div>
       </div>
-      <div class="gc-title"><span data-i18n="card.hubtienganh.title">Góc Tiếng Anh</span> <span class="chip gold" data-i18n="hub.chip.new">Mới</span></div><div class="gc-stars">⭐ tối đa 5/lượt</div>
+      <div class="gc-title"><span data-i18n="card.hubtienganh.title">Góc Tiếng Anh</span> <span class="chip gold" data-i18n="hub.chip.new">Mới</span></div><div class="gc-stars">⭐ tối đa 3/lượt</div>
       <div class="gc-desc" data-i18n="card.hubtienganh.desc">Học từ vựng &amp; câu tiếng Anh qua trò chơi: đánh vần, ghép câu, phát âm, thay đồ búp bê, trang trí phòng — giọng đọc en-US thật.</div>
       <div class="gc-meta">
         <span class="chip" data-i18n="card.hubtienganh.chip">28 game tiếng Anh</span>
@@ -307,7 +308,7 @@ footer a{color:var(--gold2)}
       <div class="gc-art">
         <div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.5)">🎪🏹🎣</div>
       </div>
-      <div class="gc-title"><span data-i18n="card.hubontapvui.title">Ôn Tập Vui</span> <span class="chip gold" data-i18n="hub.chip.new">Mới</span></div><div class="gc-stars">⭐ tối đa 5/lượt</div>
+      <div class="gc-title"><span data-i18n="card.hubontapvui.title">Ôn Tập Vui</span> <span class="chip gold" data-i18n="hub.chip.new">Mới</span></div><div class="gc-stars">⭐ tối đa 3/lượt</div>
       <div class="gc-desc" data-i18n="card.hubontapvui.desc">Bắn cung, ném lon, câu cá — ôn lại từ vựng đã học ở Góc Tiếng Anh theo cách vận động vui nhộn, dùng chung sổ 🎯 Ôn chỗ yếu.</div>
       <div class="gc-meta">
         <span class="chip" data-i18n="card.hubontapvui.chip">3 game</span>
@@ -319,7 +320,7 @@ footer a{color:var(--gold2)}
       <div class="gc-art">
         <div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.5)">🎓📜🌍</div>
       </div>
-      <div class="gc-title"><span data-i18n="card.thichungchi.title">Thi Chứng Chỉ Anh</span> <span class="chip gold" data-i18n="hub.chip.new">Mới</span></div><div class="gc-stars">⭐ tối đa 5/lượt</div>
+      <div class="gc-title"><span data-i18n="card.thichungchi.title">Thi Chứng Chỉ Anh</span> <span class="chip gold" data-i18n="hub.chip.new">Mới</span></div><div class="gc-stars">⭐ tối đa 3/lượt</div>
       <div class="gc-desc" data-i18n="card.thichungchi.desc">Luyện thi chứng chỉ tiếng Anh quốc tế: Cambridge YLE (Starters·Movers·Flyers), ngữ pháp trực quan bằng animation — sắp có KET, PET, TOEFL Junior, TOEIC.</div>
       <div class="gc-meta">
         <span class="chip" data-i18n="card.thichungchi.chip">Cambridge · KET · PET · TOEFL · TOEIC</span>
@@ -331,7 +332,7 @@ footer a{color:var(--gold2)}
       <div class="gc-art">
         <div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.5)">🇬🇧📝🗣️</div>
       </div>
-      <div class="gc-title"><span data-i18n="card.tienganh.title">Tiếng Anh Nâng Cao</span> <span class="chip gold" data-i18n="hub.chip.new">Mới</span></div><div class="gc-stars">⭐ tối đa 5/lượt</div>
+      <div class="gc-title"><span data-i18n="card.tienganh.title">Tiếng Anh Nâng Cao</span> <span class="chip gold" data-i18n="hub.chip.new">Mới</span></div><div class="gc-stars">⭐ tối đa 3/lượt</div>
       <div class="gc-desc" data-i18n="card.tienganh.desc">2 trò trong 1: ghép câu tiếng Anh đơn giản (I like cats), luyện phát âm 26 từ — bé bấm ghi âm giọng mình để tự nghe so sánh.</div>
       <div class="gc-meta">
         <span class="chip" data-i18n="card.hocvan.chip">Lớp lá – lớp 1</span>
@@ -344,7 +345,7 @@ footer a{color:var(--gold2)}
       <div class="gc-art">
         <div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.5)">📚✍️➕</div>
       </div>
-      <div class="gc-title"><span data-i18n="card.hubhoc.title">Học và Chơi</span> <span class="chip gold" data-i18n="hub.chip.new">Mới</span></div><div class="gc-stars">⭐ tối đa 5/lượt</div>
+      <div class="gc-title"><span data-i18n="card.hubhoc.title">Học và Chơi</span> <span class="chip gold" data-i18n="hub.chip.new">Mới</span></div><div class="gc-stars">⭐ tối đa 3/lượt</div>
       <div class="gc-desc" data-i18n="card.hubhoc.desc">Góc học tập: tô màu chữ &amp; số, toán lớp 1, học vần tiếng Việt, tập viết chữ — máy đọc to như cô giáo.</div>
       <div class="gc-meta">
         <span class="chip" data-i18n="card.hocvan.chip">Lớp lá – lớp 1</span>
@@ -357,7 +358,7 @@ footer a{color:var(--gold2)}
       <div class="gc-art">
         <div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.5)">🧩🍎👂</div>
       </div>
-      <div class="gc-title"><span data-i18n="card.hocvui.title">Học Vui — Từ Vựng &amp; Con Số</span> <span class="chip gold" data-i18n="hub.chip.new">Mới</span></div><div class="gc-stars">⭐ tối đa 5/lượt</div>
+      <div class="gc-title"><span data-i18n="card.hocvui.title">Học Vui — Từ Vựng &amp; Con Số</span> <span class="chip gold" data-i18n="hub.chip.new">Mới</span></div><div class="gc-stars">⭐ tối đa 3/lượt</div>
       <div class="gc-desc" data-i18n="card.hocvui.desc">3 trò trong 1: ghép chữ với hình, đếm &amp; so sánh &amp; cộng trừ, nghe &amp; tìm. Học song ngữ Việt–Anh.</div>
       <div class="gc-meta">
         <span class="chip" data-i18n="card.tomau.chip1">Bé 3–8 tuổi</span>
@@ -418,44 +419,18 @@ footer a{color:var(--gold2)}
       </div>
       <div class="gc-cta"><button class="info-btn" type="button" aria-label="Thông tin trò chơi">ℹ️</button><a class="play" href="arcade-xua/" data-i18n="hub.cta.play">Chơi ▶</a></div>
     </div>
-    <div class="game-card" data-href="khoa-hoc/">
+    <div class="game-card" data-href="lop-1/">
       <div class="gc-art">
-        <div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.5)">🔬🎨🪨</div>
+        <div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.5)">🔬💛🇻🇳</div>
       </div>
-      <div class="gc-title"><span data-i18n="card.khoahoc.title">Khoa Học Khám Phá Vui</span> <span class="chip gold" data-i18n="hub.chip.new">Mới</span></div><div class="gc-stars">⭐ tối đa 5/lượt</div>
-      <div class="gc-desc" data-i18n="card.khoahoc.desc">3 trò trong 1: vòng đời con vật/cây &amp; 4 mùa, pha màu diệu kỳ, đoán chìm hay nổi trong bể nước.</div>
+      <div class="gc-title"><span data-i18n="card.hublop1.title">Lớp 1 — Khoa Học, Kỹ Năng & Văn Hóa</span> <span class="chip gold" data-i18n="hub.chip.new">Mới</span></div><div class="gc-stars">⭐ tối đa 3/lượt</div>
+      <div class="gc-desc" data-i18n="card.hublop1.desc">3 góc học gộp chung: khoa học khám phá vui, kỹ năng sống &amp; cảm xúc, văn hóa &amp; địa lý Việt Nam.</div>
       <div class="gc-meta">
         <span class="chip" data-i18n="card.hocvan.chip">Lớp lá – lớp 1</span>
-        <span class="chip" data-i18n="card.khoahoc.chip">Khoa học vui</span>
+        <span class="chip" data-i18n="card.hublop1.chip">3 góc học</span>
         <span class="chip" data-i18n="hub.chip.offline">Offline</span>
       </div>
-      <div class="gc-cta"><button class="info-btn" type="button" aria-label="Thông tin trò chơi">ℹ️</button><a class="play" href="khoa-hoc/" data-i18n="hub.cta.play">Chơi ▶</a></div>
-    </div>
-    <div class="game-card" data-href="ky-nang-song/">
-      <div class="gc-art">
-        <div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.5)">💛😊🚦</div>
-      </div>
-      <div class="gc-title"><span data-i18n="card.kynang.title">Kỹ Năng Sống &amp; Cảm Xúc</span> <span class="chip gold" data-i18n="hub.chip.new">Mới</span></div><div class="gc-stars">⭐ tối đa 5/lượt</div>
-      <div class="gc-desc" data-i18n="card.kynang.desc">3 trò trong 1: nhận diện cảm xúc, sắp thứ tự thói quen sinh hoạt (đánh răng, mặc đồ...), đúng-sai an toàn giao thông &amp; ở nhà.</div>
-      <div class="gc-meta">
-        <span class="chip" data-i18n="card.hocvan.chip">Lớp lá – lớp 1</span>
-        <span class="chip" data-i18n="card.kynang.chip">Kỹ năng sống</span>
-        <span class="chip" data-i18n="hub.chip.offline">Offline</span>
-      </div>
-      <div class="gc-cta"><button class="info-btn" type="button" aria-label="Thông tin trò chơi">ℹ️</button><a class="play" href="ky-nang-song/" data-i18n="hub.cta.play">Chơi ▶</a></div>
-    </div>
-    <div class="game-card" data-href="van-hoa-vn/">
-      <div class="gc-art">
-        <div style="font-size:56px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.5)">🇻🇳🗺️🏮</div>
-      </div>
-      <div class="gc-title"><span data-i18n="card.vanhoa.title">Văn Hóa &amp; Địa Lý Việt Nam</span> <span class="chip gold" data-i18n="hub.chip.new">Mới</span></div><div class="gc-stars">⭐ tối đa 5/lượt</div>
-      <div class="gc-desc" data-i18n="card.vanhoa.desc">4 trò trong 1: bản đồ 3 miền, món ăn ba miền, trang trí cây Tết tự do, lật thẻ tìm cặp đèn lồng Trung Thu.</div>
-      <div class="gc-meta">
-        <span class="chip" data-i18n="card.hocvan.chip">Lớp lá – lớp 1</span>
-        <span class="chip" data-i18n="card.oanquan.chip">Tuổi thơ VN</span>
-        <span class="chip" data-i18n="hub.chip.offline">Offline</span>
-      </div>
-      <div class="gc-cta"><button class="info-btn" type="button" aria-label="Thông tin trò chơi">ℹ️</button><a class="play" href="van-hoa-vn/" data-i18n="hub.cta.play">Chơi ▶</a></div>
+      <div class="gc-cta"><button class="info-btn" type="button" aria-label="Thông tin trò chơi">ℹ️</button><a class="play" href="lop-1/" data-i18n="hub.cta.play">Chơi ▶</a></div>
     </div>
 
     <h2 class="sec" data-i18n="sec.choi">🎮 GÓC GIẢI TRÍ — game vui, trò chơi xưa</h2>
