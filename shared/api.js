@@ -286,6 +286,11 @@ export async function familySessionsSince(sinceISO) {
   return get(`sessions?select=profile_id,played_at,seconds,result&played_at=gte.${sinceISO}&order=played_at.desc&limit=1000`);
 }
 
+/** Sổ sao của CẢ NHÀ từ mốc thời gian (1 request, cho tab "Tất cả" xem hoạt động gộp). */
+export async function familyLedgerSince(sinceISO, limit = 200) {
+  return get(`reward_ledger?select=profile_id,delta,reason,ts&ts=gte.${sinceISO}&order=ts.desc&limit=${limit}`);
+}
+
 /** Sổ sao gần nhất của 1 bé (thay cho việc tải cả exportAll — tiết kiệm egress). */
 export async function kidLedger(profileId, limit = 30) {
   return get(`reward_ledger?select=delta,reason,ts&profile_id=eq.${profileId}&order=ts.desc&limit=${limit}`);

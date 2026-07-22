@@ -1,6 +1,6 @@
 /* Reply1999 Games — root service worker.
    Scope = '/'. Cache hub + các game khi truy cập lần đầu. */
-const CACHE = 'reply1999-v148';
+const CACHE = 'reply1999-v155';
 const PRECACHE = [
   './', './index.html', './manifest.json', './i18n.js', './server-config.js',
   './shared/api.js',
@@ -203,6 +203,7 @@ const PRECACHE = [
   './tro-choi-xua/index.html',
   './dien-tu-xua/index.html',
   './hoc-va-choi/index.html',
+  './lop-1/index.html',
   './dao-vang/index.html',
   './dao-vang/style.css',
   './dao-vang/src/daovang.js',
@@ -411,6 +412,7 @@ const PRECACHE = [
   './phong-xinh/images/dollhouse.svg',
   './phong-xinh/images/telescope.svg',
   './goc-tieng-anh/index.html',
+  './game-mini-tu-vung/index.html',
   './on-tap-vui/index.html',
   './thi-chung-chi-anh/index.html',
   './bat-chuot-chui-tu-vung/index.html',
@@ -639,6 +641,16 @@ const PRECACHE = [
   './phong-xinh/images/diplomaframe.svg',
   './phong-xinh/images/windsock.svg',
   './phong-xinh/images/lanternstring.svg',
+  './phong-xinh/images/bicycle.svg',
+  './phong-xinh/images/blocks.svg',
+  './phong-xinh/images/puzzle.svg',
+  './phong-xinh/images/bunny.svg',
+  './phong-xinh/images/stroller.svg',
+  './phong-xinh/images/piggybank.svg',
+  './phong-xinh/images/slide.svg',
+  './phong-xinh/images/curtain.svg',
+  './phong-xinh/images/poster.svg',
+  './phong-xinh/images/nightlight.svg',
   './vuon-rau-than-ky/images/cabbage.svg',
   './vuon-rau-than-ky/images/pepper.svg',
   './vuon-rau-than-ky/images/beetle.svg',
