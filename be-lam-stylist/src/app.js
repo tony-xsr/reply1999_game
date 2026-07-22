@@ -175,6 +175,32 @@ function topSvg(style, hex) {
       <circle cx="120" cy="165" r="10" fill="rgba(255,255,255,0.55)"/>
       <rect x="112" y="184" width="16" height="10" rx="3" fill="rgba(255,255,255,0.4)"/>`;
   }
+  if (style === 'top_pilot') {
+    return `<rect x="92" y="140" width="56" height="64" rx="10" fill="${hex}"/>
+      <rect x="84" y="142" width="12" height="40" rx="6" fill="${hex}"/>
+      <rect x="144" y="142" width="12" height="40" rx="6" fill="${hex}"/>
+      <path d="M112 140 L120 152 L128 140 Z" fill="rgba(255,255,255,0.7)"/>
+      <rect x="86" y="140" width="14" height="6" fill="#ffd54f"/>
+      <rect x="140" y="140" width="14" height="6" fill="#ffd54f"/>`;
+  }
+  if (style === 'top_farmer') {
+    return `<rect x="94" y="140" width="52" height="62" rx="8" fill="${hex}"/>
+      <rect x="86" y="142" width="12" height="36" rx="6" fill="${hex}"/>
+      <rect x="142" y="142" width="12" height="36" rx="6" fill="${hex}"/>
+      <line x1="98" y1="152" x2="142" y2="152" stroke="rgba(0,0,0,0.15)" stroke-width="2"/>
+      <line x1="98" y1="164" x2="142" y2="164" stroke="rgba(0,0,0,0.15)" stroke-width="2"/>
+      <line x1="98" y1="176" x2="142" y2="176" stroke="rgba(0,0,0,0.15)" stroke-width="2"/>
+      <rect x="104" y="140" width="8" height="62" fill="#8d6e4a" opacity="0.7"/>
+      <rect x="128" y="140" width="8" height="62" fill="#8d6e4a" opacity="0.7"/>`;
+  }
+  if (style === 'top_singer') {
+    return `<rect x="92" y="140" width="56" height="64" rx="14" fill="${hex}"/>
+      <rect x="84" y="142" width="12" height="42" rx="6" fill="${hex}"/>
+      <rect x="144" y="142" width="12" height="42" rx="6" fill="${hex}"/>
+      <circle cx="105" cy="152" r="2" fill="#fff59d"/><circle cx="120" cy="146" r="2" fill="#fff59d"/>
+      <circle cx="135" cy="152" r="2" fill="#fff59d"/><circle cx="112" cy="164" r="2" fill="#fff59d"/>
+      <circle cx="128" cy="164" r="2" fill="#fff59d"/>`;
+  }
   return `<rect x="94" y="140" width="52" height="60" rx="10" fill="${hex}"/>
     <rect x="86" y="142" width="12" height="34" rx="6" fill="${hex}"/>
     <rect x="142" y="142" width="12" height="34" rx="6" fill="${hex}"/>`; // top_tshirt
@@ -262,7 +288,57 @@ function headwearSvg(style, hex) {
     return `<path d="M78 50 Q78 2 120 2 Q162 2 162 50 Z" fill="rgba(220,235,245,0.55)" stroke="#90a4ae" stroke-width="3"/>
       <path d="M78 50 Q120 66 162 50" fill="none" stroke="#90a4ae" stroke-width="3"/>`;
   }
+  if (style === 'head_pilotcap') {
+    return `<ellipse cx="120" cy="36" rx="46" ry="9" fill="${hex}"/>
+      <path d="M92 34 Q92 8 120 8 Q148 8 148 34 Z" fill="${hex}"/>
+      <circle cx="120" cy="20" r="6" fill="#ffd54f"/>`;
+  }
+  if (style === 'head_strawhat') {
+    return `<ellipse cx="120" cy="38" rx="58" ry="10" fill="#e6c869"/>
+      <path d="M88 36 Q88 12 120 12 Q152 12 152 36 Z" fill="#f0d97e"/>
+      <rect x="98" y="30" width="44" height="6" fill="#c9a94a"/>`;
+  }
   return ''; // head_none
+}
+
+/** Phụ kiện tay TỰ ĐỘNG đi kèm 1 số trang phục nghề nghiệp (tra theo đúng
+ * `top` đang mặc, không phải 1 slot tủ đồ riêng — xem ghi chú ở PROFESSIONS
+ * trong stylist.js). Vẽ gần bàn tay phải (quanh 153,196). */
+const PROP_BY_TOP = {
+  top_doctor: 'prop_syringe',
+  top_chef: 'prop_knife',
+  top_police: 'prop_handcuffs',
+  top_singer: 'prop_mic',
+};
+
+function propSvg(style) {
+  if (style === 'prop_syringe') {
+    return `<g transform="translate(160 190) rotate(-30)">
+      <rect x="-4" y="-16" width="8" height="20" rx="2" fill="#d7e6ef" stroke="#9aa5ad" stroke-width="1.4"/>
+      <rect x="-2" y="-20" width="4" height="6" fill="#9aa5ad"/>
+      <rect x="-1" y="4" width="2" height="8" fill="#9aa5ad"/>
+    </g>`;
+  }
+  if (style === 'prop_knife') {
+    return `<g transform="translate(160 192) rotate(20)">
+      <rect x="-3" y="-4" width="6" height="16" rx="2" fill="#8d6e4a"/>
+      <path d="M-3 -4 L3 -4 L3 -22 L-3 -22 Z" fill="#cfd8dc"/>
+    </g>`;
+  }
+  if (style === 'prop_handcuffs') {
+    return `<g transform="translate(160 198)">
+      <circle cx="-5" cy="0" r="7" fill="none" stroke="#9aa5ad" stroke-width="3"/>
+      <circle cx="9" cy="0" r="7" fill="none" stroke="#9aa5ad" stroke-width="3"/>
+      <rect x="-2" y="-2" width="8" height="4" fill="#9aa5ad"/>
+    </g>`;
+  }
+  if (style === 'prop_mic') {
+    return `<g transform="translate(160 186) rotate(-10)">
+      <rect x="-3" y="-4" width="6" height="22" rx="3" fill="#3d3d3d"/>
+      <circle cx="0" cy="-8" r="8" fill="#616161"/>
+    </g>`;
+  }
+  return ''; // không có phụ kiện tay
 }
 
 function glassesSvg(style, hex) {
@@ -344,59 +420,84 @@ function bagSvg(style, hex) {
   return ''; // bag_none
 }
 
+/** Tỷ lệ cơ thể theo nhóm tuổi — trẻ em (mặc định) đầu to/thân ngắn như cũ;
+ * người lớn thân dài hơn (cao hơn) + đầu nhỏ lại 1 chút cho đúng tỷ lệ người
+ * lớn; ông/bà thêm dáng hơi cúi đầu (gù nhẹ) qua góc xoay đầu `hunch`. Áp
+ * dụng bằng 2 nhóm <g transform> quanh 1 điểm neo cố định (điểm nối
+ * đầu-cổ/vai-hông) để không bị hở cổ khi co giãn — xem renderDoll().
+ */
+const BODY_PROFILES = {
+  girl: { headScale: 1, bodyScale: 1, hunch: 0 },
+  boy: { headScale: 1, bodyScale: 1, hunch: 0 },
+  man: { headScale: 0.92, bodyScale: 1.12, hunch: 0 },
+  woman: { headScale: 0.92, bodyScale: 1.12, hunch: 0 },
+  grandpa: { headScale: 0.92, bodyScale: 1.06, hunch: 7 },
+  grandma: { headScale: 0.92, bodyScale: 1.06, hunch: 7 },
+};
+function bodyProfileFor(characterId) {
+  return BODY_PROFILES[characterId] || BODY_PROFILES.girl; // chưa chọn nhân vật -> tỷ lệ trẻ em mặc định
+}
+
 function renderDoll() {
   const o = state.outfit;
   const hex = (slot) => colorById(o[slot].color).hex;
+  const bp = bodyProfileFor(state.character);
+  const prop = propSvg(PROP_BY_TOP[o.top.item]);
   els.dollBox.innerHTML = `
   <svg viewBox="0 0 240 320" role="img" aria-label="Búp bê">
-    <!-- thân nền (da) -->
-    <rect x="112" y="120" width="16" height="26" fill="${SKIN}"/>
-    <rect x="82" y="146" width="10" height="46" rx="5" fill="${SKIN}"/>
-    <rect x="148" y="146" width="10" height="46" rx="5" fill="${SKIN}"/>
-    <circle cx="87" cy="196" r="7" fill="${SKIN_DARK}"/>
-    <circle cx="153" cy="196" r="7" fill="${SKIN_DARK}"/>
-    <rect x="100" y="150" width="40" height="56" fill="${SKIN}"/>
-    <rect x="104" y="200" width="12" height="62" fill="${SKIN}"/>
-    <rect x="124" y="200" width="12" height="62" fill="${SKIN}"/>
-    <g id="g-bottom">${bottomSvg(o.bottom.item, hex('bottom'))}</g>
-    <g id="g-socks">${socksSvg(o.socks.item, hex('socks'))}</g>
-    <g id="g-top">${topSvg(o.top.item, hex('top'))}</g>
-    <g id="g-shoes">${shoesSvg(o.shoes.item, hex('shoes'))}</g>
-    <g id="g-gloves">${glovesSvg(o.gloves.item, hex('gloves'))}</g>
-    <g id="g-bag">${bagSvg(o.bag.item, hex('bag'))}</g>
-    <g id="g-necklace">${necklaceSvg(o.necklace.item, hex('necklace'))}</g>
-    <!-- đầu + mặt -->
-    <circle cx="120" cy="86" r="42" fill="${SKIN}"/>
-    <circle cx="104" cy="86" r="4" fill="#241e2e"/>
-    <circle cx="136" cy="86" r="4" fill="#241e2e"/>
-    <circle cx="98" cy="100" r="6" fill="rgba(240,120,140,0.45)"/>
-    <circle cx="142" cy="100" r="6" fill="rgba(240,120,140,0.45)"/>
-    <path d="M108 106 Q120 118 132 106" fill="none" stroke="#241e2e" stroke-width="3.5" stroke-linecap="round"/>
-    ${state.character === 'girl' ? `
-    <path d="M100 80 L96 76 M104 78 L101 73 M108 78 L107 72" stroke="#241e2e" stroke-width="1.6" stroke-linecap="round"/>
-    <path d="M140 80 L144 76 M136 78 L139 73 M132 78 L133 72" stroke="#241e2e" stroke-width="1.6" stroke-linecap="round"/>` : ''}
-    ${state.character === 'grandpa' ? `
-    <path d="M104 99 Q112 94 120 98 Q128 94 136 99 Q128 103 120 100 Q112 103 104 99 Z" fill="${hex('hair')}"/>` : ''}
-    <g id="g-earrings">${earringsSvg(o.earrings.item, hex('earrings'))}</g>
-    <g id="g-hair">${hairSvg(o.hair.item, hex('hair'))}</g>
-    <g id="g-headwear">${headwearSvg(o.headwear.item, hex('headwear'))}</g>
-    <g id="g-glasses">${glassesSvg(o.glasses.item, hex('glasses'))}</g>
-    <!-- vùng chạm bộ phận cơ thể (trong suốt) -->
-    <circle class="hit" data-part="head" cx="120" cy="58" r="26" fill="transparent"/>
-    <rect class="hit" data-part="eyes" x="94" y="76" width="52" height="14" fill="transparent"/>
-    <circle class="hit" data-part="nose" cx="120" cy="96" r="7" fill="transparent"/>
-    <rect class="hit" data-part="mouth" x="102" y="104" width="36" height="14" fill="transparent"/>
-    <circle class="hit" data-part="ears" cx="79" cy="90" r="9" fill="transparent"/>
-    <circle class="hit" data-part="ears" cx="161" cy="90" r="9" fill="transparent"/>
-    <rect class="hit" data-part="neck" x="105" y="128" width="30" height="18" fill="transparent"/>
-    <rect class="hit" data-part="arms" x="80" y="146" width="14" height="34" fill="transparent"/>
-    <rect class="hit" data-part="arms" x="146" y="146" width="14" height="34" fill="transparent"/>
-    <circle class="hit" data-part="hands" cx="87" cy="196" r="14" fill="transparent"/>
-    <circle class="hit" data-part="hands" cx="153" cy="196" r="14" fill="transparent"/>
-    <rect class="hit" data-part="tummy" x="98" y="160" width="44" height="38" fill="transparent"/>
-    <rect class="hit" data-part="legs" x="102" y="200" width="16" height="60" fill="transparent"/>
-    <rect class="hit" data-part="legs" x="122" y="200" width="16" height="60" fill="transparent"/>
-    <rect class="hit" data-part="feet" x="94" y="262" width="52" height="24" fill="transparent"/>
+    <g transform="translate(120 140) scale(1 ${bp.bodyScale}) translate(-120 -140)">
+      <!-- thân nền (da) -->
+      <rect x="112" y="120" width="16" height="26" fill="${SKIN}"/>
+      <rect x="82" y="146" width="10" height="46" rx="5" fill="${SKIN}"/>
+      <rect x="148" y="146" width="10" height="46" rx="5" fill="${SKIN}"/>
+      <circle cx="87" cy="196" r="7" fill="${SKIN_DARK}"/>
+      <circle cx="153" cy="196" r="7" fill="${SKIN_DARK}"/>
+      <rect x="100" y="150" width="40" height="56" fill="${SKIN}"/>
+      <rect x="104" y="200" width="12" height="62" fill="${SKIN}"/>
+      <rect x="124" y="200" width="12" height="62" fill="${SKIN}"/>
+      <g id="g-bottom">${bottomSvg(o.bottom.item, hex('bottom'))}</g>
+      <g id="g-socks">${socksSvg(o.socks.item, hex('socks'))}</g>
+      <g id="g-top">${topSvg(o.top.item, hex('top'))}</g>
+      <g id="g-shoes">${shoesSvg(o.shoes.item, hex('shoes'))}</g>
+      <g id="g-gloves">${glovesSvg(o.gloves.item, hex('gloves'))}</g>
+      <g id="g-bag">${bagSvg(o.bag.item, hex('bag'))}</g>
+      <g id="g-necklace">${necklaceSvg(o.necklace.item, hex('necklace'))}</g>
+      <g id="g-prop">${prop}</g>
+      <rect class="hit" data-part="neck" x="105" y="128" width="30" height="18" fill="transparent"/>
+      <rect class="hit" data-part="arms" x="80" y="146" width="14" height="34" fill="transparent"/>
+      <rect class="hit" data-part="arms" x="146" y="146" width="14" height="34" fill="transparent"/>
+      <circle class="hit" data-part="hands" cx="87" cy="196" r="14" fill="transparent"/>
+      <circle class="hit" data-part="hands" cx="153" cy="196" r="14" fill="transparent"/>
+      <rect class="hit" data-part="tummy" x="98" y="160" width="44" height="38" fill="transparent"/>
+      <rect class="hit" data-part="legs" x="102" y="200" width="16" height="60" fill="transparent"/>
+      <rect class="hit" data-part="legs" x="122" y="200" width="16" height="60" fill="transparent"/>
+      <rect class="hit" data-part="feet" x="94" y="262" width="52" height="24" fill="transparent"/>
+    </g>
+    <g transform="translate(120 128) rotate(${bp.hunch}) scale(${bp.headScale}) translate(-120 -128)">
+      <!-- đầu + mặt -->
+      <circle cx="120" cy="86" r="42" fill="${SKIN}"/>
+      <circle cx="104" cy="86" r="4" fill="#241e2e"/>
+      <circle cx="136" cy="86" r="4" fill="#241e2e"/>
+      <circle cx="98" cy="100" r="6" fill="rgba(240,120,140,0.45)"/>
+      <circle cx="142" cy="100" r="6" fill="rgba(240,120,140,0.45)"/>
+      <path d="M108 106 Q120 118 132 106" fill="none" stroke="#241e2e" stroke-width="3.5" stroke-linecap="round"/>
+      ${state.character === 'girl' ? `
+      <path d="M100 80 L96 76 M104 78 L101 73 M108 78 L107 72" stroke="#241e2e" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M140 80 L144 76 M136 78 L139 73 M132 78 L133 72" stroke="#241e2e" stroke-width="1.6" stroke-linecap="round"/>` : ''}
+      ${state.character === 'grandpa' ? `
+      <path d="M104 99 Q112 94 120 98 Q128 94 136 99 Q128 103 120 100 Q112 103 104 99 Z" fill="${hex('hair')}"/>` : ''}
+      <g id="g-earrings">${earringsSvg(o.earrings.item, hex('earrings'))}</g>
+      <g id="g-hair">${hairSvg(o.hair.item, hex('hair'))}</g>
+      <g id="g-headwear">${headwearSvg(o.headwear.item, hex('headwear'))}</g>
+      <g id="g-glasses">${glassesSvg(o.glasses.item, hex('glasses'))}</g>
+      <!-- vùng chạm bộ phận cơ thể (trong suốt) -->
+      <circle class="hit" data-part="head" cx="120" cy="58" r="26" fill="transparent"/>
+      <rect class="hit" data-part="eyes" x="94" y="76" width="52" height="14" fill="transparent"/>
+      <circle class="hit" data-part="nose" cx="120" cy="96" r="7" fill="transparent"/>
+      <rect class="hit" data-part="mouth" x="102" y="104" width="36" height="14" fill="transparent"/>
+      <circle class="hit" data-part="ears" cx="79" cy="90" r="9" fill="transparent"/>
+      <circle class="hit" data-part="ears" cx="161" cy="90" r="9" fill="transparent"/>
+    </g>
   </svg>`;
   for (const hit of els.dollBox.querySelectorAll('.hit')) {
     hit.addEventListener('pointerdown', (e) => {

@@ -556,12 +556,14 @@ function startBreakout() {
     animId = requestAnimationFrame(loop);
   }
 
+  // Đo rect() 1 lần lúc pointerdown, tránh đo lại mỗi pointermove (layout thrashing).
+  let paddleRect = canvas.getBoundingClientRect();
   function toX(e) {
-    const rect = canvas.getBoundingClientRect();
-    return ((e.clientX - rect.left) / rect.width) * W;
+    return ((e.clientX - paddleRect.left) / paddleRect.width) * W;
   }
   canvas.addEventListener('pointermove', (e) => { paddleX = Math.max(PADDLE_W / 2, Math.min(W - PADDLE_W / 2, toX(e))); });
   canvas.addEventListener('pointerdown', (e) => {
+    paddleRect = canvas.getBoundingClientRect();
     paddleX = Math.max(PADDLE_W / 2, Math.min(W - PADDLE_W / 2, toX(e)));
     if (!launched) { launched = true; sfx.select(); }
   });

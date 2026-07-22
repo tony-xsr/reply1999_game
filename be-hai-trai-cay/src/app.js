@@ -270,11 +270,12 @@ function startLevel() {
 
 /* ===== Vuốt hái ===== */
 
+// Đo rect() 1 lần lúc pointerdown, tránh đo lại mỗi pointermove (layout thrashing).
+let fieldRect = null;
 function fieldPos(e) {
-  const rect = els.canvas.getBoundingClientRect();
   return {
-    x: ((e.clientX - rect.left) / rect.width) * FIELD_W,
-    y: ((e.clientY - rect.top) / rect.height) * FIELD_H,
+    x: ((e.clientX - fieldRect.left) / fieldRect.width) * FIELD_W,
+    y: ((e.clientY - fieldRect.top) / fieldRect.height) * FIELD_H,
   };
 }
 
@@ -332,6 +333,7 @@ let prev = null;
 els.wrap.addEventListener('pointerdown', (e) => {
   swiping = true;
   state.gesture++;
+  fieldRect = els.canvas.getBoundingClientRect();
   prev = fieldPos(e);
   state.trail.push({ ...prev, t: performance.now() });
 });

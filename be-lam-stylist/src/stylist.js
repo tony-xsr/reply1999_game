@@ -51,6 +51,9 @@ export const ITEMS = [
   { id: 'top_police', slot: 'top', en: 'police uniform', vi: 'đồng phục cảnh sát' },
   { id: 'top_firefighter', slot: 'top', en: 'firefighter jacket', vi: 'áo lính cứu hỏa' },
   { id: 'top_astronaut', slot: 'top', en: 'astronaut suit', vi: 'bộ đồ phi hành gia' },
+  { id: 'top_pilot', slot: 'top', en: 'pilot uniform', vi: 'đồng phục phi công' },
+  { id: 'top_farmer', slot: 'top', en: 'farmer shirt', vi: 'áo nông dân' },
+  { id: 'top_singer', slot: 'top', en: 'singer outfit', vi: 'trang phục ca sĩ' },
   // ----- Quần/váy -----
   { id: 'bottom_shorts', slot: 'bottom', en: 'shorts', vi: 'quần short' },
   { id: 'bottom_pants', slot: 'bottom', en: 'pants', vi: 'quần dài' },
@@ -71,6 +74,8 @@ export const ITEMS = [
   { id: 'head_policecap', slot: 'headwear', en: 'police cap', vi: 'mũ cảnh sát' },
   { id: 'head_firehelmet', slot: 'headwear', en: 'firefighter helmet', vi: 'mũ lính cứu hỏa' },
   { id: 'head_astrohelmet', slot: 'headwear', en: 'astronaut helmet', vi: 'mũ phi hành gia' },
+  { id: 'head_pilotcap', slot: 'headwear', en: 'pilot cap', vi: 'mũ phi công' },
+  { id: 'head_strawhat', slot: 'headwear', en: 'straw hat', vi: 'mũ rơm nông dân' },
   { id: 'head_none', slot: 'headwear', en: 'nothing', vi: 'không đội gì' },
   // ----- Kính -----
   { id: 'glasses_round', slot: 'glasses', en: 'glasses', vi: 'cặp kính' },
@@ -132,10 +137,14 @@ export function applyCharacter(outfit, characterId) {
   return c;
 }
 
-/** 6 "nghề nghiệp" dựng sẵn — CHỈ đổi áo (+ mũ nếu có) sang trang phục nghề
+/** 9 "nghề nghiệp" dựng sẵn — CHỈ đổi áo (+ mũ nếu có) sang trang phục nghề
  * nghiệp, giữ NGUYÊN tóc/quần/mọi phụ kiện khác đang có, khác với CHARACTERS
  * (đổi cả tóc+quần) vì đây là "khoác thêm đồng phục" chứ không phải đổi hẳn
- * sang nhân vật khác. */
+ * sang nhân vật khác. Một số nghề còn tự động cầm THÊM 1 phụ kiện tay riêng
+ * (ống tiêm, dao, còng tay, mic...) — phần vẽ phụ kiện tay này nằm ở app.js
+ * (bảng PROP_BY_TOP tra theo đúng `top` đang mặc), không phải 1 slot tủ đồ
+ * riêng vì phụ kiện này LUÔN đi kèm đúng bộ trang phục nghề, bé không tự chọn
+ * rời được. */
 export const PROFESSIONS = [
   { id: 'doctor', icon: '🩺', vi: 'Bác sĩ', en: 'doctor', top: 'top_doctor', topColor: 'white', headwear: null },
   { id: 'chef', icon: '👨‍🍳', vi: 'Đầu bếp', en: 'chef', top: 'top_chef', topColor: 'white', headwear: 'head_chefhat' },
@@ -143,6 +152,9 @@ export const PROFESSIONS = [
   { id: 'firefighter', icon: '🧑‍🚒', vi: 'Lính cứu hỏa', en: 'firefighter', top: 'top_firefighter', topColor: 'orange', headwear: 'head_firehelmet' },
   { id: 'astronaut', icon: '🧑‍🚀', vi: 'Phi hành gia', en: 'astronaut', top: 'top_astronaut', topColor: 'white', headwear: 'head_astrohelmet' },
   { id: 'teacher', icon: '👩‍🏫', vi: 'Giáo viên', en: 'teacher', top: 'top_blouse', topColor: 'purple', headwear: null },
+  { id: 'pilot', icon: '🧑‍✈️', vi: 'Phi công', en: 'pilot', top: 'top_pilot', topColor: 'blue', headwear: 'head_pilotcap' },
+  { id: 'farmer', icon: '🧑‍🌾', vi: 'Nông dân', en: 'farmer', top: 'top_farmer', topColor: 'green', headwear: 'head_strawhat' },
+  { id: 'singer', icon: '🧑‍🎤', vi: 'Ca sĩ', en: 'singer', top: 'top_singer', topColor: 'purple', headwear: null },
 ];
 
 export function professionById(id) {
