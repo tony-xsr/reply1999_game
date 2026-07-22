@@ -1,9 +1,10 @@
 // Unit test cho Bé Làm Stylist. Chạy: node src/stylist.test.js
 
 import {
-  SLOTS, COLORS, ITEMS, BODY_PARTS,
+  SLOTS, COLORS, ITEMS, BODY_PARTS, CHARACTERS, PROFESSIONS,
   itemById, colorById, itemsForSlot, makeOutfit, equipItem, recolorSlot,
   phraseFor, serializeOutfit, deserializeOutfit, randomOutfit,
+  characterById, applyCharacter, professionById, applyProfession,
 } from './stylist.js';
 
 let passed = 0;
@@ -142,6 +143,80 @@ check('BODY_PARTS đủ 11 bộ phận (thêm mũi/tai/cổ/tay/chân so với b
   return ids.size === BODY_PARTS.length && BODY_PARTS.length >= 11
     && ['nose', 'ears', 'neck', 'arms', 'legs'].every((id) => ids.has(id));
 })());
+
+console.log('— Chọn nhanh nhân vật (bé trai/gái, người lớn nam/nữ, ông/bà) —');
+
+check('6 nhân vật: id duy nhất, đủ icon/tên EN+VI, hair/top/bottom trỏ đúng ITEMS + màu hợp lệ (kể cả glasses nếu có)', (() => {
+  const ids = new Set(CHARACTERS.map((c) => c.id));
+  return ids.size === CHARACTERS.length && CHARACTERS.length === 6
+    && CHARACTERS.every((c) => c.icon && c.en && c.vi
+      && itemById(c.hair)?.slot === 'hair' && itemById(c.top)?.slot === 'top' && itemById(c.bottom)?.slot === 'bottom'
+      && COLORS.some((col) => col.id === c.hairColor)
+      && COLORS.some((col) => col.id === c.topColor)
+      && COLORS.some((col) => col.id === c.bottomColor)
+      && (!c.glasses || (itemById(c.glasses)?.slot === 'glasses' && COLORS.some((col) => col.id === c.glassesColor))))
+    && ['man', 'woman', 'grandpa', 'grandma'].every((id) => ids.has(id)); // đủ 4 nhân vật mới thêm
+})());
+
+check('applyCharacter: đổi đúng tóc/áo/quần theo preset, KHÔNG đụng giày/phụ kiện đang có', (() => {
+  const o = makeOutfit();
+  equipItem(o, 'shoes_boots');
+  equipItem(o, 'head_crown');
+  const before = { shoes: JSON.stringify(o.shoes), headwear: JSON.stringify(o.headwear) };
+  const applied = applyCharacter(o, 'boy');
+  const boy = characterById('boy');
+  return applied.id === 'boy'
+    && o.hair.item === boy.hair && o.hair.color === boy.hairColor
+    && o.top.item === boy.top && o.top.color === boy.topColor
+    && o.bottom.item === boy.bottom && o.bottom.color === boy.bottomColor
+    && JSON.stringify(o.shoes) === before.shoes && JSON.stringify(o.headwear) === before.headwear;
+})());
+
+check('applyCharacter: nhân vật có kính (ông/bà) còn đổi CẢ kính theo preset', (() => {
+  const o = makeOutfit();
+  applyCharacter(o, 'grandpa');
+  const grandpa = characterById('grandpa');
+  return o.glasses.item === grandpa.glasses && o.glasses.color === grandpa.glassesColor;
+})());
+
+check('characterById: id lạ rơi về nhân vật đầu tiên (an toàn)', (() => characterById('khong_co').id === CHARACTERS[0].id));
+
+console.log('— Khoác trang phục nghề nghiệp (chỉ đổi áo + mũ nếu có) —');
+
+check('6 nghề nghiệp: id duy nhất, đủ icon/tên EN+VI, top trỏ đúng ITEMS + màu hợp lệ, headwear (nếu có) cũng vậy', (() => {
+  const ids = new Set(PROFESSIONS.map((p) => p.id));
+  return ids.size === PROFESSIONS.length && PROFESSIONS.length === 6
+    && PROFESSIONS.every((p) => p.icon && p.en && p.vi
+      && itemById(p.top)?.slot === 'top' && COLORS.some((c) => c.id === p.topColor)
+      && (p.headwear === null || itemById(p.headwear)?.slot === 'headwear'));
+})());
+
+check('applyProfession: đổi ĐÚNG áo (và mũ nếu nghề có mũ), KHÔNG đụng tóc/quần/giày/phụ kiện khác', (() => {
+  const o = makeOutfit();
+  equipItem(o, 'bottom_skirt');
+  equipItem(o, 'shoes_boots');
+  const before = { hair: JSON.stringify(o.hair), bottom: JSON.stringify(o.bottom), shoes: JSON.stringify(o.shoes) };
+  const phrase = applyProfession(o, 'chef');
+  const chef = professionById('chef');
+  return phrase.en === chef.en && o.top.item === chef.top && o.top.color === chef.topColor
+    && o.headwear.item === chef.headwear
+    && JSON.stringify(o.hair) === before.hair && JSON.stringify(o.bottom) === before.bottom && JSON.stringify(o.shoes) === before.shoes;
+})());
+
+check('applyProfession: nghề KHÔNG có mũ riêng (bác sĩ) thì giữ nguyên mũ đang đội', (() => {
+  const o = makeOutfit();
+  equipItem(o, 'head_crown');
+  applyProfession(o, 'doctor');
+  return o.headwear.item === 'head_crown';
+})());
+
+check('applyProfession: id không tồn tại trả về null, bộ đồ không đổi', (() => {
+  const o = makeOutfit();
+  const before = serializeOutfit(o);
+  return applyProfession(o, 'khong_co') === null && serializeOutfit(o) === before;
+})());
+
+check('professionById: id lạ trả về null (không rơi về mặc định như characterById)', (() => professionById('khong_co') === null));
 
 console.log(`\nKết quả: ${passed} pass, ${failed} fail`);
 if (failed > 0) process.exit(1);

@@ -68,6 +68,24 @@ body {
 }
 .say-bubble.pop { transform: scale(1.12); }
 
+/* Chọn nhanh nhân vật (preset gợi ý tóc/áo/quần — không khoá món nào) */
+.char-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.char-btn {
+  display: flex; align-items: center; gap: 6px;
+  border: 2px solid var(--line);
+  background: var(--panel);
+  border-radius: 999px;
+  padding: 6px 14px 6px 8px;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+.char-btn .icon { font-size: 1.15rem; }
+.char-btn .en { display: block; font-size: 0.72rem; color: #a61e6e; font-weight: 900; }
+.char-btn.active { border-color: #d6669e; background: #fdeef7; box-shadow: 0 0 0 2px rgba(214, 102, 158, 0.35); }
+.char-btn:active { transform: scale(0.96); }
+
 .stage { flex: 1; min-height: 0; display: flex; gap: 10px; }
 .doll-panel {
   flex: 1;

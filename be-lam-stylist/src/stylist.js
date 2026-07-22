@@ -24,6 +24,7 @@ export const COLORS = [
   { id: 'black', en: 'black', vi: 'đen', hex: '#3d3d3d' },
   { id: 'white', en: 'white', vi: 'trắng', hex: '#f5f5f5' },
   { id: 'brown', en: 'brown', vi: 'nâu', hex: '#8d6e4a' },
+  { id: 'grey', en: 'grey', vi: 'xám', hex: '#9e9e9e' },
 ];
 
 /** Tủ đồ: mỗi món có kiểu dáng + tên EN/VI; màu chọn riêng nên tổ hợp rất nhiều. */
@@ -44,6 +45,12 @@ export const ITEMS = [
   { id: 'top_sweater', slot: 'top', en: 'sweater', vi: 'áo len' },
   { id: 'top_tank', slot: 'top', en: 'tank top', vi: 'áo ba lỗ' },
   { id: 'top_blouse', slot: 'top', en: 'blouse', vi: 'áo sơ mi nữ' },
+  // ----- Trang phục nghề nghiệp -----
+  { id: 'top_doctor', slot: 'top', en: 'doctor coat', vi: 'áo blouse bác sĩ' },
+  { id: 'top_chef', slot: 'top', en: 'chef uniform', vi: 'đồ đầu bếp' },
+  { id: 'top_police', slot: 'top', en: 'police uniform', vi: 'đồng phục cảnh sát' },
+  { id: 'top_firefighter', slot: 'top', en: 'firefighter jacket', vi: 'áo lính cứu hỏa' },
+  { id: 'top_astronaut', slot: 'top', en: 'astronaut suit', vi: 'bộ đồ phi hành gia' },
   // ----- Quần/váy -----
   { id: 'bottom_shorts', slot: 'bottom', en: 'shorts', vi: 'quần short' },
   { id: 'bottom_pants', slot: 'bottom', en: 'pants', vi: 'quần dài' },
@@ -60,6 +67,10 @@ export const ITEMS = [
   { id: 'head_hat', slot: 'headwear', en: 'hat', vi: 'chiếc mũ' },
   { id: 'head_crown', slot: 'headwear', en: 'crown', vi: 'vương miện' },
   { id: 'head_beanie', slot: 'headwear', en: 'beanie', vi: 'mũ len' },
+  { id: 'head_chefhat', slot: 'headwear', en: 'chef hat', vi: 'mũ đầu bếp' },
+  { id: 'head_policecap', slot: 'headwear', en: 'police cap', vi: 'mũ cảnh sát' },
+  { id: 'head_firehelmet', slot: 'headwear', en: 'firefighter helmet', vi: 'mũ lính cứu hỏa' },
+  { id: 'head_astrohelmet', slot: 'headwear', en: 'astronaut helmet', vi: 'mũ phi hành gia' },
   { id: 'head_none', slot: 'headwear', en: 'nothing', vi: 'không đội gì' },
   // ----- Kính -----
   { id: 'glasses_round', slot: 'glasses', en: 'glasses', vi: 'cặp kính' },
@@ -92,6 +103,62 @@ const NONE_ITEM = {
   headwear: 'head_none', glasses: 'glasses_none', necklace: 'neck_none',
   earrings: 'ear_none', gloves: 'glove_none', socks: 'sock_none', bag: 'bag_none',
 };
+
+/** 2 nhân vật cơ bản để bé chọn nhanh — chỉ đổi tóc/áo/quần MẶC ĐỊNH ban đầu
+ * (giữ nguyên giày + mọi phụ kiện đang đeo), bé vẫn tự do đổi lại BẤT KỲ món
+ * nào sau đó như bình thường (đây là preset gợi ý, không khoá món đồ nào cả). */
+export const CHARACTERS = [
+  { id: 'girl', icon: '👧', vi: 'Bé gái', en: 'girl', hair: 'hair_long', hairColor: 'yellow', top: 'top_dress', topColor: 'pink', bottom: 'bottom_skirt', bottomColor: 'pink' },
+  { id: 'boy', icon: '👦', vi: 'Bé trai', en: 'boy', hair: 'hair_short', hairColor: 'brown', top: 'top_tshirt', topColor: 'blue', bottom: 'bottom_pants', bottomColor: 'black' },
+  { id: 'man', icon: '🧑', vi: 'Người lớn nam', en: 'man', hair: 'hair_short', hairColor: 'black', top: 'top_jacket', topColor: 'blue', bottom: 'bottom_pants', bottomColor: 'black' },
+  { id: 'woman', icon: '👩', vi: 'Người lớn nữ', en: 'woman', hair: 'hair_long', hairColor: 'brown', top: 'top_blouse', topColor: 'purple', bottom: 'bottom_skirt', bottomColor: 'black' },
+  { id: 'grandpa', icon: '👴', vi: 'Ông', en: 'grandpa', hair: 'hair_short', hairColor: 'grey', top: 'top_sweater', topColor: 'brown', bottom: 'bottom_pants', bottomColor: 'grey', glasses: 'glasses_round', glassesColor: 'black' },
+  { id: 'grandma', icon: '👵', vi: 'Bà', en: 'grandma', hair: 'hair_buns', hairColor: 'grey', top: 'top_sweater', topColor: 'purple', bottom: 'bottom_skirt', bottomColor: 'grey', glasses: 'glasses_round', glassesColor: 'black' },
+];
+
+export function characterById(id) {
+  return CHARACTERS.find((c) => c.id === id) || CHARACTERS[0];
+}
+
+/** Áp preset tóc/áo/quần (và kính, nếu nhân vật có) vào bộ đồ hiện tại. Trả
+ * về nhân vật đã áp dụng. Chỉ đổi ĐÚNG những phần được nêu trong preset — các
+ * phần khác (giày, phụ kiện còn lại) giữ nguyên như trước khi bấm. */
+export function applyCharacter(outfit, characterId) {
+  const c = characterById(characterId);
+  outfit.hair = { item: c.hair, color: c.hairColor };
+  outfit.top = { item: c.top, color: c.topColor };
+  outfit.bottom = { item: c.bottom, color: c.bottomColor };
+  if (c.glasses) outfit.glasses = { item: c.glasses, color: c.glassesColor };
+  return c;
+}
+
+/** 6 "nghề nghiệp" dựng sẵn — CHỈ đổi áo (+ mũ nếu có) sang trang phục nghề
+ * nghiệp, giữ NGUYÊN tóc/quần/mọi phụ kiện khác đang có, khác với CHARACTERS
+ * (đổi cả tóc+quần) vì đây là "khoác thêm đồng phục" chứ không phải đổi hẳn
+ * sang nhân vật khác. */
+export const PROFESSIONS = [
+  { id: 'doctor', icon: '🩺', vi: 'Bác sĩ', en: 'doctor', top: 'top_doctor', topColor: 'white', headwear: null },
+  { id: 'chef', icon: '👨‍🍳', vi: 'Đầu bếp', en: 'chef', top: 'top_chef', topColor: 'white', headwear: 'head_chefhat' },
+  { id: 'police', icon: '👮', vi: 'Cảnh sát', en: 'police officer', top: 'top_police', topColor: 'blue', headwear: 'head_policecap' },
+  { id: 'firefighter', icon: '🧑‍🚒', vi: 'Lính cứu hỏa', en: 'firefighter', top: 'top_firefighter', topColor: 'orange', headwear: 'head_firehelmet' },
+  { id: 'astronaut', icon: '🧑‍🚀', vi: 'Phi hành gia', en: 'astronaut', top: 'top_astronaut', topColor: 'white', headwear: 'head_astrohelmet' },
+  { id: 'teacher', icon: '👩‍🏫', vi: 'Giáo viên', en: 'teacher', top: 'top_blouse', topColor: 'purple', headwear: null },
+];
+
+export function professionById(id) {
+  return PROFESSIONS.find((p) => p.id === id) || null;
+}
+
+/** Khoác trang phục nghề nghiệp lên bộ đồ hiện tại (chỉ đổi áo + mũ nếu nghề
+ * đó có mũ riêng — không đụng tóc/quần/giày/phụ kiện khác). Trả về cụm từ đọc
+ * to, hoặc null nếu id không hợp lệ. */
+export function applyProfession(outfit, professionId) {
+  const p = professionById(professionId);
+  if (!p) return null;
+  outfit.top = { item: p.top, color: p.topColor };
+  if (p.headwear) outfit.headwear = { item: p.headwear, color: outfit.headwear.color };
+  return { en: p.en, vi: p.vi };
+}
 
 /** Bộ phận cơ thể — chạm vào búp bê để nghe tên tiếng Anh. */
 export const BODY_PARTS = [

@@ -3,9 +3,9 @@
 // chỉ ghi thời gian chơi (tinh thần "chơi để chơi" như Vẽ Tự Do).
 
 import {
-  SLOTS, COLORS, BODY_PARTS,
+  SLOTS, COLORS, BODY_PARTS, CHARACTERS, PROFESSIONS,
   colorById, itemsForSlot, makeOutfit, equipItem, recolorSlot,
-  serializeOutfit, deserializeOutfit, randomOutfit,
+  serializeOutfit, deserializeOutfit, randomOutfit, applyCharacter, applyProfession,
 } from './stylist.js';
 import { speak, bindMute } from '../../to-mau/src/speech.js';
 import { sfx } from '../../pokemon/src/sfx.js';
@@ -19,13 +19,14 @@ const t = (key, fallback) => {
 
 const $ = (id) => document.getElementById(id);
 const els = {
-  dollBox: $('dollBox'), sayBubble: $('sayBubble'),
+  dollBox: $('dollBox'), sayBubble: $('sayBubble'), charRow: $('charRow'), professionRow: $('professionRow'),
   slotTabs: $('slotTabs'), itemGrid: $('itemGrid'), colorRow: $('colorRow'),
   btnRandom: $('btnRandom'), btnSave: $('btnSave'), btnHelp: $('btnHelp'), btnSound: $('btnSound'),
 };
 
 const OUTFIT_KEY = 'stylist.outfit';
 const GALLERY_KEY = 'stylist.gallery';
+const CHARACTER_KEY = 'stylist.character';
 const SLOT_ICON = {
   hair: '💇', top: '👕', bottom: '👖', shoes: '👟',
   headwear: '🎩', glasses: '🕶️', necklace: '📿', earrings: '💎',
@@ -34,6 +35,9 @@ const SLOT_ICON = {
 
 const state = {
   outfit: deserializeOutfit(localStorage.getItem(OUTFIT_KEY) || ''),
+  // Chỉ là preset gợi ý ban đầu (đổi tóc/áo/quần nhanh) — null = bé chưa chọn
+  // nhân vật nào, giữ đúng bộ đồ hiện có, không ép đổi gì (tương thích ngược).
+  character: localStorage.getItem(CHARACTER_KEY) || null,
   slot: 'top',
   startedAt: Date.now(),
   instruction: '',
@@ -62,7 +66,11 @@ const SKIN_DARK = '#eebd8e';
 
 function hairSvg(style, hex) {
   if (style === 'hair_long') {
-    return `<path d="M74 62 Q74 18 120 18 Q166 18 166 62 L166 150 Q150 140 146 108 L94 108 Q90 140 74 150 Z" fill="${hex}"/>`;
+    // Tóc xoã dài 2 bên đầu/cổ, KHÔNG loang ra phủ trước vai/áo (trước đây vẽ
+    // 1 khối tam giác rộng lấn hẳn vào vai — nhìn như áo choàng thay vì tóc).
+    return `<path d="M76 66 Q76 20 120 20 Q164 20 164 66 L160 80 Q120 56 80 80 Z" fill="${hex}"/>
+      <path d="M74 62 Q66 92 70 126 Q78 120 84 108 L84 66 Z" fill="${hex}"/>
+      <path d="M166 62 Q174 92 170 126 Q162 120 156 108 L156 66 Z" fill="${hex}"/>`;
   }
   if (style === 'hair_buns') {
     return `<circle cx="72" cy="52" r="17" fill="${hex}"/><circle cx="168" cy="52" r="17" fill="${hex}"/>
@@ -124,6 +132,48 @@ function topSvg(style, hex) {
       <rect x="86" y="142" width="12" height="30" rx="6" fill="${hex}"/>
       <rect x="142" y="142" width="12" height="30" rx="6" fill="${hex}"/>
       <path d="M112 140 L120 152 L128 140 Z" fill="rgba(255,255,255,0.6)"/>`;
+  }
+  if (style === 'top_doctor') {
+    return `<rect x="92" y="140" width="56" height="70" rx="10" fill="${hex}"/>
+      <rect x="84" y="142" width="12" height="40" rx="6" fill="${hex}"/>
+      <rect x="144" y="142" width="12" height="40" rx="6" fill="${hex}"/>
+      <path d="M112 140 L120 152 L128 140 Z" fill="rgba(0,0,0,0.12)"/>
+      <circle cx="120" cy="168" r="1.8" fill="rgba(0,0,0,0.35)"/>
+      <circle cx="120" cy="180" r="1.8" fill="rgba(0,0,0,0.35)"/>
+      <path d="M104 150 Q100 160 106 166 Q104 172 110 174" fill="none" stroke="#9aa5ad" stroke-width="2.4"/>
+      <circle cx="110" cy="175" r="3" fill="#9aa5ad"/>`;
+  }
+  if (style === 'top_chef') {
+    return `<rect x="94" y="140" width="52" height="60" rx="10" fill="${hex}"/>
+      <rect x="86" y="142" width="12" height="34" rx="6" fill="${hex}"/>
+      <rect x="142" y="142" width="12" height="34" rx="6" fill="${hex}"/>
+      <rect x="94" y="140" width="52" height="10" fill="rgba(0,0,0,0.08)"/>
+      <circle cx="112" cy="160" r="2.2" fill="rgba(0,0,0,0.2)"/>
+      <circle cx="112" cy="172" r="2.2" fill="rgba(0,0,0,0.2)"/>
+      <circle cx="128" cy="160" r="2.2" fill="rgba(0,0,0,0.2)"/>
+      <circle cx="128" cy="172" r="2.2" fill="rgba(0,0,0,0.2)"/>`;
+  }
+  if (style === 'top_police') {
+    return `<rect x="94" y="140" width="52" height="60" rx="8" fill="${hex}"/>
+      <rect x="86" y="142" width="12" height="34" rx="6" fill="${hex}"/>
+      <rect x="142" y="142" width="12" height="34" rx="6" fill="${hex}"/>
+      <path d="M112 140 L120 152 L128 140 Z" fill="rgba(255,255,255,0.5)"/>
+      <circle cx="120" cy="158" r="5" fill="#ffd54f" stroke="#c2a020" stroke-width="1"/>
+      <rect x="94" y="192" width="52" height="6" fill="rgba(0,0,0,0.25)"/>`;
+  }
+  if (style === 'top_firefighter') {
+    return `<rect x="92" y="140" width="56" height="62" rx="10" fill="${hex}"/>
+      <rect x="84" y="142" width="12" height="46" rx="6" fill="${hex}"/>
+      <rect x="144" y="142" width="12" height="46" rx="6" fill="${hex}"/>
+      <rect x="92" y="168" width="56" height="8" fill="#ffd54f"/>
+      <rect x="92" y="184" width="56" height="8" fill="#ffd54f"/>`;
+  }
+  if (style === 'top_astronaut') {
+    return `<rect x="90" y="138" width="60" height="66" rx="18" fill="${hex}"/>
+      <rect x="82" y="142" width="14" height="42" rx="7" fill="${hex}"/>
+      <rect x="144" y="142" width="14" height="42" rx="7" fill="${hex}"/>
+      <circle cx="120" cy="165" r="10" fill="rgba(255,255,255,0.55)"/>
+      <rect x="112" y="184" width="16" height="10" rx="3" fill="rgba(255,255,255,0.4)"/>`;
   }
   return `<rect x="94" y="140" width="52" height="60" rx="10" fill="${hex}"/>
     <rect x="86" y="142" width="12" height="34" rx="6" fill="${hex}"/>
@@ -190,6 +240,27 @@ function headwearSvg(style, hex) {
     return `<path d="M78 50 Q78 8 120 8 Q162 8 162 50 Z" fill="${hex}"/>
       <rect x="76" y="44" width="88" height="14" rx="7" fill="${hex}" opacity="0.85"/>
       <circle cx="120" cy="10" r="6" fill="#fff"/>`;
+  }
+  if (style === 'head_chefhat') {
+    return `<rect x="98" y="30" width="44" height="16" rx="4" fill="#fff"/>
+      <ellipse cx="120" cy="14" rx="26" ry="18" fill="#fff"/>
+      <circle cx="100" cy="16" r="7" fill="#fff"/>
+      <circle cx="140" cy="16" r="7" fill="#fff"/>
+      <circle cx="120" cy="4" r="8" fill="#fff"/>`;
+  }
+  if (style === 'head_policecap') {
+    return `<ellipse cx="120" cy="36" rx="46" ry="9" fill="${hex}"/>
+      <path d="M92 34 Q92 8 120 8 Q148 8 148 34 Z" fill="${hex}"/>
+      <rect x="104" y="20" width="32" height="8" rx="4" fill="#ffd54f"/>`;
+  }
+  if (style === 'head_firehelmet') {
+    return `<path d="M80 40 Q80 4 120 4 Q160 4 160 40 Z" fill="${hex}"/>
+      <ellipse cx="120" cy="42" rx="48" ry="10" fill="${hex}"/>
+      <circle cx="120" cy="20" r="8" fill="#ffd54f" stroke="#c2a020" stroke-width="1"/>`;
+  }
+  if (style === 'head_astrohelmet') {
+    return `<path d="M78 50 Q78 2 120 2 Q162 2 162 50 Z" fill="rgba(220,235,245,0.55)" stroke="#90a4ae" stroke-width="3"/>
+      <path d="M78 50 Q120 66 162 50" fill="none" stroke="#90a4ae" stroke-width="3"/>`;
   }
   return ''; // head_none
 }
@@ -301,6 +372,11 @@ function renderDoll() {
     <circle cx="98" cy="100" r="6" fill="rgba(240,120,140,0.45)"/>
     <circle cx="142" cy="100" r="6" fill="rgba(240,120,140,0.45)"/>
     <path d="M108 106 Q120 118 132 106" fill="none" stroke="#241e2e" stroke-width="3.5" stroke-linecap="round"/>
+    ${state.character === 'girl' ? `
+    <path d="M100 80 L96 76 M104 78 L101 73 M108 78 L107 72" stroke="#241e2e" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M140 80 L144 76 M136 78 L139 73 M132 78 L133 72" stroke="#241e2e" stroke-width="1.6" stroke-linecap="round"/>` : ''}
+    ${state.character === 'grandpa' ? `
+    <path d="M104 99 Q112 94 120 98 Q128 94 136 99 Q128 103 120 100 Q112 103 104 99 Z" fill="${hex('hair')}"/>` : ''}
     <g id="g-earrings">${earringsSvg(o.earrings.item, hex('earrings'))}</g>
     <g id="g-hair">${hairSvg(o.hair.item, hex('hair'))}</g>
     <g id="g-headwear">${headwearSvg(o.headwear.item, hex('headwear'))}</g>
@@ -331,6 +407,52 @@ function renderDoll() {
         announce(part);
       }
     });
+  }
+}
+
+/* ===== Chọn nhanh nhân vật (preset tóc/áo/quần, không khoá món nào) ===== */
+
+function renderCharacters() {
+  els.charRow.innerHTML = '';
+  for (const c of CHARACTERS) {
+    const btn = document.createElement('button');
+    btn.className = `char-btn${state.character === c.id ? ' active' : ''}`;
+    btn.innerHTML = `<span class="icon">${c.icon}</span><span>${c.vi}<span class="en">${c.en}</span></span>`;
+    btn.addEventListener('click', () => {
+      sfx.select();
+      const chosen = applyCharacter(state.outfit, c.id);
+      state.character = c.id;
+      localStorage.setItem(CHARACTER_KEY, c.id);
+      persist();
+      renderDoll();
+      renderWardrobe();
+      renderCharacters();
+      announce({ en: chosen.en, vi: chosen.vi });
+    });
+    els.charRow.appendChild(btn);
+  }
+}
+
+/* ===== Khoác trang phục nghề nghiệp (chỉ đổi áo + mũ, giữ nguyên phần còn lại) ===== */
+
+function renderProfessions() {
+  els.professionRow.innerHTML = '';
+  for (const p of PROFESSIONS) {
+    const btn = document.createElement('button');
+    const active = state.outfit.top.item === p.top && (!p.headwear || state.outfit.headwear.item === p.headwear);
+    btn.className = `char-btn${active ? ' active' : ''}`;
+    btn.innerHTML = `<span class="icon">${p.icon}</span><span>${p.vi}<span class="en">${p.en}</span></span>`;
+    btn.addEventListener('click', () => {
+      sfx.select();
+      const phrase = applyProfession(state.outfit, p.id);
+      if (!phrase) return;
+      persist();
+      renderDoll();
+      renderWardrobe();
+      renderProfessions();
+      announce(phrase);
+    });
+    els.professionRow.appendChild(btn);
   }
 }
 
@@ -394,6 +516,7 @@ function renderWardrobe() {
   renderTabs();
   renderItems();
   renderColors();
+  renderProfessions(); // đồ nghề nghiệp có thể trùng/lệch tuỳ món vừa đổi, luôn làm mới trạng thái active
 }
 
 function persist() {
@@ -440,6 +563,7 @@ window.addEventListener('pagehide', () => {
 els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
 renderDoll();
 renderWardrobe();
+renderCharacters();
 sayInstruction(t('stylist.help', 'Chọn ô quần áo bên phải rồi chạm món đồ để mặc cho bạn búp bê — máy sẽ đọc tên món đồ bằng tiếng Anh! Chạm chấm màu để đổi màu, chạm vào người búp bê để nghe tên bộ phận cơ thể. Bấm xúc xắc để trộn đồ, bấm máy ảnh để lưu bộ đồ đẹp!'));
 
 // Hook cho e2e test
