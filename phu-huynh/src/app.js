@@ -5,6 +5,7 @@
 import * as api from '../../shared/api.js';
 import {
   buildWeeklyReport, formatReportVi, minutesByGroup, minutesByTimeOfDay, weeklyWinRate, weekStart,
+  examProgressReport,
 } from '../../shared/report.js';
 import {
   catalogItem, CATALOG, effectiveCost, DEFAULT_REWARD_COST_MULTIPLIER,
@@ -13,7 +14,43 @@ import {
 const $ = (id) => document.getElementById(id);
 const AVATARS = ['🐰', '🐯', '🐸', '🦄', '🐼', '🐥', '🦊', '🐨', '🐷', '🦁', '🐳', '🦖'];
 
-const state = { kids: [], kid: null, avatar: AVATARS[0] };
+const state = {
+  kids: [], kid: null, avatar: AVATARS[0], compareMode: false, kidTab: 'stats', mainTab: 'kids',
+};
+
+/* ===== Tab lớn đầu trang: "Các bé" vs "Cài đặt" (gộp đăng nhập gần đây,
+   dữ liệu & thiết bị, giá quà, cài đặt chung — vốn tách rời khỏi việc theo
+   dõi từng bé — vào 1 chỗ riêng). ===== */
+function showMainTab(tab) {
+  state.mainTab = tab;
+  for (const b of $('mainTabs').querySelectorAll('button[data-maintab]')) {
+    b.classList.toggle('active', b.dataset.maintab === tab);
+  }
+  for (const el of document.querySelectorAll('.main-tab-panel')) {
+    el.classList.toggle('hidden', el.dataset.maintab !== tab);
+  }
+}
+$('mainTabs').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-maintab]');
+  if (btn) showMainTab(btn.dataset.maintab);
+});
+showMainTab(state.mainTab);
+
+/* ===== Tab con trong màn từng bé (thống kê/từ sai/báo cáo/sổ quà/cài đặt) =====
+   Tách ra để phụ huynh không phải kéo dài 1 màn mới thấy hết chart + lịch sử. */
+function showKidTab(tab) {
+  state.kidTab = tab;
+  for (const b of $('kidSubTabs').querySelectorAll('button[data-tab]')) {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  }
+  for (const el of document.querySelectorAll('.kp-tab')) {
+    el.classList.toggle('hidden', el.dataset.kptab !== tab);
+  }
+}
+$('kidSubTabs').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-tab]');
+  if (btn) showKidTab(btn.dataset.tab);
+});
 
 function show(id) {
   for (const v of ['viewSetup', 'viewAuth', 'viewMain']) $(v).classList.toggle('hidden', v !== id);
@@ -111,19 +148,31 @@ async function loadKids() {
   if (!state.kids.length) {
     tabs.innerHTML = '<i style="font-size:13px;color:var(--ink-dim)">Chưa có bé nào — thêm bé đầu tiên bên dưới nhé.</i>';
     $('kidPanel').classList.add('hidden');
+    $('compareCard').classList.add('hidden');
     $('addKidBox').open = true;
     return;
   }
+  // "Tất cả" chỉ có ý nghĩa khi có từ 2 bé trở lên — 1 bé thì so sánh với ai.
+  if (state.kids.length >= 2) {
+    const allBtn = document.createElement('button');
+    allBtn.className = `kid-tab${state.compareMode ? ' active' : ''}`;
+    allBtn.textContent = '🌟 Tất cả';
+    allBtn.addEventListener('click', () => selectCompare());
+    tabs.appendChild(allBtn);
+  }
   for (const k of state.kids) {
     const b = document.createElement('button');
-    b.className = `kid-tab${state.kid?.id === k.id ? ' active' : ''}`;
+    b.className = `kid-tab${!state.compareMode && state.kid?.id === k.id ? ' active' : ''}`;
     b.textContent = `${k.avatar} ${k.name}`;
     b.addEventListener('click', () => selectKid(k));
     tabs.appendChild(b);
   }
-  renderCompare();
   renderLoginLog();
-  if (!state.kid) selectKid(state.kids[0]);
+  if (state.compareMode) {
+    $('kidPanel').classList.add('hidden');
+    $('compareCard').classList.remove('hidden');
+    renderCompare();
+  } else if (!state.kid) selectKid(state.kids[0]);
 }
 
 /* ===== Nhật ký đăng nhập của bé ===== */
@@ -169,11 +218,20 @@ $('btnAddKid').addEventListener('click', async () => {
 
 async function selectKid(k) {
   state.kid = k;
+  state.compareMode = false;
   await loadKids();
+  $('compareCard').classList.add('hidden');
   $('kidPanel').classList.remove('hidden');
   $('kidTitle').textContent = `${k.avatar} ${k.name}`;
+  showKidTab(state.kidTab); // giữ nguyên tab con đang xem khi chuyển bé (dễ so sánh cùng 1 mục giữa các bé)
   fillEditKid(k);
   renderKidStats(k).catch((e) => { $('adminErr').textContent = e.message; });
+}
+
+async function selectCompare() {
+  state.compareMode = true;
+  state.kid = null;
+  await loadKids();
 }
 
 /* ===== Sửa hồ sơ + cài đặt riêng của bé ===== */
@@ -338,6 +396,7 @@ async function renderKidStats(k) {
   }
 
   renderAnalytics(sessions);
+  renderExamProgress(sessions);
 
   // Sổ sao gần nhất
   $('rewardLog').innerHTML = ledger.length
@@ -454,25 +513,66 @@ function renderAnalytics(sessions) {
   }).join('');
 }
 
+/* ===== Tiến độ khu Thi Chứng Chỉ Anh (Cambridge YLE/KET/PET/TOEFL Junior/
+   TOEIC/Ngữ Pháp Trực Quan) — gộp theo cấp độ, hiện phút học/số ván/lần
+   chơi gần nhất/xu hướng hiệu quả (module thuần shared/report.js). ===== */
+
+const EXAM_TREND_BADGE = {
+  improving: { icon: '📈', text: 'Đang tiến bộ', cls: 'good' },
+  declining: { icon: '📉', text: 'Đang giảm', cls: 'bad' },
+  stable: { icon: '➖', text: 'Ổn định', cls: '' },
+  'not-enough-data': { icon: '⏳', text: 'Chưa đủ ván để đánh giá', cls: '' },
+};
+
+function renderExamProgress(sessions) {
+  const box = $('examProgress');
+  const rows = examProgressReport(sessions);
+  if (!rows.length) {
+    box.innerHTML = '<i style="font-size:13px;color:var(--ink-dim)">Bé chưa chơi game nào trong khu Thi Chứng Chỉ Anh.</i>';
+    return;
+  }
+  box.innerHTML = `<div class="cmp">
+    <div class="head"></div><div class="head">Phút học</div><div class="head">Số ván</div><div class="head">Lần chơi gần nhất</div><div class="head">Hiệu quả</div>
+    ${rows.map((r) => {
+      const badge = EXAM_TREND_BADGE[r.trend];
+      const last = r.daysSinceLast === null ? '—'
+        : r.daysSinceLast === 0 ? 'Hôm nay'
+          : `${r.daysSinceLast} ngày trước`;
+      return `
+      <div class="kname">${r.label}</div>
+      <div>${r.minutes} phút</div>
+      <div>${r.sessions} ván</div>
+      <div>${last}</div>
+      <div style="${badge.cls === 'good' ? 'color:var(--good)' : badge.cls === 'bad' ? 'color:var(--bad)' : ''}">${badge.icon} ${badge.text}</div>`;
+    }).join('')}
+  </div>`;
+}
+
 /* ===== So sánh các bé (1 request/bảng nhờ truy vấn gộp cả nhà) ===== */
 
 let compareRenderedAt = 0;
 
-async function renderCompare() {
+async function renderCompare(force = false) {
   if (state.kids.length < 2) { $('compareCard').classList.add('hidden'); return; }
-  $('compareCard').classList.remove('hidden');
-  if (Date.now() - compareRenderedAt < 30000) return; // loadKids gọi nhiều lần — chỉ tải lại sau 30s
+  if (!force && Date.now() - compareRenderedAt < 30000) return; // loadKids/live gọi nhiều lần — chỉ tải lại sau 30s
   compareRenderedAt = Date.now();
   try {
-    const [stars, weak, sessions] = await Promise.all([
+    const fourWeeksAgo = new Date(Date.now() - 28 * 86400000).toISOString();
+    const [stars, weak, sessions4w, ledgerAll] = await Promise.all([
       api.familyStarBalances(), api.familyWeakCounts(),
-      api.familySessionsSince(weekStart().toISOString()),
+      api.familySessionsSince(fourWeeksAgo),
+      api.familyLedgerSince(fourWeeksAgo),
     ]);
+    const start = weekStart();
     const perKid = state.kids.map((k) => {
-      const mine = sessions.filter((s) => s.profile_id === k.id);
-      const minutes = Math.round(mine.reduce((sum, s) => sum + (s.seconds || 0), 0) / 60);
-      const days = new Set(mine.map((s) => (s.played_at || '').slice(0, 10))).size;
-      return { k, minutes, days, stars: stars.get(k.id) || 0, weak: weak.get(k.id) || 0 };
+      const mine4w = sessions4w.filter((s) => s.profile_id === k.id);
+      const mineWeek = mine4w.filter((s) => s.played_at && new Date(s.played_at) >= start);
+      const minutes = Math.round(mineWeek.reduce((sum, s) => sum + (s.seconds || 0), 0) / 60);
+      const days = new Set(mineWeek.map((s) => (s.played_at || '').slice(0, 10))).size;
+      return {
+        k, minutes, days, stars: stars.get(k.id) || 0, weak: weak.get(k.id) || 0,
+        trend: weeklyWinRate(mine4w),
+      };
     });
     const maxMin = Math.max(1, ...perKid.map((r) => r.minutes));
     $('compareBox').innerHTML = `<div class="cmp">
@@ -484,6 +584,32 @@ async function renderCompare() {
         <div><b>${r.stars}</b></div>
         <div>${r.weak ? `<b style="color:var(--bad)">${r.weak}</b>` : '<span style="color:var(--good)">0 🎉</span>'}</div>`).join('')}
     </div>`;
+
+    // Tiến bộ 4 tuần: 1 hàng cột nhỏ riêng cho mỗi bé (dùng đúng màu bé).
+    $('compareTrend').innerHTML = perKid.map((r) => `
+      <div style="margin-bottom:12px">
+        <div style="font-weight:800;font-size:13px;margin-bottom:4px">${r.k.avatar} ${r.k.name}</div>
+        <div class="trend">${r.trend.map((w) => {
+          const pct = w.rate === null ? 0 : Math.round(w.rate * 100);
+          return `<div class="col">
+            <div class="pct">${w.rate === null ? '—' : `${pct}%`}</div>
+            <div class="tbar" style="height:${w.rate === null ? 3 : Math.max(4, pct * 0.6)}px;${w.rate === null ? 'background:#d8cdb6' : `background:${r.k.color || '#ff8a3d'}`}"></div>
+            <div class="tlab">${w.label}</div></div>`;
+        }).join('')}</div>
+      </div>`).join('');
+
+    // Hoạt động gần đây gộp cả nhà (sổ sao mọi bé, sắp theo thời gian).
+    const kidOf = new Map(state.kids.map((k) => [k.id, k]));
+    $('compareActivity').innerHTML = ledgerAll.length
+      ? ledgerAll.slice(0, 40).map((r) => {
+          const k = kidOf.get(r.profile_id);
+          return `<div style="padding:4px 0;border-bottom:1px solid var(--line)">
+            ${k ? `${k.avatar} <b>${k.name}</b>` : 'Bé (đã xóa)'} — ${(r.ts || '').slice(0, 10)} —
+            <span style="color:${r.delta > 0 ? 'var(--good)' : 'var(--bad, #c2410c)'}">${r.delta > 0 ? '+' : ''}${r.delta}⭐</span> —
+            ${viReason(r.reason)}
+          </div>`;
+        }).join('')
+      : '<i style="color:var(--ink-dim)">Chưa có giao dịch sao nào trong 4 tuần qua.</i>';
   } catch (e) {
     $('compareBox').innerHTML = `<i style="font-size:13px;color:var(--ink-dim)">Không tải được (${e.message})</i>`;
   }
@@ -509,7 +635,8 @@ $('liveToggle').addEventListener('change', (e) => {
   liveTimer = null;
   if (e.target.checked) {
     liveTimer = setInterval(() => {
-      if (state.kid) renderKidStats(state.kid).catch(() => {});
+      if (state.compareMode) renderCompare(true).catch(() => {});
+      else if (state.kid) renderKidStats(state.kid).catch(() => {});
       renderLoginLog();
     }, 15000);
   }
@@ -586,6 +713,15 @@ $('btnSaveSettings').addEventListener('click', async () => {
 
 /* ===== Chỉnh giá riêng từng món quà (ghi đè hệ số chung, riêng cho gia đình này) ===== */
 
+// Gia đình tạo trước 07/2026 chưa có cột custom_item_costs -> PostgREST từ
+// chối ghi với PGRST204 ("Could not find the 'custom_item_costs' column").
+function viSettingsError(msg) {
+  if (/custom_item_costs/.test(msg) || /PGRST204/.test(msg)) {
+    return 'Cần chạy server/migrate-05-custom-item-costs.sql trong Supabase SQL Editor để bật tính năng chỉnh giá riêng từng món quà (database gia đình tạo trước 07/2026 chưa có cột này).';
+  }
+  return msg;
+}
+
 function renderPriceEditor(settings) {
   const overrides = settings.custom_item_costs || {};
   const multiplier = settings.reward_cost_multiplier ?? DEFAULT_REWARD_COST_MULTIPLIER;
@@ -619,7 +755,7 @@ $('btnSavePrices').addEventListener('click', async () => {
     await api.saveSettings({ custom_item_costs: overrides });
     $('priceOk').textContent = 'Đã lưu giá quà riêng cho Tủ Quà của gia đình!';
     await loadSettings();
-  } catch (e) { $('priceOk').textContent = `Lỗi: ${e.message}`; }
+  } catch (e) { $('priceOk').textContent = `Lỗi: ${viSettingsError(e.message)}`; }
 });
 
 $('btnResetPrices').addEventListener('click', async () => {
@@ -628,7 +764,7 @@ $('btnResetPrices').addEventListener('click', async () => {
     await api.saveSettings({ custom_item_costs: {} });
     $('priceOk').textContent = 'Đã đưa mọi giá quà về mặc định.';
     await loadSettings();
-  } catch (e) { $('priceOk').textContent = `Lỗi: ${e.message}`; }
+  } catch (e) { $('priceOk').textContent = `Lỗi: ${viSettingsError(e.message)}`; }
 });
 
 async function loadDevices() {

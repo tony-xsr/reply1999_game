@@ -297,16 +297,18 @@ function startLevel() {
 
 /* ===== Ngắm & bắn ===== */
 
+// Đo rect() 1 lần lúc pointerdown, tránh đo lại mỗi pointermove (layout thrashing).
+let aimRect = null;
 function angleFromEvent(e) {
-  const rect = els.canvas.getBoundingClientRect();
-  const x = ((e.clientX - rect.left) / rect.width) * FIELD_W;
-  const y = ((e.clientY - rect.top) / rect.height) * FIELD_H;
+  const x = ((e.clientX - aimRect.left) / aimRect.width) * FIELD_W;
+  const y = ((e.clientY - aimRect.top) / aimRect.height) * FIELD_H;
   const a = Math.atan2(x - SHOOTER_X, SHOOTER_Y - y); // 0 = thẳng lên
   return Math.max(-MAX_ANGLE, Math.min(MAX_ANGLE, a));
 }
 
 els.wrap.addEventListener('pointerdown', (e) => {
   if (!state.game || state.game.over || state.busy) return;
+  aimRect = els.canvas.getBoundingClientRect();
   state.aiming = true;
   state.aimAngle = angleFromEvent(e);
 });

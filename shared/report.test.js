@@ -185,15 +185,13 @@ check('examProgressReport: gộp đúng theo cấp độ, tính phút/số ván/
   const rows = examProgressReport(sessions, NOW);
   const movers = rows.find((r) => r.level === 'movers');
   const nguphap = rows.find((r) => r.level === 'nguphap');
-  return (() => {
-    assert.equal(rows.length, 2, 'chỉ 2 cấp độ xuất hiện (bỏ qua daovang)');
-    assert.equal(movers.label, 'Movers');
-    assert.equal(movers.sessions, 2);
-    assert.equal(movers.minutes, 15, '(300+600)/60 = 15 phút');
-    assert.equal(movers.daysSinceLast, 2, 'ván gần nhất của movers là 2 ngày trước');
-    assert.equal(nguphap.sessions, 1);
-    assert.equal(nguphap.daysSinceLast, 1);
-  })();
+  assert.equal(rows.length, 2, 'chỉ 2 cấp độ xuất hiện (bỏ qua daovang)');
+  assert.equal(movers.label, 'Movers');
+  assert.equal(movers.sessions, 2);
+  assert.equal(movers.minutes, 15, '(300+600)/60 = 15 phút');
+  assert.equal(movers.daysSinceLast, 2, 'ván gần nhất của movers là 2 ngày trước');
+  assert.equal(nguphap.sessions, 1);
+  assert.equal(nguphap.daysSinceLast, 1);
 });
 
 check('examProgressReport: xu hướng hiệu quả cần đủ 6 ván mới tính, thiếu thì "not-enough-data"', () => {
@@ -221,14 +219,14 @@ check('examProgressReport: xu hướng hiệu quả cần đủ 6 ván mới tí
   const rowsDeclining = examProgressReport(declining, NOW);
   assert.equal(rowsDeclining[0].trend, 'declining');
 
-  // Tỷ lệ thắng không đổi rõ rệt giữa 2 nửa → ổn định
+  // Tỷ lệ thắng GIỐNG NHAU giữa 2 nửa (mỗi nửa 2/3 thắng) → ổn định
   const stable = [
     { mode: 'exam-toeic-mix', played_at: iso(6), seconds: 60, result: 'win' },
     { mode: 'exam-toeic-mix', played_at: iso(5), seconds: 60, result: 'loss' },
     { mode: 'exam-toeic-mix', played_at: iso(4), seconds: 60, result: 'win' },
-    { mode: 'exam-toeic-mix', played_at: iso(3), seconds: 60, result: 'loss' },
-    { mode: 'exam-toeic-mix', played_at: iso(2), seconds: 60, result: 'win' },
-    { mode: 'exam-toeic-mix', played_at: iso(1), seconds: 60, result: 'loss' },
+    { mode: 'exam-toeic-mix', played_at: iso(3), seconds: 60, result: 'win' },
+    { mode: 'exam-toeic-mix', played_at: iso(2), seconds: 60, result: 'loss' },
+    { mode: 'exam-toeic-mix', played_at: iso(1), seconds: 60, result: 'win' },
   ];
   const rowsStable = examProgressReport(stable, NOW);
   assert.equal(rowsStable[0].trend, 'stable');

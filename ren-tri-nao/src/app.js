@@ -459,11 +459,14 @@ function startBilliard() {
     }
   }
 
+  // Đo rect() 1 lần lúc pointerdown + gom pointermove qua rAF, tránh layout
+  // thrashing và vẽ lại nhiều hơn tốc độ khung hình thật sự cần.
+  let biRect = null;
+  let rafAimBi = false;
   function toXY(e) {
-    const rect = canvas.getBoundingClientRect();
     return {
-      x: ((e.clientX - rect.left) / rect.width) * W,
-      y: ((e.clientY - rect.top) / rect.height) * H,
+      x: ((e.clientX - biRect.left) / biRect.width) * W,
+      y: ((e.clientY - biRect.top) / biRect.height) * H,
     };
   }
 
@@ -471,6 +474,7 @@ function startBilliard() {
     if (animId) return;
     const cue = balls.find((b) => b.cue);
     if (!cue) return;
+    biRect = canvas.getBoundingClientRect();
     const p = toXY(e);
     aiming = true;
     aimDx = p.x - cue.x;
@@ -484,7 +488,7 @@ function startBilliard() {
     const p = toXY(e);
     aimDx = p.x - cue.x;
     aimDy = p.y - cue.y;
-    draw();
+    if (!rafAimBi) { rafAimBi = true; requestAnimationFrame(() => { rafAimBi = false; draw(); }); }
   });
   canvas.addEventListener('pointerup', () => {
     if (!aiming) return;
