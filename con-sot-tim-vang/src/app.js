@@ -235,10 +235,11 @@ function startLevel() {
 
 /* ===== Bấm cụm HOẶC kéo tay lướt qua nhiều viên cùng màu ===== */
 
+// Đo rect() 1 lần lúc pointerdown, tránh đo lại mỗi pointermove (layout thrashing).
+let cellRect = null;
 function cellFromEvent(e) {
-  const rect = els.canvas.getBoundingClientRect();
-  const c = Math.floor(((e.clientX - rect.left) / rect.width) * COLS);
-  const r = Math.floor(((e.clientY - rect.top) / rect.height) * ROWS);
+  const c = Math.floor(((e.clientX - cellRect.left) / cellRect.width) * COLS);
+  const r = Math.floor(((e.clientY - cellRect.top) / cellRect.height) * ROWS);
   if (r < 0 || c < 0 || r >= ROWS || c >= COLS) return null;
   return [r, c];
 }
@@ -279,6 +280,7 @@ function snapshotColors(cells, g) {
 els.wrap.addEventListener('pointerdown', (e) => {
   const g = state.game;
   if (!g || g.over) return;
+  cellRect = els.canvas.getBoundingClientRect();
   const cell = cellFromEvent(e);
   if (!cell) return;
   state.dragging = true;

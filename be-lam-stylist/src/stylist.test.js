@@ -183,12 +183,13 @@ check('characterById: id lạ rơi về nhân vật đầu tiên (an toàn)', ((
 
 console.log('— Khoác trang phục nghề nghiệp (chỉ đổi áo + mũ nếu có) —');
 
-check('6 nghề nghiệp: id duy nhất, đủ icon/tên EN+VI, top trỏ đúng ITEMS + màu hợp lệ, headwear (nếu có) cũng vậy', (() => {
+check('9 nghề nghiệp: id duy nhất, đủ icon/tên EN+VI, top trỏ đúng ITEMS + màu hợp lệ, headwear (nếu có) cũng vậy', (() => {
   const ids = new Set(PROFESSIONS.map((p) => p.id));
-  return ids.size === PROFESSIONS.length && PROFESSIONS.length === 6
+  return ids.size === PROFESSIONS.length && PROFESSIONS.length === 9
     && PROFESSIONS.every((p) => p.icon && p.en && p.vi
       && itemById(p.top)?.slot === 'top' && COLORS.some((c) => c.id === p.topColor)
-      && (p.headwear === null || itemById(p.headwear)?.slot === 'headwear'));
+      && (p.headwear === null || itemById(p.headwear)?.slot === 'headwear'))
+    && ['pilot', 'farmer', 'singer'].every((id) => ids.has(id)); // đủ 3 nghề mới thêm
 })());
 
 check('applyProfession: đổi ĐÚNG áo (và mũ nếu nghề có mũ), KHÔNG đụng tóc/quần/giày/phụ kiện khác', (() => {
@@ -217,6 +218,19 @@ check('applyProfession: id không tồn tại trả về null, bộ đồ không
 })());
 
 check('professionById: id lạ trả về null (không rơi về mặc định như characterById)', (() => professionById('khong_co') === null));
+
+check('3 nghề mới (phi công/nông dân/ca sĩ): phi công + nông dân có mũ riêng, ca sĩ không có mũ nên giữ nguyên mũ đang đội', (() => {
+  const o = makeOutfit();
+  equipItem(o, 'head_crown');
+  const pilot = applyProfession(o, 'pilot');
+  const okPilot = pilot.en === 'pilot' && o.top.item === 'top_pilot' && o.headwear.item === 'head_pilotcap';
+  const farmer = applyProfession(o, 'farmer');
+  const okFarmer = farmer.en === 'farmer' && o.top.item === 'top_farmer' && o.headwear.item === 'head_strawhat';
+  equipItem(o, 'head_crown');
+  const singer = applyProfession(o, 'singer');
+  const okSinger = singer.en === 'singer' && o.top.item === 'top_singer' && o.headwear.item === 'head_crown';
+  return okPilot && okFarmer && okSinger;
+})());
 
 console.log(`\nKết quả: ${passed} pass, ${failed} fail`);
 if (failed > 0) process.exit(1);

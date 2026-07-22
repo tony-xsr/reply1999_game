@@ -236,16 +236,21 @@ function startLevel() {
 
 /* ===== Điều khiển: cá bơi về phía ngón tay ===== */
 
+// Đo rect() 1 lần lúc pointerdown, tránh đo lại mỗi pointermove (layout thrashing).
+let fieldRect = null;
 function fieldPos(e) {
-  const rect = els.canvas.getBoundingClientRect();
   return {
-    x: ((e.clientX - rect.left) / rect.width) * FIELD_W,
-    y: ((e.clientY - rect.top) / rect.height) * FIELD_H,
+    x: ((e.clientX - fieldRect.left) / fieldRect.width) * FIELD_W,
+    y: ((e.clientY - fieldRect.top) / fieldRect.height) * FIELD_H,
   };
 }
 
 let touching = false;
-els.wrap.addEventListener('pointerdown', (e) => { touching = true; state.target = fieldPos(e); });
+els.wrap.addEventListener('pointerdown', (e) => {
+  touching = true;
+  fieldRect = els.canvas.getBoundingClientRect();
+  state.target = fieldPos(e);
+});
 els.wrap.addEventListener('pointermove', (e) => { if (touching) state.target = fieldPos(e); });
 els.wrap.addEventListener('pointerup', () => { touching = false; });
 els.wrap.addEventListener('pointercancel', () => { touching = false; });
