@@ -93,12 +93,19 @@ create table if not exists settings (
   daily_limit_min        int  not null default 45,
   reward_cost_multiplier real not null default 36,
   custom_item_costs      jsonb not null default '{}',
+  -- Key AI (Groq...) de tu sinh them cau hoi on tap - xem canh bao an toan o
+  -- migrate-06-ai-key.sql (key goi THANG tu trinh duyet, khong co server rieng giau key).
+  ai_provider            text not null default 'groq',
+  ai_api_key             text not null default '',
   updated_at             timestamptz not null default now()
 );
 -- Gia dinh da tao truoc 07/2026 can chay server/migrate-05-custom-item-costs.sql
 -- (Supabase SQL Editor) de them cot gia rieng tung mon qua nay - dong ALTER
 -- duoi day chi ap dung cho project MOI tao (chay schema.sql lan dau).
 alter table settings add column if not exists custom_item_costs jsonb not null default '{}';
+-- Gia dinh da tao truoc phai chay server/migrate-06-ai-key.sql de them 2 cot AI nay.
+alter table settings add column if not exists ai_provider text not null default 'groq';
+alter table settings add column if not exists ai_api_key  text not null default '';
 
 -- May da lien ket (chi de hien thi/quan ly, khong phai co che bao mat).
 create table if not exists devices (
@@ -118,6 +125,66 @@ create table if not exists kid_logins (
   ts         timestamptz not null default now()
 );
 create index if not exists kid_logins_fam_ts on kid_logins (family_id, ts desc);
+
+-- Doan van AI tu sinh de luyen dich (3 bai/ngay/be, xem shared/groq.js
+-- generatePassages()). `day` do CLIENT truyen vao (theo ngay dia phuong cua
+-- may dang mo, khong dung default server) de tranh lech mui gio.
+create table if not exists translation_passages (
+  id         uuid primary key default gen_random_uuid(),
+  family_id  uuid not null references families(id) on delete cascade,
+  profile_id uuid not null references profiles(id) on delete cascade,
+  level      text not null,
+  day        date not null,
+  title      text not null,
+  passage_en text not null,
+  vocab      jsonb not null default '[]', -- [{"word":"...", "vi":"..."}]
+  created_at timestamptz not null default now()
+);
+create index if not exists translation_passages_profile_day on translation_passages (profile_id, day);
+
+-- Bai lam cua be: ban dich tieng Viet + diem/nhan xet AI cham (xem
+-- shared/groq.js gradeTranslation()) + ket qua noi tu vung sau do.
+create table if not exists translation_submissions (
+  id             uuid primary key default gen_random_uuid(),
+  family_id      uuid not null references families(id) on delete cascade,
+  profile_id     uuid not null references profiles(id) on delete cascade,
+  passage_id     uuid not null references translation_passages(id) on delete cascade,
+  submitted_text text not null,
+  ai_score       int,
+  ai_feedback    text not null default '',
+  vocab_correct  int not null default 0,
+  vocab_total    int not null default 0,
+  submitted_at   timestamptz not null default now()
+);
+create index if not exists translation_submissions_profile_time on translation_submissions (profile_id, submitted_at desc);
+
+-- De trac nghiem ngu phap AI tu sinh (5 cau/ngay/be, xem shared/groq.js
+-- generateGrammarQuiz()) — 1 dong = TRON BO 5 cau cua 1 ngay (khac
+-- translation_passages moi dong 1 doan van, o day gop chung 1 dong cho gon).
+create table if not exists grammar_quizzes (
+  id         uuid primary key default gen_random_uuid(),
+  family_id  uuid not null references families(id) on delete cascade,
+  profile_id uuid not null references profiles(id) on delete cascade,
+  level      text not null,
+  day        date not null,
+  questions  jsonb not null default '[]', -- [{"prompt":"...","options":["...","...","...","..."],"answer":0,"explanations":["...","...","...","..."]}]
+  created_at timestamptz not null default now()
+);
+create index if not exists grammar_quizzes_profile_day on grammar_quizzes (profile_id, day);
+
+-- Bai lam cua be: dap an da chon + diem + goi y AI cham sau khi nop
+-- (xem shared/groq.js gradeGrammarQuiz()).
+create table if not exists grammar_quiz_submissions (
+  id            uuid primary key default gen_random_uuid(),
+  family_id     uuid not null references families(id) on delete cascade,
+  profile_id    uuid not null references profiles(id) on delete cascade,
+  quiz_id       uuid not null references grammar_quizzes(id) on delete cascade,
+  answers       jsonb not null default '[]', -- [{"selected":0,"correct":true}, ...]
+  score         int not null default 0, -- so cau dung / tong so cau
+  ai_suggestion text not null default '',
+  submitted_at  timestamptz not null default now()
+);
+create index if not exists grammar_quiz_submissions_profile_time on grammar_quiz_submissions (profile_id, submitted_at desc);
 
 -- ===== View =================================================================
 
@@ -145,6 +212,10 @@ alter table purchases      enable row level security;
 alter table manual_rewards enable row level security;
 alter table settings       enable row level security;
 alter table devices        enable row level security;
+alter table translation_passages    enable row level security;
+alter table translation_submissions enable row level security;
+alter table grammar_quizzes             enable row level security;
+alter table grammar_quiz_submissions    enable row level security;
 
 drop policy if exists families_own on families;
 create policy families_own on families
@@ -159,7 +230,9 @@ do $$
 declare t text;
 begin
   foreach t in array array['profiles','sessions','miss_events','reward_ledger',
-                           'purchases','manual_rewards','settings','devices','kid_logins']
+                           'purchases','manual_rewards','settings','devices','kid_logins',
+                           'translation_passages','translation_submissions',
+                           'grammar_quizzes','grammar_quiz_submissions']
   loop
     execute format('drop policy if exists %I_fam on %I', t, t);
     execute format(
