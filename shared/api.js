@@ -408,9 +408,12 @@ export async function getSettings() {
   const s = rows[0] || {
     family_id: fam.id, tts_rate: 1.0, daily_limit_min: 45,
     reward_cost_multiplier: DEFAULT_REWARD_COST_MULTIPLIER, custom_item_costs: {},
+    ai_provider: 'groq', ai_api_key: '',
   };
   if (s.reward_cost_multiplier == null) s.reward_cost_multiplier = DEFAULT_REWARD_COST_MULTIPLIER; // gia dinh cu chua chay migrate-03
   if (s.custom_item_costs == null) s.custom_item_costs = {}; // gia dinh cu chua chay migrate-04
+  if (s.ai_provider == null) s.ai_provider = 'groq'; // gia dinh cu chua chay migrate-06
+  if (s.ai_api_key == null) s.ai_api_key = ''; // gia dinh cu chua chay migrate-06
   try { localStorage.setItem('r99-settings-cache', JSON.stringify({ ...s, cachedAt: Date.now() })); } catch { /* ignore */ }
   return s;
 }
@@ -425,7 +428,7 @@ export function cachedSettings() {
 // "Chỉnh giá quà" (custom_item_costs) lưu ĐỘC LẬP nhau; nếu luôn ghi đè cả
 // 4 cột mỗi lần gọi, lưu form này sẽ vô tình XOÁ TRẮNG dữ liệu form kia.
 export async function saveSettings({
-  tts_rate, daily_limit_min, reward_cost_multiplier, custom_item_costs,
+  tts_rate, daily_limit_min, reward_cost_multiplier, custom_item_costs, ai_provider, ai_api_key,
 } = {}) {
   const fam = await ensureFamily();
   const payload = { family_id: fam.id, updated_at: new Date().toISOString() };
@@ -433,6 +436,8 @@ export async function saveSettings({
   if (daily_limit_min !== undefined) payload.daily_limit_min = daily_limit_min;
   if (reward_cost_multiplier !== undefined) payload.reward_cost_multiplier = reward_cost_multiplier;
   if (custom_item_costs !== undefined) payload.custom_item_costs = custom_item_costs;
+  if (ai_provider !== undefined) payload.ai_provider = ai_provider;
+  if (ai_api_key !== undefined) payload.ai_api_key = ai_api_key;
   await post('settings', payload, { Prefer: 'return=minimal,resolution=merge-duplicates' });
 }
 
@@ -473,6 +478,98 @@ export async function recordKidLogin(profileId, { device = '', browser = '' } = 
 /** Các lần đăng nhập gần nhất của CẢ NHÀ (cho trang Phụ Huynh). */
 export async function recentKidLogins(limit = 15) {
   return get(`kid_logins?select=profile_id,device,browser,ts&order=ts.desc&limit=${limit}`);
+}
+
+/* ===== Luyện Dịch (đoạn văn ngắn AI tự sinh + chấm điểm bằng AI) ===== */
+
+/** Ngày N (mặc định 0 = hôm nay) tính theo giờ ĐỊA PHƯƠNG của thiết bị đang
+ * mở — dùng để "dồn trước" bài của các ngày SẮP TỚI (offset dương) khi vào
+ * site (xem shared/kid-bar.js checkDailyAiContent()). Khác `shared/vn-date.js`
+ * (server dùng giờ CỐ ĐỊNH +7 vì không có "giờ địa phương máy chủ" đáng tin). */
+export function dateKeyOffset(offsetDays = 0, base = new Date()) {
+  const d = new Date(base.getTime() + offsetDays * 86400000);
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+function todayDateKey() {
+  return dateKeyOffset(0);
+}
+
+/** Bài dịch của bé vào ĐÚNG ngày `day` (chuỗi "YYYY-MM-DD") — rỗng nếu chưa sinh. */
+export async function passagesForDay(profileId, day) {
+  return get(`translation_passages?select=*&profile_id=eq.${profileId}&day=eq.${day}&order=created_at.asc`);
+}
+
+/** 3 bài dịch HÔM NAY của bé (rỗng nếu chưa sinh — bên gọi tự sinh mới qua savePassages). */
+export async function todayPassages(profileId) {
+  return passagesForDay(profileId, todayDateKey());
+}
+
+/** Lưu các bài dịch MỚI sinh cho đúng ngày `day` (mặc định hôm nay — truyền
+ * ngày khác để "dồn trước" bài của ngày sắp tới). passages: [{level, title, passage_en, vocab}]. */
+export async function savePassages(profileId, passages, day = todayDateKey()) {
+  const fam = await ensureFamily();
+  const rows = passages.map((p) => ({ family_id: fam.id, profile_id: profileId, day, ...p }));
+  return post('translation_passages', rows, { Prefer: 'return=representation' });
+}
+
+/** Bé nộp bản dịch: lưu điểm/nhận xét AI đã chấm + kết quả nối từ vựng sau đó. */
+export async function submitTranslation(passageId, {
+  submittedText, aiScore, aiFeedback, vocabCorrect, vocabTotal,
+}) {
+  const profileId = getCurrentKidId();
+  if (!profileId) throw new Error('NO_KID_SELECTED');
+  const fam = await ensureFamily();
+  await post('translation_submissions', {
+    family_id: fam.id, profile_id: profileId, passage_id: passageId,
+    submitted_text: submittedText, ai_score: aiScore, ai_feedback: aiFeedback,
+    vocab_correct: vocabCorrect, vocab_total: vocabTotal,
+  }, { Prefer: 'return=minimal' });
+}
+
+/** Bài dịch bé đã nộp, kèm nội dung đoạn văn gốc — cho Trang Phụ Huynh xem lại. */
+export async function kidTranslationSubmissions(profileId, limit = 30) {
+  return get(`translation_submissions?select=*,translation_passages(title,passage_en,level,vocab)&profile_id=eq.${profileId}&order=submitted_at.desc&limit=${limit}`);
+}
+
+/* ===== Trắc Nghiệm Ngữ Pháp mỗi ngày (5 câu AI tự sinh + chấm điểm/gợi ý bằng AI) ===== */
+
+/** Đề trắc nghiệm ngữ pháp vào ĐÚNG ngày `day` (chuỗi "YYYY-MM-DD") — null nếu chưa sinh. */
+export async function grammarQuizForDay(profileId, day) {
+  const rows = await get(`grammar_quizzes?select=*&profile_id=eq.${profileId}&day=eq.${day}&order=created_at.desc&limit=1`);
+  return rows[0] || null;
+}
+
+/** Đề trắc nghiệm ngữ pháp HÔM NAY của bé (null nếu chưa sinh — bên gọi tự sinh mới qua saveGrammarQuiz). */
+export async function todayGrammarQuiz(profileId) {
+  return grammarQuizForDay(profileId, todayDateKey());
+}
+
+/** Lưu đề MỚI sinh cho đúng ngày `day` (mặc định hôm nay — truyền ngày khác
+ * để "dồn trước" đề của ngày sắp tới). questions: [{prompt, options, answer, explanations}]. */
+export async function saveGrammarQuiz(profileId, { level, questions }, day = todayDateKey()) {
+  const fam = await ensureFamily();
+  const rows = await post('grammar_quizzes', {
+    family_id: fam.id, profile_id: profileId, level, day, questions,
+  }, { Prefer: 'return=representation' });
+  return rows[0];
+}
+
+/** Bé nộp bài: lưu đáp án đã chọn + điểm + gợi ý AI cham sau khi nộp. */
+export async function submitGrammarQuiz(quizId, { answers, score, aiSuggestion }) {
+  const profileId = getCurrentKidId();
+  if (!profileId) throw new Error('NO_KID_SELECTED');
+  const fam = await ensureFamily();
+  await post('grammar_quiz_submissions', {
+    family_id: fam.id, profile_id: profileId, quiz_id: quizId,
+    answers, score, ai_suggestion: aiSuggestion,
+  }, { Prefer: 'return=minimal' });
+}
+
+/** Đề trắc nghiệm ngữ pháp bé đã nộp, kèm nội dung đề gốc — cho Trang Phụ Huynh xem lại. */
+export async function kidGrammarQuizSubmissions(profileId, limit = 30) {
+  return get(`grammar_quiz_submissions?select=*,grammar_quizzes(level,day,questions)&profile_id=eq.${profileId}&order=submitted_at.desc&limit=${limit}`);
 }
 
 /** Xuất toàn bộ dữ liệu gia đình (backup JSON tải về). */
