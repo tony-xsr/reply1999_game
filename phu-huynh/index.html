@@ -169,6 +169,7 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
       <div class="sub-tabs" id="kidSubTabs">
         <button type="button" class="sub-tab" data-tab="stats">📊 Thống kê</button>
         <button type="button" class="sub-tab" data-tab="exam">🎓 Thi Chứng Chỉ</button>
+        <button type="button" class="sub-tab" data-tab="translate">📝 Bài Làm AI</button>
         <button type="button" class="sub-tab" data-tab="weak">🎯 Từ hay sai</button>
         <button type="button" class="sub-tab" data-tab="report">📈 Báo cáo tuần</button>
         <button type="button" class="sub-tab" data-tab="ledger">🧾 Sổ quà & sao</button>
@@ -200,10 +201,27 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
       </div>
 
       <div class="kp-tab hidden" data-kptab="exam">
+        <div class="card hidden" id="examGoalCard">
+          <h2>🎯 Mục tiêu học hôm nay</h2>
+          <div id="examGoalBox"></div>
+        </div>
         <div class="card">
           <h2>🎓 Tiến độ Thi Chứng Chỉ Anh</h2>
           <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 10px">Gộp theo từng cấp độ (Cambridge YLE, KET, PET, TOEFL Junior, TOEIC, Ngữ Pháp Trực Quan) — tổng phút học, số ván, lần chơi gần nhất, và xu hướng hiệu quả (so tỷ lệ thắng nửa đầu với nửa sau các ván gần đây).</p>
           <div id="examProgress"><i style="font-size:13px;color:var(--ink-dim)">Đang tải…</i></div>
+        </div>
+      </div>
+
+      <div class="kp-tab hidden" data-kptab="translate">
+        <div class="card">
+          <h2>📝 Bài Dịch bé đã nộp</h2>
+          <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 10px">Đoạn văn tiếng Anh gốc, bản dịch tiếng Việt của bé, điểm/nhận xét AI đã chấm, và kết quả nối từ vựng — mới nhất lên trước.</p>
+          <div id="translateLog" style="font-size:13.5px"><i style="color:var(--ink-dim)">Đang tải…</i></div>
+        </div>
+        <div class="card">
+          <h2>🧩 Trắc Nghiệm Ngữ Pháp bé đã làm</h2>
+          <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 10px">5 câu/ngày, kèm điểm + gợi ý AI chấm sau khi bé nộp bài — mới nhất lên trước.</p>
+          <div id="grammarQuizLog" style="font-size:13.5px"><i style="color:var(--ink-dim)">Đang tải…</i></div>
         </div>
       </div>
 
@@ -254,6 +272,15 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
             </div>
             <label>Giới hạn phút/ngày RIÊNG (bỏ trống = dùng chung)</label>
             <input id="editKidLimit" type="number" min="0" max="480" placeholder="dùng cài đặt chung" />
+            <label>🎓 Mục tiêu học Thi Chứng Chỉ Anh mỗi ngày</label>
+            <select id="editGoalLevel"></select>
+            <input id="editGoalPerDay" type="number" min="1" max="20" placeholder="số bài/ngày (bỏ trống = không đặt mục tiêu)" style="margin-top:6px" />
+            <label>📝 Cấp độ dùng cho Luyện Dịch (đoạn văn ngắn, chấm bằng AI)</label>
+            <select id="editTranslationLevel"></select>
+            <p style="font-size:12px;color:var(--ink-dim);margin:4px 0 0">Bỏ trống = ẩn mục "📝 Luyện Dịch" trong Thi Chứng Chỉ Anh của bé. Mỗi ngày AI tự soạn 3 đoạn văn mới đúng cấp độ này cho riêng bé.</p>
+            <label>🧩 Cấp độ dùng cho Trắc Nghiệm Ngữ Pháp (5 câu/ngày, chấm + giải thích bằng AI)</label>
+            <select id="editGrammarQuizLevel"></select>
+            <p style="font-size:12px;color:var(--ink-dim);margin:4px 0 0">Bỏ trống = ẩn mục "🧩 Trắc Nghiệm Ngữ Pháp" của bé. Mỗi ngày AI tự soạn 5 câu trắc nghiệm mới đúng cấp độ này.</p>
             <div class="ok" id="editKidOk"></div>
             <button id="btnSaveKid">Lưu hồ sơ bé</button>
             <button id="btnDeleteKid" class="danger">🗑️ Xóa bé này</button>
@@ -302,6 +329,17 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
           <div class="ok" id="priceOk"></div>
           <button id="btnSavePrices">Lưu giá quà</button>
           <button id="btnResetPrices" class="ghost">↺ Đưa tất cả về giá mặc định</button>
+        </div>
+        <div class="card">
+          <h2>🤖 Trợ Lý AI (Groq)</h2>
+          <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 8px">Dùng để bấm "🤖 Ôn thêm với AI" trong Thi Chứng Chỉ Anh — tự sinh thêm câu hỏi trắc nghiệm mới cho từng unit. Lấy key miễn phí tại <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a>.</p>
+          <label>Groq API key</label>
+          <input id="aiKey" type="password" autocomplete="off" placeholder="gsk_..." />
+          <p style="font-size:11.5px;color:var(--ink-dim);margin:6px 0 0">⚠️ App này không có server riêng để giấu key — key được gọi thẳng từ trình duyệt đang mở. Dùng 1 key Groq riêng cho app này, đừng dùng chung với việc khác.</p>
+          <div class="ok" id="aiKeyOk"></div>
+          <button id="btnSaveAiKey">Lưu key</button>
+          <button id="btnTestAiKey" class="ghost">🔎 Kiểm tra key</button>
+          <button id="btnClearAiKey" class="ghost">🗑️ Xóa key</button>
         </div>
         <div class="card">
           <h2>💾 Dữ liệu & thiết bị</h2>
