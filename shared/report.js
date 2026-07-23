@@ -200,6 +200,15 @@ export function examProgressReport(sessions, now = new Date()) {
   return out.sort((a, b) => b.minutes - a.minutes);
 }
 
+/** Số "bài" (ván luyện tập/luyện thi) bé đã hoàn thành HÔM NAY thuộc đúng 1
+ * cấp độ Thi Chứng Chỉ Anh — dùng để tính % tiến độ so với mục tiêu phụ huynh
+ * đặt ra (bài/ngày, lưu ở profiles.settings.examGoal). */
+export function examSessionsToday(sessions, level, now = new Date()) {
+  const p = (n) => String(n).padStart(2, '0');
+  const todayKey = `${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}`;
+  return (sessions || []).filter((s) => (s.played_at || '').slice(0, 10) === todayKey && examLevelOfMode(s.mode) === level).length;
+}
+
 /** Bản văn bản tiếng Việt để bố mẹ sao chép/chia sẻ. */
 export function formatReportVi(kidName, r) {
   const lines = [

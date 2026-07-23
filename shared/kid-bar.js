@@ -10,6 +10,8 @@
 import * as api from './api.js';
 import { newGiftCount, randomSmallGift } from './rewards.js';
 import { missCount } from '../nghe-doan-on-tap/src/misses.js';
+import { generatePassages, generateGrammarQuiz } from './groq.js';
+import { EXAM_LEVEL_LABELS } from './report.js';
 
 function todayKey() {
   const d = new Date();
@@ -273,6 +275,55 @@ async function checkParentGifts() {
   } catch { /* mất mạng: lần sau hiện */ }
 }
 
+/* ===== Bài Luyện Dịch / Trắc Nghiệm Ngữ Pháp hôm nay + NGÀY MAI — DỰ PHÒNG
+   khi Vercel Cron (api/generate-daily-content.js) lỡ chưa chạy tới/bị lỗi
+   ngày đó. Chạy ÊM trong nền mỗi khi bé vào BẤT KỲ trang nào của site (không
+   chỉ trang luyện thi) — nếu cron đã sinh sẵn thì thấy có bài luôn nên không
+   làm gì cả, không tốn thêm lệnh gọi AI nào. Sinh thêm CẢ ngày mai (không chỉ
+   hôm nay) để lần sau vào site đã có sẵn — việc "dồn 60 ngày" thật sự do cron
+   lo (xem api/generate-daily-content.js), ở đây chỉ dự phòng 2 ngày gần nhất
+   vì sinh nhiều hơn ngay trong lúc bé đang tải trang sẽ quá chậm. Không hiện
+   thông báo gì (khác lúc bé tự bấm mở "📝 Luyện Dịch"/"🧩 Trắc Nghiệm" — lúc
+   đó có hiện "AI đang soạn..."). */
+async function ensureDailyAiContentForDay(kidId, apiKey, trLevel, gqLevel, day) {
+  if (trLevel) {
+    const existing = await api.passagesForDay(kidId, day);
+    if (!existing.length) {
+      const levelLabel = EXAM_LEVEL_LABELS[trLevel] || trLevel;
+      const passages = await generatePassages({ apiKey, levelLabel, count: 3 });
+      await api.savePassages(kidId, passages.map((p) => ({ level: trLevel, ...p })), day);
+    }
+  }
+  if (gqLevel) {
+    const existingQuiz = await api.grammarQuizForDay(kidId, day);
+    if (!existingQuiz) {
+      const levelLabel = EXAM_LEVEL_LABELS[gqLevel] || gqLevel;
+      const questions = await generateGrammarQuiz({ apiKey, levelLabel, count: 5 });
+      await api.saveGrammarQuiz(kidId, { level: gqLevel, questions }, day);
+    }
+  }
+}
+
+async function checkDailyAiContent() {
+  const kid = api.currentKidInfo();
+  const trLevel = kid?.settings?.translationLevel;
+  const gqLevel = kid?.settings?.grammarQuizLevel;
+  if (!kid || (!trLevel && !gqLevel)) return; // bé không dùng 2 tính năng này -> khỏi tốn mạng kiểm tra
+  const kidId = api.getCurrentKidId();
+  // Tiết kiệm request: mỗi bé chỉ kiểm tra tối đa 1 lần/30 phút dù mở bao nhiêu trang.
+  if (throttled(`r99-ai-daily-check:${kidId}`, 30)) return;
+  if (!(await api.ready())) return;
+  try {
+    const settings = api.cachedSettings() || await api.getSettings();
+    const apiKey = settings?.ai_api_key;
+    if (!apiKey) return; // chưa cấu hình key AI -> chịu, để bé tự thấy thông báo khi mở mục đó
+    // Hôm nay TRƯỚC (bé cần ngay), rồi tới ngày mai (chuẩn bị trước 1 hôm) —
+    // làm tuần tự để không gọi AI dồn dập cùng lúc.
+    await ensureDailyAiContentForDay(kidId, apiKey, trLevel, gqLevel, api.dateKeyOffset(0));
+    await ensureDailyAiContentForDay(kidId, apiKey, trLevel, gqLevel, api.dateKeyOffset(1));
+  } catch { /* mất mạng/AI lỗi: im lặng — bé tự mở mục đó sẽ tự thử sinh lại */ }
+}
+
 /** Gọi 1 lần khi game khởi động: thanh avatar + huy hiệu sao trên header +
  * giới hạn ngày + quà bố mẹ chờ mở. */
 export function mountKidFeatures() {
@@ -298,6 +349,7 @@ export function mountKidFeatures() {
     }
     checkDailyLimit();
     checkParentGifts();
+    checkDailyAiContent();
   } catch { /* không bao giờ làm hỏng game */ }
 }
 
@@ -337,5 +389,6 @@ export function mountHomeProfileChip(container) {
       knownStars = stars;
       chip.textContent = `${kid.avatar} ${kid.name} · ⭐${stars}`;
     });
+    checkDailyAiContent(); // trang chủ cũng là "vào site" -> kiểm tra dự phòng luôn, không chỉ trong game
   } catch { /* không bao giờ làm hỏng trang chủ */ }
 }

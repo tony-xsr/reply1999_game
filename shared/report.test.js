@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {
   weekStart, buildWeeklyReport, formatReportVi,
   groupOfMode, minutesByGroup, minutesByTimeOfDay, dailyMinutes, weeklyWinRate,
-  examLevelOfMode, examProgressReport, EXAM_LEVEL_LABELS,
+  examLevelOfMode, examProgressReport, EXAM_LEVEL_LABELS, examSessionsToday,
 } from './report.js';
 
 let passed = 0;
@@ -240,6 +240,18 @@ check('examProgressReport: sắp theo tổng phút học giảm dần', () => {
   ];
   const rows = examProgressReport(sessions, NOW);
   assert.deepEqual(rows.map((r) => r.level), ['pet', 'nguphap', 'ket']);
+});
+
+check('examSessionsToday: chỉ đếm ván HÔM NAY đúng cấp độ, bỏ qua ngày khác/cấp độ khác', () => {
+  const sessions = [
+    { mode: 'exam-ket-mix', played_at: iso(0), seconds: 60 }, // hôm nay, ket
+    { mode: 'exam-ket-ket-to-be', played_at: iso(0), seconds: 60 }, // hôm nay, ket (unit riêng)
+    { mode: 'exam-pet-mix', played_at: iso(0), seconds: 60 }, // hôm nay, nhưng KHÁC cấp độ
+    { mode: 'exam-ket-mix', played_at: iso(1), seconds: 60 }, // hôm qua, ket -> không tính
+  ];
+  assert.equal(examSessionsToday(sessions, 'ket', NOW), 2);
+  assert.equal(examSessionsToday(sessions, 'pet', NOW), 1);
+  assert.equal(examSessionsToday(sessions, 'toeic', NOW), 0);
 });
 
 console.log(`\n${passed} checks passed`);
