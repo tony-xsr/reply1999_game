@@ -1,0 +1,256 @@
+// Client Groq (API tương thích OpenAI Chat Completions) — dùng để TỰ SINH
+// THÊM câu hỏi ôn tập tiếng Anh khi phụ huynh đã cấu hình key AI ở Trang Phụ
+// Huynh (mục "🤖 Trợ Lý AI"). Gọi THẲNG từ trình duyệt vì đây là app tĩnh,
+// không có server riêng để giấu key — xem cảnh báo an toàn ở
+// server/migrate-06-ai-key.sql. File thuần logic + fetch (test được phần
+// phân tích JSON mà không cần giả lập mạng — xem groq.test.js).
+//
+// Mọi lỗi (thiếu key/mất mạng/JSON hỏng/sai khuôn dạng) đều ném Error với
+// thông điệp tiếng Việt dễ hiểu để UI hiển thị — bên gọi tự quyết định hiển
+// thị ra sao, KHÔNG BAO GIỜ làm hỏng phần còn lại của game.
+
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+export const DEFAULT_GROQ_MODEL = 'llama-3.3-70b-versatile';
+
+/** Kiểm tra key hợp lệ bằng 1 lệnh gọi tối giản — trả về true/false, không ném lỗi. */
+export async function testGroqKey(apiKey, model = DEFAULT_GROQ_MODEL) {
+  if (!apiKey) return false;
+  try {
+    const res = await fetch(GROQ_URL, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'user', content: 'Trả lời đúng 1 từ: OK' }],
+        max_tokens: 5,
+      }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+/** Bóc khối JSON thô ra khỏi câu trả lời (model đôi khi bọc thêm ```json ... ```). */
+function extractJson(text) {
+  const match = String(text || '').match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('AI trả lời không đúng định dạng JSON');
+  try {
+    return JSON.parse(match[0]);
+  } catch {
+    throw new Error('AI trả lời JSON không hợp lệ');
+  }
+}
+
+/**
+ * Phân tích + kiểm tra khuôn dạng câu trả lời của AI, trả về mảng Question
+ * đúng khuôn dạng exam-prep ({id, type, prompt, options, answer, explain}).
+ * Tách riêng khỏi phần gọi mạng để test được mà không cần giả lập fetch.
+ */
+export function parseQuestionsResponse(content, count = 5) {
+  const parsed = extractJson(content);
+  const list = Array.isArray(parsed.questions) ? parsed.questions : [];
+  const stamp = Date.now();
+  const questions = list
+    .filter((q) => q && typeof q.prompt === 'string' && q.prompt.trim()
+      && Array.isArray(q.options) && q.options.length === 4 && q.options.every((o) => typeof o === 'string')
+      && Number.isInteger(q.answer) && q.answer >= 0 && q.answer < 4)
+    .slice(0, count)
+    .map((q, i) => ({
+      id: `ai-${stamp}-${i}`,
+      type: 'grammar',
+      prompt: q.prompt,
+      options: q.options,
+      answer: q.answer,
+      explain: typeof q.explain === 'string' ? q.explain : '',
+    }));
+  if (!questions.length) throw new Error('AI trả lời không đúng khuôn dạng câu hỏi mong đợi');
+  return questions;
+}
+
+/** Gọi Groq Chat Completions với 1 cặp system/user prompt, trả về content thô
+ * (chuỗi) — dùng chung cho mọi tính năng AI (câu hỏi/đoạn dịch/chấm điểm).
+ * Mọi lỗi (thiếu key/mất mạng/HTTP lỗi/không có nội dung) ném Error tiếng Việt. */
+async function callGroq({ apiKey, model = DEFAULT_GROQ_MODEL, sys, user, temperature = 0.7 }) {
+  if (!apiKey) throw new Error('Chưa cấu hình key AI — vào Trang Phụ Huynh > Cài đặt > 🤖 Trợ Lý AI');
+  let res;
+  try {
+    res = await fetch(GROQ_URL, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'system', content: sys }, { role: 'user', content: user }],
+        temperature,
+        response_format: { type: 'json_object' },
+      }),
+    });
+  } catch {
+    throw new Error('Không gọi được AI — kiểm tra kết nối mạng');
+  }
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    if (res.status === 401) throw new Error('Key AI không hợp lệ hoặc đã hết hạn');
+    if (res.status === 429) throw new Error('AI đang quá tải/hết lượt miễn phí, thử lại sau');
+    throw new Error(`AI lỗi ${res.status}: ${body.slice(0, 150)}`);
+  }
+  const data = await res.json();
+  const content = data.choices?.[0]?.message?.content;
+  if (!content) throw new Error('AI không trả về nội dung');
+  return content;
+}
+
+/**
+ * Sinh thêm `count` câu hỏi trắc nghiệm tiếng Anh MỚI cho 1 unit/chủ điểm,
+ * cố gắng không trùng ý với `avoidPrompts` (câu đã có sẵn trong unit).
+ */
+export async function generateQuestions({
+  apiKey, model = DEFAULT_GROQ_MODEL, levelLabel, topic, grammarPoints = [], count = 5, avoidPrompts = [],
+}) {
+  const avoidList = avoidPrompts.slice(0, 30).join(' | ');
+  const sys = 'Bạn là giáo viên tiếng Anh soạn câu hỏi trắc nghiệm luyện thi chứng chỉ quốc tế cho học sinh Việt Nam 6-15 tuổi. LUÔN trả lời bằng đúng 1 khối JSON hợp lệ, không thêm chữ nào khác ngoài JSON.';
+  const user = `Cấp độ: ${levelLabel}. Chủ điểm: ${topic}.${grammarPoints.length ? ` Trọng tâm ngữ pháp: ${grammarPoints.join(', ')}.` : ''}
+Soạn ĐÚNG ${count} câu hỏi trắc nghiệm tiếng Anh MỚI (không trùng ý các câu sau: ${avoidList || '(chưa có)'}).
+Mỗi câu có prompt tiếng Anh (chỗ trống dùng "___" nếu là câu điền từ), đúng 4 lựa chọn (options), đúng 1 đáp án đúng (answer, chỉ số 0-3), và explain giải thích ngắn bằng tiếng Việt tại sao đáp án đó đúng.
+Trả về DUY NHẤT JSON dạng: {"questions":[{"prompt":"...","options":["...","...","...","..."],"answer":0,"explain":"..."}]}`;
+
+  const content = await callGroq({ apiKey, model, sys, user });
+  return parseQuestionsResponse(content, count);
+}
+
+/**
+ * Phân tích + kiểm tra khuôn dạng câu trả lời của AI cho phần sinh đoạn văn
+ * luyện dịch — trả về mảng {title, passage_en, vocab:[{word,vi}]}. Tách riêng
+ * khỏi phần gọi mạng để test được mà không cần giả lập fetch.
+ */
+export function parsePassagesResponse(content, count = 3) {
+  const parsed = extractJson(content);
+  const list = Array.isArray(parsed.passages) ? parsed.passages : [];
+  const passages = list
+    .filter((p) => p && typeof p.title === 'string' && p.title.trim()
+      && typeof p.passage_en === 'string' && p.passage_en.trim()
+      && Array.isArray(p.vocab) && p.vocab.length >= 3
+      && p.vocab.every((v) => v && typeof v.word === 'string' && v.word.trim() && typeof v.vi === 'string' && v.vi.trim()))
+    .slice(0, count)
+    .map((p) => ({
+      title: p.title.trim(),
+      passage_en: p.passage_en.trim(),
+      vocab: p.vocab.slice(0, 6).map((v) => ({ word: v.word.trim(), vi: v.vi.trim() })),
+    }));
+  if (!passages.length) throw new Error('AI trả lời không đúng khuôn dạng đoạn văn mong đợi');
+  return passages;
+}
+
+/**
+ * Nhờ AI soạn `count` đoạn văn tiếng Anh NGẮN, KHÁC NHAU hoàn toàn, đúng độ
+ * khó của `levelLabel`, kèm tiêu đề tiếng Việt + từ vựng quan trọng cần chú ý
+ * (để bé nối nghĩa sau khi dịch xong) — dùng cho mục "📝 Luyện Dịch".
+ */
+export async function generatePassages({ apiKey, model = DEFAULT_GROQ_MODEL, levelLabel, count = 3 }) {
+  const sys = 'Bạn là giáo viên tiếng Anh soạn đoạn văn ngắn cho học sinh Việt Nam luyện dịch Anh-Việt, đúng độ khó cấp độ được yêu cầu. LUÔN trả lời bằng đúng 1 khối JSON hợp lệ, không thêm chữ nào khác ngoài JSON.';
+  const user = `Cấp độ: ${levelLabel}. Soạn ĐÚNG ${count} đoạn văn tiếng Anh NGẮN (3-5 câu), chủ đề đời thường gần gũi học sinh, KHÁC NHAU HOÀN TOÀN về nội dung, độ khó từ vựng/ngữ pháp phù hợp đúng cấp độ trên.
+Mỗi đoạn kèm 1 tiêu đề ngắn bằng tiếng Việt (title) và 5 từ tiếng Anh QUAN TRỌNG xuất hiện trong đoạn kèm nghĩa tiếng Việt (vocab) — để học sinh ôn lại sau khi dịch.
+Trả về DUY NHẤT JSON dạng: {"passages":[{"title":"...","passage_en":"...","vocab":[{"word":"...","vi":"..."},{"word":"...","vi":"..."},{"word":"...","vi":"..."},{"word":"...","vi":"..."},{"word":"...","vi":"..."}]}]}`;
+
+  const content = await callGroq({ apiKey, model, sys, user, temperature: 0.9 });
+  return parsePassagesResponse(content, count);
+}
+
+/**
+ * Phân tích câu trả lời AI cho phần chấm điểm bản dịch — {score:0-100, feedback}.
+ * Tách riêng khỏi phần gọi mạng để test được mà không cần giả lập fetch.
+ */
+export function parseGradeResponse(content) {
+  const parsed = extractJson(content);
+  const score = Number(parsed.score);
+  if (!Number.isFinite(score) || score < 0 || score > 100) throw new Error('AI trả điểm không hợp lệ');
+  const feedback = typeof parsed.feedback === 'string' && parsed.feedback.trim()
+    ? parsed.feedback.trim()
+    : 'Bé đã cố gắng hoàn thành bài dịch!';
+  return { score: Math.round(score), feedback };
+}
+
+/**
+ * Nhờ AI chấm bản dịch tiếng Việt của bé so với đoạn văn tiếng Anh gốc — chấm
+ * theo Ý NGHĨA/HIỂU ĐÚNG nội dung, KHÔNG bắt dịch đúng nguyên văn từng chữ
+ * (đúng yêu cầu "không cần dịch đúng nguyên mẫu, hiểu là được"). Trả về
+ * {score: 0-100, feedback: nhận xét tiếng Việt ngắn gọn, khích lệ}.
+ */
+export async function gradeTranslation({ apiKey, model = DEFAULT_GROQ_MODEL, passageEn, submittedVi }) {
+  const sys = 'Bạn là giáo viên tiếng Anh CHẤM ĐIỂM bài dịch Anh-Việt của học sinh Việt Nam. Chấm theo mức độ HIỂU ĐÚNG Ý nội dung, KHÔNG bắt buộc dịch đúng nguyên văn từng từ — miễn học sinh hiểu đúng ý chính là cho điểm cao. LUÔN trả lời bằng đúng 1 khối JSON hợp lệ, không thêm chữ nào khác ngoài JSON.';
+  const user = `Đoạn văn tiếng Anh gốc:\n"""${passageEn}"""\n\nBản dịch tiếng Việt của học sinh:\n"""${submittedVi || '(bé chưa viết gì)'}"""\n\nChấm điểm 0-100 dựa trên mức độ hiểu đúng ý nội dung (không trừ điểm vì cách diễn đạt khác bản dịch mẫu). Viết nhận xét ngắn gọn bằng tiếng Việt, giọng khích lệ, nêu 1-2 điểm bé làm tốt và 1 điểm có thể cải thiện nếu có.
+Trả về DUY NHẤT JSON dạng: {"score": 85, "feedback": "..."}`;
+
+  const content = await callGroq({ apiKey, model, sys, user, temperature: 0.4 });
+  return parseGradeResponse(content);
+}
+
+/**
+ * Phân tích + kiểm tra khuôn dạng câu trả lời của AI cho đề trắc nghiệm ngữ
+ * pháp — mỗi câu có đúng 4 lựa chọn + `explanations` giải thích RIÊNG cho
+ * TỪNG lựa chọn (vì sao đúng/vì sao không nên chọn), khác `parseQuestionsResponse`
+ * (chỉ có 1 `explain` chung cho đáp án đúng) — dùng cho mục "🧩 Trắc Nghiệm
+ * Ngữ Pháp" (khác "🤖 Ôn thêm với AI" ở màn Học theo Unit).
+ */
+export function parseGrammarQuizResponse(content, count = 5) {
+  const parsed = extractJson(content);
+  const list = Array.isArray(parsed.questions) ? parsed.questions : [];
+  const questions = list
+    .filter((q) => q && typeof q.prompt === 'string' && q.prompt.trim()
+      && Array.isArray(q.options) && q.options.length === 4 && q.options.every((o) => typeof o === 'string')
+      && Number.isInteger(q.answer) && q.answer >= 0 && q.answer < 4
+      && Array.isArray(q.explanations) && q.explanations.length === 4 && q.explanations.every((e) => typeof e === 'string'))
+    .slice(0, count)
+    .map((q) => ({
+      prompt: q.prompt, options: q.options, answer: q.answer, explanations: q.explanations,
+    }));
+  if (!questions.length) throw new Error('AI trả lời không đúng khuôn dạng đề trắc nghiệm mong đợi');
+  return questions;
+}
+
+/**
+ * Nhờ AI soạn 1 đề trắc nghiệm ngữ pháp gồm `count` câu MỚI đúng độ khó
+ * `levelLabel`, mỗi câu kèm giải thích RIÊNG cho cả 4 lựa chọn (vì sao đáp án
+ * đúng đúng, vì sao 3 đáp án còn lại sai/không nên chọn) — dùng cho mục
+ * "🧩 Trắc Nghiệm Ngữ Pháp" (5 câu/ngày/bé).
+ */
+export async function generateGrammarQuiz({ apiKey, model = DEFAULT_GROQ_MODEL, levelLabel, count = 5 }) {
+  const sys = 'Bạn là giáo viên tiếng Anh soạn đề trắc nghiệm ngữ pháp cho học sinh Việt Nam luyện thi chứng chỉ quốc tế, đúng độ khó cấp độ được yêu cầu. LUÔN trả lời bằng đúng 1 khối JSON hợp lệ, không thêm chữ nào khác ngoài JSON.';
+  const user = `Cấp độ: ${levelLabel}. Soạn ĐÚNG ${count} câu hỏi trắc nghiệm ngữ pháp tiếng Anh MỚI, chủ điểm ngữ pháp KHÁC NHAU, đúng độ khó cấp độ trên.
+Mỗi câu có prompt tiếng Anh (chỗ trống dùng "___"), đúng 4 lựa chọn (options), đúng 1 đáp án đúng (answer, chỉ số 0-3), và "explanations" — mảng ĐÚNG 4 chuỗi giải thích bằng tiếng Việt, MỖI PHẦN TỬ ứng với ĐÚNG 1 lựa chọn theo thứ tự trong options: với lựa chọn ĐÚNG thì giải thích vì sao nó đúng; với các lựa chọn SAI thì giải thích cụ thể vì sao KHÔNG NÊN chọn đáp án đó (sai ở điểm ngữ pháp gì).
+Trả về DUY NHẤT JSON dạng: {"questions":[{"prompt":"...","options":["...","...","...","..."],"answer":0,"explanations":["vì sao đúng...","vì sao sai...","vì sao sai...","vì sao sai..."]}]}`;
+
+  const content = await callGroq({ apiKey, model, sys, user, temperature: 0.7 });
+  return parseGrammarQuizResponse(content, count);
+}
+
+/**
+ * Phân tích câu trả lời AI cho phần chấm điểm + gợi ý đề trắc nghiệm ngữ
+ * pháp — {suggestion: nhận xét/gợi ý tiếng Việt}.
+ */
+export function parseGrammarGradeResponse(content) {
+  const parsed = extractJson(content);
+  const suggestion = typeof parsed.suggestion === 'string' && parsed.suggestion.trim()
+    ? parsed.suggestion.trim()
+    : 'Bé đã cố gắng hoàn thành đề trắc nghiệm hôm nay!';
+  return { suggestion };
+}
+
+/**
+ * Nhờ AI chấm tổng kết + đưa gợi ý sau khi bé làm xong đề trắc nghiệm ngữ
+ * pháp (giải thích từng câu ĐÃ có sẵn từ lúc soạn đề — hàm này chỉ đưa ra
+ * NHẬN XÉT TỔNG QUAN + gợi ý nên ôn lại chủ điểm nào dựa trên các câu bé làm
+ * sai). `results`: [{prompt, correct:boolean}].
+ */
+export async function gradeGrammarQuiz({ apiKey, model = DEFAULT_GROQ_MODEL, results }) {
+  const total = results.length;
+  const correctCount = results.filter((r) => r.correct).length;
+  const wrong = results.filter((r) => !r.correct).map((r) => r.prompt);
+  const sys = 'Bạn là giáo viên tiếng Anh nhận xét kết quả đề trắc nghiệm ngữ pháp của học sinh Việt Nam, giọng khích lệ, tích cực. LUÔN trả lời bằng đúng 1 khối JSON hợp lệ, không thêm chữ nào khác ngoài JSON.';
+  const user = `Học sinh làm đúng ${correctCount}/${total} câu.${wrong.length ? ` Các câu làm SAI: ${wrong.join(' | ')}.` : ' Làm đúng hết!'}
+Viết 1 đoạn nhận xét ngắn gọn bằng tiếng Việt (2-4 câu), khích lệ, và nếu có câu sai thì gợi ý cụ thể nên ôn lại chủ điểm ngữ pháp nào.
+Trả về DUY NHẤT JSON dạng: {"suggestion": "..."}`;
+
+  const content = await callGroq({ apiKey, model, sys, user, temperature: 0.6 });
+  return parseGrammarGradeResponse(content);
+}
