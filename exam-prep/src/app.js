@@ -19,6 +19,11 @@ import { speak, speakSequence, bindMute } from '../../to-mau/src/speech.js';
 import { sfx } from '../../pokemon/src/sfx.js';
 import { mountKidFeatures, answeredOne } from '../../shared/kid-bar.js';
 import { currentProfile, recordSession } from '../../pokemon/src/stats.js';
+import * as api from '../../shared/api.js';
+import { generateQuestions } from '../../shared/groq.js';
+import { examSessionsToday, EXAM_LEVEL_LABELS } from '../../shared/report.js';
+import { buildTranslateEntryButton } from '../../shared/translate-ui.js';
+import { buildGrammarQuizEntryButton } from '../../shared/grammar-quiz-ui.js';
 
 const t = (key, fallback) => {
   const v = window.I18N?.t(key);
@@ -33,7 +38,7 @@ const els = {
   reportScreen: $('reportScreen'),
   unitGrid: $('unitGrid'),
   lessonTopic: $('lessonTopic'), lessonIntro: $('lessonIntro'), lessonPoints: $('lessonPoints'),
-  btnStartPractice: $('btnStartPractice'),
+  btnStartPractice: $('btnStartPractice'), btnAiExtra: $('btnAiExtra'), aiExtraMsg: $('aiExtraMsg'),
   btnGoStudy: $('btnGoStudy'), btnGoMock: $('btnGoMock'),
   btnBack: $('btnBack'), btnHelp: $('btnHelp'), btnSound: $('btnSound'), btnListen: $('btnListen'),
   hudScore: $('hudScore'), hudRound: $('hudRound'), hudStreak: $('hudStreak'),
@@ -112,8 +117,61 @@ document.querySelectorAll('.level-card[data-level]').forEach((btn) => {
     state.level = btn.dataset.level;
     state.history = [];
     goTo('mode');
+    renderGoalBox();
+    renderTranslateEntry();
+    renderGrammarQuizEntry();
   });
 });
+
+/** Nút "📝 Luyện Dịch" — chỉ hiện khi phụ huynh đã đặt ĐÚNG cấp độ vừa chọn
+ * làm cấp độ dùng cho Luyện Dịch (xem shared/translate-ui.js). */
+function renderTranslateEntry() {
+  const box = document.getElementById('trEntryBox');
+  if (!box) return;
+  box.innerHTML = '';
+  const btn = buildTranslateEntryButton(state.level, { speak });
+  if (btn) box.appendChild(btn);
+}
+
+/** Nút "🧩 Trắc Nghiệm Ngữ Pháp" — chỉ hiện khi phụ huynh đã đặt ĐÚNG cấp độ
+ * vừa chọn làm cấp độ Trắc Nghiệm Ngữ Pháp (xem shared/grammar-quiz-ui.js). */
+function renderGrammarQuizEntry() {
+  const box = document.getElementById('gqEntryBox');
+  if (!box) return;
+  box.innerHTML = '';
+  const btn = buildGrammarQuizEntryButton(state.level, { speak });
+  if (btn) box.appendChild(btn);
+}
+
+/** Mục tiêu học hôm nay (phụ huynh đặt ở Trang Phụ Huynh > Cài đặt bé) — chỉ
+ * hiện khi bé có đặt mục tiêu ĐÚNG cấp độ vừa chọn. Mất mạng/chưa cấu hình
+ * server thì ẩn êm, không chặn game. */
+async function renderGoalBox() {
+  const box = document.getElementById('goalBox');
+  if (!box) return;
+  box.classList.add('hidden');
+  box.innerHTML = '';
+  try {
+    const kid = api.currentKidInfo();
+    const goal = kid?.settings?.examGoal;
+    if (!goal?.level || goal.level !== state.level || !goal.perDay) return;
+    if (!(await api.ready())) return;
+    const sessions = await api.kidSessions(kid.id, 400);
+    const done = examSessionsToday(sessions, goal.level);
+    const pct = Math.min(100, Math.round((done / goal.perDay) * 100));
+    const label = EXAM_LEVEL_LABELS[goal.level] || goal.level;
+    box.innerHTML = `<div style="background:var(--panel,#fffaf2);border:2px solid var(--line,#a8834a);border-radius:14px;padding:12px 16px">
+      <div style="display:flex;justify-content:space-between;font-weight:800;font-size:14px;margin-bottom:6px">
+        <span>🎯 Mục tiêu hôm nay — ${label}</span><span>${done}/${goal.perDay} bài</span>
+      </div>
+      <div style="background:var(--panel2,#fff3df);border-radius:999px;height:14px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#ff9d5c,#c2410c);border-radius:999px"></div>
+      </div>
+      <p style="font-size:12.5px;color:var(--ink-dim,#5d5370);margin:6px 0 0">${pct >= 100 ? '🎉 Bé đã đạt mục tiêu hôm nay rồi, giỏi quá!' : `Còn ${goal.perDay - done} bài nữa là đạt mục tiêu hôm nay!`}</p>
+    </div>`;
+    box.classList.remove('hidden');
+  } catch { /* mất mạng/chưa cấu hình: ẩn êm */ }
+}
 
 /* ===== Màn 2: Học hay Luyện Thi? ===== */
 
@@ -301,7 +359,7 @@ function endStudyQuiz() {
   const q = state.quiz;
   currentProfile(t('pika.user.guest', 'Khách'));
   recordSession({
-    mode: `exam-${state.level}${state.unitId ? `-${state.unitId}` : '-mix'}`,
+    mode: `exam-${state.level}${state.unitId ? `-${state.unitId}` : '-mix'}${q.ai ? '-ai' : ''}`,
     result: q.won ? 'win' : 'loss',
     score: q.score,
     level: 1,
@@ -334,6 +392,54 @@ function startStudyQuiz(unitId) {
   updateHud();
   setTimeout(() => speakPrompt(currentQuestion(state.quiz)), 300);
 }
+
+/* ===== "🤖 Ôn thêm với AI" — nhờ Groq soạn thêm câu hỏi MỚI cho đúng unit
+   đang học (khác accord bộ câu hỏi tĩnh có sẵn), rồi luyện tập như bình
+   thường bằng CHÍNH engine study (answerQuiz — có gợi ý khi sai). Yêu cầu
+   phụ huynh đã cấu hình key AI ở Trang Phụ Huynh > Cài đặt > 🤖 Trợ Lý AI. */
+function startAiQuiz(unitId, questions) {
+  state.mode = 'study';
+  state.unitId = unitId;
+  state.busy = false;
+  els.hudTimerWrap.classList.add('hidden');
+  state.quiz = {
+    levelId: state.level, unitId, questions, index: 0,
+    score: 0, streak: 0, bestStreak: 0, correctCount: 0, over: false, won: false, ai: true,
+  };
+  state.startedAt = Date.now();
+  goTo('quiz');
+  renderQuestion();
+  updateHud();
+  setTimeout(() => speakPrompt(currentQuestion(state.quiz)), 300);
+}
+
+els.btnAiExtra.addEventListener('click', async () => {
+  const u = unitById(state.unitId);
+  if (!u) return;
+  els.btnAiExtra.disabled = true;
+  els.aiExtraMsg.textContent = '🤖 Đang nhờ AI soạn thêm câu hỏi…';
+  try {
+    const settings = api.cachedSettings() || (await api.getSettings());
+    const apiKey = settings?.ai_api_key;
+    const levelLabel = LEVELS.find((l) => l.id === state.level)?.label || state.level;
+    const questions = await generateQuestions({
+      apiKey,
+      levelLabel,
+      topic: u.topic,
+      grammarPoints: u.grammarPoints,
+      count: 5,
+      avoidPrompts: u.questions.map((q) => q.prompt),
+    });
+    for (const q of questions) q.unitId = u.id;
+    els.aiExtraMsg.textContent = '';
+    sfx.select();
+    startAiQuiz(u.id, questions);
+  } catch (e) {
+    els.aiExtraMsg.textContent = `⚠️ ${e.message}`;
+  } finally {
+    els.btnAiExtra.disabled = false;
+  }
+});
 
 /* ===== Nhánh Luyện Thi: đề tính giờ, 1 lần trả lời, báo cáo cuối đề ===== */
 
