@@ -15,6 +15,8 @@ import { recordMiss, recordHit, missMap, missCount } from '../../exam-prep/src/m
 import { speak, speakSequence, bindMute } from '../../to-mau/src/speech.js';
 import { sfx } from '../../pokemon/src/sfx.js';
 import { mountKidFeatures, answeredOne } from '../../shared/kid-bar.js';
+import { buildTranslateEntryButton } from '../../shared/translate-ui.js';
+import { buildGrammarQuizEntryButton } from '../../shared/grammar-quiz-ui.js';
 import { currentProfile, recordSession } from '../../pokemon/src/stats.js';
 
 const LEVEL_ID = 'pet';
@@ -410,6 +412,16 @@ els.btnHome2.addEventListener('click', () => { els.cheer.classList.add('hidden')
 els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
 showScreen('mode');
 mountKidFeatures(); // thanh avatar bé + kiểm tra giới hạn phút/ngày
+(() => {
+  const box = document.getElementById('trEntryBox');
+  const btn = box && buildTranslateEntryButton(LEVEL_ID, { speak });
+  if (btn) box.appendChild(btn);
+})();
+(() => {
+  const box = document.getElementById('gqEntryBox');
+  const btn = box && buildGrammarQuizEntryButton(LEVEL_ID, { speak });
+  if (btn) box.appendChild(btn);
+})();
 sayInstruction(t('expet.help', 'Đây là Luyện Thi PET! Chọn Học theo Unit để đọc bài học và luyện tập có gợi ý, hoặc chọn Luyện Thi để làm đề trộn ngẫu nhiên có tính giờ giống thi thật. Mỗi câu có 1 câu tiếng Anh thiếu từ, bé chọn đúng từ để điền vào chỗ trống.'));
 
 // Hook cho e2e test
