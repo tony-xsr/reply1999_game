@@ -47,6 +47,10 @@ export function injectAiOverlayStyle() {
     .r99-ai-opt.wrong{background:#fbdada;border-color:#c02a2a;color:#c02a2a}
     .r99-ai-opt.picked{outline:3px solid ${GOLD2}}
     .r99-ai-explain{font-size:12.5px;color:${INK_DIM};margin:4px 0 10px;line-height:1.5;padding-left:4px}
+    .r99-ai-progress{height:12px;border-radius:999px;background:#f1e2c8;overflow:hidden;border:1px solid ${LINE};margin:4px 0 8px}
+    .r99-ai-progress-fill{height:100%;background:linear-gradient(90deg,#ffb066,${GOLD2});border-radius:999px;transition:width .3s}
+    .r99-ai-progress-text{font-size:12px;color:${GOLD2};font-weight:800;text-align:center;margin:0 0 10px}
+    .r99-ai-bonus{text-align:center;font-weight:900;color:${GOLD2};background:#fff3df;border:2px solid ${LINE};border-radius:12px;padding:8px 10px;margin:8px 0}
   `;
   document.head.appendChild(s);
 }
