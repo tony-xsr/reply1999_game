@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#fff6e8" />
 <title>Tủ Quà & Vườn Hoa</title>
+<script>(function(){try{var p=JSON.parse(localStorage.getItem('r99-theme'))||{palette:'warm',mode:'auto'};var mode=p.mode==='auto'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p.mode;document.documentElement.dataset.theme=p.palette+'-'+mode;}catch(e){}})();</script>
+<link rel="stylesheet" href="/shared/theme.css" />
 <style>
-:root{--bg:#fff6e8;--gold:#ff8a3d;--gold2:#c2410c;--ink:#241e2e;--ink-dim:#5d5370;--line:#a8834a;--panel:#fffaf2;--panel2:#fff3df;--good:#15803d;--bad:#c02a2a}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:radial-gradient(ellipse 90% 55% at 50% 0%, #ffe9c8 0%, transparent 70%),var(--bg);
+body{margin:0;background:radial-gradient(ellipse 90% 55% at 50% 0%, var(--bg2) 0%, transparent 70%),var(--bg);
   color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh}
 .wrap{max-width:760px;margin:0 auto;padding:18px 14px 60px}
 header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
@@ -26,13 +27,32 @@ h1{margin:0;font-size:20px;color:var(--gold2);flex:1}
   padding:6px;font-weight:900;font-size:13px;cursor:pointer;margin-top:4px}
 .item button:disabled{opacity:.45;cursor:default}
 .garden{min-height:70px;background:linear-gradient(180deg,#eaf7e5,#d6efcf);border:2px dashed #7cc39a;border-radius:14px;
-  padding:12px;font-size:34px;letter-spacing:6px;line-height:1.5}
+  padding:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
+.garden .empty{font-size:14px;letter-spacing:0;color:var(--ink-dim)}
+.flower{display:flex;flex-direction:column;align-items:center;gap:4px;background:#fff;border:2px solid #7cc39a;
+  border-radius:12px;padding:6px 8px}
+.flower .ic{font-size:30px;line-height:1}
+.flower button{font-size:11px;font-weight:800;border:none;border-radius:8px;padding:4px 7px;
+  background:#ffe4e4;color:var(--bad);cursor:pointer}
+.growbox{margin-top:10px;padding:12px;background:var(--panel2);border:1px solid var(--line);border-radius:12px}
+.growbox.hidden{display:none}
+.growbox p{margin:0;font-size:13px;color:var(--ink-dim);line-height:1.6}
+.progressbar{height:14px;border-radius:999px;background:#f1d9b0;overflow:hidden;border:1px solid var(--line);margin:10px 0 6px}
+.progressfill{height:100%;width:0%;background:linear-gradient(90deg,#7cc39a,#2f9e5c);border-radius:999px;transition:width .4s}
+.growhint{font-size:12px!important;color:var(--gold2)!important;font-weight:800;text-align:center}
 .rowline{font-size:15px;margin:6px 0}
 .note{font-size:13px;color:var(--ink-dim);line-height:1.7;text-align:center;margin-top:20px}
 .note a{color:var(--gold2)}
 .msg{min-height:1.3em;font-size:14px;font-weight:800;margin-top:8px}
 .msg.ok{color:var(--good)} .msg.bad{color:var(--bad)}
 .hidden{display:none!important}
+.streak-row{display:flex;justify-content:center;gap:10px;margin:4px 0;flex-wrap:wrap}
+.streak-chest{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--ink-dim);font-weight:700}
+.streak-chest .ic{font-size:30px;opacity:.35}
+.streak-chest.done .ic{opacity:1}
+.streak-chest.ready{cursor:pointer}
+.streak-chest.ready .ic{opacity:1;animation:chestPop .8s ease-in-out infinite alternate}
+@keyframes chestPop{from{transform:scale(1)}to{transform:scale(1.18)}}
 </style>
 </head>
 <body>
@@ -46,9 +66,20 @@ h1{margin:0;font-size:20px;color:var(--gold2);flex:1}
   <div id="viewGuide" class="note hidden"></div>
 
   <div id="viewMain" class="hidden">
+    <div class="card" id="streakCard">
+      <h2>🔥 Chuỗi ngày điểm danh</h2>
+      <p id="streakInfo" style="font-size:13px;color:var(--ink-dim);margin:0 0 10px"></p>
+      <div class="streak-row" id="streakRow"></div>
+    </div>
+
     <div class="card">
       <h2>🌸 Vườn hoa của bé</h2>
       <div class="garden" id="garden"></div>
+      <div class="growbox hidden" id="growBox">
+        <p id="growText"></p>
+        <div class="progressbar"><div class="progressfill" id="growFill"></div></div>
+        <p class="growhint" id="growHint"></p>
+      </div>
       <div class="rowline" id="petsRow"></div>
       <div class="rowline" id="candyRow"></div>
       <div class="rowline" id="badgeRow"></div>

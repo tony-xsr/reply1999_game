@@ -1,17 +1,26 @@
 /* Reply1999 Games — root service worker.
    Scope = '/'. Cache hub + các game khi truy cập lần đầu. */
-const CACHE = 'reply1999-v163';
+const CACHE = 'reply1999-v177';
 const PRECACHE = [
   './', './index.html', './manifest.json', './i18n.js', './server-config.js',
   './shared/api.js',
   './shared/rewards.js',
+  './shared/garden.js',
   './shared/kid-bar.js',
   './shared/filter-toggle.js',
   './shared/report.js',
   './shared/groq.js',
+  './shared/deepseek.js',
+  './shared/ai-provider.js',
+  './shared/fun-games.js',
+  './shared/streak.js',
+  './shared/theme.js',
+  './shared/theme.css',
+  './shared/content-reuse.js',
   './shared/ai-overlay.js',
   './shared/translate-ui.js',
   './shared/grammar-quiz-ui.js',
+  './shared/daily-bonus.js',
   './tu-qua/index.html',
   './tu-qua/src/app.js',
   './phu-huynh/index.html',
