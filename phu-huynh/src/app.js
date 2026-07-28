@@ -624,9 +624,10 @@ function renderAiResourceStats({ translations, grammarQuizzes, allPassages, allQ
   const trAvailable = allPassages.filter((p) => !trDoneIds.has(p.id)).length;
   const gqDoneIds = new Set(grammarQuizzes.map((s) => s.quiz_id));
   const gqAvailable = allQuizzes.filter((q) => !gqDoneIds.has(q.id)).length;
-  $('aiResourceStats').innerHTML = `
+  $('trResourceStats').innerHTML = `
     <div class="stat">📝 Bài dịch đã làm<b>${translations.length}</b></div>
-    <div class="stat">📝 Bài dịch còn sẵn<b>${trAvailable}</b></div>
+    <div class="stat">📝 Bài dịch còn sẵn<b>${trAvailable}</b></div>`;
+  $('gqResourceStats').innerHTML = `
     <div class="stat">🧩 Trắc nghiệm đã làm<b>${grammarQuizzes.length}</b></div>
     <div class="stat">🧩 Trắc nghiệm còn sẵn<b>${gqAvailable}</b></div>`;
 }
@@ -730,6 +731,24 @@ $('btnCreateTargetedGrammar').addEventListener('click', async () => {
   }
 });
 
+/** Lọc theo khoảng thời gian ("all"/7/30/90 ngày, dựa vào `dateField`) + sắp
+ * xếp ("new"/"old"/"score-desc"/"score-asc", dựa vào `scoreField`) — dùng
+ * chung cho cả 2 danh sách Bài Dịch/Trắc Nghiệm ở Trang Phụ Huynh, dữ liệu
+ * càng ngày càng nhiều nên cần lọc bớt thay vì kéo tay hết cả danh sách. */
+function filterAndSortLog(list, range, sort, dateField, scoreField) {
+  let out = list;
+  if (range !== 'all') {
+    const cutoff = Date.now() - Number(range) * 86400000;
+    out = out.filter((x) => x[dateField] && new Date(x[dateField]).getTime() >= cutoff);
+  }
+  out = [...out];
+  if (sort === 'old') out.sort((a, b) => new Date(a[dateField]) - new Date(b[dateField]));
+  else if (sort === 'score-desc') out.sort((a, b) => (b[scoreField] ?? -1) - (a[scoreField] ?? -1));
+  else if (sort === 'score-asc') out.sort((a, b) => (a[scoreField] ?? Infinity) - (b[scoreField] ?? Infinity));
+  else out.sort((a, b) => new Date(b[dateField]) - new Date(a[dateField])); // 'new' (mặc định)
+  return out;
+}
+
 let lastTranslations = [];
 
 /** Bài dịch bé đã nộp — đoạn văn gốc, bản dịch của bé, điểm/nhận xét/bản
@@ -739,9 +758,23 @@ let lastTranslations = [];
  * nộp) hiện nút "Chấm lại" để phụ huynh tự thử lại bằng key AI của mình. */
 function renderTranslateLog(translations) {
   lastTranslations = translations;
+  applyTranslateFilters();
+}
+
+function applyTranslateFilters() {
+  const range = $('trFilterRange').value;
+  const sort = $('trFilterSort').value;
+  renderTranslateLogRows(filterAndSortLog(lastTranslations, range, sort, 'submitted_at', 'ai_score'));
+}
+$('trFilterRange').addEventListener('change', applyTranslateFilters);
+$('trFilterSort').addEventListener('change', applyTranslateFilters);
+
+function renderTranslateLogRows(translations) {
   const box = $('translateLog');
   if (!translations.length) {
-    box.innerHTML = '<i style="color:var(--ink-dim)">Bé chưa nộp bài dịch nào.</i>';
+    box.innerHTML = lastTranslations.length
+      ? '<i style="color:var(--ink-dim)">Không có bài dịch nào khớp bộ lọc đang chọn.</i>'
+      : '<i style="color:var(--ink-dim)">Bé chưa nộp bài dịch nào.</i>';
     return;
   }
   box.innerHTML = translations.map((t) => {
@@ -798,9 +831,23 @@ let lastGrammarQuizzes = [];
  * "Chấm lại" để phụ huynh tự thử lại. */
 function renderGrammarQuizLog(submissions) {
   lastGrammarQuizzes = submissions;
+  applyGrammarFilters();
+}
+
+function applyGrammarFilters() {
+  const range = $('gqFilterRange').value;
+  const sort = $('gqFilterSort').value;
+  renderGrammarQuizLogRows(filterAndSortLog(lastGrammarQuizzes, range, sort, 'submitted_at', 'score'));
+}
+$('gqFilterRange').addEventListener('change', applyGrammarFilters);
+$('gqFilterSort').addEventListener('change', applyGrammarFilters);
+
+function renderGrammarQuizLogRows(submissions) {
   const box = $('grammarQuizLog');
   if (!submissions.length) {
-    box.innerHTML = '<i style="color:var(--ink-dim)">Bé chưa làm bài trắc nghiệm ngữ pháp nào.</i>';
+    box.innerHTML = lastGrammarQuizzes.length
+      ? '<i style="color:var(--ink-dim)">Không có bài trắc nghiệm nào khớp bộ lọc đang chọn.</i>'
+      : '<i style="color:var(--ink-dim)">Bé chưa làm bài trắc nghiệm ngữ pháp nào.</i>';
     return;
   }
   box.innerHTML = submissions.map((s) => {

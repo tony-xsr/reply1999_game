@@ -168,7 +168,8 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
       <div class="sub-tabs" id="kidSubTabs">
         <button type="button" class="sub-tab" data-tab="stats">📊 Thống kê</button>
         <button type="button" class="sub-tab" data-tab="exam">🎓 Thi Chứng Chỉ</button>
-        <button type="button" class="sub-tab" data-tab="translate">📝 Bài Làm AI</button>
+        <button type="button" class="sub-tab" data-tab="translate">📝 Bài Dịch</button>
+        <button type="button" class="sub-tab" data-tab="grammar">🧩 Trắc Nghiệm</button>
         <button type="button" class="sub-tab" data-tab="weak">🎯 Từ hay sai</button>
         <button type="button" class="sub-tab" data-tab="report">📈 Báo cáo tuần</button>
         <button type="button" class="sub-tab" data-tab="ledger">🧾 Sổ quà & sao</button>
@@ -213,18 +214,54 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
 
       <div class="kp-tab hidden" data-kptab="translate">
         <div class="card">
-          <h2>📦 Kho bài AI đã soạn sẵn</h2>
+          <h2>📦 Kho bài dịch AI đã soạn sẵn</h2>
           <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 8px">Số bài AI đã soạn trước cho bé (buffer) — "còn sẵn" là bài đã có nhưng bé CHƯA làm.</p>
-          <div id="aiResourceStats" class="stats-row"><i style="color:var(--ink-dim);font-size:13px">Đang tải…</i></div>
+          <div id="trResourceStats" class="stats-row"><i style="color:var(--ink-dim);font-size:13px">Đang tải…</i></div>
         </div>
         <div class="card">
           <h2>📝 Bài Dịch bé đã nộp</h2>
-          <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 10px">Đoạn văn tiếng Anh gốc, bản dịch tiếng Việt của bé, điểm/nhận xét AI đã chấm, và kết quả nối từ vựng — mới nhất lên trước.</p>
+          <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 10px">Đoạn văn tiếng Anh gốc, bản dịch tiếng Việt của bé, điểm/nhận xét AI đã chấm, và kết quả nối từ vựng.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+            <select id="trFilterRange" style="width:auto;flex:1;min-width:140px">
+              <option value="all">Tất cả thời gian</option>
+              <option value="7">7 ngày qua</option>
+              <option value="30">30 ngày qua</option>
+              <option value="90">3 tháng qua</option>
+            </select>
+            <select id="trFilterSort" style="width:auto;flex:1;min-width:140px">
+              <option value="new">Mới nhất trước</option>
+              <option value="old">Cũ nhất trước</option>
+              <option value="score-desc">Điểm cao → thấp</option>
+              <option value="score-asc">Điểm thấp → cao</option>
+            </select>
+          </div>
           <div id="translateLog" style="font-size:13.5px"><i style="color:var(--ink-dim)">Đang tải…</i></div>
+        </div>
+      </div>
+
+      <div class="kp-tab hidden" data-kptab="grammar">
+        <div class="card">
+          <h2>📦 Kho đề trắc nghiệm AI đã soạn sẵn</h2>
+          <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 8px">Số đề AI đã soạn trước cho bé (buffer) — "còn sẵn" là đề đã có nhưng bé CHƯA làm.</p>
+          <div id="gqResourceStats" class="stats-row"><i style="color:var(--ink-dim);font-size:13px">Đang tải…</i></div>
         </div>
         <div class="card">
           <h2>🧩 Trắc Nghiệm Ngữ Pháp bé đã làm</h2>
-          <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 10px">5 câu/ngày, kèm điểm + gợi ý AI chấm sau khi bé nộp bài — mới nhất lên trước.</p>
+          <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 10px">5 câu/ngày, kèm điểm + gợi ý AI chấm sau khi bé nộp bài.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+            <select id="gqFilterRange" style="width:auto;flex:1;min-width:140px">
+              <option value="all">Tất cả thời gian</option>
+              <option value="7">7 ngày qua</option>
+              <option value="30">30 ngày qua</option>
+              <option value="90">3 tháng qua</option>
+            </select>
+            <select id="gqFilterSort" style="width:auto;flex:1;min-width:140px">
+              <option value="new">Mới nhất trước</option>
+              <option value="old">Cũ nhất trước</option>
+              <option value="score-desc">Điểm cao → thấp</option>
+              <option value="score-asc">Điểm thấp → cao</option>
+            </select>
+          </div>
           <div id="grammarQuizLog" style="font-size:13.5px"><i style="color:var(--ink-dim)">Đang tải…</i></div>
         </div>
       </div>
