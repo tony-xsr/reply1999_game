@@ -146,10 +146,15 @@ export function parsePassagesResponse(content, count = 3) {
  * khó của `levelLabel`, kèm tiêu đề tiếng Việt + từ vựng quan trọng cần chú ý
  * (để bé nối nghĩa sau khi dịch xong) — dùng cho mục "📝 Luyện Dịch".
  */
-export async function generatePassages({ apiKey, model = DEFAULT_GROQ_MODEL, levelLabel, count = 3 }) {
+/**
+ * @param {string} [weakSummary] đoạn văn bản tiếng Việt tóm tắt từ vựng/điểm
+ *   ngữ pháp bé hay sai (xem shared/weak-points.js buildWeakPointsSummary) —
+ *   để AI ưu tiên lồng ghép ôn lại đúng chỗ yếu. Rỗng/không truyền = bỏ qua.
+ */
+export async function generatePassages({ apiKey, model = DEFAULT_GROQ_MODEL, levelLabel, count = 3, weakSummary = '' }) {
   const sys = 'Bạn là giáo viên tiếng Anh soạn đoạn văn ngắn cho học sinh Việt Nam luyện dịch Anh-Việt, đúng độ khó cấp độ được yêu cầu. LUÔN trả lời bằng đúng 1 khối JSON hợp lệ, không thêm chữ nào khác ngoài JSON.';
   const user = `Cấp độ: ${levelLabel}. Soạn ĐÚNG ${count} đoạn văn tiếng Anh NGẮN (3-5 câu), chủ đề đời thường gần gũi học sinh, KHÁC NHAU HOÀN TOÀN về nội dung, độ khó từ vựng/ngữ pháp phù hợp đúng cấp độ trên.
-Mỗi đoạn kèm 1 tiêu đề ngắn bằng tiếng Việt (title) và 5 từ tiếng Anh QUAN TRỌNG xuất hiện trong đoạn kèm nghĩa tiếng Việt (vocab) — để học sinh ôn lại sau khi dịch.
+Mỗi đoạn kèm 1 tiêu đề ngắn bằng tiếng Việt (title) và 5 từ tiếng Anh QUAN TRỌNG xuất hiện trong đoạn kèm nghĩa tiếng Việt (vocab) — để học sinh ôn lại sau khi dịch.${weakSummary ? `\n${weakSummary}` : ''}
 Trả về DUY NHẤT JSON dạng: {"passages":[{"title":"...","passage_en":"...","vocab":[{"word":"...","vi":"..."},{"word":"...","vi":"..."},{"word":"...","vi":"..."},{"word":"...","vi":"..."},{"word":"...","vi":"..."}]}]}`;
 
   const content = await callGroq({ apiKey, model, sys, user, temperature: 0.9 });
@@ -225,17 +230,18 @@ export function parseGrammarQuizResponse(content, count = 5) {
  *   dạng câu hỏi (4 lựa chọn + giải thích từng lựa chọn) nên dùng chung
  *   parseGrammarQuizResponse(), chỉ khác nội dung yêu cầu AI soạn.
  */
-export async function generateGrammarQuiz({ apiKey, model = DEFAULT_GROQ_MODEL, levelLabel, count = 5, quizType = 'grammar' }) {
+export async function generateGrammarQuiz({ apiKey, model = DEFAULT_GROQ_MODEL, levelLabel, count = 5, quizType = 'grammar', weakSummary = '' }) {
   const isVocab = quizType === 'vocab';
   const sys = isVocab
     ? 'Bạn là giáo viên tiếng Anh soạn đề trắc nghiệm TỪ VỰNG cho học sinh Việt Nam luyện thi chứng chỉ quốc tế, đúng độ khó cấp độ được yêu cầu. LUÔN trả lời bằng đúng 1 khối JSON hợp lệ, không thêm chữ nào khác ngoài JSON.'
     : 'Bạn là giáo viên tiếng Anh soạn đề trắc nghiệm ngữ pháp cho học sinh Việt Nam luyện thi chứng chỉ quốc tế, đúng độ khó cấp độ được yêu cầu. LUÔN trả lời bằng đúng 1 khối JSON hợp lệ, không thêm chữ nào khác ngoài JSON.';
+  const weakLine = weakSummary ? `\n${weakSummary}` : '';
   const user = isVocab
     ? `Cấp độ: ${levelLabel}. Soạn ĐÚNG ${count} câu hỏi trắc nghiệm TỪ VỰNG tiếng Anh MỚI, chủ đề từ vựng KHÁC NHAU, đúng độ khó cấp độ trên — kiểm tra NGHĨA CỦA TỪ (chọn đúng nghĩa/từ đồng nghĩa/điền đúng từ theo ngữ cảnh câu), KHÔNG kiểm tra ngữ pháp.
-Mỗi câu có prompt tiếng Anh (câu có 1 từ để trống dùng "___" hoặc hỏi thẳng nghĩa của 1 từ), đúng 4 lựa chọn (options), đúng 1 đáp án đúng (answer, chỉ số 0-3), "explanations" — mảng ĐÚNG 4 chuỗi giải thích bằng tiếng Việt, MỖI PHẦN TỬ ứng với ĐÚNG 1 lựa chọn theo thứ tự trong options: với lựa chọn ĐÚNG thì giải thích nghĩa của từ/vì sao hợp ngữ cảnh; với các lựa chọn SAI thì giải thích vì sao nghĩa không phù hợp, "structure" — 1 câu tiếng Việt nêu rõ TỪ/CỤM TỪ đang kiểm tra thuộc loại gì (danh từ/động từ/tính từ/thành ngữ...) và vì sao dùng đúng chỗ đó trong câu, và "translation" — dịch NGUYÊN CÂU tiếng Anh (đã điền đáp án đúng vào chỗ trống) sang tiếng Việt.
+Mỗi câu có prompt tiếng Anh (câu có 1 từ để trống dùng "___" hoặc hỏi thẳng nghĩa của 1 từ), đúng 4 lựa chọn (options), đúng 1 đáp án đúng (answer, chỉ số 0-3), "explanations" — mảng ĐÚNG 4 chuỗi giải thích bằng tiếng Việt, MỖI PHẦN TỬ ứng với ĐÚNG 1 lựa chọn theo thứ tự trong options: với lựa chọn ĐÚNG thì giải thích nghĩa của từ/vì sao hợp ngữ cảnh; với các lựa chọn SAI thì giải thích vì sao nghĩa không phù hợp, "structure" — 1 câu tiếng Việt nêu rõ TỪ/CỤM TỪ đang kiểm tra thuộc loại gì (danh từ/động từ/tính từ/thành ngữ...) và vì sao dùng đúng chỗ đó trong câu, và "translation" — dịch NGUYÊN CÂU tiếng Anh (đã điền đáp án đúng vào chỗ trống) sang tiếng Việt.${weakLine}
 Trả về DUY NHẤT JSON dạng: {"questions":[{"prompt":"...","options":["...","...","...","..."],"answer":0,"explanations":["vì sao đúng...","vì sao sai...","vì sao sai...","vì sao sai..."],"structure":"...","translation":"..."}]}`
     : `Cấp độ: ${levelLabel}. Soạn ĐÚNG ${count} câu hỏi trắc nghiệm ngữ pháp tiếng Anh MỚI, chủ điểm ngữ pháp KHÁC NHAU, đúng độ khó cấp độ trên.
-Mỗi câu có prompt tiếng Anh (chỗ trống dùng "___"), đúng 4 lựa chọn (options), đúng 1 đáp án đúng (answer, chỉ số 0-3), "explanations" — mảng ĐÚNG 4 chuỗi giải thích bằng tiếng Việt, MỖI PHẦN TỬ ứng với ĐÚNG 1 lựa chọn theo thứ tự trong options: với lựa chọn ĐÚNG thì giải thích vì sao nó đúng; với các lựa chọn SAI thì giải thích cụ thể vì sao KHÔNG NÊN chọn đáp án đó (sai ở điểm ngữ pháp gì), "structure" — 1-2 câu tiếng Việt nêu rõ TÊN cấu trúc/thì ngữ pháp đang kiểm tra (vd "Câu điều kiện loại 2", "Thì hiện tại hoàn thành") và GIẢI THÍCH vì sao ngữ cảnh câu này phải dùng đúng cấu trúc/thì đó, và "translation" — dịch NGUYÊN CÂU tiếng Anh (đã điền đáp án đúng vào chỗ trống) sang tiếng Việt.
+Mỗi câu có prompt tiếng Anh (chỗ trống dùng "___"), đúng 4 lựa chọn (options), đúng 1 đáp án đúng (answer, chỉ số 0-3), "explanations" — mảng ĐÚNG 4 chuỗi giải thích bằng tiếng Việt, MỖI PHẦN TỬ ứng với ĐÚNG 1 lựa chọn theo thứ tự trong options: với lựa chọn ĐÚNG thì giải thích vì sao nó đúng; với các lựa chọn SAI thì giải thích cụ thể vì sao KHÔNG NÊN chọn đáp án đó (sai ở điểm ngữ pháp gì), "structure" — 1-2 câu tiếng Việt nêu rõ TÊN cấu trúc/thì ngữ pháp đang kiểm tra (vd "Câu điều kiện loại 2", "Thì hiện tại hoàn thành") và GIẢI THÍCH vì sao ngữ cảnh câu này phải dùng đúng cấu trúc/thì đó, và "translation" — dịch NGUYÊN CÂU tiếng Anh (đã điền đáp án đúng vào chỗ trống) sang tiếng Việt.${weakLine}
 Trả về DUY NHẤT JSON dạng: {"questions":[{"prompt":"...","options":["...","...","...","..."],"answer":0,"explanations":["vì sao đúng...","vì sao sai...","vì sao sai...","vì sao sai..."],"structure":"...","translation":"..."}]}`;
 
   const content = await callGroq({ apiKey, model, sys, user, temperature: 0.7 });
