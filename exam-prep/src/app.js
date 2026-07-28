@@ -112,22 +112,38 @@ function confetti() {
 
 /* ===== Màn 1: chọn cấp độ ===== */
 
+async function selectLevel(level) {
+  state.level = level;
+  state.history = [];
+  goTo('mode');
+  renderGoalBox();
+  // Làm mới cache settings trước khi kiểm tra cấp độ Luyện Dịch/Trắc Nghiệm
+  // — tránh nút biến mất do thiết bị bé còn giữ settings cũ (xem
+  // shared/api.js#refreshCurrentKidSettings).
+  await api.refreshCurrentKidSettings();
+  renderTranslateEntry();
+  renderGrammarQuizEntry();
+  renderMillionaireEntry();
+}
+
 document.querySelectorAll('.level-card[data-level]').forEach((btn) => {
-  btn.addEventListener('click', async () => {
-    sfx.select();
-    state.level = btn.dataset.level;
-    state.history = [];
-    goTo('mode');
-    renderGoalBox();
-    // Làm mới cache settings trước khi kiểm tra cấp độ Luyện Dịch/Trắc Nghiệm
-    // — tránh nút biến mất do thiết bị bé còn giữ settings cũ (xem
-    // shared/api.js#refreshCurrentKidSettings).
-    await api.refreshCurrentKidSettings();
-    renderTranslateEntry();
-    renderGrammarQuizEntry();
-    renderMillionaireEntry();
-  });
+  btn.addEventListener('click', () => { sfx.select(); selectLevel(btn.dataset.level); });
 });
+
+// Trang chủ có mục "Tiếng Anh Hôm Nay" liên kết thẳng vào đây kèm
+// ?level=starters|movers|flyers&open=translate|grammar|millionaire cho các
+// cấp độ KHÔNG có trang riêng /luyen-thi-*/ — tự chọn cấp độ + bấm hộ nút đó
+// nếu đang hiển thị (im lặng bỏ qua nếu bé/cấp độ này chưa cấu hình mục đó).
+(async () => {
+  const params = new URLSearchParams(location.search);
+  const wantLevel = params.get('level');
+  if (!wantLevel || !LEVELS.some((l) => l.id === wantLevel)) return;
+  await selectLevel(wantLevel);
+  const wantOpen = params.get('open');
+  if (wantOpen === 'translate') document.getElementById('trEntryBox')?.querySelector('button')?.click();
+  else if (wantOpen === 'grammar') document.getElementById('gqEntryBox')?.querySelector('button')?.click();
+  else if (wantOpen === 'millionaire') document.getElementById('mpEntryBox')?.querySelector('button')?.click();
+})();
 
 /** Nút "📝 Luyện Dịch" — chỉ hiện khi phụ huynh đã đặt ĐÚNG cấp độ vừa chọn
  * làm cấp độ dùng cho Luyện Dịch (xem shared/translate-ui.js). */

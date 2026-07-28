@@ -247,3 +247,31 @@ body {
   .quiz-prompt { font-size: 1.08rem; }
   .quiz-opt { font-size: 0.9rem; padding: 10px 6px; }
 }
+
+/* ===== Chế độ Tối (theo lựa chọn Sáng/Tối/Theo máy dùng CHUNG toàn site —
+   xem shared/theme.js) — trang này giữ NGUYÊN bảng màu xanh dương của riêng
+   nó ở chế độ Sáng (đây chính là nguồn cảm hứng cho theme "Dịu" dùng ở các
+   trang khác), chỉ thêm override cho chế độ Tối để không bị chói khi phần
+   còn lại của site đang ở nền tối. ===== */
+:root[data-theme$="-dark"] {
+  --bg: #0f1424;
+  --panel: #171e35;
+  --ink: #e6ecff;
+  --muted: #aab6d6;
+  --accent: #7fa2ff;
+  --accent-deep: #a6c0ff;
+  --good: #4ade80;
+  --bad: #f87171;
+  --line: #33447a;
+}
+:root[data-theme$="-dark"] body { background-image: radial-gradient(ellipse 80% 50% at 50% 0%, #182240 0%, transparent 70%); }
+:root[data-theme$="-dark"] .mode-big-card--test { background: linear-gradient(135deg, #3a2a14, #4a3818); border-color: #8a6a2f; }
+:root[data-theme$="-dark"] .mode-big-card--test .lc-name { color: #ffcf87; }
+:root[data-theme$="-dark"] .lesson-point,
+:root[data-theme$="-dark"] .quiz-passage,
+:root[data-theme$="-dark"] .quiz-opt { background: #1e2742; }
+:root[data-theme$="-dark"] .report-weak-item { background: #3a2a14; color: #ffcf87; }
+:root[data-theme$="-dark"] .unit-card.special { background: linear-gradient(135deg, #1c2540, #202c50); }
+:root[data-theme$="-dark"] .quiz-opt.correct { background: #163a24; }
+:root[data-theme$="-dark"] .quiz-opt.wrong { background: #3a1616; }
+:root[data-theme$="-dark"] .cheer { background: rgba(15, 20, 36, 0.97); }
