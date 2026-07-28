@@ -80,12 +80,12 @@ header .shop-btn:active{transform:translateY(1px)}
 
 .gc-art{
   height:64px;border-radius:10px;
-  background:linear-gradient(135deg, #fff3df, #ffe1b0);
+  background:linear-gradient(135deg, var(--panel2), var(--bg2));
   border:1px solid var(--line);
   display:flex;align-items:center;justify-content:center;
   position:relative;overflow:hidden;
 }
-.gc-art .placeholder{font-size:42px;opacity:.4}
+.gc-art .placeholder{font-size:42px;opacity:.55}
 .gc-art > div{font-size:32px!important}
 
 .gc-title{font-size:12.5px;font-weight:800;color:var(--ink);line-height:1.3;
@@ -207,7 +207,7 @@ footer a{color:var(--gold2)}
     <div id="homeProfileSlot" style="display:flex;align-items:center"></div>
     <div class="lang-picker" id="lang-picker" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
       <button id="btn-test-audio-hub" aria-label="Test audio" title="Test audio (iPhone)" style="background:linear-gradient(180deg,#3b82f6,#1d4ed8);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;cursor:pointer">🔊 Test</button>
-      <select id="lang-select" aria-label="Language" style="background:#fff3df;color:var(--gold2);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;cursor:pointer;outline:none">
+      <select id="lang-select" aria-label="Language" style="background:var(--panel2);color:var(--gold2);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;cursor:pointer;outline:none">
         <option value="vi">🇻🇳 VI</option>
         <option value="en">🇬🇧 EN</option>
         <option value="ja">🇯🇵 JA</option>
@@ -244,9 +244,9 @@ footer a{color:var(--gold2)}
     <h2>🔤 Tiếng Anh Hôm Nay</h2>
     <p>Truy cập nhanh 4 mục luyện thi Chứng Chỉ Anh bé hay dùng, khỏi phải tự tìm vào từng trang.</p>
     <div class="cta">
-      <a class="kids" href="/luyen-thi-pet/?open=translate">📝 Luyện Dịch PET — hôm nay</a>
-      <a class="kids" href="/luyen-thi-pet/?open=grammar">🧩 Trắc Nghiệm Ngữ Pháp PET — hôm nay</a>
-      <a class="kids" href="/luyen-thi-pet/?open=millionaire">🏆 Ai Là Triệu Phú PET — hôm nay</a>
+      <a class="kids" id="englishTodayTranslate" href="/luyen-thi-pet/?open=translate">📝 Luyện Dịch PET — hôm nay</a>
+      <a class="kids" id="englishTodayGrammar" href="/luyen-thi-pet/?open=grammar">🧩 Trắc Nghiệm Ngữ Pháp PET — hôm nay</a>
+      <a class="kids" id="englishTodayMillionaire" href="/luyen-thi-pet/?open=millionaire">🏆 Ai Là Triệu Phú PET — hôm nay</a>
       <a class="parent" href="/nguphap-truc-quan/">🧠 Ngữ Pháp Trực Quan</a>
     </div>
   </section>
@@ -559,6 +559,34 @@ footer a{color:var(--gold2)}
 // nút "Chọn bé" dẫn tới /chon-be/.
 import { mountHomeProfileChip } from '/shared/kid-bar.js';
 mountHomeProfileChip(document.getElementById('homeProfileSlot'));
+
+// "Tiếng Anh Hôm Nay" mặc định trỏ tới PET — nếu bé ĐANG CHỌN (qua /chon-be/)
+// đã được phụ huynh cấu hình cấp độ Luyện Dịch/Trắc Nghiệm KHÁC PET (vd KET,
+// TOEIC...), sửa lại link + nhãn cho ĐÚNG cấp độ đó, tránh vào trang PET rồi
+// thấy nút "biến mất" (page đó gate theo đúng cấp độ được cấu hình).
+(async () => {
+  try {
+    const [api, { EXAM_LEVEL_LABELS }] = await Promise.all([
+      import('/shared/api.js'), import('/shared/report.js'),
+    ]);
+    await api.refreshCurrentKidSettings().catch(() => {});
+    const kid = api.currentKidInfo();
+    if (!kid) return;
+    const DIRECT_LEVELS = ['ket', 'pet', 'toefl-junior', 'toeic'];
+    const levelLink = (level, open) => (DIRECT_LEVELS.includes(level)
+      ? `/luyen-thi-${level}/?open=${open}`
+      : `/exam-prep/?level=${level}&open=${open}`);
+    const trLevel = kid.settings?.translationLevel;
+    const gqLevel = kid.settings?.grammarQuizLevel;
+    const mpLevel = gqLevel || trLevel;
+    const trA = document.getElementById('englishTodayTranslate');
+    const gqA = document.getElementById('englishTodayGrammar');
+    const mpA = document.getElementById('englishTodayMillionaire');
+    if (trLevel && trA) { trA.href = levelLink(trLevel, 'translate'); trA.textContent = `📝 Luyện Dịch ${EXAM_LEVEL_LABELS[trLevel] || trLevel} — hôm nay`; }
+    if (gqLevel && gqA) { gqA.href = levelLink(gqLevel, 'grammar'); gqA.textContent = `🧩 Trắc Nghiệm Ngữ Pháp ${EXAM_LEVEL_LABELS[gqLevel] || gqLevel} — hôm nay`; }
+    if (mpLevel && mpA) { mpA.href = levelLink(mpLevel, 'millionaire'); mpA.textContent = `🏆 Ai Là Triệu Phú ${EXAM_LEVEL_LABELS[mpLevel] || mpLevel} — hôm nay`; }
+  } catch { /* mất mạng/chưa chọn bé: giữ nguyên link mặc định PET */ }
+})();
 
 // 🎨 Chọn theme (bảng màu Ấm/Dịu + Sáng/Tối/Theo máy) — xem shared/theme.js.
 import { mountThemePicker } from '/shared/theme.js';
