@@ -100,7 +100,8 @@ async function openTranslateOverlay(levelId, { speak } = {}) {
         renderAiBox(ov, '<p class="r99-ai-msg">⚠️ Chưa cấu hình key AI — nhờ phụ huynh vào Trang Phụ Huynh &gt; Cài đặt &gt; 🤖 Trợ Lý AI.</p>');
         return;
       }
-      const generated = await aiProvider.generatePassages(settings, { levelLabel, count: 3 });
+      const weakSummary = await api.weakPointsSummaryText(kid.id).catch(() => '');
+      const generated = await aiProvider.generatePassages(settings, { levelLabel, count: 3, weakSummary });
       passages = await api.savePassages(kid.id, generated.map((p) => ({ level: levelId, ...p })));
     }
   } catch (e) {
@@ -341,8 +342,9 @@ function renderMatch(ov, ctx) {
     if ([...matchState.values()].every((v) => v.matched)) {
       const total = vocab.length;
       const correct = [...matchState.values()].filter((v) => !v.wrongOnce).length;
+      const wrongWords = [...matchState.entries()].filter(([, v]) => v.wrongOnce).map(([word]) => word);
       msg.textContent = '🎉 Xong rồi! Đang lưu bài…';
-      finish(ov, { ...ctx, vocabCorrect: correct, vocabTotal: total });
+      finish(ov, { ...ctx, vocabCorrect: correct, vocabTotal: total, wrongWords });
     }
   }
 
@@ -375,10 +377,16 @@ function renderMatch(ov, ctx) {
 }
 
 async function finish(ov, ctx) {
-  const { submission, grade, vocabCorrect, vocabTotal, kid, say } = ctx;
+  const { submission, grade, vocabCorrect, vocabTotal, wrongWords, kid, say } = ctx;
   try {
     await api.updateTranslationVocab(submission.id, { vocabCorrect, vocabTotal });
   } catch { /* mất mạng lúc lưu nối từ: bé vẫn đã hoàn thành, không chặn */ }
+
+  // Ghi "từ hay sai" (dùng lại đúng sổ miss_events sẵn có của các mini-game từ
+  // vựng khác) — để cùng hiện trong "Từ cần ôn" của Trang Phụ Huynh + Ôn Tập Vui.
+  if (wrongWords?.length) {
+    api.recordMissBatch(wrongWords.map((word) => ({ word, delta: 1 }))).catch(() => {});
+  }
 
   let bonusHtml = '';
   try {

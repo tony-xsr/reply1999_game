@@ -305,13 +305,22 @@ async function checkParentGifts() {
    thông báo gì (khác lúc bé tự bấm mở "📝 Luyện Dịch"/"🧩 Trắc Nghiệm" — lúc
    đó có hiện "AI đang soạn..."). */
 async function ensureDailyAiContentForDay(kidId, settings, trLevel, gqLevel, gqType, day) {
+  // Chỉ đi lấy "từ/cấu trúc hay sai" (2 request phụ) NẾU thật sự cần gọi AI
+  // sinh bài mới bên dưới (đa số lần chạy hàm này KHÔNG cần, vì đã có sẵn bài
+  // từ cron/tái sử dụng) — nhớ lại (memo) để dùng chung cho cả 2 khối dưới.
+  let weakSummary;
+  async function getWeakSummary() {
+    if (weakSummary === undefined) weakSummary = await api.weakPointsSummaryText(kidId).catch(() => '');
+    return weakSummary;
+  }
+
   if (trLevel) {
     // Thử TÁI SỬ DỤNG nội dung có sẵn của cả nhà trước khi gọi AI (tiết kiệm
     // chi phí, anh/chị/em không trùng bài — xem shared/content-reuse.js).
     let passages = await api.ensureTranslationPassages(kidId, trLevel, day);
     if (!passages.length) {
       const levelLabel = EXAM_LEVEL_LABELS[trLevel] || trLevel;
-      const generated = await aiProvider.generatePassages(settings, { levelLabel, count: 3 });
+      const generated = await aiProvider.generatePassages(settings, { levelLabel, count: 3, weakSummary: await getWeakSummary() });
       passages = await api.savePassages(kidId, generated.map((p) => ({ level: trLevel, ...p })), day);
     }
   }
@@ -319,7 +328,7 @@ async function ensureDailyAiContentForDay(kidId, settings, trLevel, gqLevel, gqT
     let quiz = await api.ensureGrammarQuiz(kidId, gqLevel, gqType, day);
     if (!quiz) {
       const levelLabel = EXAM_LEVEL_LABELS[gqLevel] || gqLevel;
-      const questions = await aiProvider.generateGrammarQuiz(settings, { levelLabel, count: 5, quizType: gqType });
+      const questions = await aiProvider.generateGrammarQuiz(settings, { levelLabel, count: 5, quizType: gqType, weakSummary: await getWeakSummary() });
       quiz = await api.saveGrammarQuiz(kidId, { level: gqLevel, questions, quizType: gqType }, day);
     }
   }
@@ -385,9 +394,9 @@ export function mountHomeProfileChip(container) {
   try {
     const chipCss = [
       'display:inline-flex', 'align-items:center', 'gap:6px',
-      'background:#fffaf2', 'border:2px solid #a8834a', 'border-radius:999px',
+      'background:var(--panel2,#fffaf2)', 'border:2px solid var(--line,#a8834a)', 'border-radius:999px',
       'padding:6px 14px', 'font:800 13px -apple-system,Segoe UI,Roboto,Arial,sans-serif',
-      'color:#241e2e', 'text-decoration:none', 'cursor:pointer', 'box-shadow:0 2px 6px rgba(90,60,20,.2)',
+      'color:var(--ink,#241e2e)', 'text-decoration:none', 'cursor:pointer', 'box-shadow:0 2px 6px rgba(0,0,0,.18)',
     ].join(';');
     const kid = api.currentKidInfo();
     if (!kid) {
