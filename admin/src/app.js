@@ -45,9 +45,59 @@ async function loadStats() {
     if (!res.ok) throw new Error(data.error || `Lỗi ${res.status}`);
     renderStats(data);
     show('viewMain');
+    loadCronState();
   } catch (e) {
     show('viewAuth');
     $('authErr').textContent = `Không tải được thống kê: ${e.message}`;
+  }
+}
+
+/* ===== ⏯️ Cron sinh bài AI mỗi ngày (xem api/admin-cron.js) ===== */
+
+async function loadCronState() {
+  const row = $('cronStatusRow');
+  const btn = $('btnToggleCron');
+  try {
+    const token = api.accessToken();
+    const res = await fetch('/api/admin-cron', { headers: { Authorization: `Bearer ${token}` } });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `Lỗi ${res.status}`);
+    renderCronState(data);
+  } catch (e) {
+    row.innerHTML = `<i style="color:var(--bad);font-size:13px">Không tải được (${e.message})</i>`;
+    btn.disabled = true;
+  }
+}
+
+function renderCronState(data) {
+  const row = $('cronStatusRow');
+  const btn = $('btnToggleCron');
+  row.innerHTML = `<div class="stat">Trạng thái<b style="color:${data.enabled ? 'var(--good)' : 'var(--bad)'}">${data.enabled ? '🟢 Đang BẬT' : '🔴 Đang TẮT'}</b></div>`
+    + (data.updatedAt ? `<div class="stat">Đổi lần cuối<b style="font-size:13px">${new Date(data.updatedAt).toLocaleString('vi-VN')}</b></div>` : '');
+  btn.disabled = false;
+  btn.textContent = data.enabled ? '⏸️ Tắt cron' : '▶️ Bật lại cron';
+  btn.className = data.enabled ? 'ghost' : '';
+  btn.onclick = () => toggleCron(!data.enabled);
+}
+
+async function toggleCron(enabled) {
+  const btn = $('btnToggleCron');
+  const msg = $('cronMsg');
+  btn.disabled = true;
+  msg.textContent = '';
+  try {
+    const token = api.accessToken();
+    const res = await fetch('/api/admin-cron', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `Lỗi ${res.status}`);
+    renderCronState({ enabled: data.enabled, updatedAt: new Date().toISOString() });
+  } catch (e) {
+    msg.textContent = `Lỗi: ${e.message}`;
+    btn.disabled = false;
   }
 }
 

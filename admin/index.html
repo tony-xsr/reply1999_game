@@ -109,6 +109,14 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
     <p style="font-size:12px;color:var(--ink-dim);text-align:center">Vì hệ thống gọi AI thẳng từ trình duyệt (không qua server riêng), số liệu ở đây chỉ mang tính THỐNG KÊ — không phải giới hạn chặn cứng số lượt gọi thật sự.</p>
 
     <div class="card">
+      <h2>⏯️ Cron sinh bài AI mỗi ngày</h2>
+      <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 8px">Cron chạy 1 lần/ngày, tự soạn trước bài Luyện Dịch/Trắc Nghiệm cho mọi bé (xem <code>api/generate-daily-content.js</code>). TẮT ở đây để tạm dừng tốn quota AI mà không cần vào Vercel Dashboard xoá lịch cron — Vercel vẫn gọi đúng giờ, nhưng route sẽ tự thoát ngay không sinh gì.</p>
+      <div class="stats-row" id="cronStatusRow"><i style="color:var(--ink-dim);font-size:13px">Đang tải…</i></div>
+      <button id="btnToggleCron" disabled>…</button>
+      <p class="err" id="cronMsg"></p>
+    </div>
+
+    <div class="card">
       <h2>💾 Sao lưu & Khôi phục toàn bộ dữ liệu</h2>
       <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 8px">Sao lưu tải về TOÀN BỘ dữ liệu server (mọi gia đình, mọi bảng) thành 1 file JSON — giữ file này ở nơi an toàn.</p>
       <button id="btnDownloadBackup">⬇️ Tải bản sao lưu (JSON)</button>
