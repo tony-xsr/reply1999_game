@@ -3,7 +3,11 @@
 // Toàn bộ số dư/quà nằm trên server theo hồ sơ bé đang chọn ở /chon-be/.
 
 import * as api from '../../shared/api.js';
-import { CATALOG, catalogItem, effectiveCost, DEFAULT_REWARD_COST_MULTIPLIER } from '../../shared/rewards.js';
+import { effectiveCost, DEFAULT_REWARD_COST_MULTIPLIER, mergeCatalog } from '../../shared/rewards.js';
+import { GARDEN_DAILY_RATE, GARDEN_ANNUAL_RATE, todayProgress, sellBackValue } from '../../shared/garden.js';
+import {
+  STREAK_MILESTONES, starsForMilestone, uniqueLoginDays, computeCurrentStreak, nextClaimableMilestone,
+} from '../../shared/streak.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -54,6 +58,14 @@ async function boot() {
 let balance = 0;
 let rewardMultiplier = DEFAULT_REWARD_COST_MULTIPLIER;
 let customCosts = {};
+let catalog = mergeCatalog();
+let gardenLastYieldAtMs = Date.now();
+let gardenTickTimer = null;
+
+/** Tìm quà theo id trong catalog ĐÃ GỘP (gốc + quà phụ huynh tự thêm). */
+function findItem(id) {
+  return catalog.find((c) => c.id === id) || null;
+}
 
 async function refresh() {
   try {
@@ -61,15 +73,32 @@ async function refresh() {
     const cached = api.cachedSettings();
     if (cached?.reward_cost_multiplier) rewardMultiplier = cached.reward_cost_multiplier;
     if (cached?.custom_item_costs) customCosts = cached.custom_item_costs;
+    if (cached?.custom_catalog_items) catalog = mergeCatalog(cached.custom_catalog_items);
     const [stars, purchases, settings] = await Promise.all([
       api.starBalance(kidId), api.kidPurchases(kidId), api.getSettings(),
     ]);
     balance = stars;
     rewardMultiplier = settings.reward_cost_multiplier ?? DEFAULT_REWARD_COST_MULTIPLIER;
     customCosts = settings.custom_item_costs || {};
-    $('starBox').textContent = `⭐ ${stars}`;
+    catalog = mergeCatalog(settings.custom_catalog_items);
+
+    // Mỗi lần bé mở Tủ Quà, thu luôn số sao vườn hoa đã sinh ra từ lần trước
+    // (trần 36.5%/năm — xem shared/garden.js). Về sau nếu muốn "sống" hơn có
+    // thể thu theo hẹn giờ, nhưng thu khi mở trang là đủ dùng và đơn giản.
+    const claim = await api.claimGardenYield(kidId);
+    gardenLastYieldAtMs = claim.lastYieldAtMs;
+    if (claim.stars > 0) {
+      balance += claim.stars;
+      speakVi(`Vườn hoa của bé vừa lớn thêm, tặng bé ${claim.stars} sao!`);
+    }
+
+    $('starBox').textContent = `⭐ ${balance}`;
     renderCollection(purchases);
+    renderGarden(purchases);
     renderShop();
+    renderStreak(kidId);
+    if (gardenTickTimer) clearInterval(gardenTickTimer);
+    gardenTickTimer = setInterval(updateGardenProgress, 30000);
   } catch (e) {
     guide(`Không tải được tủ quà (${e.message}) — kiểm tra mạng rồi tải lại nhé.`);
   }
@@ -80,14 +109,11 @@ function renderCollection(purchases) {
   // loại nữa) — quà loại mới (voucher/drink) thêm sau này sẽ không làm
   // `byType[item.type].push` bị lỗi vì thiếu khóa.
   const byType = {};
-  for (const item of CATALOG) if (!byType[item.type]) byType[item.type] = [];
+  for (const item of catalog) if (!byType[item.type]) byType[item.type] = [];
   for (const p of purchases) {
-    const item = catalogItem(p.item_id);
+    const item = findItem(p.item_id);
     if (item) byType[item.type].push(item);
   }
-  $('garden').innerHTML = byType.flower.length
-    ? byType.flower.map((f) => f.icon).join('')
-    : '<span style="font-size:14px;letter-spacing:0;color:#5d5370">Vườn còn trống — đổi 🌸 để trồng hoa nhé!</span>';
   $('petsRow').textContent = byType.pet.length
     ? `Thú cưng: ${byType.pet.map((p) => p.icon).join(' ')}`
     : 'Thú cưng: chưa có (để dành sao đổi 🐣 nhé!)';
@@ -103,10 +129,78 @@ function renderCollection(purchases) {
     : '';
 }
 
+// ===== Vườn hoa sinh sao: hoa trồng càng lâu càng sinh thêm sao, tối đa
+// 36,5%/năm (giống 1000 sao tiền hoa -> mỗi ngày +1 sao) — công thức thật
+// nằm ở shared/garden.js, ở đây chỉ hiển thị + cho bé bán lại hoa.
+let gardenValue = 0;
+
+function renderGarden(purchases) {
+  const flowers = purchases.filter((p) => !p.sold_at && findItem(p.item_id)?.type === 'flower');
+  gardenValue = flowers.reduce((sum, p) => sum + (p.cost | 0), 0);
+
+  const garden = $('garden');
+  garden.innerHTML = '';
+  if (!flowers.length) {
+    garden.innerHTML = '<span class="empty">Vườn còn trống — đổi 🌸 ở "Đổi sao lấy quà" bên dưới để trồng hoa đầu tiên nhé!</span>';
+  }
+  for (const p of flowers) {
+    const item = findItem(p.item_id);
+    const refund = sellBackValue(p.cost);
+    const div = document.createElement('div');
+    div.className = 'flower';
+    div.innerHTML = `<span class="ic">${item.icon}</span>`;
+    const btn = document.createElement('button');
+    btn.textContent = `Bán ⭐${refund}`;
+    btn.title = `Bé mua hoa này hết ${p.cost} sao — bán lại được ${refund} sao (mất 1 sao)`;
+    btn.addEventListener('click', () => sellFlower(p, btn));
+    div.appendChild(btn);
+    garden.appendChild(div);
+  }
+
+  const growBox = $('growBox');
+  if (gardenValue <= 0) {
+    growBox.classList.add('hidden');
+    return;
+  }
+  growBox.classList.remove('hidden');
+  const dailyStars = Math.round(gardenValue * GARDEN_DAILY_RATE);
+  const yearStars = Math.round(gardenValue * GARDEN_ANNUAL_RATE);
+  $('growText').textContent = `Vườn của bé đang trồng ${gardenValue} sao tiền hoa 🌸 — mỗi ngày tự nhiên `
+    + `nở ra thêm khoảng ${dailyStars} sao cho bé (khoảng ${yearStars} sao mỗi năm). Cứ để hoa trong vườn `
+    + `càng lâu, bé càng được thêm nhiều sao, giống như nuôi heo đất vậy đó!`;
+  updateGardenProgress();
+}
+
+function updateGardenProgress() {
+  if (gardenValue <= 0) return;
+  const pct = Math.round(todayProgress(gardenLastYieldAtMs, Date.now()) * 100);
+  $('growFill').style.width = `${pct}%`;
+  const dailyStars = Math.round(gardenValue * GARDEN_DAILY_RATE);
+  $('growHint').textContent = dailyStars > 0
+    ? `Hôm nay vườn đã tích được ${pct}% trên đường tới +${dailyStars} sao tiếp theo 🌟`
+    : 'Trồng thêm hoa để vườn bắt đầu sinh sao mỗi ngày nhé!';
+}
+
+async function sellFlower(purchase, btn) {
+  const msg = $('shopMsg');
+  btn.disabled = true;
+  try {
+    const refund = await api.sellFlower(api.getCurrentKidId(), purchase);
+    msg.className = 'msg ok';
+    msg.textContent = `Bé đã bán lại hoa, nhận thêm ${refund} sao!`;
+    speakVi(`Bé đã bán lại hoa, nhận thêm ${refund} sao!`);
+    await refresh();
+  } catch (e) {
+    msg.className = 'msg bad';
+    msg.textContent = `Lỗi: ${e.message}`;
+    btn.disabled = false;
+  }
+}
+
 function renderShop() {
   const shop = $('shop');
   shop.innerHTML = '';
-  for (const item of CATALOG) {
+  for (const item of catalog) {
     const cost = effectiveCost(item, rewardMultiplier, customCosts);
     const div = document.createElement('div');
     div.className = 'item';
@@ -137,6 +231,48 @@ async function buy(item, cost, btn) {
       : `Lỗi: ${e.message}`;
     btn.disabled = false;
   }
+}
+
+// ===== Chuỗi ngày điểm danh liên tục (xem shared/streak.js) — thanh dài các
+// kho báu ở mốc 5/10/20/50 ngày, mở được ngay tại đây nếu bỏ lỡ lúc chọn hồ
+// sơ ở /chon-be/ (chỗ hiện popup mừng ngay lúc đăng nhập).
+async function renderStreak(kidId) {
+  try {
+    const [timestamps, freshKid] = await Promise.all([
+      api.kidLoginTimestamps(kidId),
+      api.refreshCurrentKidSettings(),
+    ]);
+    const days = uniqueLoginDays(timestamps);
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const streak = computeCurrentStreak(days, todayKey);
+    const claimedMax = freshKid?.settings?.streakClaimedMax || 0;
+    const milestone = nextClaimableMilestone(streak, claimedMax);
+    $('streakInfo').textContent = milestone
+      ? `🎉 Bé đang điểm danh liên tục ${streak} ngày — có 1 kho báu sẵn sàng mở, bấm vào nhé!`
+      : `Bé đang điểm danh liên tục ${streak} ngày! Vào chơi mỗi ngày để mở kho báu tiếp theo nhé.`;
+    $('streakRow').innerHTML = STREAK_MILESTONES.map((m) => {
+      const state = m <= claimedMax ? 'done' : (m === milestone ? 'ready' : '');
+      const icon = m <= claimedMax ? '✅' : '📦';
+      return `<div class="streak-chest ${state}" data-milestone="${m}"><span class="ic">${icon}</span><span>${m} ngày</span></div>`;
+    }).join('');
+    if (milestone) {
+      $('streakRow').querySelector(`[data-milestone="${milestone}"]`)
+        ?.addEventListener('click', () => claimStreakFromTuQua(kidId, milestone));
+    }
+  } catch {
+    $('streakCard').classList.add('hidden'); // mất mạng: ẩn êm, không chặn phần còn lại của Tủ Quà
+  }
+}
+
+async function claimStreakFromTuQua(kidId, milestone) {
+  const stars = starsForMilestone(milestone);
+  try {
+    const granted = await api.claimStreakMilestone(kidId, milestone, stars);
+    if (granted) {
+      speakVi(`Chúc mừng! Bé nhận được ${stars} sao từ kho báu điểm danh!`);
+      await refresh();
+    }
+  } catch { /* mất mạng: bé thử bấm lại sau */ }
 }
 
 boot();

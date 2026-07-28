@@ -6,7 +6,8 @@
     { "path": "/api/generate-daily-content", "schedule": "0 17 * * *" }
   ],
   "functions": {
-    "api/generate-daily-content.js": { "maxDuration": 60 }
+    "api/generate-daily-content.js": { "maxDuration": 60 },
+    "api/admin-backup.js": { "maxDuration": 60 }
   },
   "headers": [
     {
