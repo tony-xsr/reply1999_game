@@ -6,7 +6,10 @@
 // /server-config.js hoặc chưa đăng nhập, các hàm ghi trở thành no-op để game
 // không hỏng — trang Phụ Huynh sẽ hướng dẫn cài đặt.
 
-import { starsForSession, capDailyStars, DEFAULT_REWARD_COST_MULTIPLIER } from './rewards.js';
+import { starsForSession, capDailyStars, DEFAULT_REWARD_COST_MULTIPLIER, catalogItem } from './rewards.js';
+import { gardenValue, claimGardenYield as calcGardenYield, sellBackValue } from './garden.js';
+import { DAILY_PRACTICE_BONUS_STARS } from './daily-bonus.js';
+import { REUSE_WINDOW_DAYS, pickReusableContent } from './content-reuse.js';
 
 const SESSION_KEY = 'r99-session';
 const KID_KEY = 'r99-kid';
@@ -56,6 +59,14 @@ export function signedIn() {
 
 export function sessionUser() {
   return readSession()?.user || null;
+}
+
+/** Access token Supabase hiện tại của phiên phụ huynh — dùng để gọi các API
+ * server cần xác thực đúng người (vd /api/admin-stats), null nếu chưa đăng
+ * nhập. Khác PostgREST (qua rest()) ở chỗ hàm này KHÔNG tự làm mới token hết
+ * hạn — bên gọi tự xử lý lỗi 401 nếu có (vd yêu cầu đăng nhập lại). */
+export function accessToken() {
+  return readSession()?.access_token || null;
 }
 
 async function authFetch(path, body) {
@@ -216,6 +227,31 @@ export function currentKidInfo() {
   } catch { return null; }
 }
 
+/**
+ * Làm mới `settings` (jsonb) trong cache cục bộ của bé đang chơi từ server —
+ * gọi trước khi kiểm tra các cấu hình phụ thuộc `settings` (vd cấp độ dùng
+ * cho Luyện Dịch/Trắc Nghiệm Ngữ Pháp ở shared/translate-ui.js/grammar-quiz-
+ * ui.js). Không làm vậy thì nếu phụ huynh VỪA đổi cấu hình trong khi thiết bị
+ * của bé vẫn giữ bản `settings` CŨ (chỉ được nạp lại lúc chọn hồ sơ ở
+ * /chon-be/), các nút phụ thuộc cấu hình đó sẽ "biến mất" dù cấu hình mới đã
+ * đúng trên server — bé phải quay lại /chon-be/ chọn lại mới thấy. Mất mạng
+ * thì giữ nguyên cache cũ, không phá vỡ gì.
+ * @returns {Promise<object|null>} thông tin bé đã cập nhật, hoặc null nếu chưa chọn bé
+ */
+export async function refreshCurrentKidSettings() {
+  const id = getCurrentKidId();
+  const info = currentKidInfo();
+  if (!id || !info) return null;
+  try {
+    const settings = await fetchKidSettings(id);
+    const updated = { ...info, settings };
+    setCurrentKid(id, updated);
+    return updated;
+  } catch {
+    return info; // mất mạng: giữ nguyên cache cũ
+  }
+}
+
 /* ===== Phiên chơi + sao thưởng ===== */
 
 function todayISO() {
@@ -373,6 +409,90 @@ export async function unmarkPurchaseDelivered(purchaseId) {
   await patch(`purchases?id=eq.${purchaseId}`, { delivered_at: null });
 }
 
+/** Đọc `settings` (jsonb) MỚI NHẤT của 1 hồ sơ bé thẳng từ server — không
+ * qua cache local (`currentKidInfo()` có thể cũ nếu bé vừa đổi cài đặt ở
+ * thiết bị khác), dùng khi cần đọc-sửa-ghi 1 khoá trong đó cho an toàn. */
+async function fetchKidSettings(profileId) {
+  const rows = await get(`profiles?select=settings&id=eq.${profileId}`);
+  return rows[0]?.settings || {};
+}
+
+/* ===== Vườn hoa sinh sao (xem công thức thuần trong shared/garden.js) ===== */
+
+/**
+ * "Thu lãi vườn hoa": cộng sao vườn hoa đã sinh ra kể từ lần thu gần nhất
+ * (trần 36.5%/năm, tức 0,1%/ngày trên tổng giá hoa đang trồng), rồi lưu lại
+ * mốc thu mới vào profiles.settings.gardenLastYieldAt (cần chạy migrate-01 để
+ * có cột settings, và migrate-09 để có cột purchases.sold_at). An toàn gọi
+ * lại nhiều lần liên tiếp trong cùng ngày — chưa đủ 1 ngày thì trả 0 sao và
+ * KHÔNG đổi mốc, để progress bar phía UI vẫn tính đúng tiến độ hôm nay.
+ * @returns {Promise<{stars:number, value:number, lastYieldAtMs:number}>}
+ */
+export async function claimGardenYield(profileId) {
+  const [purchases, settings] = await Promise.all([kidPurchases(profileId), fetchKidSettings(profileId)]);
+  const value = gardenValue(purchases, catalogItem);
+  const lastYieldAtMs = settings.gardenLastYieldAt ? new Date(settings.gardenLastYieldAt).getTime() : Date.now();
+  const { stars, days, newLastYieldAtMs } = calcGardenYield(value, lastYieldAtMs, Date.now());
+  if (days > 0 || !settings.gardenLastYieldAt) {
+    await updateKid(profileId, {
+      settings: { ...settings, gardenLastYieldAt: new Date(newLastYieldAtMs).toISOString() },
+    });
+  }
+  if (stars > 0) await grantStars(profileId, stars, 'vuon-hoa');
+  return { stars, value, lastYieldAtMs: newLastYieldAtMs };
+}
+
+/** Bé bán lại 1 bông hoa trong vườn: mất đúng 1 sao so với giá đã mua. */
+export async function sellFlower(profileId, purchase) {
+  const refund = sellBackValue(purchase.cost);
+  await patch(`purchases?id=eq.${purchase.id}`, { sold_at: new Date().toISOString() });
+  if (refund > 0) await grantStars(profileId, refund, `ban:${purchase.item_id}`);
+  return refund;
+}
+
+/* ===== Thưởng hoàn thành Luyện Dịch / Trắc Nghiệm Ngữ Pháp (xem shared/daily-bonus.js) ===== */
+
+/**
+ * Thưởng DAILY_PRACTICE_BONUS_STARS sao khi bé hoàn thành hết chỉ tiêu 1
+ * phần luyện thi hôm nay — tự chặn thưởng quá 1 lần/ngày/phần bằng mốc lưu
+ * ở profiles.settings[sectionKey]. Bên gọi tự kiểm tra đã làm xong hết chỉ
+ * tiêu chưa (isQuotaComplete trong shared/daily-bonus.js) rồi mới gọi hàm
+ * này — hàm chỉ lo phần chống thưởng trùng + ghi sổ.
+ * @param {string} sectionKey khoá lưu mốc trong settings, vd 'trRewardedDay'/'gqRewardedDay'
+ * @param {string} todayKey ngày hôm nay, vd dateKeyOffset(0)
+ * @param {string} reason lý do ghi vào reward_ledger
+ * @param {number} stars số sao thưởng — mặc định DAILY_PRACTICE_BONUS_STARS (Luyện Dịch/Trắc
+ *   Nghiệm), truyền riêng cho các nhiệm vụ khác có mức thưởng khác (vd Ngữ Pháp Trực Quan 2 sao).
+ * @returns {Promise<boolean>} true nếu vừa thưởng, false nếu hôm nay đã thưởng rồi
+ */
+export async function claimDailyPracticeBonus(profileId, sectionKey, todayKey, reason, stars = DAILY_PRACTICE_BONUS_STARS) {
+  const settings = await fetchKidSettings(profileId);
+  if (settings[sectionKey] === todayKey) return false;
+  await updateKid(profileId, { settings: { ...settings, [sectionKey]: todayKey } });
+  await grantStars(profileId, stars, reason);
+  return true;
+}
+
+/* ===== Ai Là Triệu Phú (xem shared/millionaire.js) — 1 lần/ngày/bé ===== */
+
+/**
+ * Ghi kết quả 1 lượt chơi "Ai Là Triệu Phú" hôm nay — CHẶN chơi lần 2 trong
+ * cùng ngày (đọc settings MỚI NHẤT từ server, không tin cache, để 2 thiết bị/
+ * 2 tab không lách chơi được 2 lần/ngày). Cộng sao nếu có.
+ * @returns {Promise<boolean>} true nếu vừa ghi nhận, false nếu HÔM NAY đã chơi rồi
+ */
+export async function claimMillionaireResult(profileId, { stars, correctStreak }, todayKey) {
+  const settings = await fetchKidSettings(profileId);
+  if (settings.millionaireLastPlayedDay === todayKey) return false;
+  await updateKid(profileId, {
+    settings: {
+      ...settings, millionaireLastPlayedDay: todayKey, millionaireLastStars: stars, millionaireLastCorrectStreak: correctStreak,
+    },
+  });
+  if (stars > 0) await grantStars(profileId, stars, 'trieu-phu:hoan-thanh');
+  return true;
+}
+
 /** Quà MIỄN PHÍ "học chăm" (hộp quà mỗi 15 câu) — vào tủ quà với cost 0. */
 export async function recordFreeGift(profileId, itemId) {
   const fam = await ensureFamily();
@@ -408,12 +528,16 @@ export async function getSettings() {
   const s = rows[0] || {
     family_id: fam.id, tts_rate: 1.0, daily_limit_min: 45,
     reward_cost_multiplier: DEFAULT_REWARD_COST_MULTIPLIER, custom_item_costs: {},
-    ai_provider: 'groq', ai_api_key: '',
+    ai_provider: 'groq', ai_api_key: '', deepseek_api_key: '', deepseek_model: '',
+    custom_catalog_items: [],
   };
   if (s.reward_cost_multiplier == null) s.reward_cost_multiplier = DEFAULT_REWARD_COST_MULTIPLIER; // gia dinh cu chua chay migrate-03
   if (s.custom_item_costs == null) s.custom_item_costs = {}; // gia dinh cu chua chay migrate-04
   if (s.ai_provider == null) s.ai_provider = 'groq'; // gia dinh cu chua chay migrate-06
   if (s.ai_api_key == null) s.ai_api_key = ''; // gia dinh cu chua chay migrate-06
+  if (s.deepseek_api_key == null) s.deepseek_api_key = ''; // gia dinh cu chua chay migrate-10
+  if (s.deepseek_model == null) s.deepseek_model = ''; // gia dinh cu chua chay migrate-10
+  if (s.custom_catalog_items == null) s.custom_catalog_items = []; // gia dinh cu chua chay migrate-13
   try { localStorage.setItem('r99-settings-cache', JSON.stringify({ ...s, cachedAt: Date.now() })); } catch { /* ignore */ }
   return s;
 }
@@ -428,7 +552,8 @@ export function cachedSettings() {
 // "Chỉnh giá quà" (custom_item_costs) lưu ĐỘC LẬP nhau; nếu luôn ghi đè cả
 // 4 cột mỗi lần gọi, lưu form này sẽ vô tình XOÁ TRẮNG dữ liệu form kia.
 export async function saveSettings({
-  tts_rate, daily_limit_min, reward_cost_multiplier, custom_item_costs, ai_provider, ai_api_key,
+  tts_rate, daily_limit_min, reward_cost_multiplier, custom_item_costs,
+  ai_provider, ai_api_key, deepseek_api_key, deepseek_model, custom_catalog_items,
 } = {}) {
   const fam = await ensureFamily();
   const payload = { family_id: fam.id, updated_at: new Date().toISOString() };
@@ -438,7 +563,24 @@ export async function saveSettings({
   if (custom_item_costs !== undefined) payload.custom_item_costs = custom_item_costs;
   if (ai_provider !== undefined) payload.ai_provider = ai_provider;
   if (ai_api_key !== undefined) payload.ai_api_key = ai_api_key;
+  if (deepseek_api_key !== undefined) payload.deepseek_api_key = deepseek_api_key;
+  if (deepseek_model !== undefined) payload.deepseek_model = deepseek_model;
+  if (custom_catalog_items !== undefined) payload.custom_catalog_items = custom_catalog_items;
   await post('settings', payload, { Prefer: 'return=minimal,resolution=merge-duplicates' });
+}
+
+/** Ghi 1 lượt gọi AI (Groq/DeepSeek) thành/không thành — chỉ dùng cho thống
+ * kê Admin Dashboard (đếm tổng lượt gọi/ngày, xem api/admin-stats.js). Cần
+ * chạy server/migrate-12-admin-stats.sql để có bảng này — best-effort, KHÔNG
+ * BAO GIỜ ném lỗi (thống kê không quan trọng bằng tính năng AI chính, gọi từ
+ * shared/ai-provider.js sau mỗi lần gọi AI thật). */
+export async function logAiCall(provider, purpose, ok) {
+  try {
+    const fam = await ensureFamily();
+    await post('ai_call_log', {
+      family_id: fam.id, provider, purpose, ok: !!ok,
+    }, { Prefer: 'return=minimal' });
+  } catch { /* bảng chưa tồn tại (chưa chạy migrate-12) hoặc mất mạng: bỏ qua êm */ }
 }
 
 /** Tổng số GIÂY bé đã chơi hôm nay (để áp giới hạn giờ chơi). */
@@ -480,6 +622,33 @@ export async function recentKidLogins(limit = 15) {
   return get(`kid_logins?select=profile_id,device,browser,ts&order=ts.desc&limit=${limit}`);
 }
 
+/* ===== Chuỗi ngày đăng nhập liên tục (streak) — xem shared/streak.js ===== */
+
+/** Mốc thời gian (`ts`) các lần đăng nhập của 1 bé trong `days` ngày gần
+ * nhất — đủ để tính streak hiện tại (xem streak.computeCurrentStreak). */
+export async function kidLoginTimestamps(profileId, days = 90) {
+  const since = new Date(Date.now() - days * 86400000).toISOString();
+  const rows = await get(`kid_logins?select=ts&profile_id=eq.${profileId}&ts=gte.${since}&order=ts.asc`);
+  return rows.map((r) => r.ts);
+}
+
+/**
+ * Nhận thưởng 1 mốc streak đăng nhập — cộng sao + đánh dấu mốc này đã nhận
+ * (profiles.settings.streakClaimedMax) để không nhận trùng. Bên gọi tự tính
+ * streak hiện tại + mốc khả dụng (shared/streak.js) rồi mới gọi hàm này —
+ * hàm chỉ lo chống nhận trùng + ghi sổ, tự đọc lại settings MỚI NHẤT từ
+ * server (không tin cache) để 2 thiết bị/2 tab không thể nhận trùng 1 mốc.
+ * @returns {Promise<boolean>} true nếu vừa nhận, false nếu mốc này đã nhận rồi
+ */
+export async function claimStreakMilestone(profileId, milestone, stars) {
+  const settings = await fetchKidSettings(profileId);
+  const claimedMax = settings.streakClaimedMax || 0;
+  if (milestone <= claimedMax) return false;
+  await updateKid(profileId, { settings: { ...settings, streakClaimedMax: milestone } });
+  await grantStars(profileId, stars, `streak:${milestone}`);
+  return true;
+}
+
 /* ===== Luyện Dịch (đoạn văn ngắn AI tự sinh + chấm điểm bằng AI) ===== */
 
 /** Ngày N (mặc định 0 = hôm nay) tính theo giờ ĐỊA PHƯƠNG của thiết bị đang
@@ -514,18 +683,36 @@ export async function savePassages(profileId, passages, day = todayDateKey()) {
   return post('translation_passages', rows, { Prefer: 'return=representation' });
 }
 
-/** Bé nộp bản dịch: lưu điểm/nhận xét AI đã chấm + kết quả nối từ vựng sau đó. */
-export async function submitTranslation(passageId, {
-  submittedText, aiScore, aiFeedback, vocabCorrect, vocabTotal,
-}) {
+/**
+ * Bé NỘP bản dịch — BƯỚC 1: lưu ngay bài làm lên server, CHƯA cần điểm AI.
+ * Làm vậy để lỡ AI chấm lỗi/hết quota thì bài của bé vẫn KHÔNG MẤT, phụ
+ * huynh vẫn thấy bé đã nộp — điểm/nhận xét được điền vào SAU bằng
+ * `updateTranslationGrade` (gọi lại được nhiều lần nếu lần trước lỗi).
+ * @returns {Promise<object>} bản ghi vừa tạo (có `id` để dùng cho 2 hàm dưới)
+ */
+export async function submitTranslationDraft(passageId, { submittedText, secondsSpent }) {
   const profileId = getCurrentKidId();
   if (!profileId) throw new Error('NO_KID_SELECTED');
   const fam = await ensureFamily();
-  await post('translation_submissions', {
+  const rows = await post('translation_submissions', {
     family_id: fam.id, profile_id: profileId, passage_id: passageId,
-    submitted_text: submittedText, ai_score: aiScore, ai_feedback: aiFeedback,
+    submitted_text: submittedText, seconds_spent: secondsSpent ?? null,
+  }, { Prefer: 'return=representation' });
+  return rows[0];
+}
+
+/** BƯỚC 2 (sau khi AI chấm xong, có thể gọi lại nếu lần trước lỗi): điền điểm/nhận xét/bản dịch mẫu AI. */
+export async function updateTranslationGrade(submissionId, { aiScore, aiFeedback, aiReferenceVi }) {
+  await patch(`translation_submissions?id=eq.${submissionId}`, {
+    ai_score: aiScore, ai_feedback: aiFeedback, ai_reference_vi: aiReferenceVi || '',
+  });
+}
+
+/** BƯỚC 3 (độc lập với việc AI đã chấm hay chưa): điền kết quả nối từ vựng sau khi bé làm xong. */
+export async function updateTranslationVocab(submissionId, { vocabCorrect, vocabTotal }) {
+  await patch(`translation_submissions?id=eq.${submissionId}`, {
     vocab_correct: vocabCorrect, vocab_total: vocabTotal,
-  }, { Prefer: 'return=minimal' });
+  });
 }
 
 /** Bài dịch bé đã nộp, kèm nội dung đoạn văn gốc — cho Trang Phụ Huynh xem lại. */
@@ -535,41 +722,103 @@ export async function kidTranslationSubmissions(profileId, limit = 30) {
 
 /* ===== Trắc Nghiệm Ngữ Pháp mỗi ngày (5 câu AI tự sinh + chấm điểm/gợi ý bằng AI) ===== */
 
-/** Đề trắc nghiệm ngữ pháp vào ĐÚNG ngày `day` (chuỗi "YYYY-MM-DD") — null nếu chưa sinh. */
-export async function grammarQuizForDay(profileId, day) {
-  const rows = await get(`grammar_quizzes?select=*&profile_id=eq.${profileId}&day=eq.${day}&order=created_at.desc&limit=1`);
+/** Đề trắc nghiệm ngữ pháp/từ vựng vào ĐÚNG ngày `day` (chuỗi "YYYY-MM-DD") — null nếu chưa sinh. */
+export async function grammarQuizForDay(profileId, day, quizType = 'grammar') {
+  const rows = await get(`grammar_quizzes?select=*&profile_id=eq.${profileId}&day=eq.${day}&quiz_type=eq.${quizType}&order=created_at.desc&limit=1`);
   return rows[0] || null;
 }
 
-/** Đề trắc nghiệm ngữ pháp HÔM NAY của bé (null nếu chưa sinh — bên gọi tự sinh mới qua saveGrammarQuiz). */
-export async function todayGrammarQuiz(profileId) {
-  return grammarQuizForDay(profileId, todayDateKey());
+/** Đề trắc nghiệm HÔM NAY của bé (null nếu chưa sinh — bên gọi tự sinh mới qua saveGrammarQuiz). */
+export async function todayGrammarQuiz(profileId, quizType = 'grammar') {
+  return grammarQuizForDay(profileId, todayDateKey(), quizType);
 }
 
 /** Lưu đề MỚI sinh cho đúng ngày `day` (mặc định hôm nay — truyền ngày khác
  * để "dồn trước" đề của ngày sắp tới). questions: [{prompt, options, answer, explanations}]. */
-export async function saveGrammarQuiz(profileId, { level, questions }, day = todayDateKey()) {
+export async function saveGrammarQuiz(profileId, { level, questions, quizType = 'grammar' }, day = todayDateKey()) {
   const fam = await ensureFamily();
   const rows = await post('grammar_quizzes', {
-    family_id: fam.id, profile_id: profileId, level, day, questions,
+    family_id: fam.id, profile_id: profileId, level, day, quiz_type: quizType, questions,
   }, { Prefer: 'return=representation' });
   return rows[0];
 }
 
-/** Bé nộp bài: lưu đáp án đã chọn + điểm + gợi ý AI cham sau khi nộp. */
-export async function submitGrammarQuiz(quizId, { answers, score, aiSuggestion }) {
+/* ===== Tái sử dụng nội dung của cả nhà — xem shared/content-reuse.js ===== */
+
+/** Nội dung Luyện Dịch của CẢ NHÀ (không riêng 1 bé) trong `sinceDay` (chuỗi
+ * "YYYY-MM-DD") tới nay, cùng cấp độ — nguồn để tìm bài PHÙ HỢP tái sử dụng. */
+export async function familyPassagesForReuse(level, sinceDay) {
+  return get(`translation_passages?select=id,day,profile_id,title,passage_en,vocab&level=eq.${level}&day=gte.${sinceDay}&order=day.asc&limit=500`);
+}
+
+/** Tương tự familyPassagesForReuse nhưng cho Trắc Nghiệm Ngữ Pháp/Từ Vựng. */
+export async function familyGrammarQuizzesForReuse(level, quizType, sinceDay) {
+  return get(`grammar_quizzes?select=id,day,profile_id,questions&level=eq.${level}&quiz_type=eq.${quizType}&day=gte.${sinceDay}&order=day.asc&limit=500`);
+}
+
+/**
+ * Chuẩn bị bài Luyện Dịch cho `profileId` vào ngày `day` — ưu tiên TÁI SỬ
+ * DỤNG nội dung có sẵn của CẢ NHÀ nếu tìm được phù hợp (xem shared/content-
+ * reuse.js: tiết kiệm AI, anh/chị/em cùng ngày không trùng bài, nội dung cũ
+ * tự nhiên "trồi lại" thành ôn tập). Trả về mảng passages đã sẵn sàng nếu
+ * tái dùng được, hoặc [] nếu KHÔNG tìm được gì phù hợp — bên gọi tự sinh AI
+ * mới rồi lưu bằng savePassages(profileId, generated, day).
+ */
+export async function ensureTranslationPassages(profileId, level, day) {
+  const existing = await passagesForDay(profileId, day);
+  if (existing.length) return existing;
+  const sinceDay = dateKeyOffset(-REUSE_WINDOW_DAYS);
+  const [pool, submissions] = await Promise.all([
+    familyPassagesForReuse(level, sinceDay),
+    kidTranslationSubmissions(profileId, 300),
+  ]);
+  const doneIds = new Set(submissions.map((s) => s.passage_id));
+  const picked = pickReusableContent(pool, { profileId, todayKey: day, doneIds });
+  if (!picked) return [];
+  return savePassages(profileId, [{ level, title: picked.title, passage_en: picked.passage_en, vocab: picked.vocab }], day);
+}
+
+/** Tương tự ensureTranslationPassages nhưng cho Trắc Nghiệm — trả về đề nếu
+ * tái dùng được, hoặc null nếu bên gọi cần tự sinh AI mới. */
+export async function ensureGrammarQuiz(profileId, level, quizType, day) {
+  const existing = await grammarQuizForDay(profileId, day, quizType);
+  if (existing) return existing;
+  const sinceDay = dateKeyOffset(-REUSE_WINDOW_DAYS);
+  const [pool, submissions] = await Promise.all([
+    familyGrammarQuizzesForReuse(level, quizType, sinceDay),
+    kidGrammarQuizSubmissions(profileId, 300),
+  ]);
+  const doneIds = new Set(submissions.map((s) => s.quiz_id));
+  const picked = pickReusableContent(pool, { profileId, todayKey: day, doneIds });
+  if (!picked) return null;
+  return saveGrammarQuiz(profileId, { level, questions: picked.questions, quizType }, day);
+}
+
+/**
+ * Bé NỘP bài trắc nghiệm — BƯỚC 1: lưu ngay đáp án + điểm (điểm tính CLIENT-
+ * SIDE từ đáp án đúng/sai, KHÔNG cần AI) — bài luôn được ghi nhận dù AI có
+ * chấm gợi ý được hay không. Gợi ý AI điền SAU bằng `updateGrammarQuizSuggestion`.
+ * @returns {Promise<object>} bản ghi vừa tạo (có `id` để dùng cho hàm dưới)
+ */
+export async function submitGrammarQuizDraft(quizId, { answers, score, secondsSpent }) {
   const profileId = getCurrentKidId();
   if (!profileId) throw new Error('NO_KID_SELECTED');
   const fam = await ensureFamily();
-  await post('grammar_quiz_submissions', {
+  const rows = await post('grammar_quiz_submissions', {
     family_id: fam.id, profile_id: profileId, quiz_id: quizId,
-    answers, score, ai_suggestion: aiSuggestion,
-  }, { Prefer: 'return=minimal' });
+    answers, score, seconds_spent: secondsSpent ?? null,
+  }, { Prefer: 'return=representation' });
+  return rows[0];
+}
+
+/** BƯỚC 2 (sau khi AI soạn gợi ý xong, có thể gọi lại nếu lần trước lỗi): điền gợi ý AI. */
+export async function updateGrammarQuizSuggestion(submissionId, aiSuggestion) {
+  await patch(`grammar_quiz_submissions?id=eq.${submissionId}`, { ai_suggestion: aiSuggestion });
 }
 
 /** Đề trắc nghiệm ngữ pháp bé đã nộp, kèm nội dung đề gốc — cho Trang Phụ Huynh xem lại. */
 export async function kidGrammarQuizSubmissions(profileId, limit = 30) {
-  return get(`grammar_quiz_submissions?select=*,grammar_quizzes(level,day,questions)&profile_id=eq.${profileId}&order=submitted_at.desc&limit=${limit}`);
+  return get(`grammar_quiz_submissions?select=*,grammar_quizzes(level,day,quiz_type,questions)&profile_id=eq.${profileId}&order=submitted_at.desc&limit=${limit}`);
 }
 
 /** Xuất toàn bộ dữ liệu gia đình (backup JSON tải về). */
