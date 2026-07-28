@@ -239,6 +239,15 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
           <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 8px">Tổng hợp từ các câu bé chọn SAI trong Trắc Nghiệm Ngữ Pháp — AI cũng dựa vào đây để ưu tiên ra thêm câu ôn đúng chỗ yếu ở các đề sau.</p>
           <div id="weakGrammarPoints" style="font-size:13.5px"><i style="color:var(--ink-dim)">Đang tải…</i></div>
         </div>
+        <div class="card">
+          <h2>🤖 Tạo bài từ AI theo mục đã chọn</h2>
+          <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 8px">Tick chọn từ vựng/cấu trúc ngữ pháp ở 2 danh sách trên (☑️ trong mỗi ô), rồi bấm 1 trong 2 nút bên dưới — AI soạn 1 bài MỚI dùng đúng các mục đã chọn, và bài đó sẽ được ưu tiên đẩy ra cho bé làm <b>NGÀY MAI</b>. Số nhỏ 🤖 cạnh mỗi mục là số bài đã tạo riêng cho mục đó.</p>
+          <button type="button" id="btnCreateTargetedTranslate">📝 Tạo bài dịch từ mục đã chọn</button>
+          <button type="button" id="btnCreateTargetedGrammar" class="ghost">🧩 Tạo trắc nghiệm từ mục đã chọn</button>
+          <div class="ok" id="targetedGenOk"></div>
+          <h2 style="margin-top:16px;font-size:14px">🕘 Lịch sử tạo bài từ điểm yếu</h2>
+          <div id="weakGenHistory" style="font-size:13px"><i style="color:var(--ink-dim)">Chưa có lượt tạo nào.</i></div>
+        </div>
       </div>
 
       <div class="kp-tab hidden" data-kptab="report">

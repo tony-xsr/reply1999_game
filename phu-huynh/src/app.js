@@ -12,6 +12,7 @@ import {
 } from '../../shared/rewards.js';
 import * as aiProvider from '../../shared/ai-provider.js';
 import { mountThemePicker } from '../../shared/theme.js';
+import { buildTargetedInstruction } from '../../shared/weak-points.js';
 
 const $ = (id) => document.getElementById(id);
 const AVATARS = ['🐰', '🐯', '🐸', '🦄', '🐼', '🐥', '🦊', '🐨', '🐷', '🦁', '🐳', '🦖'];
@@ -369,9 +370,11 @@ function dayKey(d) {
 }
 
 let lastReportText = '';
+let lastWeakGrammarPoints = [];
+let weakGenCountsCache = {};
 
 async function renderKidStats(k) {
-  const [sessions, stars, weak, weakGrammar, ledger, purchases, translations, grammarQuizzes, allPassages, allQuizzes] = await Promise.all([
+  const [sessions, stars, weak, weakGrammar, ledger, purchases, translations, grammarQuizzes, allPassages, allQuizzes, weakGenCounts, weakGenHistory] = await Promise.all([
     api.kidSessions(k.id), api.starBalance(k.id), api.weakWordsServer(k.id),
     api.weakGrammarPointsServer(k.id).catch(() => []),
     apiLedger(k.id), api.kidPurchases(k.id).catch(() => []),
@@ -379,9 +382,14 @@ async function renderKidStats(k) {
     api.kidGrammarQuizSubmissions(k.id, 500).catch(() => []),
     api.kidTranslationPassages(k.id).catch(() => []),
     api.kidGrammarQuizzes(k.id).catch(() => []),
+    api.weakItemGeneratedCounts(k.id).catch(() => ({})),
+    api.weakGenerationHistory(k.id).catch(() => []),
   ]);
   renderAiResourceStats({ translations, grammarQuizzes, allPassages, allQuizzes });
+  lastWeakGrammarPoints = weakGrammar;
+  weakGenCountsCache = weakGenCounts;
   renderWeakGrammarPoints(weakGrammar);
+  renderWeakGenHistory(weakGenHistory);
 
   // Báo cáo tuần (module thuần shared/report.js)
   const report = buildWeeklyReport({ sessions, ledger, purchases, weakWords: weak });
@@ -428,7 +436,9 @@ async function renderKidStats(k) {
   for (const w of weak.slice(0, 60)) {
     const chip = document.createElement('span');
     chip.className = 'word-chip';
-    chip.innerHTML = `<b>${w.word}</b> <span class="n">×${w.misses}</span>`;
+    const genCount = weakGenCountsCache[w.word] || 0;
+    chip.innerHTML = `<input type="checkbox" class="weak-pick" data-word="${w.word}" title="Chọn để tạo bài từ AI" />`
+      + `<b>${w.word}</b> <span class="n">×${w.misses}</span>${genCount ? ` <span title="Đã tạo ${genCount} bài riêng cho từ này">🤖${genCount}</span>` : ''}`;
     const btn = document.createElement('button');
     btn.textContent = '🔊';
     btn.addEventListener('click', () => {
@@ -629,12 +639,96 @@ function renderWeakGrammarPoints(weakGrammar) {
     box.innerHTML = '<i style="color:var(--good)">Chưa có điểm ngữ pháp nào bé hay sai — đang làm rất tốt! 🎉</i>';
     return;
   }
-  box.innerHTML = weakGrammar.map((g) => `
-    <div style="margin:6px 0;padding:8px 10px;background:var(--panel2);border-radius:8px;display:flex;justify-content:space-between;gap:8px">
-      <span>${g.structure}</span>
+  box.innerHTML = weakGrammar.map((g, i) => {
+    const genCount = weakGenCountsCache[g.structure] || 0;
+    return `
+    <div style="margin:6px 0;padding:8px 10px;background:var(--panel2);border-radius:8px;display:flex;align-items:center;gap:8px">
+      <input type="checkbox" class="weak-pick" data-structure-idx="${i}" title="Chọn để tạo bài từ AI" />
+      <span style="flex:1">${g.structure}</span>
+      ${genCount ? `<span title="Đã tạo ${genCount} bài riêng cho điểm này">🤖${genCount}</span>` : ''}
       <b style="color:var(--bad);white-space:nowrap">×${g.misses}</b>
+    </div>`;
+  }).join('');
+}
+
+/** Lịch sử "tạo bài từ AI theo mục đã chọn" — xem migrate-16-weak-source.sql. */
+function renderWeakGenHistory(history) {
+  const box = $('weakGenHistory');
+  if (!history.length) {
+    box.innerHTML = '<i style="color:var(--ink-dim)">Chưa có lượt tạo nào.</i>';
+    return;
+  }
+  box.innerHTML = history.map((h) => `
+    <div style="margin:4px 0;padding:6px 10px;background:var(--panel2);border-radius:8px">
+      <b>${h.label}</b> · dùng cho ngày ${h.day} <span style="color:var(--ink-dim)">(tạo lúc ${new Date(h.createdAt).toLocaleString('vi-VN')})</span>
+      <div style="font-size:12px;color:var(--ink-dim);margin-top:2px">Từ mục: ${h.sourceWeak.join(', ')}</div>
     </div>`).join('');
 }
+
+function getSelectedWeakWords() {
+  return [...document.querySelectorAll('#weakWords input.weak-pick:checked')].map((el) => el.dataset.word);
+}
+
+function getSelectedWeakStructures() {
+  return [...document.querySelectorAll('#weakGrammarPoints input.weak-pick:checked')]
+    .map((el) => lastWeakGrammarPoints[Number(el.dataset.structureIdx)]?.structure)
+    .filter(Boolean);
+}
+
+$('btnCreateTargetedTranslate').addEventListener('click', async () => {
+  const msg = $('targetedGenOk');
+  const kid = state.kid;
+  if (!kid) return;
+  const words = getSelectedWeakWords();
+  const structures = getSelectedWeakStructures();
+  if (!words.length && !structures.length) { msg.style.color = 'var(--bad)'; msg.textContent = 'Chọn ít nhất 1 từ/điểm ngữ pháp ở trên trước đã.'; return; }
+  const level = kid.settings?.translationLevel;
+  if (!level) { msg.style.color = 'var(--bad)'; msg.textContent = 'Bé này chưa đặt cấp độ Luyện Dịch ở "⚙️ Cài đặt bé" — không biết soạn ở cấp độ nào.'; return; }
+  msg.style.color = 'var(--ink-dim)';
+  msg.textContent = '🤖 AI đang soạn bài dịch...';
+  try {
+    const settings = await api.getSettings();
+    const levelLabel = EXAM_LEVEL_LABELS[level] || level;
+    const weakSummary = buildTargetedInstruction(words, structures);
+    const [generated] = await aiProvider.generatePassages(settings, { levelLabel, count: 1, weakSummary });
+    const day = api.dateKeyOffset(1);
+    await api.savePassages(kid.id, [{ level, ...generated, source_weak: [...words, ...structures] }], day);
+    msg.style.color = 'var(--good)';
+    msg.textContent = `✅ Đã tạo xong bài dịch "${generated.title}" cho ngày mai (${day}).`;
+    await renderKidStats(kid);
+  } catch (e) {
+    msg.style.color = 'var(--bad)';
+    msg.textContent = `Lỗi: ${e.message}`;
+  }
+});
+
+$('btnCreateTargetedGrammar').addEventListener('click', async () => {
+  const msg = $('targetedGenOk');
+  const kid = state.kid;
+  if (!kid) return;
+  const words = getSelectedWeakWords();
+  const structures = getSelectedWeakStructures();
+  if (!words.length && !structures.length) { msg.style.color = 'var(--bad)'; msg.textContent = 'Chọn ít nhất 1 từ/điểm ngữ pháp ở trên trước đã.'; return; }
+  const level = kid.settings?.grammarQuizLevel;
+  if (!level) { msg.style.color = 'var(--bad)'; msg.textContent = 'Bé này chưa đặt cấp độ Trắc Nghiệm ở "⚙️ Cài đặt bé" — không biết soạn ở cấp độ nào.'; return; }
+  const quizType = kid.settings?.grammarQuizType || 'grammar';
+  msg.style.color = 'var(--ink-dim)';
+  msg.textContent = '🤖 AI đang soạn trắc nghiệm...';
+  try {
+    const settings = await api.getSettings();
+    const levelLabel = EXAM_LEVEL_LABELS[level] || level;
+    const weakSummary = buildTargetedInstruction(words, structures);
+    const questions = await aiProvider.generateGrammarQuiz(settings, { levelLabel, count: 5, quizType, weakSummary });
+    const day = api.dateKeyOffset(1);
+    await api.saveGrammarQuiz(kid.id, { level, questions, quizType, sourceWeak: [...words, ...structures] }, day);
+    msg.style.color = 'var(--good)';
+    msg.textContent = `✅ Đã tạo xong đề trắc nghiệm cho ngày mai (${day}).`;
+    await renderKidStats(kid);
+  } catch (e) {
+    msg.style.color = 'var(--bad)';
+    msg.textContent = `Lỗi: ${e.message}`;
+  }
+});
 
 let lastTranslations = [];
 
