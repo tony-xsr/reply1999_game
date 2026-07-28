@@ -20,7 +20,7 @@ import { sfx } from '../../pokemon/src/sfx.js';
 import { mountKidFeatures, answeredOne } from '../../shared/kid-bar.js';
 import { currentProfile, recordSession } from '../../pokemon/src/stats.js';
 import * as api from '../../shared/api.js';
-import { generateQuestions } from '../../shared/groq.js';
+import * as aiProvider from '../../shared/ai-provider.js';
 import { examSessionsToday, EXAM_LEVEL_LABELS } from '../../shared/report.js';
 import { buildTranslateEntryButton } from '../../shared/translate-ui.js';
 import { buildGrammarQuizEntryButton } from '../../shared/grammar-quiz-ui.js';
@@ -112,12 +112,16 @@ function confetti() {
 /* ===== Màn 1: chọn cấp độ ===== */
 
 document.querySelectorAll('.level-card[data-level]').forEach((btn) => {
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', async () => {
     sfx.select();
     state.level = btn.dataset.level;
     state.history = [];
     goTo('mode');
     renderGoalBox();
+    // Làm mới cache settings trước khi kiểm tra cấp độ Luyện Dịch/Trắc Nghiệm
+    // — tránh nút biến mất do thiết bị bé còn giữ settings cũ (xem
+    // shared/api.js#refreshCurrentKidSettings).
+    await api.refreshCurrentKidSettings();
     renderTranslateEntry();
     renderGrammarQuizEntry();
   });
@@ -420,10 +424,8 @@ els.btnAiExtra.addEventListener('click', async () => {
   els.aiExtraMsg.textContent = '🤖 Đang nhờ AI soạn thêm câu hỏi…';
   try {
     const settings = api.cachedSettings() || (await api.getSettings());
-    const apiKey = settings?.ai_api_key;
     const levelLabel = LEVELS.find((l) => l.id === state.level)?.label || state.level;
-    const questions = await generateQuestions({
-      apiKey,
+    const questions = await aiProvider.generateQuestions(settings, {
       levelLabel,
       topic: u.topic,
       grammarPoints: u.grammarPoints,

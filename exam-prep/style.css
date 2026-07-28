@@ -16,7 +16,7 @@
   --line: #9db2e6;
 }
 
-html, body { height: 100%; }
+html, body { height: 100%; overflow-x: hidden; }
 body {
   background:
     radial-gradient(ellipse 80% 50% at 50% 0%, #dbe6ff 0%, transparent 70%),
@@ -38,7 +38,7 @@ body {
   position: relative;
 }
 
-.top { display: flex; align-items: center; gap: 8px; }
+.top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .top h1 { font-size: 1.05rem; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .round-btn {

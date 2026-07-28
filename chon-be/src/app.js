@@ -4,6 +4,9 @@
 // mở), hiện hộp quà + máy đọc lời nhắn ngay khi bé chọn xong.
 
 import * as api from '../../shared/api.js';
+import {
+  STREAK_MILESTONES, starsForMilestone, uniqueLoginDays, computeCurrentStreak, nextClaimableMilestone,
+} from '../../shared/streak.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -38,10 +41,19 @@ async function boot() {
     const card = document.createElement('div');
     card.className = `kid${k.id === currentId ? ' current' : ''}`;
     card.innerHTML = `<div class="face">${k.avatar}</div><div class="name">${k.name}</div>
+      <div class="stars" id="stars-${k.id}">⭐ …</div>
       <div class="tag">${k.id === currentId ? 'Đang chơi ✓' : ''}</div>`;
     card.addEventListener('click', () => pickKid(k));
     kidsBox.appendChild(card);
   }
+  // 1 request duy nhất lấy sao của CẢ NHÀ (thay vì N request/bé) — không chặn
+  // hiện danh sách bé, mất mạng thì chỉ ô sao im lặng giữ "…".
+  api.familyStarBalances().then((balances) => {
+    for (const k of kids) {
+      const el = $(`stars-${k.id}`);
+      if (el) el.textContent = `⭐ ${balances.get(k.id) ?? 0}`;
+    }
+  }).catch(() => { /* mất mạng: giữ nguyên "…" */ });
 }
 
 /** Đoán tên thiết bị + trình duyệt từ userAgent (chỉ để hiển thị cho bố mẹ). */
@@ -93,11 +105,63 @@ async function pickKid(k) {
   // Báo cho trang Phụ Huynh: bé vừa đăng nhập (thời gian + thiết bị + trình duyệt).
   api.recordKidLogin(k.id, deviceInfo()).catch(() => {});
   boot();
-  // Có quà bố mẹ gửi đang chờ không?
+  // Có quà bố mẹ gửi đang chờ không? Ưu tiên hiện trước — kho báu streak (nếu
+  // có) sẽ hiện ở lần vào kế tiếp, tránh chồng 2 overlay cùng lúc rối mắt bé.
   try {
     const gifts = await api.unopenedRewards(k.id);
-    if (gifts.length) showGift(k, gifts[0]);
+    if (gifts.length) { showGift(k, gifts[0]); return; }
   } catch { /* mất mạng thì thôi, lần sau hiện */ }
+  try {
+    await checkStreak(k);
+  } catch { /* mất mạng: bỏ qua, bé vẫn mở được kho báu sau ở Tủ Quà */ }
+}
+
+/* ===== Kho báu streak điểm danh liên tục (xem shared/streak.js) ===== */
+
+async function checkStreak(kid) {
+  const timestamps = await api.kidLoginTimestamps(kid.id);
+  const days = uniqueLoginDays(timestamps);
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const streak = computeCurrentStreak(days, todayKey);
+  const claimedMax = kid.settings?.streakClaimedMax || 0;
+  const milestone = nextClaimableMilestone(streak, claimedMax);
+  if (milestone) showStreakChest(kid, milestone, streak, claimedMax);
+}
+
+function renderStreakRow(milestone, claimedMax) {
+  $('streakRow').innerHTML = STREAK_MILESTONES.map((m) => {
+    const state = m <= claimedMax ? 'done' : m === milestone ? 'ready' : '';
+    const icon = m <= claimedMax ? '✅' : '📦';
+    return `<div class="streak-chest ${state}"><span class="ic">${icon}</span><span>${m} ngày</span></div>`;
+  }).join('');
+}
+
+function showStreakChest(kid, milestone, streak, claimedMax) {
+  const stars = starsForMilestone(milestone);
+  $('streakChestIcon').textContent = '📦';
+  $('streakText').innerHTML = `🔥 Bé đã điểm danh liên tục <b>${streak} ngày</b>!<br>Mở kho báu mốc ${milestone} ngày để nhận <b>${stars} sao</b>!`;
+  renderStreakRow(milestone, claimedMax);
+  const btn = $('btnOpenStreak');
+  btn.textContent = 'MỞ KHO BÁU ▶';
+  btn.disabled = false;
+  $('streakOverlay').classList.remove('hidden');
+  speakVi(`Chúc mừng bé đã điểm danh liên tục ${streak} ngày! Mở kho báu để nhận ${stars} sao nhé!`);
+  btn.onclick = async () => {
+    btn.disabled = true;
+    try {
+      await api.claimStreakMilestone(kid.id, milestone, stars);
+      $('streakChestIcon').textContent = '⭐';
+      $('streakText').innerHTML = `🎉 Tuyệt vời! Bé nhận được <b>${stars} sao</b>!`;
+      renderStreakRow(milestone, milestone);
+      speakVi(`Chúc mừng! Bé nhận được ${stars} sao!`);
+      btn.textContent = 'TUYỆT VỜI ▶';
+      btn.disabled = false;
+      btn.onclick = () => $('streakOverlay').classList.add('hidden');
+    } catch (e) {
+      $('streakText').innerHTML += `<br><span style="color:#c02a2a;font-size:12px">Lỗi: ${e.message} — thử lại nhé.</span>`;
+      btn.disabled = false;
+    }
+  };
 }
 
 /* ===== Bàn phím mã số 6 chữ số (thân thiện trẻ em) ===== */

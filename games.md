@@ -5989,4 +5989,94 @@ Bạn yêu cầu mở rộng thêm 2 việc cho hệ thống Luyện Dịch/Tr�
 
 `sw.js` v162 → **v163** (không thêm file mới lên client — `shared/day-buffer.js`/`shared/vn-date.js` chỉ dùng ở server nên không cần vào PRECACHE — chỉ đổi mã nguồn `shared/api.js`/`shared/kid-bar.js` đã cache).
 
-**Còn để ngỏ**: (a) như mục 97, vẫn CHƯA test được trên Vercel thật (chỉ giả lập `fetch` trong Node) — mong bạn deploy + đợi vài đêm xem cửa sổ 60 ngày có thực sự đầy dần lên không, hay xem trực tiếp bảng `translation_passages`/`grammar_quizzes` trong Supabase; (b) cap "5 ngày mới/loại/lần chạy" là số CỐ ĐỊNH viết cứng trong code (`MAX_NEW_DAYS_PER_RUN`) — nếu có RẤT nhiều gia đình/bé cùng lúc, tổng thời gian 1 lần cron chạy vẫn có thể chạm giới hạn 60 giây đã đặt, lúc đó cần giảm cap xuống hoặc nâng cấp gói Vercel; (c) 60 ngày là số cố định (`BUFFER_DAYS`), muốn đổi thành số khác phải sửa trực tiếp trong code, chưa có ô cấu hình cho phụ huynh tự chỉnh; (d) nếu phụ huynh đổi `translationLevel`/`grammarQuizLevel` sang cấp độ KHÁC giữa chừng, 60 ngày bài đã dồn trước theo cấp độ CŨ vẫn còn nguyên trong DB (không tự xoá) — bài cũ không hiển thị lại cho bé (vì bé chỉ thấy đúng ngày hôm nay ở cấp độ hiện tại) nhưng chiếm chỗ lưu trữ không dùng tới, chưa có cơ chế dọn dẹp.
+**Còn để ngỏ**: (a) như mục 97, vẫn CHƯA test được trên Vercel thật (chỉ giả lập `fetch` trong Node) — mong bạn deploy + đợi vài đêm xem cửa sổ 60 ngày có thực sự đầy dần lên không, hay xem trực tiếp bảng `translation_passages`/`grammar_quizzes` trong Supabase; (b) cap "5 ngày mới/loại/lần chạy" là số CỐ ĐỊNH viết cứng trong code (`MAX_NEW_DAYS_PER_RUN`) — nếu có RẤT nhiều gia đình/bé cùng lúc, tổng thời gian 1 lần cron chạy vẫn có thể chạm giới hạn 60 giây đã đặt, lúc đó cần giảm cap xuống hoặc nâng cấp gói Vercel; (c) 60 ngày là số cố định (`BUFFER_DAYS`), muốn đổi thành số khác phải sửa trực tiếp trong code, chưa có ô cấu hình cho phụ huynh tự chỉnh; (d) nếu phụ huynh đổi `translationLevel`/`grammarQuizLevel` sang cấp độ KHÁC giữa chừng, 60 ngày bài đã dồn trước theo cấp độ CŨ vẫn còn nguyên trong DB (không tự xoá) — bài cũ không hiển thị lại cho bé (vì bé chỉ thấy đúng ngày hôm nay ở cấp độ hiện tại) nhưng chiếm chỗ lưu trữ không dùng tới, chưa có cơ chế dọn dẹp 
+=============================================
+=============================================
+=============================================
+=============================================
+=============================================
+=============================================
+## EXPLAIN and FIX
+
+##  Vườn hoa của bé ?Thú cưng: chưa có (để dành sao đổi 🐣 nhé!) để làm gì ? 
+ Các loại hoa có thể tạo ra sao cho bé không , tính toán lại tỷ suất sinh sao nếu bé trồng hoa , và tỷ lệ lạm phát sao khi trồng hoa cao nhất là 36.5% / năm . ví dụ bé mua 10 hoa tổng hết 1000 sao thì trung bình 1 năm bé có thêm 365 sao và mỗi ngày tự + vào 365/365 = 1? sao tự thêm vào số sao của bé ? có progress bar đếm số sao nhận mỗi ngày . Và giải thích rõ cho bé. 
+## Bé có thể đem hoa đổi ngược lại lấy sao , bé bị mất 1 sao so với giá trị của hoa .
+ ví dụ hoa 10 sao khi đổi ngược lại thì chỉ đổi đc 9 sao thôi .
+## /luyen-thi-pet/ bị lỗi UI trên ipad , table nằm ngang , bị mất nút luyện dịch ? 
+## Luyện thi làm bài tập chưa thưởng sao ?
+ hãy thưởng cho mỗi phần 5 sao khi hoàn thành hết (ko cần biết sai đúng bao nhiêu ) . Ví du mục luyện dịch giới hạn 1 bài thì làm xong luyện dịch được 5 sao , Tương tự luyện dịch giới hạn 3 bài thì phải làm xong 3 bài mới được 5 sao, có progress bar để trẻ biết . Tương tự với mục trắc nghiệm . 5 sao khi hoàn thành hết chỉ tiêu , có progress bar. 
+🐰 Bé nào đang chơi? có thể thiện thị sao của các bé ? thay vì chỉ hiển thị tên ?
+
+## Có admin trang tổng để thống kê users/ phụ huynh / học sinh . và cài đặt khác như AI key , cài đặt limited .. 
+Admin page cũng có thể xem thống kê về database , size, số lượng records or số người online , stats , hay hiển thị ping database... ok or not ok.
+## Bên cạnh dùng groq để tạo bài thi và chấm bài thi thì có thể chọn deepseek
+DEEPSEEK_API_KEY cấu hình và dùng DeepSeek-V4-Flash   và admin page có thể set mặc định và giới hạn số tokens or request mỗi ngày . admin có thể có chart theo dõi user daily login ./ register, request AI call count ... 
+
+##  GÓC GIẢI TRÍ — game vui, trò chơi xưa ngoài game hiện có , hãy random 5 game mỗi lần bé vào chơi (webpp or web) ngẫu nhiên show 5 games.
+ 
+## Bài dịch không có show kết quả của AI dịch là gì hả? chỉ có show bài gốc , điểm AI và nhận xét ? Hơn nữa khi bé dịch xong , ghi nhận xét và chấm điểm còn phải show bài dịch của AI để bé biết so sánh lại . 
+Buổi Sáng Của Tôi
+21:13:07 25/7/2026
+My morning starts at 6:00 am. I wake up and have a quick shower. After that, I eat breakfast and get ready for school. My favourite breakfast is rice porridge with egg. I always feel happy and full of energy after breakfast.
+
+Bản dịch của bé: Buối sáng của tôi bắt đầu vào lúc 6 giờ sáng.Tôi dậy và tắm nhanh.Sau đó,tôi ăn bữa sáng nó có cơm thịt ba chỉ với trứng.Tôi luôn cảm thấy vui và có đầy năng lượng sau bữa sáng.
+
+Điểm AI chấm: 90/100 · Nối từ vựng: 5/5
+
+💬 Tuyệt vời! Bạn đã dịch được ý chính của đoạn văn gốc một cách chính xác. Đặc biệt, bạn đã dịch đúng thời gian và hoạt động buổi sáng. Tuy nhiên, bạn có thể cải thiện bằng cách dịch 'rice porridge' chính xác hơn là 'cháo' thay vì 'cơm'.
+## Bé làm bài dịch , trắc nghiệm ... không có tính thời gian khi bé typing và submit ? vì trên khung quản lý chỉ thấy bé nộp bài nhưng thời gian thì chỉ thấy online chơi chỉ có 1 phút , trong khi đó bé ngồi dịch bài rất lâu .
+
+## Lỗi nộp bài , sau khi bé bấm submit gởi bài , 
+AI chấm (ai bị lỗi hoặc hết quota ) bài thi không được gởi cho phụ huynh? không thể luôn luôn submit gởi bài lên serve trước, còn việc AI chấm sẽ update sau ? nếu trường hợp AI bị lỗi thì nó sẽ tự retry sau., hoặc phụ huynh có thể xem bài submit rồi ấn chấm điểm với AI nếu bài đó chưa được AI chấm thành công?, Có trường hợp AI đã chấm 90/100 sau khi submit nhưng trên translation_submissions vẫn ko cập nhật khi bé bỏ qua bài trắc nghiệm có thể vẫn gởi bài thi nhưng báo chưa hoàn thành vì bé chưa làm bài trắc nghiệm sau khi dịch ? và mục dịch bài vẫn báo chưa hoàn thành chỉ có 50% thôi ,bé bấm vào thì tiếp tục làm bài trắc nghiệm của bài dịch thay vì làm lại từ đầu ?
+## Bé đang nhập bài làm , chưa xong chưa submit,
+ xoay màn hình hoặc tạm thời dừng làm việc khác, vào lại bài thi mất luôn ? không thể lưu local khi bé typing, và bài thi theo id đó không thể mất khi bé chưa submit , nó như bản draft,
+ 
+## Có thêm các mốc đăng nhập mỗi ngày , số ngày streak liên tục hoàn thành nhiệm vụ , 5-10-20-50 .... nhận tương ứng 5- 10- 20 -50 sao . có thanh nhận quà , giao diện thanh dài có các kho báo ở mốc ngày , khi đủ streak , kho báu sẽ animation , click vào thì sẽ mở ra + sao và chúc mừng animation . tài khoản bé được + sao .  
+
+## + Thêm các mốc đổi quà, phụ huynh cũng có thể thêm bằng tay . 
+trước mắt thêm mốc 
+600 sao đổi 55 Robux.
+1100 sao đổi phiếu 145 Robux (50k)
+1600 sao đổi phiếu mua đồ chơi 100k  
+1750 sao đổi phiếu  300 Robux (100k)
+2800 đổi phiếu 200k 
+
+
+ ## Tất cả mọi dữ liệu của server vercel và user database đều có thể dump và backup từ admin và restore lại được , nên nhớ là tất cả nhé, và restore lại không thiếu một cái gì tính từ thời điểm backup trở về trước.
+
+ ## Nhiệm vụ ngữ pháp trực quan mỗi ngày cho bé ? có thể set không ? mặc định học bất kỳ game ngữ pháp trực quan mỗi ngàyu nhiệm vụ 5 bài được 2 sao . 
+
+ ## Ở Homepage thêm mục Tiếng Anh Hôm nay sẽ cung cấp các truy cập vào các phần có sẵn bao gồm : 
+Luyện dịch PET  - hôm nay  
+Trắc nghiệm ngữ pháp hôm nay (PET) 
+Và ngữ pháp trực quan (/nguphap-truc-quan/) 
+cho trẻ dễ truy cập vào .
+
+## Theme màu sắc trong Thi Chứng Chỉ Anh rất đẹp tôi rất thích màu dịu , có thể ngoài homepage có thể chọn theme? theme hiện tại và theme giống trong mục thi chứng chỉ anh ? và cũng có hỗ trợ dark and light mode . ?  
+
+
+## Góc phụ huynh có thể 
+- set mặc định AI sẽ dùng 
+- Dùng AI để tạo bài thi chuẩn , và cung cấp các chuẩn , và có thể in các bài thi này ra giấy A4 (có cửa sổ để tạo AI dựa trên cách chọn chuẩn thi ...) bạn có thể nghĩ ra UI sao cho tiện , dễ dùng . 
+- Dùng AI tạo bài thi trắc nghiệm mỗi ngày và có thể chọn các option như trắc nghiệm ngữ pháp, từ vựng , hay bằng cấp .
+Tất nhiên các bài thi này đều có cung cấp đáp án .
+
+
+ AI sẽ soạn sẵn bài tập nhé, chuẩn bị trước ít nhất buget  (cho mỗi bé trước 30 ngày) để phân phối lúc nào bé vào học trong này sẽ có sẵn bài. 
+
+- Tạo trước càng nhiều data seed 30 ngày tương đương 60 bài thi cho các bài thi , Luyện dịch PET  , bài trắc nghiệm ngữ pháp càng tốt, 1 bài thi có thể có nhiều học sinh làm , không nhất thiết dùng 1 lần, và chắc rằng cùng ngày các học sinh có cùng phụ huynh không nên làm giống bài test của nhau ,tránh tình trạng copy. ,
+- Bé có thể làm lại bài đã làm trong vòng  45 ngày để remind lại trí nhớ và tiết kiệm resource 
+
+- Đối với những trẻ nghiện tiktok ,youtube reels, có thể thiết kế giao diện giống và AI sẽ tạo bài post với tiêu đề , hoại thoại vui trong comments, với từ vựng tiếng Anh để khi in ra trẻ hứng thú đọc, nội dung hài hước như comments vui, content vui, và nhờ trẻ dịch , tờ A4 có thể in ra nhiều reels/ tiktok, dọc thú vị bên canh comments hài hước bằng tiếng anh . với emotions . 
+Tính năng in trước khi in có giao diện preview.
+ 
+## Thiết kế trò chơi ai là triệu phú /luyen-thi-pet/ với 15 câu trắc nghiệm , mỗi ngày chỉ được chơi 1 lần . 
+nhưng theo kiểu sau 
+ mốc 5 : mỗi câu 1-4 +1/2 sao , đủ mốc 5 thì được 5 sao sai thì mất , đúng thì được 3 sao tổng cộng từ 1-5 là 5 sao (đã bao gồm 1-4 mỗi câu đúng 1/4 sao )
+ mốc 10 tương tự mỗi câu 1 sao , câu thứ 10 đúng +thêm 5 sao nữa 
+ mốc 15 mỗi câu 2 sao , câu thứ 15 đúng +10 sao nữa. 
+
+ dĩ nhiên mức độ câu sẽ tư khó đến dễ , câu trắc nghiệm có thể về ngữ pháp , đọc hiểu đoạn văn và chọn đáp án đúng ...
+
+ UI rõ ràng đẹp và thân thiện .
+## Quản lý Mindmap từ vựng tiếng Anh 

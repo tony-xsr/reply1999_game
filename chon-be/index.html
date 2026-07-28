@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#fff6e8" />
 <title>Bé nào đang chơi?</title>
+<script>(function(){try{var p=JSON.parse(localStorage.getItem('r99-theme'))||{palette:'warm',mode:'auto'};var mode=p.mode==='auto'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p.mode;document.documentElement.dataset.theme=p.palette+'-'+mode;}catch(e){}})();</script>
+<link rel="stylesheet" href="/shared/theme.css" />
 <style>
-:root{--bg:#fff6e8;--gold:#ff8a3d;--gold2:#c2410c;--ink:#241e2e;--ink-dim:#5d5370;--line:#a8834a;--panel:#fffaf2}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:radial-gradient(ellipse 90% 55% at 50% 0%, #ffe9c8 0%, transparent 70%),var(--bg);
+body{margin:0;background:radial-gradient(ellipse 90% 55% at 50% 0%, var(--bg2) 0%, transparent 70%),var(--bg);
   color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh}
 .wrap{max-width:640px;margin:0 auto;padding:24px 16px 60px;text-align:center}
 h1{color:var(--gold2);font-size:26px;margin:20px 0 6px}
@@ -17,9 +18,10 @@ h1{color:var(--gold2);font-size:26px;margin:20px 0 6px}
 .kid{width:150px;padding:18px 10px;background:var(--panel);border:3px solid var(--line);border-radius:20px;
   cursor:pointer;transition:transform .15s;box-shadow:0 4px 14px rgba(194,65,12,.1)}
 .kid:hover{transform:translateY(-4px);border-color:var(--gold)}
-.kid.current{border-color:var(--gold2);background:#ffe9c8}
+.kid.current{border-color:var(--gold2);background:var(--bg2)}
 .kid .face{font-size:56px;line-height:1.2}
 .kid .name{font-weight:900;font-size:17px;margin-top:6px}
+.kid .stars{font-size:13px;font-weight:800;color:var(--gold2);margin-top:2px}
 .kid .tag{font-size:11px;color:var(--gold2);font-weight:700;min-height:1.2em}
 .note{margin-top:26px;font-size:13px;color:var(--ink-dim);line-height:1.7}
 .note a{color:var(--gold2)}
@@ -33,6 +35,13 @@ a.home{display:inline-block;margin-top:20px;font-size:14px;color:var(--gold2);fo
 .gift-box button{background:linear-gradient(180deg,#34b566,#1e7a45);color:#fff;border:none;border-radius:12px;
   padding:11px 26px;font-weight:900;font-size:15px;cursor:pointer;margin-top:8px}
 .hidden{display:none!important}
+/* Kho báu streak điểm danh */
+.streak-row{display:flex;justify-content:center;gap:10px;margin:14px 0 4px;flex-wrap:wrap}
+.streak-chest{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--ink-dim);font-weight:700}
+.streak-chest .ic{font-size:26px;opacity:.35}
+.streak-chest.done .ic{opacity:1}
+.streak-chest.ready .ic{opacity:1;animation:chestPop .8s ease-in-out infinite alternate}
+@keyframes chestPop{from{transform:scale(1)}to{transform:scale(1.18)}}
 </style>
 </head>
 <body>
@@ -57,6 +66,14 @@ a.home{display:inline-block;margin-top:20px;font-size:14px;color:var(--gold2);fo
     <div class="big" id="giftIcon">🎁</div>
     <p id="giftText"></p>
     <button id="btnOpenGift">MỞ QUÀ ▶</button>
+  </div>
+</div>
+<div class="gift-overlay hidden" id="streakOverlay">
+  <div class="gift-box" style="max-width:360px">
+    <div class="big" id="streakChestIcon">📦</div>
+    <p id="streakText"></p>
+    <div class="streak-row" id="streakRow"></div>
+    <button id="btnOpenStreak">MỞ KHO BÁU ▶</button>
   </div>
 </div>
 <script src="/server-config.js"></script>
