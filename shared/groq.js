@@ -206,6 +206,8 @@ export function parseGrammarQuizResponse(content, count = 5) {
     .slice(0, count)
     .map((q) => ({
       prompt: q.prompt, options: q.options, answer: q.answer, explanations: q.explanations,
+      structure: typeof q.structure === 'string' ? q.structure : '',
+      translation: typeof q.translation === 'string' ? q.translation : '',
     }));
   if (!questions.length) throw new Error('AI trả lời không đúng khuôn dạng đề trắc nghiệm mong đợi');
   return questions;
@@ -230,11 +232,11 @@ export async function generateGrammarQuiz({ apiKey, model = DEFAULT_GROQ_MODEL, 
     : 'Bạn là giáo viên tiếng Anh soạn đề trắc nghiệm ngữ pháp cho học sinh Việt Nam luyện thi chứng chỉ quốc tế, đúng độ khó cấp độ được yêu cầu. LUÔN trả lời bằng đúng 1 khối JSON hợp lệ, không thêm chữ nào khác ngoài JSON.';
   const user = isVocab
     ? `Cấp độ: ${levelLabel}. Soạn ĐÚNG ${count} câu hỏi trắc nghiệm TỪ VỰNG tiếng Anh MỚI, chủ đề từ vựng KHÁC NHAU, đúng độ khó cấp độ trên — kiểm tra NGHĨA CỦA TỪ (chọn đúng nghĩa/từ đồng nghĩa/điền đúng từ theo ngữ cảnh câu), KHÔNG kiểm tra ngữ pháp.
-Mỗi câu có prompt tiếng Anh (câu có 1 từ để trống dùng "___" hoặc hỏi thẳng nghĩa của 1 từ), đúng 4 lựa chọn (options), đúng 1 đáp án đúng (answer, chỉ số 0-3), và "explanations" — mảng ĐÚNG 4 chuỗi giải thích bằng tiếng Việt, MỖI PHẦN TỬ ứng với ĐÚNG 1 lựa chọn theo thứ tự trong options: với lựa chọn ĐÚNG thì giải thích nghĩa của từ/vì sao hợp ngữ cảnh; với các lựa chọn SAI thì giải thích vì sao nghĩa không phù hợp.
-Trả về DUY NHẤT JSON dạng: {"questions":[{"prompt":"...","options":["...","...","...","..."],"answer":0,"explanations":["vì sao đúng...","vì sao sai...","vì sao sai...","vì sao sai..."]}]}`
+Mỗi câu có prompt tiếng Anh (câu có 1 từ để trống dùng "___" hoặc hỏi thẳng nghĩa của 1 từ), đúng 4 lựa chọn (options), đúng 1 đáp án đúng (answer, chỉ số 0-3), "explanations" — mảng ĐÚNG 4 chuỗi giải thích bằng tiếng Việt, MỖI PHẦN TỬ ứng với ĐÚNG 1 lựa chọn theo thứ tự trong options: với lựa chọn ĐÚNG thì giải thích nghĩa của từ/vì sao hợp ngữ cảnh; với các lựa chọn SAI thì giải thích vì sao nghĩa không phù hợp, "structure" — 1 câu tiếng Việt nêu rõ TỪ/CỤM TỪ đang kiểm tra thuộc loại gì (danh từ/động từ/tính từ/thành ngữ...) và vì sao dùng đúng chỗ đó trong câu, và "translation" — dịch NGUYÊN CÂU tiếng Anh (đã điền đáp án đúng vào chỗ trống) sang tiếng Việt.
+Trả về DUY NHẤT JSON dạng: {"questions":[{"prompt":"...","options":["...","...","...","..."],"answer":0,"explanations":["vì sao đúng...","vì sao sai...","vì sao sai...","vì sao sai..."],"structure":"...","translation":"..."}]}`
     : `Cấp độ: ${levelLabel}. Soạn ĐÚNG ${count} câu hỏi trắc nghiệm ngữ pháp tiếng Anh MỚI, chủ điểm ngữ pháp KHÁC NHAU, đúng độ khó cấp độ trên.
-Mỗi câu có prompt tiếng Anh (chỗ trống dùng "___"), đúng 4 lựa chọn (options), đúng 1 đáp án đúng (answer, chỉ số 0-3), và "explanations" — mảng ĐÚNG 4 chuỗi giải thích bằng tiếng Việt, MỖI PHẦN TỬ ứng với ĐÚNG 1 lựa chọn theo thứ tự trong options: với lựa chọn ĐÚNG thì giải thích vì sao nó đúng; với các lựa chọn SAI thì giải thích cụ thể vì sao KHÔNG NÊN chọn đáp án đó (sai ở điểm ngữ pháp gì).
-Trả về DUY NHẤT JSON dạng: {"questions":[{"prompt":"...","options":["...","...","...","..."],"answer":0,"explanations":["vì sao đúng...","vì sao sai...","vì sao sai...","vì sao sai..."]}]}`;
+Mỗi câu có prompt tiếng Anh (chỗ trống dùng "___"), đúng 4 lựa chọn (options), đúng 1 đáp án đúng (answer, chỉ số 0-3), "explanations" — mảng ĐÚNG 4 chuỗi giải thích bằng tiếng Việt, MỖI PHẦN TỬ ứng với ĐÚNG 1 lựa chọn theo thứ tự trong options: với lựa chọn ĐÚNG thì giải thích vì sao nó đúng; với các lựa chọn SAI thì giải thích cụ thể vì sao KHÔNG NÊN chọn đáp án đó (sai ở điểm ngữ pháp gì), "structure" — 1-2 câu tiếng Việt nêu rõ TÊN cấu trúc/thì ngữ pháp đang kiểm tra (vd "Câu điều kiện loại 2", "Thì hiện tại hoàn thành") và GIẢI THÍCH vì sao ngữ cảnh câu này phải dùng đúng cấu trúc/thì đó, và "translation" — dịch NGUYÊN CÂU tiếng Anh (đã điền đáp án đúng vào chỗ trống) sang tiếng Việt.
+Trả về DUY NHẤT JSON dạng: {"questions":[{"prompt":"...","options":["...","...","...","..."],"answer":0,"explanations":["vì sao đúng...","vì sao sai...","vì sao sai...","vì sao sai..."],"structure":"...","translation":"..."}]}`;
 
   const content = await callGroq({ apiKey, model, sys, user, temperature: 0.7 });
   return parseGrammarQuizResponse(content, count);
@@ -330,8 +332,8 @@ Trả về DUY NHẤT JSON dạng: {"posts":[{"username":"...","emoji":"🎬","c
 export async function generateMillionaireQuiz({ apiKey, model = DEFAULT_GROQ_MODEL, levelLabel, count = 15 }) {
   const sys = 'Bạn là giáo viên tiếng Anh soạn đề trắc nghiệm kiểu gameshow "Ai Là Triệu Phú" cho học sinh Việt Nam luyện thi chứng chỉ quốc tế. LUÔN trả lời bằng đúng 1 khối JSON hợp lệ, không thêm chữ nào khác ngoài JSON.';
   const user = `Cấp độ: ${levelLabel}. Soạn ĐÚNG ${count} câu hỏi tiếng Anh, XẾP THEO THỨ TỰ TỪ DỄ NHẤT (câu 1) ĐẾN KHÓ NHẤT (câu cuối) — độ khó tăng dần rõ rệt qua từng câu, đúng tinh thần gameshow "càng về sau càng khó". Trộn đều 3 DẠNG câu hỏi xen kẽ trong suốt đề: (1) ngữ pháp, (2) từ vựng (nghĩa từ/đồng nghĩa), (3) đọc hiểu — với dạng đọc hiểu thì NHÚNG THẲNG 1 đoạn văn tiếng Anh RẤT NGẮN (2-3 câu) vào ngay trong "prompt" rồi hỏi 1 câu hỏi về đoạn đó.
-Mỗi câu có "prompt" (câu hỏi tiếng Anh, nếu là câu điền từ thì chỗ trống dùng "___"), đúng 4 lựa chọn (options), đúng 1 đáp án đúng (answer, chỉ số 0-3), và "explanations" — mảng ĐÚNG 4 chuỗi giải thích bằng tiếng Việt, MỖI PHẦN TỬ ứng với ĐÚNG 1 lựa chọn theo thứ tự trong options: với lựa chọn ĐÚNG thì giải thích vì sao đúng; với các lựa chọn SAI thì giải thích cụ thể vì sao không nên chọn.
-Trả về DUY NHẤT JSON dạng: {"questions":[{"prompt":"...","options":["...","...","...","..."],"answer":0,"explanations":["vì sao đúng...","vì sao sai...","vì sao sai...","vì sao sai..."]}]}`;
+Mỗi câu có "prompt" (câu hỏi tiếng Anh, nếu là câu điền từ thì chỗ trống dùng "___"), đúng 4 lựa chọn (options), đúng 1 đáp án đúng (answer, chỉ số 0-3), "explanations" — mảng ĐÚNG 4 chuỗi giải thích bằng tiếng Việt, MỖI PHẦN TỬ ứng với ĐÚNG 1 lựa chọn theo thứ tự trong options: với lựa chọn ĐÚNG thì giải thích vì sao đúng; với các lựa chọn SAI thì giải thích cụ thể vì sao không nên chọn, "structure" — 1-2 câu tiếng Việt nêu rõ ĐIỂM KIẾN THỨC đang kiểm tra (tên cấu trúc/thì ngữ pháp nếu là câu ngữ pháp, hoặc loại từ/ngữ cảnh nếu là câu từ vựng) và vì sao ngữ cảnh câu này cần dùng đúng như vậy, và "translation" — dịch NGUYÊN CÂU/đoạn văn tiếng Anh trong prompt (đã điền đáp án đúng nếu có chỗ trống) sang tiếng Việt.
+Trả về DUY NHẤT JSON dạng: {"questions":[{"prompt":"...","options":["...","...","...","..."],"answer":0,"explanations":["vì sao đúng...","vì sao sai...","vì sao sai...","vì sao sai..."],"structure":"...","translation":"..."}]}`;
 
   const content = await callGroq({ apiKey, model, sys, user, temperature: 0.8 });
   return parseGrammarQuizResponse(content, count);
