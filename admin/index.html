@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#fff6e8" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Admin — Reply1999 Games</title>
+<script>(function(){try{var p=JSON.parse(localStorage.getItem('r99-theme'))||{palette:'warm',mode:'auto'};var mode=p.mode==='auto'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p.mode;document.documentElement.dataset.theme=p.palette+'-'+mode;}catch(e){}})();</script>
+<link rel="stylesheet" href="/shared/theme.css" />
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:radial-gradient(ellipse 90% 55% at 50% 0%, var(--bg2) 0%, transparent 70%),var(--bg);
+  color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh}
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;align-items:center;gap:12px;padding:8px 0 18px;border-bottom:1px solid #e9d3ad;margin-bottom:18px}
+header .back{width:44px;height:44px;border-radius:50%;border:2px solid var(--line);background:var(--panel);
+  display:flex;align-items:center;justify-content:center;font-size:20px;text-decoration:none;color:var(--ink)}
+h1{margin:0;font-size:20px;color:var(--gold2)}
+.sub{color:var(--ink-dim);font-size:13px;margin:2px 0 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;
+  box-shadow:0 4px 14px rgba(194,65,12,.08)}
+.card h2{margin:0 0 10px;font-size:16px;color:var(--gold2)}
+label{display:block;font-size:13px;color:var(--ink-dim);margin:8px 0 4px;font-weight:600}
+input{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;background:#fff;
+  font-size:14px;color:var(--ink)}
+button{background:linear-gradient(180deg,#ff9d5c,#c2410c);color:#fff;border:none;border-radius:10px;
+  padding:10px 18px;font-weight:800;font-size:14px;cursor:pointer;margin-top:10px}
+button.ghost{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+button:disabled{opacity:.5;cursor:default}
+.err{color:var(--bad);font-size:13px;min-height:1.2em;margin-top:8px;white-space:pre-wrap}
+.hidden{display:none!important}
+.stats-row{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 4px}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-size:13px}
+.stat b{display:block;font-size:19px;color:var(--gold2)}
+.bars{display:flex;align-items:flex-end;gap:6px;height:90px;padding:6px 2px;border-bottom:2px solid var(--line)}
+.bar{flex:1;background:linear-gradient(180deg,#ff9d5c,#c2410c);border-radius:4px 4px 0 0;min-height:2px;position:relative}
+.bar span{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:10px;color:var(--ink-dim)}
+.bar-labels{display:flex;gap:6px}
+.bar-labels div{flex:1;text-align:center;font-size:10px;color:var(--ink-dim);padding-top:3px}
+code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="back" href="/" title="Trang chủ">🏠</a>
+    <div>
+      <h1>🛠️ Admin</h1>
+      <p class="sub">Thống kê toàn hệ thống — chỉ tài khoản admin xem được</p>
+    </div>
+  </header>
+
+  <div id="viewSetup" class="card hidden">
+    <h2>⚙️ Chưa kết nối server</h2>
+    <p style="font-size:14px;line-height:1.6">Cần cấu hình Supabase trước — xem <code>server/README.md</code> và điền <code>/server-config.js</code>.</p>
+  </div>
+
+  <div id="viewAuth" class="card hidden">
+    <h2>Đăng nhập</h2>
+    <p style="font-size:13px;color:var(--ink-dim);margin:0 0 6px">Dùng đúng tài khoản phụ huynh đã đăng ký làm admin (xem biến môi trường <code>ADMIN_EMAIL</code> trên Vercel).</p>
+    <label>Email</label><input id="email" type="email" autocomplete="username" />
+    <label>Mật khẩu</label><input id="password" type="password" autocomplete="current-password" />
+    <div class="err" id="authErr"></div>
+    <button id="btnSignIn">Đăng nhập</button>
+  </div>
+
+  <div id="viewLoading" class="card hidden">
+    <p>Đang tải thống kê…</p>
+  </div>
+
+  <div id="viewDenied" class="card hidden">
+    <h2>⛔ Không có quyền</h2>
+    <p style="font-size:14px;line-height:1.6">Tài khoản này không phải admin. Đăng nhập đúng email admin (biến môi trường <code>ADMIN_EMAIL</code> trên Vercel) rồi tải lại trang.</p>
+    <button class="ghost" id="btnSignOut2">Đăng xuất, đăng nhập tài khoản khác</button>
+  </div>
+
+  <div id="viewMain" class="hidden">
+    <div class="card" style="padding:10px 16px">
+      <span id="who" style="font-size:12px;color:var(--ink-dim)"></span>
+      <button id="btnRefresh" class="ghost" style="float:right;margin:0 8px 0 0;padding:5px 12px;font-size:12px">🔄 Tải lại</button>
+      <button id="btnSignOut" class="ghost" style="float:right;margin:0;padding:5px 12px;font-size:12px">Đăng xuất</button>
+    </div>
+
+    <div class="card" style="padding:10px 16px">
+      <span style="font-size:12px;color:var(--ink-dim);font-weight:800">🎨 Giao diện (riêng máy này)</span>
+      <div id="themeSlot" style="margin-top:6px"></div>
+    </div>
+
+    <div class="card">
+      <h2>📊 Tổng quan</h2>
+      <div class="stats-row" id="statsRow"></div>
+      <p style="font-size:11.5px;color:var(--ink-dim);margin:6px 0 0" id="generatedAt"></p>
+    </div>
+
+    <div class="card">
+      <h2>🗄️ Database</h2>
+      <div class="stats-row" id="dbRow"></div>
+    </div>
+
+    <div class="card">
+      <h2>🤖 Lượt gọi AI (7 ngày qua)</h2>
+      <div class="stats-row" id="aiRow"></div>
+      <div class="bars" id="aiBars"></div>
+      <div class="bar-labels" id="aiBarLabels"></div>
+      <p style="font-size:11.5px;color:var(--ink-dim);margin:8px 0 0">Mỗi cột = tổng lượt gọi AI thành công (Groq + DeepSeek) trong ngày đó. Cần chạy <code>server/migrate-12-admin-stats.sql</code> để bắt đầu ghi số liệu.</p>
+    </div>
+
+    <p style="font-size:12px;color:var(--ink-dim);text-align:center">Vì hệ thống gọi AI thẳng từ trình duyệt (không qua server riêng), số liệu ở đây chỉ mang tính THỐNG KÊ — không phải giới hạn chặn cứng số lượt gọi thật sự.</p>
+
+    <div class="card">
+      <h2>💾 Sao lưu & Khôi phục toàn bộ dữ liệu</h2>
+      <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 8px">Sao lưu tải về TOÀN BỘ dữ liệu server (mọi gia đình, mọi bảng) thành 1 file JSON — giữ file này ở nơi an toàn.</p>
+      <button id="btnDownloadBackup">⬇️ Tải bản sao lưu (JSON)</button>
+      <p class="ok" id="backupOk"></p>
+
+      <hr style="border:none;border-top:1px solid var(--line);margin:18px 0" />
+
+      <h2 style="color:var(--bad)">⚠️ Khôi phục từ file sao lưu</h2>
+      <p style="font-size:12.5px;color:var(--bad);line-height:1.6;margin:0 0 8px">
+        <b>NGUY HIỂM — không thể hoàn tác:</b> khôi phục sẽ XOÁ SẠCH toàn bộ dữ liệu HIỆN TẠI trên server
+        rồi thay bằng ĐÚNG dữ liệu trong file bạn chọn. Bất kỳ thứ gì được tạo SAU thời điểm sao lưu đó
+        (không có trong file) sẽ MẤT VĨNH VIỄN. Chỉ dùng khi thật sự cần đưa cả hệ thống về đúng 1 thời điểm cũ.
+      </p>
+      <label>Chọn file backup (.json)</label>
+      <input id="restoreFile" type="file" accept="application/json" />
+      <label>Gõ đúng chữ <code>KHÔI PHỤC</code> để mở khoá nút bên dưới</label>
+      <input id="restoreConfirmText" type="text" placeholder="Gõ: KHÔI PHỤC" />
+      <button id="btnRestore" class="ghost" style="border-color:var(--bad);color:var(--bad)" disabled>♻️ Xoá hết & Khôi phục từ file này</button>
+      <p class="err" id="restoreMsg"></p>
+    </div>
+  </div>
+</div>
+<script src="/server-config.js"></script>
+<script type="module" src="src/app.js"></script>
+</body>
+</html>
