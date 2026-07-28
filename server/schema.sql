@@ -220,6 +220,19 @@ create table if not exists ai_call_log (
 );
 create index if not exists ai_call_log_created on ai_call_log (created_at desc);
 
+-- Cau truc ngu phap be hay lam SAI trong Trac Nghiem Ngu Phap (xem migrate-15).
+-- Chi CONG DON khi sai, KHONG tru khi dung lai (khac miss_events) vi "structure"
+-- la chuoi AI tu soan, cach dien dat co the khac nhau giua cac lan.
+create table if not exists grammar_miss_events (
+  id         bigint generated always as identity primary key,
+  family_id  uuid not null references families(id) on delete cascade,
+  profile_id uuid not null references profiles(id) on delete cascade,
+  structure  text not null,
+  delta      int  not null check (delta between -999 and 999 and delta <> 0),
+  ts         timestamptz not null default now()
+);
+create index if not exists grammar_miss_events_profile_structure on grammar_miss_events (profile_id, structure);
+
 -- ===== View =================================================================
 
 -- So tu yeu hien tai cua tung be (security_invoker de RLS ap dung theo nguoi goi).
@@ -227,6 +240,13 @@ create or replace view weak_words with (security_invoker = on) as
   select profile_id, word, sum(delta)::int as misses
   from miss_events
   group by profile_id, word
+  having sum(delta) > 0;
+
+-- So cau truc ngu phap yeu hien tai cua tung be.
+create or replace view weak_grammar_points with (security_invoker = on) as
+  select profile_id, structure, sum(delta)::int as misses
+  from grammar_miss_events
+  group by profile_id, structure
   having sum(delta) > 0;
 
 -- So du sao cua tung be.
@@ -241,6 +261,7 @@ alter table families       enable row level security;
 alter table profiles       enable row level security;
 alter table sessions       enable row level security;
 alter table miss_events    enable row level security;
+alter table grammar_miss_events enable row level security;
 alter table reward_ledger  enable row level security;
 alter table purchases      enable row level security;
 alter table manual_rewards enable row level security;
@@ -264,7 +285,7 @@ $$ select id from families where owner = auth.uid() $$;
 do $$
 declare t text;
 begin
-  foreach t in array array['profiles','sessions','miss_events','reward_ledger',
+  foreach t in array array['profiles','sessions','miss_events','grammar_miss_events','reward_ledger',
                            'purchases','manual_rewards','settings','devices','kid_logins',
                            'translation_passages','translation_submissions',
                            'grammar_quizzes','grammar_quiz_submissions','ai_call_log']
@@ -326,6 +347,17 @@ begin
   select fam, profile_id, word, sum(delta), now() - interval '30 days'
   from old
   group by profile_id, word
+  having sum(delta) <> 0 and sum(delta) between -999 and 999;
+
+  with old_gr as (
+    delete from grammar_miss_events
+    where family_id = fam and ts < now() - interval '30 days'
+    returning profile_id, structure, delta
+  )
+  insert into grammar_miss_events (family_id, profile_id, structure, delta, ts)
+  select fam, profile_id, structure, sum(delta), now() - interval '30 days'
+  from old_gr
+  group by profile_id, structure
   having sum(delta) <> 0 and sum(delta) between -999 and 999;
 
   delete from sessions s
