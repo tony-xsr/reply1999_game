@@ -7,7 +7,13 @@
    (☀️ Sáng/🌙 Tối, cộng thêm ⚙️ Theo máy) = chọn qua thuộc tính data-theme
    trên thẻ <html> (xem shared/theme.js). */
 
+/* color-scheme: BẮT BUỘC khai báo khớp với theme đang chọn — nếu không, khi
+   máy/trình duyệt ở chế độ Tối, trình duyệt tự vẽ CHỮ trong <input>/<select>
+   theo màu Tối hệ thống (thường trắng/xám nhạt) BẤT KỂ theme Sáng mình đang
+   chọn và BẤT KỂ CSS `color` đã set — chữ trắng trên nền sáng, không đọc
+   được. Khai báo color-scheme cho trình duyệt biết nền mình vẽ là gì. */
 :root, :root[data-theme="warm-light"] {
+  color-scheme: light;
   --bg:#fff6e8; --bg2:#ffe9c8;
   --gold:#ff8a3d; --gold2:#c2410c;
   --ink:#241e2e; --ink-dim:#5d5370; --line:#a8834a;
@@ -15,6 +21,7 @@
   --good:#15803d; --bad:#c02a2a;
 }
 :root[data-theme="warm-dark"] {
+  color-scheme: dark;
   --bg:#1c1712; --bg2:#2e2013;
   --gold:#ffab6b; --gold2:#ffc38a;
   --ink:#f5ead9; --ink-dim:#cbb89c; --line:#7a5f3a;
@@ -22,6 +29,7 @@
   --good:#4ade80; --bad:#f87171;
 }
 :root[data-theme="soft-light"] {
+  color-scheme: light;
   --bg:#eef3ff; --bg2:#dbe6ff;
   --gold:#3b6bef; --gold2:#2547b8;
   --ink:#1b2340; --ink-dim:#556086; --line:#9db2e6;
@@ -29,11 +37,20 @@
   --good:#15803d; --bad:#c02a2a;
 }
 :root[data-theme="soft-dark"] {
+  color-scheme: dark;
   --bg:#0f1424; --bg2:#182240;
   --gold:#7fa2ff; --gold2:#a6c0ff;
   --ink:#e6ecff; --ink-dim:#aab6d6; --line:#33447a;
   --panel:#171e35; --panel2:#1e2742;
   --good:#4ade80; --bad:#f87171;
+}
+
+/* Chốt thêm 1 lớp nữa: buộc input/select/textarea tự vẽ theo CSS của mình
+   (không dùng control "gốc" của hệ điều hành cho phần chữ/nền) + hiện rõ
+   con trỏ nhập liệu — áp dụng mọi trang có form (Phụ Huynh/Admin/In Bài Tập). */
+input, select, textarea {
+  color-scheme: inherit;
+  caret-color: var(--ink);
 }
 
 /* Bộ nút chọn theme dùng chung — xem shared/theme.js mountThemePicker(). */

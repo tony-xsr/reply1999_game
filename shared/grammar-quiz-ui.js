@@ -260,7 +260,10 @@ function renderReview(ov, ctx) {
       return `<div class="r99-ai-opt ${cls}" style="cursor:default">${o}${pickedMark}</div>
         <div class="r99-ai-explain">${q.explanations[oi]}</div>`;
     }).join('');
-    return `<div class="r99-ai-q"><b>Câu ${qi + 1}:</b> ${q.prompt}${optsHtml}</div>`;
+    const extraHtml = (q.structure || q.translation) ? `
+      ${q.structure ? `<div class="r99-ai-explain">📚 <b>Cấu trúc:</b> ${q.structure}</div>` : ''}
+      ${q.translation ? `<div class="r99-ai-explain">🇻🇳 <b>Dịch:</b> ${q.translation}</div>` : ''}` : '';
+    return `<div class="r99-ai-q"><b>Câu ${qi + 1}:</b> ${q.prompt}${optsHtml}${extraHtml}</div>`;
   }).join('');
 
   renderAiBox(ov, `
