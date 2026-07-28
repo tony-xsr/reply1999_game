@@ -115,7 +115,30 @@ export const CATALOG = [
   { id: 'drink3', icon: '🧋', name: 'Trà sữa', cost: 480, type: 'drink', fixedCost: true },
   { id: 'voucher20k', icon: '🧸', name: 'Phiếu mua đồ chơi 20k', cost: 400, type: 'voucher', fixedCost: true },
   { id: 'voucher50k', icon: '🎮', name: 'Phiếu mua đồ chơi 50k', cost: 900, type: 'voucher', fixedCost: true },
+  { id: 'robux55', icon: '🎮', name: '55 Robux', cost: 600, type: 'voucher', fixedCost: true },
+  { id: 'robux145', icon: '🎮', name: 'Phiếu 145 Robux (50k)', cost: 1100, type: 'voucher', fixedCost: true },
+  { id: 'voucher100k', icon: '🧸', name: 'Phiếu mua đồ chơi 100k', cost: 1600, type: 'voucher', fixedCost: true },
+  { id: 'robux300', icon: '🎮', name: 'Phiếu 300 Robux (100k)', cost: 1750, type: 'voucher', fixedCost: true },
+  { id: 'voucher200k', icon: '🧸', name: 'Phiếu mua đồ chơi 200k', cost: 2800, type: 'voucher', fixedCost: true },
 ];
+
+/**
+ * Ghép CATALOG gốc với quà TỰ THÊM của từng gia đình (phụ huynh nhập tay ở
+ * Trang Phụ Huynh > Cài đặt > 🎁 Quà tự thêm, lưu ở settings.custom_catalog_
+ * items) — quà tự thêm LUÔN tính giá thẳng (fixedCost, không nhân hệ số
+ * chung) vì phụ huynh đã tự nhập đúng giá sao mong muốn. Trùng id với
+ * CATALOG gốc thì quà tự thêm THẮNG (phụ huynh có thể "ghi đè" 1 món có sẵn).
+ */
+export function mergeCatalog(customItems = []) {
+  const custom = (customItems || [])
+    .filter((c) => c && c.id && c.name && Number(c.cost) > 0)
+    .map((c) => ({
+      id: c.id, icon: c.icon || '🎁', name: c.name, cost: Number(c.cost),
+      type: c.type || 'voucher', fixedCost: true,
+    }));
+  const customIds = new Set(custom.map((c) => c.id));
+  return [...CATALOG.filter((c) => !customIds.has(c.id)), ...custom];
+}
 
 /** Quà ngẫu nhiên loại kẹo cho hộp quà "học đủ 15 câu" (không tốn sao). */
 export function randomSmallGift(rng = Math.random) {

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {
   starsFromScore, capDailyStars, newGiftCount, randomSmallGift, catalogItem,
   CATALOG, DAILY_STAR_CAP, GIFT_EVERY, effectiveCost, DEFAULT_REWARD_COST_MULTIPLIER,
-  isFlatRewardMode, starsForSession, FLAT_REWARD_MODES, FLAT_REWARD_STARS,
+  isFlatRewardMode, starsForSession, FLAT_REWARD_MODES, FLAT_REWARD_STARS, mergeCatalog,
 } from './rewards.js';
 
 let passed = 0;
@@ -66,6 +66,42 @@ check('randomSmallGift: always returns a candy from the catalog', () => {
 check('catalogItem: finds by id, null for unknown', () => {
   assert.equal(catalogItem('flower1').icon, '🌸');
   assert.equal(catalogItem('nope'), null);
+});
+
+check('CATALOG: 5 mốc Robux/phiếu mới đúng giá đã chốt, đều fixedCost', () => {
+  const prices = { robux55: 600, robux145: 1100, voucher100k: 1600, robux300: 1750, voucher200k: 2800 };
+  for (const [id, cost] of Object.entries(prices)) {
+    const item = catalogItem(id);
+    assert.ok(item, `thiếu món ${id}`);
+    assert.equal(item.cost, cost);
+    assert.equal(item.fixedCost, true);
+    assert.equal(effectiveCost(item), cost, `${id} không được nhân hệ số chung`);
+  }
+});
+
+check('mergeCatalog: không có quà tự thêm -> trả về đúng CATALOG gốc', () => {
+  assert.deepEqual(mergeCatalog([]), CATALOG);
+  assert.deepEqual(mergeCatalog(), CATALOG);
+});
+
+check('mergeCatalog: thêm quà mới, giá luôn fixedCost (không nhân hệ số)', () => {
+  const merged = mergeCatalog([{ id: 'custom1', icon: '🎁', name: 'Vé xem phim', cost: 500 }]);
+  const item = merged.find((c) => c.id === 'custom1');
+  assert.ok(item);
+  assert.equal(item.type, 'voucher');
+  assert.equal(effectiveCost(item, 36), 500);
+});
+
+check('mergeCatalog: trùng id với CATALOG gốc -> quà tự thêm thắng (ghi đè)', () => {
+  const merged = mergeCatalog([{ id: 'flower1', icon: '🌺', name: 'Hoa tự chỉnh', cost: 999 }]);
+  const item = merged.find((c) => c.id === 'flower1');
+  assert.equal(item.name, 'Hoa tự chỉnh');
+  assert.equal(merged.length, CATALOG.length); // không tăng số lượng, chỉ thay thế
+});
+
+check('mergeCatalog: bỏ qua mục thiếu tên/giá không hợp lệ', () => {
+  const merged = mergeCatalog([{ id: 'bad1', icon: '🎁', name: '', cost: 100 }, { id: 'bad2', icon: '🎁', name: 'X', cost: 0 }]);
+  assert.equal(merged.length, CATALOG.length);
 });
 
 check('effectiveCost: applies default x36 multiplier, rounds, floors at 1', () => {
