@@ -3,7 +3,7 @@
 
 import {
   parseQuestionsResponse, parsePassagesResponse, parseGradeResponse,
-  parseGrammarQuizResponse, parseGrammarGradeResponse,
+  parseGrammarQuizResponse, parseGrammarGradeResponse, parseSocialPostResponse,
 } from './groq.js';
 
 let passed = 0;
@@ -135,6 +135,16 @@ check('feedback rỗng/thiếu → dùng câu khích lệ mặc định', (() =>
   return g.score === 60 && /cố gắng/.test(g.feedback);
 })());
 
+check('có reference_vi → bóc đúng vào referenceVi', (() => {
+  const g = parseGradeResponse(JSON.stringify({ score: 80, feedback: 'Tốt', reference_vi: 'Bản dịch mẫu.' }));
+  return g.referenceVi === 'Bản dịch mẫu.';
+})());
+
+check('thiếu reference_vi → referenceVi rỗng, không ném lỗi', (() => {
+  const g = parseGradeResponse(JSON.stringify({ score: 80, feedback: 'Tốt' }));
+  return g.referenceVi === '';
+})());
+
 check('score ngoài phạm vi 0-100 → ném lỗi rõ ràng', (() => {
   try {
     parseGradeResponse(JSON.stringify({ score: 150, feedback: 'x' }));
@@ -207,6 +217,55 @@ check('JSON hợp lệ: lấy đúng suggestion', (() => {
 check('suggestion rỗng/thiếu → dùng câu khích lệ mặc định', (() => {
   const g = parseGrammarGradeResponse(JSON.stringify({ suggestion: '' }));
   return /cố gắng/.test(g.suggestion);
+})());
+
+console.log('— parseSocialPostResponse —');
+
+check('JSON hợp lệ: bóc đúng bài đăng + bình luận + đáp án dịch', (() => {
+  const content = JSON.stringify({
+    posts: [{
+      username: 'funkid99', emoji: '🐶', caption: 'My dog ate my homework fr fr', likes: 4200,
+      comments: [
+        { username: 'a', text: 'LOL classic 😂', vi: 'Buồn cười thật đấy' },
+        { username: 'b', text: 'No way', vi: 'Không thể nào' },
+        { username: 'c', text: 'Same happened to me', vi: 'Tôi cũng bị vậy đó' },
+      ],
+    }],
+  });
+  const posts = parseSocialPostResponse(content, 2);
+  return posts.length === 1 && posts[0].username === 'funkid99' && posts[0].comments.length === 3
+    && posts[0].comments[0].vi === 'Buồn cười thật đấy';
+})());
+
+check('thiếu username/likes → tự điền giá trị mặc định hợp lý', (() => {
+  const content = JSON.stringify({
+    posts: [{
+      caption: 'Test caption',
+      comments: [
+        { text: 'a', vi: 'a-vi' }, { text: 'b', vi: 'b-vi' }, { text: 'c', vi: 'c-vi' },
+      ],
+    }],
+  });
+  const posts = parseSocialPostResponse(content, 1);
+  return posts[0].username && posts[0].likes > 0 && posts[0].emoji;
+})());
+
+check('bình luận thiếu "vi" (đáp án dịch) → loại bỏ bài đăng đó', (() => {
+  const content = JSON.stringify({
+    posts: [{ caption: 'X', comments: [{ text: 'a', vi: '' }, { text: 'b', vi: '' }, { text: 'c', vi: '' }] }],
+  });
+  try {
+    parseSocialPostResponse(content, 1);
+    return false;
+  } catch (e) {
+    return /khuôn dạng bài đăng/.test(e.message);
+  }
+})());
+
+check('giới hạn đúng count dù AI trả về nhiều bài đăng hơn', (() => {
+  const onePost = { caption: 'X', comments: [{ text: 'a', vi: 'a' }, { text: 'b', vi: 'b' }, { text: 'c', vi: 'c' }] };
+  const content = JSON.stringify({ posts: [onePost, onePost, onePost] });
+  return parseSocialPostResponse(content, 2).length === 2;
 })());
 
 console.log(`\nKết quả: ${passed} pass, ${failed} fail`);

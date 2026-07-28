@@ -157,8 +157,9 @@ Trả về DUY NHẤT JSON dạng: {"passages":[{"title":"...","passage_en":"...
 }
 
 /**
- * Phân tích câu trả lời AI cho phần chấm điểm bản dịch — {score:0-100, feedback}.
- * Tách riêng khỏi phần gọi mạng để test được mà không cần giả lập fetch.
+ * Phân tích câu trả lời AI cho phần chấm điểm bản dịch — {score:0-100,
+ * feedback, referenceVi: bản dịch mẫu để bé so sánh}. Tách riêng khỏi phần
+ * gọi mạng để test được mà không cần giả lập fetch.
  */
 export function parseGradeResponse(content) {
   const parsed = extractJson(content);
@@ -167,19 +168,21 @@ export function parseGradeResponse(content) {
   const feedback = typeof parsed.feedback === 'string' && parsed.feedback.trim()
     ? parsed.feedback.trim()
     : 'Bé đã cố gắng hoàn thành bài dịch!';
-  return { score: Math.round(score), feedback };
+  const referenceVi = typeof parsed.reference_vi === 'string' ? parsed.reference_vi.trim() : '';
+  return { score: Math.round(score), feedback, referenceVi };
 }
 
 /**
  * Nhờ AI chấm bản dịch tiếng Việt của bé so với đoạn văn tiếng Anh gốc — chấm
  * theo Ý NGHĨA/HIỂU ĐÚNG nội dung, KHÔNG bắt dịch đúng nguyên văn từng chữ
- * (đúng yêu cầu "không cần dịch đúng nguyên mẫu, hiểu là được"). Trả về
- * {score: 0-100, feedback: nhận xét tiếng Việt ngắn gọn, khích lệ}.
+ * (đúng yêu cầu "không cần dịch đúng nguyên mẫu, hiểu là được"). Trả về thêm
+ * `referenceVi` — 1 bản dịch mẫu của AI để bé so sánh lại sau khi chấm.
+ * @returns {Promise<{score:number, feedback:string, referenceVi:string}>}
  */
 export async function gradeTranslation({ apiKey, model = DEFAULT_GROQ_MODEL, passageEn, submittedVi }) {
   const sys = 'Bạn là giáo viên tiếng Anh CHẤM ĐIỂM bài dịch Anh-Việt của học sinh Việt Nam. Chấm theo mức độ HIỂU ĐÚNG Ý nội dung, KHÔNG bắt buộc dịch đúng nguyên văn từng từ — miễn học sinh hiểu đúng ý chính là cho điểm cao. LUÔN trả lời bằng đúng 1 khối JSON hợp lệ, không thêm chữ nào khác ngoài JSON.';
-  const user = `Đoạn văn tiếng Anh gốc:\n"""${passageEn}"""\n\nBản dịch tiếng Việt của học sinh:\n"""${submittedVi || '(bé chưa viết gì)'}"""\n\nChấm điểm 0-100 dựa trên mức độ hiểu đúng ý nội dung (không trừ điểm vì cách diễn đạt khác bản dịch mẫu). Viết nhận xét ngắn gọn bằng tiếng Việt, giọng khích lệ, nêu 1-2 điểm bé làm tốt và 1 điểm có thể cải thiện nếu có.
-Trả về DUY NHẤT JSON dạng: {"score": 85, "feedback": "..."}`;
+  const user = `Đoạn văn tiếng Anh gốc:\n"""${passageEn}"""\n\nBản dịch tiếng Việt của học sinh:\n"""${submittedVi || '(bé chưa viết gì)'}"""\n\nChấm điểm 0-100 dựa trên mức độ hiểu đúng ý nội dung (không trừ điểm vì cách diễn đạt khác bản dịch mẫu). Viết nhận xét ngắn gọn bằng tiếng Việt, giọng khích lệ, nêu 1-2 điểm bé làm tốt và 1 điểm có thể cải thiện nếu có. Viết thêm 1 bản dịch tiếng Việt MẪU của riêng đoạn văn gốc (tự nhiên, dễ hiểu) để học sinh so sánh lại với bài của mình.
+Trả về DUY NHẤT JSON dạng: {"score": 85, "feedback": "...", "reference_vi": "..."}`;
 
   const content = await callGroq({ apiKey, model, sys, user, temperature: 0.4 });
   return parseGradeResponse(content);
@@ -214,9 +217,22 @@ export function parseGrammarQuizResponse(content, count = 5) {
  * đúng đúng, vì sao 3 đáp án còn lại sai/không nên chọn) — dùng cho mục
  * "🧩 Trắc Nghiệm Ngữ Pháp" (5 câu/ngày/bé).
  */
-export async function generateGrammarQuiz({ apiKey, model = DEFAULT_GROQ_MODEL, levelLabel, count = 5 }) {
-  const sys = 'Bạn là giáo viên tiếng Anh soạn đề trắc nghiệm ngữ pháp cho học sinh Việt Nam luyện thi chứng chỉ quốc tế, đúng độ khó cấp độ được yêu cầu. LUÔN trả lời bằng đúng 1 khối JSON hợp lệ, không thêm chữ nào khác ngoài JSON.';
-  const user = `Cấp độ: ${levelLabel}. Soạn ĐÚNG ${count} câu hỏi trắc nghiệm ngữ pháp tiếng Anh MỚI, chủ điểm ngữ pháp KHÁC NHAU, đúng độ khó cấp độ trên.
+/**
+ * @param {'grammar'|'vocab'} quizType 'grammar' (mặc định, kiểm tra ngữ pháp)
+ *   hoặc 'vocab' (kiểm tra nghĩa/từ vựng, không hỏi ngữ pháp) — cùng 1 khuôn
+ *   dạng câu hỏi (4 lựa chọn + giải thích từng lựa chọn) nên dùng chung
+ *   parseGrammarQuizResponse(), chỉ khác nội dung yêu cầu AI soạn.
+ */
+export async function generateGrammarQuiz({ apiKey, model = DEFAULT_GROQ_MODEL, levelLabel, count = 5, quizType = 'grammar' }) {
+  const isVocab = quizType === 'vocab';
+  const sys = isVocab
+    ? 'Bạn là giáo viên tiếng Anh soạn đề trắc nghiệm TỪ VỰNG cho học sinh Việt Nam luyện thi chứng chỉ quốc tế, đúng độ khó cấp độ được yêu cầu. LUÔN trả lời bằng đúng 1 khối JSON hợp lệ, không thêm chữ nào khác ngoài JSON.'
+    : 'Bạn là giáo viên tiếng Anh soạn đề trắc nghiệm ngữ pháp cho học sinh Việt Nam luyện thi chứng chỉ quốc tế, đúng độ khó cấp độ được yêu cầu. LUÔN trả lời bằng đúng 1 khối JSON hợp lệ, không thêm chữ nào khác ngoài JSON.';
+  const user = isVocab
+    ? `Cấp độ: ${levelLabel}. Soạn ĐÚNG ${count} câu hỏi trắc nghiệm TỪ VỰNG tiếng Anh MỚI, chủ đề từ vựng KHÁC NHAU, đúng độ khó cấp độ trên — kiểm tra NGHĨA CỦA TỪ (chọn đúng nghĩa/từ đồng nghĩa/điền đúng từ theo ngữ cảnh câu), KHÔNG kiểm tra ngữ pháp.
+Mỗi câu có prompt tiếng Anh (câu có 1 từ để trống dùng "___" hoặc hỏi thẳng nghĩa của 1 từ), đúng 4 lựa chọn (options), đúng 1 đáp án đúng (answer, chỉ số 0-3), và "explanations" — mảng ĐÚNG 4 chuỗi giải thích bằng tiếng Việt, MỖI PHẦN TỬ ứng với ĐÚNG 1 lựa chọn theo thứ tự trong options: với lựa chọn ĐÚNG thì giải thích nghĩa của từ/vì sao hợp ngữ cảnh; với các lựa chọn SAI thì giải thích vì sao nghĩa không phù hợp.
+Trả về DUY NHẤT JSON dạng: {"questions":[{"prompt":"...","options":["...","...","...","..."],"answer":0,"explanations":["vì sao đúng...","vì sao sai...","vì sao sai...","vì sao sai..."]}]}`
+    : `Cấp độ: ${levelLabel}. Soạn ĐÚNG ${count} câu hỏi trắc nghiệm ngữ pháp tiếng Anh MỚI, chủ điểm ngữ pháp KHÁC NHAU, đúng độ khó cấp độ trên.
 Mỗi câu có prompt tiếng Anh (chỗ trống dùng "___"), đúng 4 lựa chọn (options), đúng 1 đáp án đúng (answer, chỉ số 0-3), và "explanations" — mảng ĐÚNG 4 chuỗi giải thích bằng tiếng Việt, MỖI PHẦN TỬ ứng với ĐÚNG 1 lựa chọn theo thứ tự trong options: với lựa chọn ĐÚNG thì giải thích vì sao nó đúng; với các lựa chọn SAI thì giải thích cụ thể vì sao KHÔNG NÊN chọn đáp án đó (sai ở điểm ngữ pháp gì).
 Trả về DUY NHẤT JSON dạng: {"questions":[{"prompt":"...","options":["...","...","...","..."],"answer":0,"explanations":["vì sao đúng...","vì sao sai...","vì sao sai...","vì sao sai..."]}]}`;
 
@@ -253,4 +269,70 @@ Trả về DUY NHẤT JSON dạng: {"suggestion": "..."}`;
 
   const content = await callGroq({ apiKey, model, sys, user, temperature: 0.6 });
   return parseGrammarGradeResponse(content);
+}
+
+/**
+ * Phân tích câu trả lời AI cho phần soạn "bài đăng mạng xã hội" (dùng in ra
+ * giấy cho bé dịch, xem generateSocialPosts) — mảng bài đăng, mỗi bài có
+ * username/emoji/caption/likes/comments (mỗi comment có text tiếng Anh +
+ * "vi" là đáp án dịch tiếng Việt).
+ */
+export function parseSocialPostResponse(content, count = 2) {
+  const parsed = extractJson(content);
+  const list = Array.isArray(parsed.posts) ? parsed.posts : [];
+  const posts = list
+    .filter((p) => p && typeof p.caption === 'string' && p.caption.trim()
+      && Array.isArray(p.comments) && p.comments.length >= 3
+      && p.comments.every((c) => c && typeof c.text === 'string' && c.text.trim() && typeof c.vi === 'string' && c.vi.trim()))
+    .slice(0, count)
+    .map((p) => ({
+      username: typeof p.username === 'string' && p.username.trim() ? p.username.trim() : 'friend_123',
+      emoji: typeof p.emoji === 'string' && p.emoji.trim() ? p.emoji.trim() : '🎬',
+      caption: p.caption.trim(),
+      likes: Number.isInteger(p.likes) && p.likes > 0 ? p.likes : (1000 + Math.floor(Math.random() * 9000)),
+      comments: p.comments.slice(0, 6).map((c) => ({
+        username: typeof c.username === 'string' && c.username.trim() ? c.username.trim() : 'user',
+        text: c.text.trim(),
+        vi: c.vi.trim(),
+      })),
+    }));
+  if (!posts.length) throw new Error('AI trả lời không đúng khuôn dạng bài đăng mong đợi');
+  return posts;
+}
+
+/**
+ * Nhờ AI soạn `count` bài đăng mạng xã hội GIẢ LẬP (kiểu TikTok/Instagram) —
+ * caption + bình luận tiếng Anh hài hước, phù hợp trẻ em, để IN RA GIẤY cho
+ * bé dịch (đáp án là trường "vi" của từng bình luận) — dành cho bé quen
+ * lướt mạng xã hội, biến việc dịch tiếng Anh thành thứ quen thuộc, hứng thú.
+ */
+export async function generateSocialPosts({ apiKey, model = DEFAULT_GROQ_MODEL, topic, count = 2 }) {
+  const sys = 'Bạn soạn nội dung bài tập tiếng Anh cho học sinh Việt Nam dưới dạng GIẢ LẬP bài đăng mạng xã hội (như TikTok/Instagram) — vui nhộn, hài hước, PHÙ HỢP TRẺ EM, để in ra giấy cho bé dịch. LUÔN trả lời bằng đúng 1 khối JSON hợp lệ, không thêm chữ nào khác ngoài JSON.';
+  const user = `Chủ đề: ${topic || 'đời sống hằng ngày vui nhộn, phù hợp trẻ em'}. Soạn ĐÚNG ${count} bài đăng mạng xã hội tiếng Anh GIẢ LẬP (KHÔNG dùng tên người thật/nhân vật có bản quyền), MỖI bài gồm:
+- username: tên tài khoản ảo vui nhộn
+- emoji: 1 emoji đại diện chủ đề bài đăng
+- caption: 1 câu tiêu đề/chú thích tiếng Anh ngắn, hài hước, phù hợp trẻ em
+- likes: 1 số lượt thích ngẫu nhiên hợp lý (vd 1234)
+- comments: mảng ĐÚNG 5 bình luận tiếng Anh NGẮN, HÀI HƯỚC, phù hợp trẻ em, có thể kèm emoji, mỗi bình luận có "username" (tên ảo), "text" (nội dung tiếng Anh), và "vi" (nghĩa tiếng Việt CHÍNH XÁC để làm đáp án cho bé dịch)
+Trả về DUY NHẤT JSON dạng: {"posts":[{"username":"...","emoji":"🎬","caption":"...","likes":1234,"comments":[{"username":"...","text":"...","vi":"..."}]}]}`;
+
+  const content = await callGroq({ apiKey, model, sys, user, temperature: 0.95 });
+  return parseSocialPostResponse(content, count);
+}
+
+/**
+ * Nhờ AI soạn đề "🏆 Ai Là Triệu Phú" — ĐÚNG `count` (mặc định 15) câu trắc
+ * nghiệm tiếng Anh, SẮP XẾP TỪ DỄ ĐẾN KHÓ theo thứ tự, trộn 3 dạng: ngữ
+ * pháp, từ vựng, và đọc hiểu đoạn văn ngắn (đoạn văn nhúng thẳng trong câu
+ * hỏi). Cùng khuôn dạng {prompt,options,answer,explanations} như trắc
+ * nghiệm ngữ pháp thường nên tái dùng NGUYÊN VẸN parseGrammarQuizResponse().
+ */
+export async function generateMillionaireQuiz({ apiKey, model = DEFAULT_GROQ_MODEL, levelLabel, count = 15 }) {
+  const sys = 'Bạn là giáo viên tiếng Anh soạn đề trắc nghiệm kiểu gameshow "Ai Là Triệu Phú" cho học sinh Việt Nam luyện thi chứng chỉ quốc tế. LUÔN trả lời bằng đúng 1 khối JSON hợp lệ, không thêm chữ nào khác ngoài JSON.';
+  const user = `Cấp độ: ${levelLabel}. Soạn ĐÚNG ${count} câu hỏi tiếng Anh, XẾP THEO THỨ TỰ TỪ DỄ NHẤT (câu 1) ĐẾN KHÓ NHẤT (câu cuối) — độ khó tăng dần rõ rệt qua từng câu, đúng tinh thần gameshow "càng về sau càng khó". Trộn đều 3 DẠNG câu hỏi xen kẽ trong suốt đề: (1) ngữ pháp, (2) từ vựng (nghĩa từ/đồng nghĩa), (3) đọc hiểu — với dạng đọc hiểu thì NHÚNG THẲNG 1 đoạn văn tiếng Anh RẤT NGẮN (2-3 câu) vào ngay trong "prompt" rồi hỏi 1 câu hỏi về đoạn đó.
+Mỗi câu có "prompt" (câu hỏi tiếng Anh, nếu là câu điền từ thì chỗ trống dùng "___"), đúng 4 lựa chọn (options), đúng 1 đáp án đúng (answer, chỉ số 0-3), và "explanations" — mảng ĐÚNG 4 chuỗi giải thích bằng tiếng Việt, MỖI PHẦN TỬ ứng với ĐÚNG 1 lựa chọn theo thứ tự trong options: với lựa chọn ĐÚNG thì giải thích vì sao đúng; với các lựa chọn SAI thì giải thích cụ thể vì sao không nên chọn.
+Trả về DUY NHẤT JSON dạng: {"questions":[{"prompt":"...","options":["...","...","...","..."],"answer":0,"explanations":["vì sao đúng...","vì sao sai...","vì sao sai...","vì sao sai..."]}]}`;
+
+  const content = await callGroq({ apiKey, model, sys, user, temperature: 0.8 });
+  return parseGrammarQuizResponse(content, count);
 }

@@ -24,6 +24,7 @@ import * as aiProvider from '../../shared/ai-provider.js';
 import { examSessionsToday, EXAM_LEVEL_LABELS } from '../../shared/report.js';
 import { buildTranslateEntryButton } from '../../shared/translate-ui.js';
 import { buildGrammarQuizEntryButton } from '../../shared/grammar-quiz-ui.js';
+import { buildMillionaireEntryButton } from '../../shared/millionaire-ui.js';
 
 const t = (key, fallback) => {
   const v = window.I18N?.t(key);
@@ -124,6 +125,7 @@ document.querySelectorAll('.level-card[data-level]').forEach((btn) => {
     await api.refreshCurrentKidSettings();
     renderTranslateEntry();
     renderGrammarQuizEntry();
+    renderMillionaireEntry();
   });
 });
 
@@ -144,6 +146,16 @@ function renderGrammarQuizEntry() {
   if (!box) return;
   box.innerHTML = '';
   const btn = buildGrammarQuizEntryButton(state.level, { speak });
+  if (btn) box.appendChild(btn);
+}
+
+/** Nút "🏆 Ai Là Triệu Phú" — luôn hiện (không cần phụ huynh bật riêng như 2
+ * mục trên), dùng cấp độ vừa chọn (xem shared/millionaire-ui.js). */
+function renderMillionaireEntry() {
+  const box = document.getElementById('mpEntryBox');
+  if (!box) return;
+  box.innerHTML = '';
+  const btn = buildMillionaireEntryButton(state.level, { speak });
   if (btn) box.appendChild(btn);
 }
 
