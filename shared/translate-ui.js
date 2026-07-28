@@ -313,12 +313,25 @@ function renderFeedback(ov, ctx) {
     <button type="button" class="r99-ai-btn" id="trNextBtn">Tiếp theo: Nối từ vựng ▶</button>
   `);
   if (grade) say(grade.feedback, { lang: 'vi-VN', rate: 0.92 });
-  ov.querySelector('#trNextBtn').addEventListener('click', () => renderMatch(ov, ctx));
+  ov.querySelector('#trNextBtn').addEventListener('click', () => {
+    try {
+      renderMatch(ov, ctx);
+    } catch (e) {
+      renderAiBox(ov, `<p class="r99-ai-msg">⚠️ ${e.message} — bấm ✕ rồi vào lại bài này thử lại nhé.</p>`);
+    }
+  });
 }
 
 function renderMatch(ov, ctx) {
   const { passage } = ctx;
   const vocab = passage.vocab || [];
+  // Phòng trường hợp bài cũ/lỗi dữ liệu không có từ vựng nào (không có gì để
+  // nối) — tự tính xong luôn thay vì hiện màn trống khiến bé bấm không thấy
+  // gì xảy ra.
+  if (!vocab.length) {
+    finish(ov, { ...ctx, vocabCorrect: 0, vocabTotal: 0, wrongWords: [] });
+    return;
+  }
   const { words, meanings } = shuffleVocabColumns(vocab);
   const answerKey = vocabAnswerKey(vocab);
   const matchState = new Map(vocab.map((v) => [v.word, { matched: false, wrongOnce: false }]));

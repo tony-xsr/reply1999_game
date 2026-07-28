@@ -249,20 +249,27 @@ async function finishQuiz(ov, ctx) {
     await api.updateGrammarQuizSuggestion(submission.id, suggestion);
   } catch { /* AI lỗi: bài đã lưu an toàn, chỉ thiếu gợi ý — thử lại ngầm lần sau */ }
 
-  // Làm tới đây nghĩa là đã trả lời HẾT các câu -> luôn tính là xong chỉ tiêu
-  // trắc nghiệm hôm nay (không cần so đếm như Luyện Dịch nhiều bài/ngày).
+  // Làm tới đây nghĩa là đã trả lời HẾT các câu, nhưng CHỈ thưởng nếu làm
+  // đúng ít nhất 60% (vd 3/5 câu) — trả lời hết mà sai gần hết vẫn được full
+  // thưởng như làm đúng hoàn toàn là không hợp lý (khác Luyện Dịch: chấm điểm
+  // AI theo Ý, luôn cho hoàn thành miễn nộp đủ bài).
+  const total = quiz.questions.length;
+  const passed = score >= Math.ceil(total * 0.6);
   let bonusGranted = false;
-  try {
-    bonusGranted = await api.claimDailyPracticeBonus(kid.id, 'gqRewardedDay', api.dateKeyOffset(0), 'trac-nghiem:hoan-thanh');
-    if (bonusGranted) refreshStarBadge();
-  } catch { /* mất mạng lúc thưởng: không chặn bé xem kết quả */ }
+  if (passed) {
+    try {
+      bonusGranted = await api.claimDailyPracticeBonus(kid.id, 'gqRewardedDay', api.dateKeyOffset(0), 'trac-nghiem:hoan-thanh');
+      if (bonusGranted) refreshStarBadge();
+    } catch { /* mất mạng lúc thưởng: không chặn bé xem kết quả */ }
+  }
 
-  renderReview(ov, { ...ctx, score, suggestion, bonusGranted });
+  renderReview(ov, { ...ctx, score, suggestion, bonusGranted, passed });
 }
 
 function renderReview(ov, ctx) {
-  const { quiz, score, suggestion, picks, say, bonusGranted, oldQuizzes = [] } = ctx;
+  const { quiz, score, suggestion, picks, say, bonusGranted, passed, oldQuizzes = [] } = ctx;
   const total = quiz.questions.length;
+  const minCorrect = Math.ceil(total * 0.6);
   const questionsHtml = quiz.questions.map((q, qi) => {
     const picked = picks?.[qi];
     const optsHtml = q.options.map((o, oi) => {
@@ -280,6 +287,7 @@ function renderReview(ov, ctx) {
   renderAiBox(ov, `
     <div class="r99-ai-score">${score}/${total}</div>
     ${bonusGranted ? `<p class="r99-ai-bonus">🌟 Hoàn thành hết bài trắc nghiệm hôm nay — thưởng +${DAILY_PRACTICE_BONUS_STARS} sao!</p>` : ''}
+    ${passed === false ? `<p class="r99-ai-msg">Cần đúng ít nhất ${minCorrect}/${total} câu mới được thưởng sao hoàn thành — bé cố gắng hơn ở đề ngày mai nhé!</p>` : ''}
     ${suggestion ? `<div class="r99-ai-feedback">💬 ${suggestion}</div>` : '<p class="r99-ai-msg">⏳ AI chưa soạn được gợi ý ngay lúc này, đang tự thử lại...</p>'}
     ${questionsHtml}
     <button type="button" class="r99-ai-btn ghost" id="gqCloseBtn">Đóng</button>
