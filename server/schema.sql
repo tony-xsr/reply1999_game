@@ -150,9 +150,13 @@ create table if not exists translation_passages (
   title      text not null,
   passage_en text not null,
   vocab      jsonb not null default '[]', -- [{"word":"...", "vi":"..."}]
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  source_weak text[] not null default '{}' -- tu/diem ngu phap phu huynh chon de "tao bai tu AI" (xem migrate-16)
 );
 create index if not exists translation_passages_profile_day on translation_passages (profile_id, day);
+create index if not exists translation_passages_source_weak on translation_passages using gin (source_weak);
+-- Gia dinh da tao truoc phai chay server/migrate-16-weak-source.sql.
+alter table translation_passages add column if not exists source_weak text[] not null default '{}';
 
 -- Bai lam cua be: ban dich tieng Viet + diem/nhan xet AI cham (xem
 -- shared/groq.js gradeTranslation()) + ket qua noi tu vung sau do.
@@ -183,11 +187,14 @@ create table if not exists grammar_quizzes (
   day        date not null,
   quiz_type  text not null default 'grammar', -- 'grammar' hoac 'vocab' - xem shared/groq.js generateGrammarQuiz()
   questions  jsonb not null default '[]', -- [{"prompt":"...","options":["...","...","...","..."],"answer":0,"explanations":["...","...","...","..."]}]
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  source_weak text[] not null default '{}' -- tu/diem ngu phap phu huynh chon de "tao bai tu AI" (xem migrate-16)
 );
 create index if not exists grammar_quizzes_profile_day on grammar_quizzes (profile_id, day);
--- Gia dinh da tao truoc phai chay server/migrate-14-quiz-type.sql.
+create index if not exists grammar_quizzes_source_weak on grammar_quizzes using gin (source_weak);
+-- Gia dinh da tao truoc phai chay server/migrate-14-quiz-type.sql va migrate-16-weak-source.sql.
 alter table grammar_quizzes add column if not exists quiz_type text not null default 'grammar';
+alter table grammar_quizzes add column if not exists source_weak text[] not null default '{}';
 
 -- Bai lam cua be: dap an da chon + diem + goi y AI cham sau khi nop
 -- (xem shared/groq.js gradeGrammarQuiz()).
@@ -296,6 +303,19 @@ begin
       t, t);
   end loop;
 end $$;
+
+-- ===== Admin: bat/tat cron sinh bai AI moi ngay tu trang /admin/ (xem
+-- migrate-17-cron-toggle.sql + api/admin-cron.js + api/generate-daily-content.js).
+-- KHONG tao policy nao ben duoi - bat RLS ma khong co policy nghia la CHI
+-- server (SERVICE ROLE KEY) moi doc/ghi duoc, anon/authenticated KHONG the.
+create table if not exists system_settings (
+  key        text primary key,
+  value      jsonb not null,
+  updated_at timestamptz not null default now()
+);
+alter table system_settings enable row level security;
+insert into system_settings (key, value) values ('cron_generate_daily_content_enabled', 'true'::jsonb)
+  on conflict (key) do nothing;
 
 -- ===== Xoa toan bo du lieu gia dinh (nut 1 cham trong trang Phu Huynh) ======
 -- Chi xoa duoc gia dinh CUA CHINH MINH (kiem tra owner ben trong ham).
