@@ -10,7 +10,7 @@
 import * as api from './api.js';
 import { newGiftCount, randomSmallGift } from './rewards.js';
 import { missCount } from '../nghe-doan-on-tap/src/misses.js';
-import { generatePassages, generateGrammarQuiz } from './groq.js';
+import * as aiProvider from './ai-provider.js';
 import { EXAM_LEVEL_LABELS } from './report.js';
 
 function todayKey() {
@@ -113,6 +113,25 @@ function mountHeaderStars() {
   badge.textContent = '⭐ …';
   header.appendChild(badge);
   return badge;
+}
+
+/** Xoá cache số sao (5 phút) + cập nhật ngay huy hiệu ⭐ trên header/thanh
+ * avatar — gọi ngay sau khi cộng/trừ sao NGOÀI luồng chơi game bình thường
+ * (vd thưởng hoàn thành Luyện Dịch/Trắc Nghiệm) để bé thấy số sao mới liền,
+ * không phải đợi cache hết hạn hay tải lại trang. */
+export function refreshStarBadge() {
+  try {
+    const kid = api.currentKidInfo();
+    if (!kid) return;
+    try { localStorage.removeItem(`r99-stars-cache:${kid.id}`); } catch { /* ignore */ }
+    fetchStars(kid).then((stars) => {
+      if (stars === null) return;
+      const bar = document.getElementById('kidBar');
+      if (bar) bar.textContent = `${kid.avatar} ${kid.name} · ⭐${stars}`;
+      const headerBadge = document.getElementById('kidHeaderStars');
+      if (headerBadge) headerBadge.textContent = `⭐ ${stars}`;
+    });
+  } catch { /* không bao giờ làm hỏng game */ }
 }
 
 /* ===== Hồ sơ của bé (avatar + tên + sao + từ cần ôn) ===== */
@@ -285,21 +304,23 @@ async function checkParentGifts() {
    vì sinh nhiều hơn ngay trong lúc bé đang tải trang sẽ quá chậm. Không hiện
    thông báo gì (khác lúc bé tự bấm mở "📝 Luyện Dịch"/"🧩 Trắc Nghiệm" — lúc
    đó có hiện "AI đang soạn..."). */
-async function ensureDailyAiContentForDay(kidId, apiKey, trLevel, gqLevel, day) {
+async function ensureDailyAiContentForDay(kidId, settings, trLevel, gqLevel, gqType, day) {
   if (trLevel) {
-    const existing = await api.passagesForDay(kidId, day);
-    if (!existing.length) {
+    // Thử TÁI SỬ DỤNG nội dung có sẵn của cả nhà trước khi gọi AI (tiết kiệm
+    // chi phí, anh/chị/em không trùng bài — xem shared/content-reuse.js).
+    let passages = await api.ensureTranslationPassages(kidId, trLevel, day);
+    if (!passages.length) {
       const levelLabel = EXAM_LEVEL_LABELS[trLevel] || trLevel;
-      const passages = await generatePassages({ apiKey, levelLabel, count: 3 });
-      await api.savePassages(kidId, passages.map((p) => ({ level: trLevel, ...p })), day);
+      const generated = await aiProvider.generatePassages(settings, { levelLabel, count: 3 });
+      passages = await api.savePassages(kidId, generated.map((p) => ({ level: trLevel, ...p })), day);
     }
   }
   if (gqLevel) {
-    const existingQuiz = await api.grammarQuizForDay(kidId, day);
-    if (!existingQuiz) {
+    let quiz = await api.ensureGrammarQuiz(kidId, gqLevel, gqType, day);
+    if (!quiz) {
       const levelLabel = EXAM_LEVEL_LABELS[gqLevel] || gqLevel;
-      const questions = await generateGrammarQuiz({ apiKey, levelLabel, count: 5 });
-      await api.saveGrammarQuiz(kidId, { level: gqLevel, questions }, day);
+      const questions = await aiProvider.generateGrammarQuiz(settings, { levelLabel, count: 5, quizType: gqType });
+      quiz = await api.saveGrammarQuiz(kidId, { level: gqLevel, questions, quizType: gqType }, day);
     }
   }
 }
@@ -308,6 +329,7 @@ async function checkDailyAiContent() {
   const kid = api.currentKidInfo();
   const trLevel = kid?.settings?.translationLevel;
   const gqLevel = kid?.settings?.grammarQuizLevel;
+  const gqType = kid?.settings?.grammarQuizType || 'grammar';
   if (!kid || (!trLevel && !gqLevel)) return; // bé không dùng 2 tính năng này -> khỏi tốn mạng kiểm tra
   const kidId = api.getCurrentKidId();
   // Tiết kiệm request: mỗi bé chỉ kiểm tra tối đa 1 lần/30 phút dù mở bao nhiêu trang.
@@ -315,12 +337,11 @@ async function checkDailyAiContent() {
   if (!(await api.ready())) return;
   try {
     const settings = api.cachedSettings() || await api.getSettings();
-    const apiKey = settings?.ai_api_key;
-    if (!apiKey) return; // chưa cấu hình key AI -> chịu, để bé tự thấy thông báo khi mở mục đó
+    if (!aiProvider.resolveProvider(settings).apiKey) return; // chưa cấu hình key AI -> chịu, để bé tự thấy thông báo khi mở mục đó
     // Hôm nay TRƯỚC (bé cần ngay), rồi tới ngày mai (chuẩn bị trước 1 hôm) —
     // làm tuần tự để không gọi AI dồn dập cùng lúc.
-    await ensureDailyAiContentForDay(kidId, apiKey, trLevel, gqLevel, api.dateKeyOffset(0));
-    await ensureDailyAiContentForDay(kidId, apiKey, trLevel, gqLevel, api.dateKeyOffset(1));
+    await ensureDailyAiContentForDay(kidId, settings, trLevel, gqLevel, gqType, api.dateKeyOffset(0));
+    await ensureDailyAiContentForDay(kidId, settings, trLevel, gqLevel, gqType, api.dateKeyOffset(1));
   } catch { /* mất mạng/AI lỗi: im lặng — bé tự mở mục đó sẽ tự thử sinh lại */ }
 }
 
