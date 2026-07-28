@@ -96,12 +96,17 @@ export function dateKey(d = new Date()) {
 }
 
 /**
- * Ghi 1 ván đã chơi cho hồ sơ hiện tại.
+ * Ghi 1 ván đã chơi cho hồ sơ hiện tại. Trả về Promise của lượt ghi SERVER
+ * (resolve khi xong, hoặc null nếu mất mạng/chưa cấu hình) — hầu hết chỗ gọi
+ * không cần quan tâm giá trị trả về (fire-and-forget như trước), nhưng vài
+ * nơi cần biết CHẮC CHẮN server đã ghi xong trước khi kiểm tra tiếp (vd
+ * nguphap-truc-quan/src/app.js kiểm tra nhiệm vụ ngày ngay sau khi ghi ván
+ * cuối cùng — nếu không đợi, có thể đếm thiếu đúng ván vừa xong do độ trễ mạng).
  * @param {{mode:string, result:'win'|'loss'|'quit'|'duel', score:number, level:number, seconds:number}} s
  */
 export function recordSession(s) {
   const profile = currentProfile();
-  if (!profile) return;
+  if (!profile) return Promise.resolve(null);
   const list = getSessions(profile.id);
   list.push({
     mode: s.mode,
@@ -114,7 +119,7 @@ export function recordSession(s) {
   writeJSON(statsKey(profile.id), list.slice(-MAX_SESSIONS));
   // Gửi lên server (kèm tự cộng sao theo luật thưởng) — mất mạng/chưa cấu hình
   // thì bỏ qua im lặng, không được làm hỏng ván chơi của bé.
-  serverReady().then((ok) => (ok ? recordSessionServer(s) : null)).catch(() => {});
+  return serverReady().then((ok) => (ok ? recordSessionServer(s) : null)).catch(() => null);
 }
 
 /** @returns {object[]} các ván đã ghi của 1 hồ sơ */

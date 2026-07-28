@@ -24,8 +24,11 @@ import {
 } from './nguphaptructuan.js';
 import { speak, speakSequence, bindMute } from '../../to-mau/src/speech.js';
 import { sfx } from '../../pokemon/src/sfx.js';
-import { mountKidFeatures, answeredOne } from '../../shared/kid-bar.js';
+import { mountKidFeatures, answeredOne, refreshStarBadge } from '../../shared/kid-bar.js';
 import { currentProfile, recordSession } from '../../pokemon/src/stats.js';
+import * as api from '../../shared/api.js';
+import { examSessionsToday } from '../../shared/report.js';
+import { isQuotaComplete } from '../../shared/daily-bonus.js';
 import {
   _setProfileIdGetter, markLearned, progressPercent, learnedCount,
 } from './progress.js';
@@ -96,15 +99,41 @@ function confetti() {
   }
 }
 
-function finish(score, bestStreak, won, mode) {
+const NGUPHAP_DEFAULT_GOAL = { perDay: 5, rewardStars: 2 };
+
+/** Nhiệm vụ "Ngữ Pháp Trực Quan mỗi ngày" — mặc định BẬT cho mọi bé (5 bài =
+ * 2 sao, xem NGUPHAP_DEFAULT_GOAL), phụ huynh chỉnh được ở Trang Phụ Huynh >
+ * Cài đặt bé (đặt số sao = 0 để tắt hẳn). Kiểm tra ngay sau mỗi ván — ĐỘC
+ * LẬP với "Mục tiêu học Thi Chứng Chỉ Anh" chung (examGoal, phụ huynh tự
+ * chọn 1 cấp độ bất kỳ để theo dõi, không tự thưởng sao). */
+async function checkNguphapQuest() {
+  const kidId = api.getCurrentKidId();
+  if (!kidId || !(await api.ready().catch(() => false))) return;
+  const kid = api.currentKidInfo();
+  const goal = kid?.settings?.nguphapGoal || NGUPHAP_DEFAULT_GOAL;
+  if (!(goal.perDay > 0) || !(goal.rewardStars > 0)) return;
+  const sessions = await api.kidSessions(kidId);
+  const done = examSessionsToday(sessions, 'nguphap');
+  if (!isQuotaComplete(done, goal.perDay)) return;
+  const granted = await api.claimDailyPracticeBonus(
+    kidId, 'nguphapRewardedDay', api.dateKeyOffset(0), 'nguphap:hoan-thanh', goal.rewardStars,
+  );
+  if (granted) {
+    refreshStarBadge();
+    speak(`Chúc mừng! Bé hoàn thành nhiệm vụ Ngữ Pháp Trực Quan hôm nay, được thưởng thêm ${goal.rewardStars} sao!`);
+  }
+}
+
+async function finish(score, bestStreak, won, mode) {
   currentProfile(t('pika.user.guest', 'Khách'));
-  recordSession({
+  await recordSession({
     mode: `nguphap-${mode}`,
     result: won ? 'win' : 'loss',
     score,
     level: 1,
     seconds: (Date.now() - state.startedAt) / 1000,
   });
+  checkNguphapQuest().catch(() => { /* mất mạng: bỏ qua, kiểm tra lại ở ván sau */ });
   if (won) {
     sfx.levelWin();
     confetti();
