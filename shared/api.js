@@ -10,6 +10,7 @@ import { starsForSession, capDailyStars, DEFAULT_REWARD_COST_MULTIPLIER, catalog
 import { gardenValue, claimGardenYield as calcGardenYield, sellBackValue } from './garden.js';
 import { DAILY_PRACTICE_BONUS_STARS } from './daily-bonus.js';
 import { REUSE_WINDOW_DAYS, pickReusableContent } from './content-reuse.js';
+import { buildWeakPointsSummary } from './weak-points.js';
 
 const SESSION_KEY = 'r99-session';
 const KID_KEY = 'r99-kid';
@@ -364,6 +365,40 @@ export async function tidyFamily() {
 
 export async function weakWordsServer(profileId) {
   return get(`weak_words?select=word,misses&profile_id=eq.${profileId}&order=misses.desc`);
+}
+
+/* ===== Sổ "cấu trúc ngữ pháp hay sai" (Trắc Nghiệm Ngữ Pháp) — xem
+   migrate-15-grammar-miss.sql + shared/weak-points.js ===== */
+
+/** Ghi 1 lô "câu trắc nghiệm bé làm SAI" — events: [{structure}]. `structure`
+ * lấy từ field AI soạn sẵn trong grammar_quizzes.questions[i].structure. */
+export async function recordGrammarMissBatch(events) {
+  const profileId = getCurrentKidId();
+  if (!profileId || !events?.length) return;
+  const fam = await ensureFamily();
+  await post('grammar_miss_events', events.map((e) => ({
+    family_id: fam.id, profile_id: profileId, structure: e.structure, delta: 1,
+  })), { Prefer: 'return=minimal' });
+}
+
+export async function weakGrammarPointsServer(profileId) {
+  return get(`weak_grammar_points?select=structure,misses&profile_id=eq.${profileId}&order=misses.desc`);
+}
+
+/** Gộp weak_words + weak_grammar_points của 1 bé thành 1 đoạn plain-text tiếng
+ * Việt (xem buildWeakPointsSummary) — dùng làm ngữ cảnh thêm khi nhờ AI soạn
+ * bài dịch/trắc nghiệm MỚI, để AI ưu tiên củng cố đúng chỗ bé đang yếu. Lỗi gì
+ * cũng trả rỗng — KHÔNG được chặn việc soạn bài chỉ vì thiếu dữ liệu này. */
+export async function weakPointsSummaryText(profileId) {
+  try {
+    const [words, points] = await Promise.all([
+      weakWordsServer(profileId).catch(() => []),
+      weakGrammarPointsServer(profileId).catch(() => []),
+    ]);
+    return buildWeakPointsSummary(words, points);
+  } catch {
+    return '';
+  }
 }
 
 /* ===== Sao & quà ===== */

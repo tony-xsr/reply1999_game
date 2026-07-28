@@ -87,7 +87,8 @@ async function openGrammarQuizOverlay(levelId, { speak } = {}) {
         renderAiBox(ov, '<p class="r99-ai-msg">⚠️ Chưa cấu hình key AI — nhờ phụ huynh vào Trang Phụ Huynh &gt; Cài đặt &gt; 🤖 Trợ Lý AI.</p>');
         return;
       }
-      const questions = await aiProvider.generateGrammarQuiz(settings, { levelLabel, count: 5, quizType });
+      const weakSummary = await api.weakPointsSummaryText(kid.id).catch(() => '');
+      const questions = await aiProvider.generateGrammarQuiz(settings, { levelLabel, count: 5, quizType, weakSummary });
       quiz = await api.saveGrammarQuiz(kid.id, { level: levelId, questions, quizType });
     }
   } catch (e) {
@@ -227,6 +228,16 @@ async function finishQuiz(ov, ctx) {
     return;
   }
   clearDraft(kid.id, quiz.id);
+
+  // Ghi "cấu trúc ngữ pháp hay sai" (câu nào bé chọn SAI, có sẵn field
+  // "structure" AI soạn kèm câu hỏi) — để Trang Phụ Huynh xem lại + AI ưu
+  // tiên ra thêm câu ôn đúng chỗ yếu ở các đề sau (xem shared/weak-points.js).
+  const wrongStructures = quiz.questions
+    .filter((q, i) => picks[i] !== q.answer && q.structure)
+    .map((q) => q.structure);
+  if (wrongStructures.length) {
+    api.recordGrammarMissBatch(wrongStructures.map((structure) => ({ structure }))).catch(() => {});
+  }
 
   // BƯỚC 2 — nhờ AI soạn gợi ý tổng kết (lỗi/hết quota cũng KHÔNG mất bài đã lưu).
   renderAiBox(ov, '<p class="r99-ai-msg">🤖 AI đang soạn gợi ý…</p>');
