@@ -25,13 +25,18 @@
 //                                 kèm mỗi lần gọi cron, dùng để chặn người lạ
 //                                 gọi thẳng route này gây tốn quota AI.
 
-import { generatePassages, generateGrammarQuiz } from '../shared/groq.js';
+import * as aiProvider from '../shared/ai-provider.js';
 import { EXAM_LEVEL_LABELS } from '../shared/report.js';
 import { vnDateKey } from '../shared/vn-date.js';
 import { dateRange, missingDays } from '../shared/day-buffer.js';
+import { pickReusableContent, REUSE_WINDOW_DAYS } from '../shared/content-reuse.js';
 
 const BUFFER_DAYS = 60;
 const MAX_NEW_DAYS_PER_RUN = 5;
+
+function daysAgoKey(days) {
+  return new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
+}
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -54,18 +59,53 @@ async function sb(path, options = {}) {
   return text ? JSON.parse(text) : null;
 }
 
-async function ensureTranslationBuffer(profile, apiKey, wantDays, tally) {
+// Pool nội dung của CẢ NHÀ trong REUSE_WINDOW_DAYS ngày gần đây, cache theo
+// "family:level[:quizType]" — dùng chung giữa các bé CÙNG NHÀ CÙNG CẤP ĐỘ
+// trong 1 lượt chạy cron, để anh/chị/em không được gán trùng 1 bài trong
+// cùng lượt (xem shared/content-reuse.js pickReusableContent()).
+const passagePoolCache = new Map();
+const quizPoolCache = new Map();
+
+async function familyPassagePool(familyId, level, sinceDay) {
+  const key = `${familyId}:${level}`;
+  if (!passagePoolCache.has(key)) {
+    passagePoolCache.set(key, await sb(`translation_passages?select=id,day,profile_id,title,passage_en,vocab&family_id=eq.${familyId}&level=eq.${level}&day=gte.${sinceDay}&order=day.asc`));
+  }
+  return passagePoolCache.get(key);
+}
+
+async function familyQuizPool(familyId, level, quizType, sinceDay) {
+  const key = `${familyId}:${level}:${quizType}`;
+  if (!quizPoolCache.has(key)) {
+    quizPoolCache.set(key, await sb(`grammar_quizzes?select=id,day,profile_id,questions&family_id=eq.${familyId}&level=eq.${level}&quiz_type=eq.${quizType}&day=gte.${sinceDay}&order=day.asc`));
+  }
+  return quizPoolCache.get(key);
+}
+
+async function ensureTranslationBuffer(profile, settings, wantDays, tally) {
   const level = profile.settings?.translationLevel;
   if (!level) return;
   try {
-    const existingRows = await sb(`translation_passages?select=day&profile_id=eq.${profile.id}&day=gte.${wantDays[0]}&day=lte.${wantDays[wantDays.length - 1]}`);
+    const [existingRows, doneRows] = await Promise.all([
+      sb(`translation_passages?select=day&profile_id=eq.${profile.id}&day=gte.${wantDays[0]}&day=lte.${wantDays[wantDays.length - 1]}`),
+      sb(`translation_submissions?select=passage_id&profile_id=eq.${profile.id}`),
+    ]);
     const existingDays = [...new Set(existingRows.map((r) => r.day))];
+    const doneIds = new Set(doneRows.map((r) => r.passage_id));
     const missingAll = missingDays(wantDays, existingDays);
     const toGenerate = missingAll.slice(0, MAX_NEW_DAYS_PER_RUN);
     const levelLabel = EXAM_LEVEL_LABELS[level] || level;
+    const sinceDay = daysAgoKey(REUSE_WINDOW_DAYS);
     for (const day of toGenerate) {
-      // eslint-disable-next-line no-await-in-loop -- chạy tuần tự để không dồn dập gọi Groq cùng lúc (tránh 429)
-      const passages = await generatePassages({ apiKey, levelLabel, count: 3 });
+      // eslint-disable-next-line no-await-in-loop -- chạy tuần tự để không dồn dập gọi AI cùng lúc (tránh 429)
+      const pool = await familyPassagePool(profile.family_id, level, sinceDay);
+      const picked = pickReusableContent(pool, { profileId: profile.id, todayKey: day, doneIds });
+      const passages = picked
+        // eslint-disable-next-line no-await-in-loop
+        ? [{ title: picked.title, passage_en: picked.passage_en, vocab: picked.vocab }]
+        // eslint-disable-next-line no-await-in-loop
+        : await aiProvider.generatePassages(settings, { levelLabel, count: 3 });
+      if (picked) pool.push({ ...picked, day, profile_id: profile.id }); // đánh dấu đã gán hôm nay -> sibling khác không trùng
       // eslint-disable-next-line no-await-in-loop
       await sb('translation_passages', {
         method: 'POST',
@@ -74,7 +114,8 @@ async function ensureTranslationBuffer(profile, apiKey, wantDays, tally) {
           family_id: profile.family_id, profile_id: profile.id, day, level, ...p,
         }))),
       });
-      tally.translation.generated++;
+      if (picked) tally.translation.reused = (tally.translation.reused || 0) + 1;
+      else tally.translation.generated++;
     }
     tally.translation.alreadyBuffered += existingDays.length;
     tally.translation.remaining += missingAll.length - toGenerate.length;
@@ -83,25 +124,38 @@ async function ensureTranslationBuffer(profile, apiKey, wantDays, tally) {
   }
 }
 
-async function ensureGrammarQuizBuffer(profile, apiKey, wantDays, tally) {
+async function ensureGrammarQuizBuffer(profile, settings, wantDays, tally) {
   const level = profile.settings?.grammarQuizLevel;
   if (!level) return;
+  const quizType = profile.settings?.grammarQuizType || 'grammar';
   try {
-    const existingRows = await sb(`grammar_quizzes?select=day&profile_id=eq.${profile.id}&day=gte.${wantDays[0]}&day=lte.${wantDays[wantDays.length - 1]}`);
+    const [existingRows, doneRows] = await Promise.all([
+      sb(`grammar_quizzes?select=day&profile_id=eq.${profile.id}&quiz_type=eq.${quizType}&day=gte.${wantDays[0]}&day=lte.${wantDays[wantDays.length - 1]}`),
+      sb(`grammar_quiz_submissions?select=quiz_id&profile_id=eq.${profile.id}`),
+    ]);
     const existingDays = [...new Set(existingRows.map((r) => r.day))];
+    const doneIds = new Set(doneRows.map((r) => r.quiz_id));
     const missingAll = missingDays(wantDays, existingDays);
     const toGenerate = missingAll.slice(0, MAX_NEW_DAYS_PER_RUN);
     const levelLabel = EXAM_LEVEL_LABELS[level] || level;
+    const sinceDay = daysAgoKey(REUSE_WINDOW_DAYS);
     for (const day of toGenerate) {
       // eslint-disable-next-line no-await-in-loop
-      const questions = await generateGrammarQuiz({ apiKey, levelLabel, count: 5 });
+      const pool = await familyQuizPool(profile.family_id, level, quizType, sinceDay);
+      const picked = pickReusableContent(pool, { profileId: profile.id, todayKey: day, doneIds });
+      const questions = picked
+        ? picked.questions
+        // eslint-disable-next-line no-await-in-loop
+        : await aiProvider.generateGrammarQuiz(settings, { levelLabel, count: 5, quizType });
+      if (picked) pool.push({ ...picked, day, profile_id: profile.id });
       // eslint-disable-next-line no-await-in-loop
       await sb('grammar_quizzes', {
         method: 'POST',
         headers: { Prefer: 'return=minimal' },
-        body: JSON.stringify({ family_id: profile.family_id, profile_id: profile.id, day, level, questions }),
+        body: JSON.stringify({ family_id: profile.family_id, profile_id: profile.id, day, level, quiz_type: quizType, questions }),
       });
-      tally.grammar.generated++;
+      if (picked) tally.grammar.reused = (tally.grammar.reused || 0) + 1;
+      else tally.grammar.generated++;
     }
     tally.grammar.alreadyBuffered += existingDays.length;
     tally.grammar.remaining += missingAll.length - toGenerate.length;
@@ -120,24 +174,24 @@ export default async function handler(req, res) {
 
   const wantDays = dateRange(vnDateKey(), BUFFER_DAYS);
   const tally = {
-    translation: { generated: 0, alreadyBuffered: 0, remaining: 0, errors: [] },
-    grammar: { generated: 0, alreadyBuffered: 0, remaining: 0, errors: [] },
+    translation: { generated: 0, reused: 0, alreadyBuffered: 0, remaining: 0, errors: [] },
+    grammar: { generated: 0, reused: 0, alreadyBuffered: 0, remaining: 0, errors: [] },
   };
 
   try {
     const [settingsRows, profiles] = await Promise.all([
-      sb('settings?select=family_id,ai_api_key'),
+      sb('settings?select=family_id,ai_provider,ai_api_key,deepseek_api_key,deepseek_model'),
       sb('profiles?select=id,family_id,settings'),
     ]);
-    const keyByFamily = new Map(settingsRows.filter((s) => s.ai_api_key).map((s) => [s.family_id, s.ai_api_key]));
+    const settingsByFamily = new Map(settingsRows.map((s) => [s.family_id, s]));
 
     for (const profile of profiles) {
-      const apiKey = keyByFamily.get(profile.family_id);
-      if (!apiKey) continue; // gia đình chưa cấu hình key AI -> bỏ qua bé này
+      const settings = settingsByFamily.get(profile.family_id);
+      if (!aiProvider.resolveProvider(settings).apiKey) continue; // gia đình chưa cấu hình key AI -> bỏ qua bé này
       // eslint-disable-next-line no-await-in-loop
-      await ensureTranslationBuffer(profile, apiKey, wantDays, tally);
+      await ensureTranslationBuffer(profile, settings, wantDays, tally);
       // eslint-disable-next-line no-await-in-loop
-      await ensureGrammarQuizBuffer(profile, apiKey, wantDays, tally);
+      await ensureGrammarQuizBuffer(profile, settings, wantDays, tally);
     }
   } catch (e) {
     return res.status(500).json({ error: e.message });
