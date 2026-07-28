@@ -18,6 +18,27 @@ import {
   TOTAL_QUESTIONS, isMilestone, computeStarsEarned, buildLadder, formatStars,
 } from './millionaire.js';
 
+/* ===== Đề hôm nay lưu vào DB (dùng chung bảng grammar_quizzes, quiz_type =
+   "millionaire" — CÙNG khuôn dạng câu hỏi hệt trắc nghiệm ngữ pháp thường)
+   thay vì chỉ giữ tạm trong biến JS — để lỡ bé/phụ huynh bấm ✕ đóng overlay
+   hoặc thoát app giữa chừng (KHÔNG phải trả lời SAI) thì mở lại vẫn ĐÚNG đề
+   đó, tiếp tục đúng câu đang dở — không bị tính lại từ đầu bằng 1 đề MỚI do
+   AI soạn lại. Draft (câu đang dở) lưu localStorage, chỉ cần nhớ `index` vì
+   Ai Là Triệu Phú là "đúng liên tục" — còn tới được câu N nghĩa là N-1 câu
+   trước ĐÃ đúng hết rồi, không cần lưu lại từng đáp án đã chọn. */
+function draftKey(kidId, quizId) {
+  return `r99-mp-draft:${kidId}:${quizId}`;
+}
+function loadDraft(kidId, quizId) {
+  try { return JSON.parse(localStorage.getItem(draftKey(kidId, quizId))); } catch { return null; }
+}
+function saveDraft(kidId, quizId, data) {
+  try { localStorage.setItem(draftKey(kidId, quizId), JSON.stringify(data)); } catch { /* ignore */ }
+}
+function clearDraft(kidId, quizId) {
+  try { localStorage.removeItem(draftKey(kidId, quizId)); } catch { /* ignore */ }
+}
+
 let styleInjected = false;
 function injectMillionaireStyle() {
   if (styleInjected || document.getElementById('r99-mp-style')) return;
@@ -89,22 +110,32 @@ async function openMillionaireOverlay(levelId, { speak } = {}) {
   }
 
   const levelLabel = EXAM_LEVEL_LABELS[levelId] || levelId;
-  let questions;
+  let quiz;
   try {
-    renderAiBox(ov, `<p class="r99-ai-msg">🤖 AI đang soạn 15 câu hỏi tăng dần độ khó (${levelLabel})…</p>`);
-    const settings = api.cachedSettings() || await api.getSettings();
-    if (!aiProvider.resolveProvider(settings).apiKey) {
-      renderAiBox(ov, '<p class="r99-ai-msg">⚠️ Chưa cấu hình key AI — nhờ phụ huynh vào Trang Phụ Huynh &gt; Cài đặt &gt; 🤖 Trợ Lý AI.</p>');
-      return;
+    quiz = await api.grammarQuizForDay(kid.id, todayKey, 'millionaire');
+    if (!quiz) {
+      renderAiBox(ov, `<p class="r99-ai-msg">🤖 AI đang soạn 15 câu hỏi tăng dần độ khó (${levelLabel})…</p>`);
+      const settings = api.cachedSettings() || await api.getSettings();
+      if (!aiProvider.resolveProvider(settings).apiKey) {
+        renderAiBox(ov, '<p class="r99-ai-msg">⚠️ Chưa cấu hình key AI — nhờ phụ huynh vào Trang Phụ Huynh &gt; Cài đặt &gt; 🤖 Trợ Lý AI.</p>');
+        return;
+      }
+      const questions = await aiProvider.generateMillionaireQuiz(settings, { levelLabel, count: TOTAL_QUESTIONS });
+      if (questions.length < TOTAL_QUESTIONS) throw new Error('AI soạn thiếu câu, thử lại nhé');
+      quiz = await api.saveGrammarQuiz(kid.id, { level: levelId, questions, quizType: 'millionaire' }, todayKey);
     }
-    questions = await aiProvider.generateMillionaireQuiz(settings, { levelLabel, count: TOTAL_QUESTIONS });
-    if (questions.length < TOTAL_QUESTIONS) throw new Error('AI soạn thiếu câu, thử lại nhé');
   } catch (e) {
     renderAiBox(ov, `<p class="r99-ai-msg">⚠️ ${e.message}</p>`);
     return;
   }
 
-  renderIntro(ov, { levelLabel, questions, kid, say });
+  const questions = quiz.questions;
+  const draft = loadDraft(kid.id, quiz.id);
+  if (draft?.index > 0 && draft.index < TOTAL_QUESTIONS) {
+    renderQuestion(ov, { levelLabel, questions, quizId: quiz.id, kid, say, index: draft.index });
+  } else {
+    renderIntro(ov, { levelLabel, questions, quizId: quiz.id, kid, say });
+  }
 }
 
 function renderAlreadyPlayed(ov, kid) {
@@ -152,7 +183,7 @@ function renderQuestion(ov, ctx) {
 }
 
 function answerQuestion(ov, ctx, picked) {
-  const { questions, index } = ctx;
+  const { questions, index, kid, quizId } = ctx;
   const q = questions[index];
   const correct = picked === q.answer;
   ov.querySelectorAll('#mpOpts .r99-ai-opt').forEach((btn, i) => {
@@ -172,7 +203,10 @@ function answerQuestion(ov, ctx, picked) {
   const qNum = index + 1;
   if (correct && qNum < TOTAL_QUESTIONS) {
     nextBtn.textContent = 'CÂU TIẾP THEO ▶';
-    nextBtn.addEventListener('click', () => renderQuestion(ov, { ...ctx, index: index + 1 }));
+    nextBtn.addEventListener('click', () => {
+      saveDraft(kid.id, quizId, { index: index + 1 });
+      renderQuestion(ov, { ...ctx, index: index + 1 });
+    });
   } else {
     nextBtn.textContent = 'XEM KẾT QUẢ ▶';
     const correctStreak = correct ? qNum : index; // đúng hết Q15 -> streak=15; sai câu này -> streak = số câu ĐÃ đúng trước đó
@@ -182,7 +216,8 @@ function answerQuestion(ov, ctx, picked) {
 }
 
 async function finishGame(ov, ctx, correctStreak) {
-  const { kid, say } = ctx;
+  const { kid, say, quizId } = ctx;
+  clearDraft(kid.id, quizId);
   renderAiBox(ov, '<p class="r99-ai-msg">Đang lưu kết quả…</p>');
   const stars = computeStarsEarned(correctStreak);
   const todayKey = api.dateKeyOffset(0);

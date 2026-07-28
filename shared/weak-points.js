@@ -22,3 +22,19 @@ export function buildWeakPointsSummary(weakWords = [], weakGrammarPoints = [], l
   parts.push('Hãy ƯU TIÊN lồng ghép ôn lại các từ vựng/điểm ngữ pháp trên trong đề lần này khi hợp lý (không bắt buộc dùng hết, không cần liệt kê lại nguyên văn danh sách này cho bé thấy).');
   return parts.join(' ');
 }
+
+/**
+ * Phụ huynh TỰ CHỌN vài từ/điểm ngữ pháp trong "🎯 Từ hay sai" rồi bấm "Tạo
+ * bài từ AI" — khác `buildWeakPointsSummary` (chỉ "ưu tiên nếu hợp lý", tự
+ * động chạy nền), ở đây là yêu cầu TRỰC TIẾP của phụ huynh nên diễn đạt chắc
+ * chắn hơn (BẮT BUỘC) thay vì gợi ý.
+ * @param {string[]} words
+ * @param {string[]} structures
+ * @returns {string} rỗng nếu không chọn gì
+ */
+export function buildTargetedInstruction(words = [], structures = []) {
+  const parts = [];
+  if (words.length) parts.push(`Phụ huynh yêu cầu: BẮT BUỘC dùng CHÍNH XÁC các từ vựng sau ít nhất 1 lần trong bài này: ${words.join(', ')}.`);
+  if (structures.length) parts.push(`Phụ huynh yêu cầu: BẮT BUỘC ra nội dung liên quan ĐÚNG các điểm ngữ pháp sau: ${structures.join('; ')}.`);
+  return parts.join(' ');
+}
