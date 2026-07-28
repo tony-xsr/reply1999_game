@@ -5,13 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#fff6e8" />
 <title>Trang Phụ Huynh — Reply1999 Games</title>
+<script>(function(){try{var p=JSON.parse(localStorage.getItem('r99-theme'))||{palette:'warm',mode:'auto'};var mode=p.mode==='auto'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p.mode;document.documentElement.dataset.theme=p.palette+'-'+mode;}catch(e){}})();</script>
+<link rel="stylesheet" href="/shared/theme.css" />
 <style>
-:root{
-  --bg:#fff6e8; --gold:#ff8a3d; --gold2:#c2410c; --ink:#241e2e; --ink-dim:#5d5370;
-  --line:#a8834a; --panel:#fffaf2; --panel2:#fff3df; --good:#15803d; --bad:#c02a2a;
-}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:radial-gradient(ellipse 90% 55% at 50% 0%, #ffe9c8 0%, transparent 70%),var(--bg);
+body{margin:0;background:radial-gradient(ellipse 90% 55% at 50% 0%, var(--bg2) 0%, transparent 70%),var(--bg);
   color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh}
 .wrap{max-width:860px;margin:0 auto;padding:20px 16px 60px}
 header{display:flex;align-items:center;gap:12px;padding:8px 0 18px;border-bottom:1px solid #e9d3ad;margin-bottom:18px}
@@ -98,10 +96,11 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
 <div class="wrap">
   <header>
     <a class="back" href="/" title="Trang chủ">🏠</a>
-    <div>
+    <div style="flex:1">
       <h1>🔒 Trang Phụ Huynh</h1>
       <p class="sub">Theo dõi từng bé · phát thưởng · cài đặt — dữ liệu lưu trên server, xem được từ mọi máy</p>
     </div>
+    <a class="back" href="/in-bai-tap/" title="In Bài Tập">🖨️</a>
   </header>
 
   <!-- Chưa cấu hình server -->
@@ -275,12 +274,22 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
             <label>🎓 Mục tiêu học Thi Chứng Chỉ Anh mỗi ngày</label>
             <select id="editGoalLevel"></select>
             <input id="editGoalPerDay" type="number" min="1" max="20" placeholder="số bài/ngày (bỏ trống = không đặt mục tiêu)" style="margin-top:6px" />
+            <label>🧠 Nhiệm vụ Ngữ Pháp Trực Quan mỗi ngày (mặc định BẬT: 5 bài/ngày = 2 sao)</label>
+            <div style="display:flex;gap:8px">
+              <input id="editNguphapPerDay" type="number" min="1" max="30" placeholder="5" style="flex:1" />
+              <input id="editNguphapReward" type="number" min="0" max="50" placeholder="2 sao" style="flex:1" />
+            </div>
+            <p style="font-size:12px;color:var(--ink-dim);margin:4px 0 0">Để trống cả 2 ô = dùng mặc định (5 bài/ngày = 2 sao). Đặt số sao = 0 để TẮT hẳn nhiệm vụ này cho bé.</p>
             <label>📝 Cấp độ dùng cho Luyện Dịch (đoạn văn ngắn, chấm bằng AI)</label>
             <select id="editTranslationLevel"></select>
             <p style="font-size:12px;color:var(--ink-dim);margin:4px 0 0">Bỏ trống = ẩn mục "📝 Luyện Dịch" trong Thi Chứng Chỉ Anh của bé. Mỗi ngày AI tự soạn 3 đoạn văn mới đúng cấp độ này cho riêng bé.</p>
-            <label>🧩 Cấp độ dùng cho Trắc Nghiệm Ngữ Pháp (5 câu/ngày, chấm + giải thích bằng AI)</label>
+            <label>🧩 Cấp độ dùng cho Trắc Nghiệm (5 câu/ngày, chấm + giải thích bằng AI)</label>
             <select id="editGrammarQuizLevel"></select>
-            <p style="font-size:12px;color:var(--ink-dim);margin:4px 0 0">Bỏ trống = ẩn mục "🧩 Trắc Nghiệm Ngữ Pháp" của bé. Mỗi ngày AI tự soạn 5 câu trắc nghiệm mới đúng cấp độ này.</p>
+            <select id="editGrammarQuizType" style="margin-top:6px">
+              <option value="grammar">Loại đề: Ngữ pháp</option>
+              <option value="vocab">Loại đề: Từ vựng</option>
+            </select>
+            <p style="font-size:12px;color:var(--ink-dim);margin:4px 0 0">Bỏ trống cấp độ = ẩn mục "🧩 Trắc Nghiệm" của bé. Mỗi ngày AI tự soạn 5 câu trắc nghiệm mới đúng cấp độ + loại đề đã chọn.</p>
             <div class="ok" id="editKidOk"></div>
             <button id="btnSaveKid">Lưu hồ sơ bé</button>
             <button id="btnDeleteKid" class="danger">🗑️ Xóa bé này</button>
@@ -313,6 +322,12 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
         <div id="loginLog" style="font-size:13.5px;line-height:2">Đang tải…</div>
       </div>
 
+      <div class="card">
+        <h2>🎨 Giao diện (riêng máy này)</h2>
+        <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 4px">Chỉ áp dụng cho trình duyệt đang mở (không đồng bộ qua server) — chọn lại trên từng máy nếu muốn giống nhau.</p>
+        <div id="themeSlot"></div>
+      </div>
+
       <div class="grid2">
         <div class="card">
           <h2>⚙️ Cài đặt (áp dụng mọi máy)</h2>
@@ -331,15 +346,40 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
           <button id="btnResetPrices" class="ghost">↺ Đưa tất cả về giá mặc định</button>
         </div>
         <div class="card">
-          <h2>🤖 Trợ Lý AI (Groq)</h2>
-          <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 8px">Dùng để bấm "🤖 Ôn thêm với AI" trong Thi Chứng Chỉ Anh — tự sinh thêm câu hỏi trắc nghiệm mới cho từng unit. Lấy key miễn phí tại <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a>.</p>
-          <label>Groq API key</label>
-          <input id="aiKey" type="password" autocomplete="off" placeholder="gsk_..." />
-          <p style="font-size:11.5px;color:var(--ink-dim);margin:6px 0 0">⚠️ App này không có server riêng để giấu key — key được gọi thẳng từ trình duyệt đang mở. Dùng 1 key Groq riêng cho app này, đừng dùng chung với việc khác.</p>
+          <h2>🎁 Quà tự thêm</h2>
+          <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 8px">Thêm món quà RIÊNG ngoài danh sách có sẵn (vd phiếu quà tặng, đồ chơi cụ thể) — giá bé nhập ở đây LÀ giá sao cuối cùng, không nhân hệ số chung.</p>
+          <div id="customItemList" style="font-size:13px;margin-bottom:8px"></div>
+          <label>Icon (1 emoji)</label><input id="newItemIcon" maxlength="4" placeholder="🎁" />
+          <label>Tên quà</label><input id="newItemName" placeholder="Vd: Vé xem phim" />
+          <label>Giá (sao)</label><input id="newItemCost" type="number" min="1" step="1" placeholder="500" />
+          <div class="ok" id="customItemOk"></div>
+          <button id="btnAddCustomItem">➕ Thêm quà này</button>
+        </div>
+        <div class="card">
+          <h2>🤖 Trợ Lý AI</h2>
+          <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 8px">Dùng để tự sinh thêm câu hỏi/đoạn dịch/trắc nghiệm ngữ pháp bằng AI ("🤖 Ôn thêm với AI", "📝 Luyện Dịch", "🧩 Trắc Nghiệm Ngữ Pháp"). Chọn 1 trong 2 nhà cung cấp bên dưới.</p>
+          <label>Nhà cung cấp AI</label>
+          <select id="aiProvider">
+            <option value="groq">Groq (mặc định, miễn phí)</option>
+            <option value="deepseek">DeepSeek</option>
+          </select>
+          <div id="groqBox">
+            <label>Groq API key</label>
+            <input id="aiKey" type="password" autocomplete="off" placeholder="gsk_..." />
+            <p style="font-size:11.5px;color:var(--ink-dim);margin:6px 0 0">Lấy key miễn phí tại <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a>.</p>
+          </div>
+          <div id="deepseekBox" class="hidden">
+            <label>DeepSeek API key</label>
+            <input id="deepseekKey" type="password" autocomplete="off" placeholder="sk-..." />
+            <label>Model DeepSeek (để trống = dùng mặc định deepseek-v4-flash)</label>
+            <input id="deepseekModel" type="text" autocomplete="off" placeholder="deepseek-v4-flash" />
+            <p style="font-size:11.5px;color:var(--ink-dim);margin:6px 0 0">Lấy key tại <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">platform.deepseek.com/api_keys</a>. Nếu DeepSeek đổi tên model chính thức khác đi, sửa lại ô model ở trên (không cần chờ cập nhật app).</p>
+          </div>
+          <p style="font-size:11.5px;color:var(--ink-dim);margin:6px 0 0">⚠️ App này không có server riêng để giấu key — key được gọi thẳng từ trình duyệt đang mở. Dùng 1 key riêng cho app này, đừng dùng chung với việc khác.</p>
           <div class="ok" id="aiKeyOk"></div>
-          <button id="btnSaveAiKey">Lưu key</button>
-          <button id="btnTestAiKey" class="ghost">🔎 Kiểm tra key</button>
-          <button id="btnClearAiKey" class="ghost">🗑️ Xóa key</button>
+          <button id="btnSaveAiKey">Lưu</button>
+          <button id="btnTestAiKey" class="ghost">🔎 Kiểm tra key đang chọn</button>
+          <button id="btnClearAiKey" class="ghost">🗑️ Xóa key đang chọn</button>
         </div>
         <div class="card">
           <h2>💾 Dữ liệu & thiết bị</h2>

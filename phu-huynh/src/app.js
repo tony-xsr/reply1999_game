@@ -8,12 +8,15 @@ import {
   examProgressReport, EXAM_LEVEL_LABELS, examSessionsToday,
 } from '../../shared/report.js';
 import {
-  catalogItem, CATALOG, effectiveCost, DEFAULT_REWARD_COST_MULTIPLIER,
+  catalogItem, CATALOG, effectiveCost, DEFAULT_REWARD_COST_MULTIPLIER, mergeCatalog,
 } from '../../shared/rewards.js';
-import { testGroqKey, DEFAULT_GROQ_MODEL } from '../../shared/groq.js';
+import * as aiProvider from '../../shared/ai-provider.js';
+import { mountThemePicker } from '../../shared/theme.js';
 
 const $ = (id) => document.getElementById(id);
 const AVATARS = ['🐰', '🐯', '🐸', '🦄', '🐼', '🐥', '🦊', '🐨', '🐷', '🦁', '🐳', '🦖'];
+
+mountThemePicker($('themeSlot'));
 
 const state = {
   kids: [], kid: null, avatar: AVATARS[0], compareMode: false, kidTab: 'stats', mainTab: 'kids',
@@ -261,8 +264,11 @@ function fillEditKid(k) {
   $('editKidLimit').value = k.settings?.daily_limit_min ?? '';
   $('editGoalLevel').value = k.settings?.examGoal?.level || '';
   $('editGoalPerDay').value = k.settings?.examGoal?.perDay ?? '';
+  $('editNguphapPerDay').value = k.settings?.nguphapGoal?.perDay ?? '';
+  $('editNguphapReward').value = k.settings?.nguphapGoal?.rewardStars ?? '';
   $('editTranslationLevel').value = k.settings?.translationLevel || '';
   $('editGrammarQuizLevel').value = k.settings?.grammarQuizLevel || '';
+  $('editGrammarQuizType').value = k.settings?.grammarQuizType || 'grammar';
   $('editKidOk').textContent = '';
 }
 
@@ -315,12 +321,21 @@ $('btnSaveKid').addEventListener('click', async () => {
   else settings.code = codeRaw;
   if (!goalLevel || goalPerDayRaw === '') delete settings.examGoal;
   else settings.examGoal = { level: goalLevel, perDay: Math.max(1, Number(goalPerDayRaw) | 0) };
+  const nguphapPerDayRaw = $('editNguphapPerDay').value.trim();
+  const nguphapRewardRaw = $('editNguphapReward').value.trim();
+  if (nguphapPerDayRaw === '' && nguphapRewardRaw === '') delete settings.nguphapGoal;
+  else settings.nguphapGoal = {
+    perDay: nguphapPerDayRaw === '' ? 5 : Math.max(1, Number(nguphapPerDayRaw) | 0),
+    rewardStars: nguphapRewardRaw === '' ? 2 : Math.max(0, Number(nguphapRewardRaw) | 0),
+  };
   const translationLevel = $('editTranslationLevel').value;
   if (!translationLevel) delete settings.translationLevel;
   else settings.translationLevel = translationLevel;
   const grammarQuizLevel = $('editGrammarQuizLevel').value;
   if (!grammarQuizLevel) delete settings.grammarQuizLevel;
   else settings.grammarQuizLevel = grammarQuizLevel;
+  if (!grammarQuizLevel) delete settings.grammarQuizType;
+  else settings.grammarQuizType = $('editGrammarQuizType').value || 'grammar';
   try {
     const updated = await api.updateKid(state.kid.id, { name, avatar: state.editAvatar, color: state.editColor, settings });
     $('editKidOk').textContent = 'Đã lưu. (Máy của bé sẽ nhận giới hạn mới khi bé chọn lại avatar ở /chon-be/.)';
@@ -448,7 +463,9 @@ function renderPurchaseLog(purchases) {
     return;
   }
   box.innerHTML = purchases.slice(0, 40).map((p) => {
-    const item = catalogItem(p.item_id) || { icon: '🎁', name: p.item_id };
+    const custom = api.cachedSettings()?.custom_catalog_items;
+    const item = catalogItem(p.item_id) || (custom && mergeCatalog(custom).find((c) => c.id === p.item_id))
+      || { icon: '🎁', name: p.item_id };
     const date = (p.ts || '').slice(0, 10);
     const status = p.delivered_at
       ? `<span style="color:var(--good)">✅ Đã giao ${(p.delivered_at || '').slice(0, 10)}</span>
@@ -575,10 +592,23 @@ function renderExamGoal(k, sessions) {
     <p style="font-size:12.5px;color:var(--ink-dim);margin:8px 0 0">${pct >= 100 ? '🎉 Bé đã đạt mục tiêu hôm nay!' : `Còn ${goal.perDay - done} bài nữa là đạt mục tiêu hôm nay.`}</p>`;
 }
 
-/** Bài dịch bé đã nộp — đoạn văn gốc, bản dịch của bé, điểm/nhận xét AI, kết
- * quả nối từ vựng. Dữ liệu đã embed sẵn `translation_passages` qua PostgREST
- * (xem shared/api.js kidTranslationSubmissions). */
+/** "1 phút 20 giây" từ số giây — rỗng nếu chưa có dữ liệu (bản ghi cũ trước migrate-11). */
+function formatSeconds(sec) {
+  if (sec == null) return '';
+  const m = Math.floor(sec / 60);
+  const s = Math.round(sec % 60);
+  return m > 0 ? `⏱️ ${m} phút ${s} giây` : `⏱️ ${s} giây`;
+}
+
+let lastTranslations = [];
+
+/** Bài dịch bé đã nộp — đoạn văn gốc, bản dịch của bé, điểm/nhận xét/bản
+ * dịch mẫu AI, kết quả nối từ vựng, thời gian làm bài. Dữ liệu đã embed sẵn
+ * `translation_passages` qua PostgREST (xem shared/api.js
+ * kidTranslationSubmissions). Bài chưa được AI chấm (lỗi/hết quota lúc bé
+ * nộp) hiện nút "Chấm lại" để phụ huynh tự thử lại bằng key AI của mình. */
 function renderTranslateLog(translations) {
+  lastTranslations = translations;
   const box = $('translateLog');
   if (!translations.length) {
     box.innerHTML = '<i style="color:var(--ink-dim)">Bé chưa nộp bài dịch nào.</i>';
@@ -587,27 +617,57 @@ function renderTranslateLog(translations) {
   box.innerHTML = translations.map((t) => {
     const p = t.translation_passages || {};
     const when = t.submitted_at ? new Date(t.submitted_at).toLocaleString('vi-VN') : '';
-    const scoreColor = t.ai_score >= 70 ? 'var(--good)' : t.ai_score >= 40 ? '#b45309' : 'var(--bad)';
+    const timeSpent = formatSeconds(t.seconds_spent);
+    const graded = t.ai_score != null;
+    const scoreLine = graded
+      ? `<b style="color:${t.ai_score >= 70 ? 'var(--good)' : t.ai_score >= 40 ? '#b45309' : 'var(--bad)'}">Điểm AI chấm: ${t.ai_score}/100</b> · Nối từ vựng: ${t.vocab_correct ?? 0}/${t.vocab_total ?? 0}`
+      : `<b style="color:#b45309">⏳ AI chưa chấm được bài này</b>
+         <button data-action="regrade-tr" data-id="${t.id}" style="margin-left:8px;padding:2px 9px;font-size:12px">🔁 Chấm lại</button>
+         <span style="margin-left:6px">· Nối từ vựng: ${t.vocab_correct ?? 0}/${t.vocab_total ?? 0}</span>`;
     return `<div class="card" style="margin-bottom:10px;padding:12px 14px">
       <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px">
         <b>${p.title || '(không rõ tiêu đề)'}</b>
-        <span style="color:var(--ink-dim);font-size:12px">${when}</span>
+        <span style="color:var(--ink-dim);font-size:12px">${when}${timeSpent ? ' · ' + timeSpent : ''}</span>
       </div>
       <p style="font-style:italic;color:var(--ink-dim);margin:6px 0">${p.passage_en || ''}</p>
       <p style="margin:6px 0"><b>Bản dịch của bé:</b> ${t.submitted_text || ''}</p>
-      <p style="margin:6px 0">
-        <b style="color:${scoreColor}">Điểm AI chấm: ${t.ai_score ?? '—'}/100</b>
-        · Nối từ vựng: ${t.vocab_correct ?? 0}/${t.vocab_total ?? 0}
-      </p>
-      <p style="margin:6px 0 0;font-size:13px">💬 ${t.ai_feedback || ''}</p>
+      <p style="margin:6px 0">${scoreLine}</p>
+      ${t.ai_feedback ? `<p style="margin:6px 0 0;font-size:13px">💬 ${t.ai_feedback}</p>` : ''}
+      ${t.ai_reference_vi ? `<p style="margin:6px 0 0;font-size:13px"><b>📖 Bản dịch mẫu AI:</b> ${t.ai_reference_vi}</p>` : ''}
     </div>`;
   }).join('');
 }
 
-/** Đề trắc nghiệm ngữ pháp bé đã làm — điểm, gợi ý AI, và chi tiết từng câu
- * (đáp án bé chọn + đáp án đúng + giải thích) — dữ liệu đã embed sẵn
- * `grammar_quizzes` qua PostgREST (xem shared/api.js kidGrammarQuizSubmissions). */
+$('translateLog').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-action="regrade-tr"]');
+  if (!btn) return;
+  const t = lastTranslations.find((x) => x.id === btn.dataset.id);
+  if (!t || !state.kid) return;
+  btn.disabled = true;
+  btn.textContent = '🤖 Đang chấm...';
+  try {
+    const settings = await api.getSettings();
+    const grade = await aiProvider.gradeTranslation(settings, {
+      passageEn: t.translation_passages?.passage_en || '', submittedVi: t.submitted_text,
+    });
+    await api.updateTranslationGrade(t.id, { aiScore: grade.score, aiFeedback: grade.feedback, aiReferenceVi: grade.referenceVi });
+    await renderKidStats(state.kid);
+  } catch (e2) {
+    btn.disabled = false;
+    btn.textContent = `❌ Lỗi (${e2.message}) — bấm thử lại`;
+  }
+});
+
+let lastGrammarQuizzes = [];
+
+/** Đề trắc nghiệm ngữ pháp bé đã làm — điểm, gợi ý AI, thời gian làm bài, và
+ * chi tiết từng câu (đáp án bé chọn + đáp án đúng + giải thích) — dữ liệu đã
+ * embed sẵn `grammar_quizzes` qua PostgREST (xem shared/api.js
+ * kidGrammarQuizSubmissions). Điểm luôn có ngay (tính client-side lúc bé
+ * nộp) — chỉ riêng GỢI Ý AI có thể chưa có nếu AI lỗi/hết quota, hiện nút
+ * "Chấm lại" để phụ huynh tự thử lại. */
 function renderGrammarQuizLog(submissions) {
+  lastGrammarQuizzes = submissions;
   const box = $('grammarQuizLog');
   if (!submissions.length) {
     box.innerHTML = '<i style="color:var(--ink-dim)">Bé chưa làm bài trắc nghiệm ngữ pháp nào.</i>';
@@ -617,8 +677,13 @@ function renderGrammarQuizLog(submissions) {
     const quiz = s.grammar_quizzes || {};
     const questions = quiz.questions || [];
     const when = s.submitted_at ? new Date(s.submitted_at).toLocaleString('vi-VN') : '';
+    const timeSpent = formatSeconds(s.seconds_spent);
     const total = questions.length || s.answers?.length || 0;
     const scoreColor = s.score >= total * 0.7 ? 'var(--good)' : s.score >= total * 0.4 ? '#b45309' : 'var(--bad)';
+    const suggestionHtml = s.ai_suggestion
+      ? `<p style="margin:6px 0;font-size:13px">💬 ${s.ai_suggestion}</p>`
+      : `<p style="margin:6px 0;font-size:13px;color:#b45309">⏳ AI chưa soạn được gợi ý
+         <button data-action="regrade-gq" data-id="${s.id}" style="margin-left:6px;padding:2px 9px;font-size:12px">🔁 Chấm lại</button></p>`;
     const qsHtml = questions.map((q, i) => {
       const a = s.answers?.[i] || {};
       const pickedText = q.options?.[a.selected] ?? '—';
@@ -630,15 +695,35 @@ function renderGrammarQuizLog(submissions) {
     }).join('');
     return `<div class="card" style="margin-bottom:10px;padding:12px 14px">
       <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px">
-        <b>${EXAM_LEVEL_LABELS[quiz.level] || quiz.level || ''} — ${quiz.day || ''}</b>
-        <span style="color:var(--ink-dim);font-size:12px">${when}</span>
+        <b>${EXAM_LEVEL_LABELS[quiz.level] || quiz.level || ''} · ${quiz.quiz_type === 'vocab' ? 'Từ Vựng' : 'Ngữ Pháp'} — ${quiz.day || ''}</b>
+        <span style="color:var(--ink-dim);font-size:12px">${when}${timeSpent ? ' · ' + timeSpent : ''}</span>
       </div>
       <p style="margin:6px 0"><b style="color:${scoreColor}">Điểm: ${s.score}/${total}</b></p>
-      <p style="margin:6px 0;font-size:13px">💬 ${s.ai_suggestion || ''}</p>
+      ${suggestionHtml}
       ${qsHtml}
     </div>`;
   }).join('');
 }
+
+$('grammarQuizLog').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-action="regrade-gq"]');
+  if (!btn) return;
+  const s = lastGrammarQuizzes.find((x) => x.id === btn.dataset.id);
+  if (!s || !state.kid) return;
+  btn.disabled = true;
+  btn.textContent = '🤖 Đang chấm...';
+  try {
+    const quiz = s.grammar_quizzes || {};
+    const results = (quiz.questions || []).map((q, i) => ({ prompt: q.prompt, correct: !!s.answers?.[i]?.correct }));
+    const settings = await api.getSettings();
+    const grade = await aiProvider.gradeGrammarQuiz(settings, { results });
+    await api.updateGrammarQuizSuggestion(s.id, grade.suggestion);
+    await renderKidStats(state.kid);
+  } catch (e2) {
+    btn.disabled = false;
+    btn.textContent = `❌ Lỗi (${e2.message}) — bấm thử lại`;
+  }
+});
 
 function renderExamProgress(sessions) {
   const box = $('examProgress');
@@ -811,41 +896,110 @@ async function loadSettings() {
   $('setLimit').value = s.daily_limit_min;
   $('setRate').value = s.tts_rate;
   $('setRewardMult').value = s.reward_cost_multiplier ?? DEFAULT_REWARD_COST_MULTIPLIER;
+  $('aiProvider').value = s.ai_provider || 'groq';
   $('aiKey').value = s.ai_api_key || '';
+  $('deepseekKey').value = s.deepseek_api_key || '';
+  $('deepseekModel').value = s.deepseek_model || '';
+  updateAiProviderBoxes();
   renderPriceEditor(s);
+  renderCustomItemList(s.custom_catalog_items || []);
 }
 
-/* ===== Trợ Lý AI (Groq) — key gọi thẳng từ trình duyệt (xem cảnh báo trong index.html) ===== */
+/* ===== Quà tự thêm (settings.custom_catalog_items) ===== */
 
-// Gia đình tạo trước 07/2026 chưa có cột ai_api_key -> PostgREST từ chối ghi (PGRST204).
+function renderCustomItemList(items) {
+  const box = $('customItemList');
+  if (!items.length) {
+    box.innerHTML = '<i style="color:var(--ink-dim)">Chưa có quà tự thêm nào.</i>';
+    return;
+  }
+  box.innerHTML = items.map((it) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)">
+      <span>${it.icon} ${it.name} — ⭐ ${it.cost}</span>
+      <button data-action="remove-custom-item" data-id="${it.id}" class="ghost" style="margin:0;padding:2px 9px;font-size:12px">🗑️ Xoá</button>
+    </div>`).join('');
+}
+
+$('btnAddCustomItem').addEventListener('click', async () => {
+  const ok = $('customItemOk');
+  ok.textContent = '';
+  const icon = $('newItemIcon').value.trim() || '🎁';
+  const name = $('newItemName').value.trim();
+  const cost = Number($('newItemCost').value);
+  if (!name || !(cost > 0)) { ok.textContent = 'Nhập tên quà và giá sao (lớn hơn 0) đã nhé.'; return; }
+  try {
+    const settings = await api.getSettings();
+    const items = [...(settings.custom_catalog_items || [])];
+    items.push({ id: `custom-${Date.now()}`, icon, name, cost: Math.round(cost) });
+    await api.saveSettings({ custom_catalog_items: items });
+    $('newItemIcon').value = ''; $('newItemName').value = ''; $('newItemCost').value = '';
+    ok.textContent = `Đã thêm "${name}" vào Tủ Quà!`;
+    renderCustomItemList(items);
+  } catch (e) { ok.textContent = `Lỗi: ${e.message}`; }
+});
+
+$('customItemList').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-action="remove-custom-item"]');
+  if (!btn) return;
+  btn.disabled = true;
+  try {
+    const settings = await api.getSettings();
+    const items = (settings.custom_catalog_items || []).filter((it) => it.id !== btn.dataset.id);
+    await api.saveSettings({ custom_catalog_items: items });
+    renderCustomItemList(items);
+  } catch { btn.disabled = false; }
+});
+
+/* ===== Trợ Lý AI (Groq/DeepSeek) — key gọi thẳng từ trình duyệt (xem cảnh báo trong index.html) ===== */
+
+// Gia đình tạo trước 07/2026 chưa có các cột này -> PostgREST từ chối ghi (PGRST204).
 function viAiKeyError(msg) {
+  if (/deepseek_api_key|deepseek_model/.test(msg)) {
+    return 'Cần chạy server/migrate-10-deepseek.sql trong Supabase SQL Editor để dùng DeepSeek (database gia đình tạo trước chưa có 2 cột này).';
+  }
   if (/ai_api_key/.test(msg) || /ai_provider/.test(msg) || /PGRST204/.test(msg)) {
     return 'Cần chạy server/migrate-06-ai-key.sql trong Supabase SQL Editor để bật Trợ Lý AI (database gia đình tạo trước chưa có 2 cột này).';
   }
   return msg;
 }
 
+function updateAiProviderBoxes() {
+  const isDeepSeek = $('aiProvider').value === 'deepseek';
+  $('groqBox').classList.toggle('hidden', isDeepSeek);
+  $('deepseekBox').classList.toggle('hidden', !isDeepSeek);
+}
+$('aiProvider').addEventListener('change', updateAiProviderBoxes);
+
+function currentAiSettingsFromForm() {
+  return {
+    ai_provider: $('aiProvider').value,
+    ai_api_key: $('aiKey').value.trim(),
+    deepseek_api_key: $('deepseekKey').value.trim(),
+    deepseek_model: $('deepseekModel').value.trim(),
+  };
+}
+
 $('btnSaveAiKey').addEventListener('click', async () => {
   $('aiKeyOk').textContent = '';
   try {
-    await api.saveSettings({ ai_provider: 'groq', ai_api_key: $('aiKey').value.trim() });
-    $('aiKeyOk').textContent = 'Đã lưu key AI — áp dụng cho mọi máy của gia đình.';
+    await api.saveSettings(currentAiSettingsFromForm());
+    $('aiKeyOk').textContent = 'Đã lưu — áp dụng cho mọi máy của gia đình.';
   } catch (e) { $('aiKeyOk').textContent = `Lỗi: ${viAiKeyError(e.message)}`; }
 });
 
 $('btnTestAiKey').addEventListener('click', async () => {
   $('aiKeyOk').textContent = 'Đang kiểm tra…';
-  const key = $('aiKey').value.trim();
-  const ok = await testGroqKey(key, DEFAULT_GROQ_MODEL);
+  const ok = await aiProvider.testProviderKey(currentAiSettingsFromForm());
   $('aiKeyOk').textContent = ok ? '✅ Key hoạt động tốt!' : '❌ Key không hoạt động — kiểm tra lại key hoặc mạng.';
 });
 
 $('btnClearAiKey').addEventListener('click', async () => {
   $('aiKeyOk').textContent = '';
   try {
-    await api.saveSettings({ ai_api_key: '' });
-    $('aiKey').value = '';
-    $('aiKeyOk').textContent = 'Đã xóa key AI.';
+    const isDeepSeek = $('aiProvider').value === 'deepseek';
+    await api.saveSettings(isDeepSeek ? { deepseek_api_key: '' } : { ai_api_key: '' });
+    if (isDeepSeek) $('deepseekKey').value = ''; else $('aiKey').value = '';
+    $('aiKeyOk').textContent = 'Đã xóa key.';
   } catch (e) { $('aiKeyOk').textContent = `Lỗi: ${viAiKeyError(e.message)}`; }
 });
 
