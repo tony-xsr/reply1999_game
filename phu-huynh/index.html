@@ -34,7 +34,7 @@ button:disabled{opacity:.5;cursor:default}
 .kid-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .kid-tab{border:2px solid var(--line);background:var(--panel);border-radius:999px;padding:7px 14px;
   font-weight:800;font-size:14px;cursor:pointer;color:var(--ink);margin-top:0}
-.kid-tab.active{background:var(--gold2);color:#fff;border-color:transparent}
+.kid-tab.active{background:linear-gradient(180deg,#ff9d5c,#c2410c);color:#fff;border-color:transparent}
 .stats-row{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 10px}
 .stat{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-size:13px}
 .stat b{display:block;font-size:19px;color:var(--gold2)}
@@ -52,7 +52,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 td,th{padding:6px 8px;border-bottom:1px solid #eadbbe;text-align:left}
 .avatars{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
 .avatars button{margin:0;font-size:22px;background:var(--panel2);border:2px solid var(--line);border-radius:10px;padding:6px 9px}
-.avatars button.sel{border-color:var(--gold2);background:#ffe1b0}
+.avatars button.sel{border-color:var(--gold2);background:var(--bg2)}
 /* Biểu đồ phân tích */
 .mini-h{font-size:13px;color:var(--ink-dim);margin:0 0 8px;font-weight:700}
 .donut-row{display:flex;align-items:center;gap:14px}
@@ -86,7 +86,7 @@ td,th{padding:6px 8px;border-bottom:1px solid #eadbbe;text-align:left}
 .main-tabs{display:flex;gap:8px;margin-bottom:14px}
 .main-tab{flex:1;border:2px solid var(--line);background:var(--panel);border-radius:12px;padding:11px 16px;
   font-weight:900;font-size:15px;cursor:pointer;color:var(--ink);margin-top:0;text-align:center}
-.main-tab.active{background:var(--gold2);color:#fff;border-color:transparent}
+.main-tab.active{background:linear-gradient(180deg,#ff9d5c,#c2410c);color:#fff;border-color:transparent}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:560px){.grid2{grid-template-columns:1fr}}
 code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
@@ -233,6 +233,11 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
         <div class="card">
           <h2>🎯 Từ hay sai (bấm 🔊 để nghe)</h2>
           <div class="words" id="weakWords"><i style="font-size:13px;color:var(--ink-dim)">Đang tải…</i></div>
+        </div>
+        <div class="card">
+          <h2>🧩 Cấu trúc ngữ pháp hay sai</h2>
+          <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 8px">Tổng hợp từ các câu bé chọn SAI trong Trắc Nghiệm Ngữ Pháp — AI cũng dựa vào đây để ưu tiên ra thêm câu ôn đúng chỗ yếu ở các đề sau.</p>
+          <div id="weakGrammarPoints" style="font-size:13.5px"><i style="color:var(--ink-dim)">Đang tải…</i></div>
         </div>
       </div>
 

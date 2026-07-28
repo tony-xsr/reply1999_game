@@ -371,8 +371,9 @@ function dayKey(d) {
 let lastReportText = '';
 
 async function renderKidStats(k) {
-  const [sessions, stars, weak, ledger, purchases, translations, grammarQuizzes, allPassages, allQuizzes] = await Promise.all([
+  const [sessions, stars, weak, weakGrammar, ledger, purchases, translations, grammarQuizzes, allPassages, allQuizzes] = await Promise.all([
     api.kidSessions(k.id), api.starBalance(k.id), api.weakWordsServer(k.id),
+    api.weakGrammarPointsServer(k.id).catch(() => []),
     apiLedger(k.id), api.kidPurchases(k.id).catch(() => []),
     api.kidTranslationSubmissions(k.id, 500).catch(() => []),
     api.kidGrammarQuizSubmissions(k.id, 500).catch(() => []),
@@ -380,6 +381,7 @@ async function renderKidStats(k) {
     api.kidGrammarQuizzes(k.id).catch(() => []),
   ]);
   renderAiResourceStats({ translations, grammarQuizzes, allPassages, allQuizzes });
+  renderWeakGrammarPoints(weakGrammar);
 
   // Báo cáo tuần (module thuần shared/report.js)
   const report = buildWeeklyReport({ sessions, ledger, purchases, weakWords: weak });
@@ -619,6 +621,21 @@ function renderAiResourceStats({ translations, grammarQuizzes, allPassages, allQ
     <div class="stat">🧩 Trắc nghiệm còn sẵn<b>${gqAvailable}</b></div>`;
 }
 
+/** Cấu trúc ngữ pháp bé hay chọn SAI (gộp từ mọi đề Trắc Nghiệm Ngữ Pháp đã
+ * làm — xem migrate-15-grammar-miss.sql), sai nhiều nhất lên đầu. */
+function renderWeakGrammarPoints(weakGrammar) {
+  const box = $('weakGrammarPoints');
+  if (!weakGrammar.length) {
+    box.innerHTML = '<i style="color:var(--good)">Chưa có điểm ngữ pháp nào bé hay sai — đang làm rất tốt! 🎉</i>';
+    return;
+  }
+  box.innerHTML = weakGrammar.map((g) => `
+    <div style="margin:6px 0;padding:8px 10px;background:var(--panel2);border-radius:8px;display:flex;justify-content:space-between;gap:8px">
+      <span>${g.structure}</span>
+      <b style="color:var(--bad);white-space:nowrap">×${g.misses}</b>
+    </div>`).join('');
+}
+
 let lastTranslations = [];
 
 /** Bài dịch bé đã nộp — đoạn văn gốc, bản dịch của bé, điểm/nhận xét/bản
@@ -707,9 +724,15 @@ function renderGrammarQuizLog(submissions) {
       const a = s.answers?.[i] || {};
       const pickedText = q.options?.[a.selected] ?? '—';
       const correctText = q.options?.[q.answer] ?? '—';
+      const pickedExplain = q.explanations?.[a.selected];
+      const correctExplain = q.explanations?.[q.answer];
       return `<div style="margin:8px 0;padding:8px 10px;background:var(--panel2);border-radius:8px">
         <div><b>Câu ${i + 1}:</b> ${q.prompt}</div>
         <div style="font-size:12.5px;margin:4px 0">Bé chọn: <b style="color:${a.correct ? 'var(--good)' : 'var(--bad)'}">${pickedText}</b>${a.correct ? ' ✅' : ` ❌ (đúng: ${correctText})`}</div>
+        ${pickedExplain ? `<div style="font-size:12.5px;margin:4px 0;color:var(--ink-dim)">💡 ${pickedExplain}</div>` : ''}
+        ${!a.correct && correctExplain ? `<div style="font-size:12.5px;margin:4px 0;color:var(--ink-dim)">💡 ${correctExplain}</div>` : ''}
+        ${q.structure ? `<div style="font-size:12.5px;margin:4px 0">📚 <b>Cấu trúc:</b> ${q.structure}</div>` : ''}
+        ${q.translation ? `<div style="font-size:12.5px;margin:4px 0">🇻🇳 <b>Dịch:</b> ${q.translation}</div>` : ''}
       </div>`;
     }).join('');
     return `<div class="card" style="margin-bottom:10px;padding:12px 14px">
