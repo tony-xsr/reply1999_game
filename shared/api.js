@@ -401,6 +401,41 @@ export async function weakPointsSummaryText(profileId) {
   }
 }
 
+/* ===== "Tạo bài từ AI" theo từ/điểm ngữ pháp phụ huynh TỰ CHỌN (khác cơ chế
+   tự động ở weakPointsSummaryText) — phụ huynh chọn vài mục trong "🎯 Từ hay
+   sai", bấm tạo, bài mới gắn field source_weak để đếm + hiện lịch sử. ===== */
+
+/** {item: count} — mỗi từ/điểm ngữ pháp đã được "tạo bài từ AI" bao nhiêu lần. */
+export async function weakItemGeneratedCounts(profileId) {
+  const [passages, quizzes] = await Promise.all([
+    get(`translation_passages?select=source_weak&profile_id=eq.${profileId}&limit=1000`),
+    get(`grammar_quizzes?select=source_weak&profile_id=eq.${profileId}&limit=1000`),
+  ]);
+  const counts = {};
+  for (const row of [...passages, ...quizzes]) {
+    for (const item of row.source_weak || []) counts[item] = (counts[item] || 0) + 1;
+  }
+  return counts;
+}
+
+/** 20 lượt "tạo bài từ AI theo yêu cầu" gần nhất, mới nhất lên đầu. */
+export async function weakGenerationHistory(profileId) {
+  const [passages, quizzes] = await Promise.all([
+    get(`translation_passages?select=day,title,source_weak,created_at&profile_id=eq.${profileId}&order=created_at.desc&limit=1000`),
+    get(`grammar_quizzes?select=day,quiz_type,source_weak,created_at&profile_id=eq.${profileId}&order=created_at.desc&limit=1000`),
+  ]);
+  const items = [
+    ...passages.filter((p) => p.source_weak?.length).map((p) => ({
+      type: 'translate', day: p.day, label: `📝 ${p.title}`, sourceWeak: p.source_weak, createdAt: p.created_at,
+    })),
+    ...quizzes.filter((q) => q.source_weak?.length).map((q) => ({
+      type: 'grammar', day: q.day, label: `🧩 ${q.quiz_type === 'vocab' ? 'Từ Vựng' : 'Ngữ Pháp'}`, sourceWeak: q.source_weak, createdAt: q.created_at,
+    })),
+  ];
+  items.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+  return items.slice(0, 20);
+}
+
 /* ===== Sao & quà ===== */
 
 export async function starBalance(profileId) {
@@ -776,10 +811,10 @@ export async function todayGrammarQuiz(profileId, quizType = 'grammar') {
 
 /** Lưu đề MỚI sinh cho đúng ngày `day` (mặc định hôm nay — truyền ngày khác
  * để "dồn trước" đề của ngày sắp tới). questions: [{prompt, options, answer, explanations}]. */
-export async function saveGrammarQuiz(profileId, { level, questions, quizType = 'grammar' }, day = todayDateKey()) {
+export async function saveGrammarQuiz(profileId, { level, questions, quizType = 'grammar', sourceWeak = [] }, day = todayDateKey()) {
   const fam = await ensureFamily();
   const rows = await post('grammar_quizzes', {
-    family_id: fam.id, profile_id: profileId, level, day, quiz_type: quizType, questions,
+    family_id: fam.id, profile_id: profileId, level, day, quiz_type: quizType, questions, source_weak: sourceWeak,
   }, { Prefer: 'return=representation' });
   return rows[0];
 }
@@ -865,7 +900,10 @@ export async function kidGrammarQuizSubmissions(profileId, limit = 30) {
 /** Tất cả đề trắc nghiệm AI đã soạn sẵn cho bé (id thôi, để đếm — kể cả đề
  * chưa làm) — dùng để tính "còn bao nhiêu đề trong kho chưa làm" ở Trang Phụ Huynh. */
 export async function kidGrammarQuizzes(profileId, limit = 1000) {
-  return get(`grammar_quizzes?select=id&profile_id=eq.${profileId}&limit=${limit}`);
+  // Loại quiz_type=millionaire — đề "Ai Là Triệu Phú" tự sinh mỗi ngày lúc bé
+  // bấm vào chơi (không phải buffer chờ sẵn như Trắc Nghiệm Ngữ Pháp thường,
+  // và không có bảng submission riêng) nên không tính vào "kho bài chưa làm".
+  return get(`grammar_quizzes?select=id&profile_id=eq.${profileId}&quiz_type=neq.millionaire&limit=${limit}`);
 }
 
 /** Xuất toàn bộ dữ liệu gia đình (backup JSON tải về). */
