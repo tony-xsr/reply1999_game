@@ -720,6 +720,12 @@ export async function kidTranslationSubmissions(profileId, limit = 30) {
   return get(`translation_submissions?select=*,translation_passages(title,passage_en,level,vocab)&profile_id=eq.${profileId}&order=submitted_at.desc&limit=${limit}`);
 }
 
+/** Tất cả bài dịch AI đã soạn sẵn cho bé (id thôi, để đếm — kể cả bài chưa
+ * làm) — dùng để tính "còn bao nhiêu bài trong kho chưa làm" ở Trang Phụ Huynh. */
+export async function kidTranslationPassages(profileId, limit = 1000) {
+  return get(`translation_passages?select=id&profile_id=eq.${profileId}&limit=${limit}`);
+}
+
 /* ===== Trắc Nghiệm Ngữ Pháp mỗi ngày (5 câu AI tự sinh + chấm điểm/gợi ý bằng AI) ===== */
 
 /** Đề trắc nghiệm ngữ pháp/từ vựng vào ĐÚNG ngày `day` (chuỗi "YYYY-MM-DD") — null nếu chưa sinh. */
@@ -819,6 +825,12 @@ export async function updateGrammarQuizSuggestion(submissionId, aiSuggestion) {
 /** Đề trắc nghiệm ngữ pháp bé đã nộp, kèm nội dung đề gốc — cho Trang Phụ Huynh xem lại. */
 export async function kidGrammarQuizSubmissions(profileId, limit = 30) {
   return get(`grammar_quiz_submissions?select=*,grammar_quizzes(level,day,quiz_type,questions)&profile_id=eq.${profileId}&order=submitted_at.desc&limit=${limit}`);
+}
+
+/** Tất cả đề trắc nghiệm AI đã soạn sẵn cho bé (id thôi, để đếm — kể cả đề
+ * chưa làm) — dùng để tính "còn bao nhiêu đề trong kho chưa làm" ở Trang Phụ Huynh. */
+export async function kidGrammarQuizzes(profileId, limit = 1000) {
+  return get(`grammar_quizzes?select=id&profile_id=eq.${profileId}&limit=${limit}`);
 }
 
 /** Xuất toàn bộ dữ liệu gia đình (backup JSON tải về). */

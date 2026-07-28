@@ -371,12 +371,15 @@ function dayKey(d) {
 let lastReportText = '';
 
 async function renderKidStats(k) {
-  const [sessions, stars, weak, ledger, purchases, translations, grammarQuizzes] = await Promise.all([
+  const [sessions, stars, weak, ledger, purchases, translations, grammarQuizzes, allPassages, allQuizzes] = await Promise.all([
     api.kidSessions(k.id), api.starBalance(k.id), api.weakWordsServer(k.id),
     apiLedger(k.id), api.kidPurchases(k.id).catch(() => []),
-    api.kidTranslationSubmissions(k.id).catch(() => []),
-    api.kidGrammarQuizSubmissions(k.id).catch(() => []),
+    api.kidTranslationSubmissions(k.id, 500).catch(() => []),
+    api.kidGrammarQuizSubmissions(k.id, 500).catch(() => []),
+    api.kidTranslationPassages(k.id).catch(() => []),
+    api.kidGrammarQuizzes(k.id).catch(() => []),
   ]);
+  renderAiResourceStats({ translations, grammarQuizzes, allPassages, allQuizzes });
 
   // Báo cáo tuần (module thuần shared/report.js)
   const report = buildWeeklyReport({ sessions, ledger, purchases, weakWords: weak });
@@ -598,6 +601,22 @@ function formatSeconds(sec) {
   const m = Math.floor(sec / 60);
   const s = Math.round(sec % 60);
   return m > 0 ? `⏱️ ${m} phút ${s} giây` : `⏱️ ${s} giây`;
+}
+
+/** Bài dịch + trắc nghiệm ngữ pháp AI đã soạn sẵn (buffer) cho bé: bao nhiêu
+ * bài đã làm, bao nhiêu bài còn sẵn trong kho chưa làm (đếm bằng cách so
+ * passage/quiz id với id đã có trong translation_submissions/
+ * grammar_quiz_submissions của bé). */
+function renderAiResourceStats({ translations, grammarQuizzes, allPassages, allQuizzes }) {
+  const trDoneIds = new Set(translations.map((t) => t.passage_id));
+  const trAvailable = allPassages.filter((p) => !trDoneIds.has(p.id)).length;
+  const gqDoneIds = new Set(grammarQuizzes.map((s) => s.quiz_id));
+  const gqAvailable = allQuizzes.filter((q) => !gqDoneIds.has(q.id)).length;
+  $('aiResourceStats').innerHTML = `
+    <div class="stat">📝 Bài dịch đã làm<b>${translations.length}</b></div>
+    <div class="stat">📝 Bài dịch còn sẵn<b>${trAvailable}</b></div>
+    <div class="stat">🧩 Trắc nghiệm đã làm<b>${grammarQuizzes.length}</b></div>
+    <div class="stat">🧩 Trắc nghiệm còn sẵn<b>${gqAvailable}</b></div>`;
 }
 
 let lastTranslations = [];
