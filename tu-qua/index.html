@@ -53,6 +53,13 @@ h1{margin:0;font-size:20px;color:var(--gold2);flex:1}
 .streak-chest.ready{cursor:pointer}
 .streak-chest.ready .ic{opacity:1;animation:chestPop .8s ease-in-out infinite alternate}
 @keyframes chestPop{from{transform:scale(1)}to{transform:scale(1.18)}}
+/* Chế độ Tối: màu xanh lá vườn hoa nguyên bản (#eaf7e5/#7cc39a) quá chói trên
+   nền tối — đổi sang tông xanh lá đậm/trầm hơn, dịu mắt hơn. */
+:root[data-theme$="-dark"] .garden{background:linear-gradient(180deg,#16281d,#1c3324);border-color:#2f6b46}
+:root[data-theme$="-dark"] .flower{background:var(--panel2);border-color:#2f6b46}
+:root[data-theme$="-dark"] .flower button{background:#3a1f1f;color:#f87171}
+:root[data-theme$="-dark"] .progressbar{background:#2a2216}
+:root[data-theme$="-dark"] .progressfill{background:linear-gradient(90deg,#2f6b46,#3f9e63)}
 </style>
 </head>
 <body>

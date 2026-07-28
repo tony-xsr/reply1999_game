@@ -8,6 +8,7 @@ import { GARDEN_DAILY_RATE, GARDEN_ANNUAL_RATE, todayProgress, sellBackValue } f
 import {
   STREAK_MILESTONES, starsForMilestone, uniqueLoginDays, computeCurrentStreak, nextClaimableMilestone,
 } from '../../shared/streak.js';
+import { refreshStarBadge } from '../../shared/kid-bar.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -90,6 +91,7 @@ async function refresh() {
     if (claim.stars > 0) {
       balance += claim.stars;
       speakVi(`Vườn hoa của bé vừa lớn thêm, tặng bé ${claim.stars} sao!`);
+      refreshStarBadge();
     }
 
     $('starBox').textContent = `⭐ ${balance}`;
@@ -189,6 +191,7 @@ async function sellFlower(purchase, btn) {
     msg.className = 'msg ok';
     msg.textContent = `Bé đã bán lại hoa, nhận thêm ${refund} sao!`;
     speakVi(`Bé đã bán lại hoa, nhận thêm ${refund} sao!`);
+    refreshStarBadge();
     await refresh();
   } catch (e) {
     msg.className = 'msg bad';
@@ -223,6 +226,7 @@ async function buy(item, cost, btn) {
     msg.classList.add('ok');
     msg.textContent = `Bé đã đổi được ${item.icon} ${item.name}! Tuyệt vời!`;
     speakVi(`Bé đã đổi được ${item.name}! Tuyệt vời!`);
+    refreshStarBadge();
     await refresh();
   } catch (e) {
     msg.classList.add('bad');
@@ -270,6 +274,7 @@ async function claimStreakFromTuQua(kidId, milestone) {
     const granted = await api.claimStreakMilestone(kidId, milestone, stars);
     if (granted) {
       speakVi(`Chúc mừng! Bé nhận được ${stars} sao từ kho báu điểm danh!`);
+      refreshStarBadge();
       await refresh();
     }
   } catch { /* mất mạng: bé thử bấm lại sau */ }
