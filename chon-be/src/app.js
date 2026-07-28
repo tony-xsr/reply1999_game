@@ -7,6 +7,7 @@ import * as api from '../../shared/api.js';
 import {
   STREAK_MILESTONES, starsForMilestone, uniqueLoginDays, computeCurrentStreak, nextClaimableMilestone,
 } from '../../shared/streak.js';
+import { refreshStarBadge } from '../../shared/kid-bar.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -150,6 +151,7 @@ function showStreakChest(kid, milestone, streak, claimedMax) {
     btn.disabled = true;
     try {
       await api.claimStreakMilestone(kid.id, milestone, stars);
+      refreshStarBadge();
       $('streakChestIcon').textContent = '⭐';
       $('streakText').innerHTML = `🎉 Tuyệt vời! Bé nhận được <b>${stars} sao</b>!`;
       renderStreakRow(milestone, milestone);

@@ -5,6 +5,7 @@
 // (các game cũ đọc trực tiếp) — không phải bản đối chiếu chính.
 
 import { ready as serverReady, recordSessionServer } from '../../shared/api.js';
+import { refreshStarBadge } from '../../shared/kid-bar.js';
 
 const DEVICE_KEY = 'pika.device';
 const PROFILES_KEY = 'pika.profiles';
@@ -119,7 +120,13 @@ export function recordSession(s) {
   writeJSON(statsKey(profile.id), list.slice(-MAX_SESSIONS));
   // Gửi lên server (kèm tự cộng sao theo luật thưởng) — mất mạng/chưa cấu hình
   // thì bỏ qua im lặng, không được làm hỏng ván chơi của bé.
-  return serverReady().then((ok) => (ok ? recordSessionServer(s) : null)).catch(() => null);
+  return serverReady().then((ok) => (ok ? recordSessionServer(s) : null)).then((res) => {
+    // Có sao mới -> xoá cache số sao (5 phút) + cập nhật ngay huy hiệu ⭐ nếu
+    // trang này có hiện — nếu không thì lần tải trang KẾ TIẾP (điều hướng
+    // sang trang khác) cũng sẽ lấy số mới thay vì hiện lại số cũ đã cache.
+    if (res?.stars > 0) refreshStarBadge();
+    return res;
+  }).catch(() => null);
 }
 
 /** @returns {object[]} các ván đã ghi của 1 hồ sơ */
