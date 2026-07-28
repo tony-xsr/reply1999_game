@@ -29,7 +29,7 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 // Thứ tự NẠP LẠI khi restore (cha trước, con sau).
 const TABLE_ORDER = [
   'families', 'profiles', 'settings', 'devices',
-  'sessions', 'miss_events', 'reward_ledger', 'purchases', 'manual_rewards', 'kid_logins',
+  'sessions', 'miss_events', 'grammar_miss_events', 'reward_ledger', 'purchases', 'manual_rewards', 'kid_logins',
   'translation_passages', 'grammar_quizzes', 'ai_call_log',
   'translation_submissions', 'grammar_quiz_submissions',
 ];

@@ -30,6 +30,7 @@ import { EXAM_LEVEL_LABELS } from '../shared/report.js';
 import { vnDateKey } from '../shared/vn-date.js';
 import { dateRange, missingDays } from '../shared/day-buffer.js';
 import { pickReusableContent, REUSE_WINDOW_DAYS } from '../shared/content-reuse.js';
+import { buildWeakPointsSummary } from '../shared/weak-points.js';
 
 const BUFFER_DAYS = 60;
 const MAX_NEW_DAYS_PER_RUN = 5;
@@ -82,7 +83,17 @@ async function familyQuizPool(familyId, level, quizType, sinceDay) {
   return quizPoolCache.get(key);
 }
 
-async function ensureTranslationBuffer(profile, settings, wantDays, tally) {
+// Từ vựng/cấu trúc ngữ pháp bé hay sai (xem shared/weak-points.js) — dùng làm
+// ngữ cảnh thêm để AI ưu tiên củng cố đúng chỗ yếu khi soạn bài mới.
+async function weakSummaryFor(profileId) {
+  const [words, points] = await Promise.all([
+    sb(`weak_words?select=word,misses&profile_id=eq.${profileId}&order=misses.desc`),
+    sb(`weak_grammar_points?select=structure,misses&profile_id=eq.${profileId}&order=misses.desc`),
+  ]);
+  return buildWeakPointsSummary(words, points);
+}
+
+async function ensureTranslationBuffer(profile, settings, wantDays, tally, weakSummary) {
   const level = profile.settings?.translationLevel;
   if (!level) return;
   try {
@@ -104,7 +115,7 @@ async function ensureTranslationBuffer(profile, settings, wantDays, tally) {
         // eslint-disable-next-line no-await-in-loop
         ? [{ title: picked.title, passage_en: picked.passage_en, vocab: picked.vocab }]
         // eslint-disable-next-line no-await-in-loop
-        : await aiProvider.generatePassages(settings, { levelLabel, count: 3 });
+        : await aiProvider.generatePassages(settings, { levelLabel, count: 3, weakSummary });
       if (picked) pool.push({ ...picked, day, profile_id: profile.id }); // đánh dấu đã gán hôm nay -> sibling khác không trùng
       // eslint-disable-next-line no-await-in-loop
       await sb('translation_passages', {
@@ -124,7 +135,7 @@ async function ensureTranslationBuffer(profile, settings, wantDays, tally) {
   }
 }
 
-async function ensureGrammarQuizBuffer(profile, settings, wantDays, tally) {
+async function ensureGrammarQuizBuffer(profile, settings, wantDays, tally, weakSummary) {
   const level = profile.settings?.grammarQuizLevel;
   if (!level) return;
   const quizType = profile.settings?.grammarQuizType || 'grammar';
@@ -146,7 +157,7 @@ async function ensureGrammarQuizBuffer(profile, settings, wantDays, tally) {
       const questions = picked
         ? picked.questions
         // eslint-disable-next-line no-await-in-loop
-        : await aiProvider.generateGrammarQuiz(settings, { levelLabel, count: 5, quizType });
+        : await aiProvider.generateGrammarQuiz(settings, { levelLabel, count: 5, quizType, weakSummary });
       if (picked) pool.push({ ...picked, day, profile_id: profile.id });
       // eslint-disable-next-line no-await-in-loop
       await sb('grammar_quizzes', {
@@ -189,9 +200,11 @@ export default async function handler(req, res) {
       const settings = settingsByFamily.get(profile.family_id);
       if (!aiProvider.resolveProvider(settings).apiKey) continue; // gia đình chưa cấu hình key AI -> bỏ qua bé này
       // eslint-disable-next-line no-await-in-loop
-      await ensureTranslationBuffer(profile, settings, wantDays, tally);
+      const weakSummary = await weakSummaryFor(profile.id).catch(() => '');
       // eslint-disable-next-line no-await-in-loop
-      await ensureGrammarQuizBuffer(profile, settings, wantDays, tally);
+      await ensureTranslationBuffer(profile, settings, wantDays, tally, weakSummary);
+      // eslint-disable-next-line no-await-in-loop
+      await ensureGrammarQuizBuffer(profile, settings, wantDays, tally, weakSummary);
     }
   } catch (e) {
     return res.status(500).json({ error: e.message });
