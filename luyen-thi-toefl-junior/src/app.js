@@ -18,7 +18,9 @@ import { sfx } from '../../pokemon/src/sfx.js';
 import { mountKidFeatures, answeredOne } from '../../shared/kid-bar.js';
 import { buildTranslateEntryButton } from '../../shared/translate-ui.js';
 import { buildGrammarQuizEntryButton } from '../../shared/grammar-quiz-ui.js';
+import { buildMillionaireEntryButton } from '../../shared/millionaire-ui.js';
 import { currentProfile, recordSession } from '../../pokemon/src/stats.js';
+import * as api from '../../shared/api.js';
 
 const LEVEL_ID = 'toefl-junior';
 const LEVEL_LABEL = '📘 TOEFL Junior (>800/900)';
@@ -413,15 +415,28 @@ els.btnHome2.addEventListener('click', () => { els.cheer.classList.add('hidden')
 els.btnSound.textContent = sfx.muted ? '🔇' : '🔊';
 showScreen('mode');
 mountKidFeatures(); // thanh avatar bé + kiểm tra giới hạn phút/ngày
-(() => {
-  const box = document.getElementById('trEntryBox');
-  const btn = box && buildTranslateEntryButton(LEVEL_ID, { speak });
-  if (btn) box.appendChild(btn);
-})();
-(() => {
-  const box = document.getElementById('gqEntryBox');
-  const btn = box && buildGrammarQuizEntryButton(LEVEL_ID, { speak });
-  if (btn) box.appendChild(btn);
+(async () => {
+  // Làm mới cache settings trước khi kiểm tra cấp độ Luyện Dịch/Trắc Nghiệm —
+  // tránh trường hợp phụ huynh vừa đổi cấu hình nhưng thiết bị bé vẫn giữ
+  // bản settings cũ (chỉ nạp lại lúc chọn hồ sơ ở /chon-be/), khiến nút biến
+  // mất dù cấu hình mới đã đúng trên server.
+  await api.refreshCurrentKidSettings();
+  const trBox = document.getElementById('trEntryBox');
+  const trBtn = trBox && buildTranslateEntryButton(LEVEL_ID, { speak });
+  if (trBtn) trBox.appendChild(trBtn);
+  const gqBox = document.getElementById('gqEntryBox');
+  const gqBtn = gqBox && buildGrammarQuizEntryButton(LEVEL_ID, { speak });
+  if (gqBtn) gqBox.appendChild(gqBtn);
+  const mpBox = document.getElementById('mpEntryBox');
+  const mpBtn = mpBox && buildMillionaireEntryButton(LEVEL_ID, { speak });
+  if (mpBtn) mpBox.appendChild(mpBtn);
+  // Trang chủ có mục "Tiếng Anh Hôm Nay" liên kết thẳng vào đây kèm
+  // ?open=translate|grammar|millionaire để bé đỡ phải tự tìm nút — tự bấm hộ
+  // nếu nút đó đang hiển thị (im lặng bỏ qua nếu bé/cấp độ này chưa cấu hình mục đó).
+  const autoOpen = new URLSearchParams(location.search).get('open');
+  if (autoOpen === 'translate' && trBtn) trBtn.click();
+  else if (autoOpen === 'grammar' && gqBtn) gqBtn.click();
+  else if (autoOpen === 'millionaire' && mpBtn) mpBtn.click();
 })();
 sayInstruction(t('extofljr.help', 'Đây là Luyện Thi TOEFL Junior! Chọn Học theo Unit để đọc bài học và luyện tập có gợi ý, hoặc chọn Luyện Thi để làm đề trộn ngẫu nhiên có tính giờ giống thi thật. Mỗi câu có 1 câu tiếng Anh thiếu từ, bé chọn đúng từ để điền vào chỗ trống.'));
 
