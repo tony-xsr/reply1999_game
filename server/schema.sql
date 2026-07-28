@@ -71,7 +71,8 @@ create table if not exists purchases (
   item_id      text not null,
   cost         int  not null,
   ts           timestamptz not null default now(),
-  delivered_at timestamptz -- null = bo me chua giao qua tay cho be; phu huynh bam "Da giao" de danh dau
+  delivered_at timestamptz, -- null = bo me chua giao qua tay cho be; phu huynh bam "Da giao" de danh dau
+  sold_at      timestamptz -- hoa vuon: khac null = be da ban lai lay sao, khong con trong vuon nua
 );
 
 -- Thuong tay cua bo me (kem loi nhan); be mo qua thi ghi opened_at.
@@ -97,6 +98,12 @@ create table if not exists settings (
   -- migrate-06-ai-key.sql (key goi THANG tu trinh duyet, khong co server rieng giau key).
   ai_provider            text not null default 'groq',
   ai_api_key             text not null default '',
+  -- DeepSeek (lua chon thu 2 ben canh Groq) - xem canh bao an toan o
+  -- migrate-10-deepseek.sql (key goi THANG tu trinh duyet nhu Groq).
+  deepseek_api_key       text not null default '',
+  deepseek_model         text not null default '',
+  -- Qua phu huynh TU THEM ngoai CATALOG co san - xem shared/rewards.js mergeCatalog().
+  custom_catalog_items   jsonb not null default '[]',
   updated_at             timestamptz not null default now()
 );
 -- Gia dinh da tao truoc 07/2026 can chay server/migrate-05-custom-item-costs.sql
@@ -106,6 +113,11 @@ alter table settings add column if not exists custom_item_costs jsonb not null d
 -- Gia dinh da tao truoc phai chay server/migrate-06-ai-key.sql de them 2 cot AI nay.
 alter table settings add column if not exists ai_provider text not null default 'groq';
 alter table settings add column if not exists ai_api_key  text not null default '';
+-- Gia dinh da tao truoc phai chay server/migrate-10-deepseek.sql de them 2 cot DeepSeek nay.
+alter table settings add column if not exists deepseek_api_key text not null default '';
+alter table settings add column if not exists deepseek_model   text not null default '';
+-- Gia dinh da tao truoc phai chay server/migrate-13-custom-catalog.sql.
+alter table settings add column if not exists custom_catalog_items jsonb not null default '[]';
 
 -- May da lien ket (chi de hien thi/quan ly, khong phai co che bao mat).
 create table if not exists devices (
@@ -152,8 +164,10 @@ create table if not exists translation_submissions (
   submitted_text text not null,
   ai_score       int,
   ai_feedback    text not null default '',
+  ai_reference_vi text not null default '', -- ban dich mau AI de be so sanh - dien SAU khi AI cham xong
   vocab_correct  int not null default 0,
   vocab_total    int not null default 0,
+  seconds_spent  int, -- thoi gian be go bai (giay), null = ban ghi cu truoc migrate-11
   submitted_at   timestamptz not null default now()
 );
 create index if not exists translation_submissions_profile_time on translation_submissions (profile_id, submitted_at desc);
@@ -167,10 +181,13 @@ create table if not exists grammar_quizzes (
   profile_id uuid not null references profiles(id) on delete cascade,
   level      text not null,
   day        date not null,
+  quiz_type  text not null default 'grammar', -- 'grammar' hoac 'vocab' - xem shared/groq.js generateGrammarQuiz()
   questions  jsonb not null default '[]', -- [{"prompt":"...","options":["...","...","...","..."],"answer":0,"explanations":["...","...","...","..."]}]
   created_at timestamptz not null default now()
 );
 create index if not exists grammar_quizzes_profile_day on grammar_quizzes (profile_id, day);
+-- Gia dinh da tao truoc phai chay server/migrate-14-quiz-type.sql.
+alter table grammar_quizzes add column if not exists quiz_type text not null default 'grammar';
 
 -- Bai lam cua be: dap an da chon + diem + goi y AI cham sau khi nop
 -- (xem shared/groq.js gradeGrammarQuiz()).
@@ -182,9 +199,26 @@ create table if not exists grammar_quiz_submissions (
   answers       jsonb not null default '[]', -- [{"selected":0,"correct":true}, ...]
   score         int not null default 0, -- so cau dung / tong so cau
   ai_suggestion text not null default '',
+  seconds_spent int, -- thoi gian be lam bai (giay), null = ban ghi cu truoc migrate-11
   submitted_at  timestamptz not null default now()
 );
 create index if not exists grammar_quiz_submissions_profile_time on grammar_quiz_submissions (profile_id, submitted_at desc);
+-- Gia dinh da tao truoc phai chay server/migrate-11-submission-reliability.sql.
+alter table translation_submissions add column if not exists ai_reference_vi text not null default '';
+alter table translation_submissions add column if not exists seconds_spent  int;
+alter table grammar_quiz_submissions add column if not exists seconds_spent int;
+
+-- Ghi lai moi luot goi AI (Groq/DeepSeek) - dung cho Admin Dashboard dem tong
+-- theo ngay/nha cung cap (xem shared/ai-provider.js logAiCall, migrate-12).
+create table if not exists ai_call_log (
+  id         uuid primary key default gen_random_uuid(),
+  family_id  uuid not null references families(id) on delete cascade,
+  provider   text not null,
+  purpose    text not null,
+  ok         boolean not null default true,
+  created_at timestamptz not null default now()
+);
+create index if not exists ai_call_log_created on ai_call_log (created_at desc);
 
 -- ===== View =================================================================
 
@@ -216,6 +250,7 @@ alter table translation_passages    enable row level security;
 alter table translation_submissions enable row level security;
 alter table grammar_quizzes             enable row level security;
 alter table grammar_quiz_submissions    enable row level security;
+alter table ai_call_log                 enable row level security;
 
 drop policy if exists families_own on families;
 create policy families_own on families
@@ -232,7 +267,7 @@ begin
   foreach t in array array['profiles','sessions','miss_events','reward_ledger',
                            'purchases','manual_rewards','settings','devices','kid_logins',
                            'translation_passages','translation_submissions',
-                           'grammar_quizzes','grammar_quiz_submissions']
+                           'grammar_quizzes','grammar_quiz_submissions','ai_call_log']
   loop
     execute format('drop policy if exists %I_fam on %I', t, t);
     execute format(
@@ -248,6 +283,29 @@ language plpgsql security definer set search_path = public as $$
 begin
   delete from families where owner = auth.uid();
 end $$;
+
+-- ===== Admin Dashboard: thong ke so dong cac bang + dung luong database ====
+-- CHI goi duoc tu server (api/admin-stats.js dung SERVICE ROLE KEY) - REVOKE
+-- khoi anon/authenticated de 1 phu huynh binh thuong KHONG tu goi thang RPC
+-- nay bang anon key cua ho ma xem duoc thong ke cua CA HE THONG.
+create or replace function admin_db_stats() returns json
+language plpgsql security definer set search_path = public as $$
+declare result json;
+begin
+  select json_build_object(
+    'db_size_bytes', pg_database_size(current_database()),
+    'families', (select count(*) from families),
+    'profiles', (select count(*) from profiles),
+    'sessions', (select count(*) from sessions),
+    'reward_ledger', (select count(*) from reward_ledger),
+    'purchases', (select count(*) from purchases),
+    'translation_submissions', (select count(*) from translation_submissions),
+    'grammar_quiz_submissions', (select count(*) from grammar_quiz_submissions),
+    'ai_call_log', (select count(*) from ai_call_log)
+  ) into result;
+  return result;
+end $$;
+revoke execute on function admin_db_stats() from public, anon, authenticated;
 
 -- ===== Don dep dinh ky (trang Phu Huynh tu goi ~1 lan/tuan) ==================
 -- Gop miss_events cu (>30 ngay) thanh 1 dong/tu; giu 300 van moi nhat moi be;
