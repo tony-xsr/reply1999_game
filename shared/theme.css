@@ -1,0 +1,43 @@
+/* Hệ thống theme dùng CHUNG cho các trang "hub" (trang chủ, chọn bé, tủ quà,
+   phụ huynh, admin, giới thiệu) — KHÔNG áp dụng cho từng game riêng lẻ (mỗi
+   game giữ nguyên màu sắc/chủ đề riêng vốn có, vd Đào Vàng vẫn màu vàng-nâu,
+   Vườn Rau vẫn xanh lá — đổi hết 100+ game sẽ phá vỡ chủ đề hình ảnh riêng
+   của từng game). 2 bảng màu (🟠 Ấm mặc định / 🔵 Dịu kiểu Thi Chứng Chỉ Anh
+   — theo đúng yêu cầu "thích màu dịu bên khu thi chứng chỉ") × 2 chế độ
+   (☀️ Sáng/🌙 Tối, cộng thêm ⚙️ Theo máy) = chọn qua thuộc tính data-theme
+   trên thẻ <html> (xem shared/theme.js). */
+
+:root, :root[data-theme="warm-light"] {
+  --bg:#fff6e8; --bg2:#ffe9c8;
+  --gold:#ff8a3d; --gold2:#c2410c;
+  --ink:#241e2e; --ink-dim:#5d5370; --line:#a8834a;
+  --panel:#fffaf2; --panel2:#fff3df;
+  --good:#15803d; --bad:#c02a2a;
+}
+:root[data-theme="warm-dark"] {
+  --bg:#1c1712; --bg2:#2e2013;
+  --gold:#ffab6b; --gold2:#ffc38a;
+  --ink:#f5ead9; --ink-dim:#cbb89c; --line:#7a5f3a;
+  --panel:#26201a; --panel2:#332822;
+  --good:#4ade80; --bad:#f87171;
+}
+:root[data-theme="soft-light"] {
+  --bg:#eef3ff; --bg2:#dbe6ff;
+  --gold:#3b6bef; --gold2:#2547b8;
+  --ink:#1b2340; --ink-dim:#556086; --line:#9db2e6;
+  --panel:#ffffff; --panel2:#f5f8ff;
+  --good:#15803d; --bad:#c02a2a;
+}
+:root[data-theme="soft-dark"] {
+  --bg:#0f1424; --bg2:#182240;
+  --gold:#7fa2ff; --gold2:#a6c0ff;
+  --ink:#e6ecff; --ink-dim:#aab6d6; --line:#33447a;
+  --panel:#171e35; --panel2:#1e2742;
+  --good:#4ade80; --bad:#f87171;
+}
+
+/* Bộ nút chọn theme dùng chung — xem shared/theme.js mountThemePicker(). */
+.r99-theme-picker{display:inline-flex;gap:6px;flex-wrap:wrap;align-items:center;margin:4px 0}
+.r99-theme-btn{background:var(--panel2);border:2px solid var(--line);border-radius:999px;
+  padding:6px 12px;font-size:12.5px;font-weight:800;color:var(--ink);cursor:pointer}
+.r99-theme-btn.sel{background:var(--gold2);color:#fff;border-color:transparent}
