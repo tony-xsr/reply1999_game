@@ -183,6 +183,16 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Thiếu biến môi trường SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY trên Vercel' });
   }
 
+  // Admin có thể TẮT cron này từ /admin/ (xem api/admin-cron.js) mà không cần
+  // xoá lịch cron trên Vercel Dashboard — chưa chạy migrate-17 thì coi như
+  // đang BẬT (giữ đúng hành vi trước khi có cờ này).
+  try {
+    const settingRows = await sb(`system_settings?select=value&key=eq.cron_generate_daily_content_enabled`);
+    if (settingRows?.[0]?.value === false) {
+      return res.status(200).json({ skipped: true, reason: 'Cron đang TẮT — bật lại ở trang Admin (⏯️ Cron sinh bài AI mỗi ngày).' });
+    }
+  } catch { /* bảng chưa tồn tại (chưa chạy migrate-17) -> coi như đang BẬT, chạy tiếp bình thường */ }
+
   const wantDays = dateRange(vnDateKey(), BUFFER_DAYS);
   const tally = {
     translation: { generated: 0, reused: 0, alreadyBuffered: 0, remaining: 0, errors: [] },
