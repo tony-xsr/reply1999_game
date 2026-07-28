@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#fff6e8" />
+<script>(function(){try{var p=JSON.parse(localStorage.getItem('r99-theme'))||{palette:'warm',mode:'auto'};var mode=p.mode==='auto'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p.mode;document.documentElement.dataset.theme=p.palette+'-'+mode;}catch(e){}})();</script>
+<link rel="stylesheet" href="/shared/theme.css" />
+<title>In Bài Tập — Reply1999 Games</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:radial-gradient(ellipse 90% 55% at 50% 0%, var(--bg2) 0%, transparent 70%),var(--bg);
+  color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh}
+.wrap{max-width:720px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;align-items:center;gap:12px;padding:8px 0 18px;border-bottom:1px solid #e9d3ad;margin-bottom:18px}
+header .back{width:44px;height:44px;border-radius:50%;border:2px solid var(--line);background:var(--panel);
+  display:flex;align-items:center;justify-content:center;font-size:20px;text-decoration:none;color:var(--ink)}
+h1{margin:0;font-size:20px;color:var(--gold2)}
+.sub{color:var(--ink-dim);font-size:13px;margin:2px 0 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;
+  box-shadow:0 4px 14px rgba(194,65,12,.08)}
+label{display:block;font-size:13px;color:var(--ink-dim);margin:8px 0 4px;font-weight:600}
+input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;background:#fff;
+  font-size:14px;color:var(--ink)}
+button{background:linear-gradient(180deg,#ff9d5c,#c2410c);color:#fff;border:none;border-radius:10px;
+  padding:10px 18px;font-weight:800;font-size:14px;cursor:pointer;margin-top:10px}
+button.ghost{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+button:disabled{opacity:.5;cursor:default}
+.err{color:var(--bad);font-size:13px;min-height:1.2em;margin-top:8px;white-space:pre-wrap}
+.hidden{display:none!important}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tab{flex:1;border:2px solid var(--line);background:var(--panel);border-radius:12px;padding:11px 12px;
+  font-weight:900;font-size:14px;cursor:pointer;color:var(--ink);margin-top:0;text-align:center}
+.tab.active{background:var(--gold2);color:#fff;border-color:transparent}
+
+/* ===== Xem trước A4 + in ===== */
+#previewWrap{display:none}
+#previewWrap.active{display:block}
+.preview-toolbar{position:sticky;top:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:10px 14px;margin-bottom:14px;display:flex;gap:8px;align-items:center;z-index:5}
+.preview-toolbar span{font-size:13px;color:var(--ink-dim);flex:1}
+.a4-scroll{overflow-x:auto;padding-bottom:20px}
+.a4-page{width:210mm;min-height:297mm;margin:0 auto 18px;background:#fff;color:#111;
+  padding:15mm;box-shadow:0 0 12px rgba(0,0,0,.18);box-sizing:border-box;font-family:Georgia,"Times New Roman",serif}
+.a4-page h1{font-size:18px;margin:0 0 4px;color:#111}
+.a4-page h2{font-size:16px;margin:0 0 10px;color:#111}
+.a4-page h3{font-size:14px;margin:14px 0 4px;color:#111}
+.print-meta{font-size:13px;margin:0 0 16px;border-bottom:1px solid #999;padding-bottom:10px}
+.print-questions{padding-left:20px;font-size:13.5px;line-height:1.8}
+.print-questions li{margin-bottom:10px}
+.print-opts{margin-left:4px;color:#333}
+.passage-en{font-style:italic;background:#f5f5f5;padding:10px 12px;border-radius:8px;font-size:13.5px;line-height:1.6}
+.write-lines{border-bottom:1px solid #999;height:22px;margin:6px 0}
+.write-lines + .write-lines{margin-top:2px}
+.answer-list{font-size:13.5px;line-height:2}
+/* Bài đăng mạng xã hội — giả lập giao diện app */
+.social-post{border:1px solid #ddd;border-radius:14px;margin:0 0 18px;overflow:hidden;page-break-inside:avoid}
+.post-header{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #eee;font-family:-apple-system,Arial,sans-serif}
+.post-avatar{width:32px;height:32px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center;font-size:18px}
+.post-caption{padding:10px 12px;font-size:14px;font-family:-apple-system,Arial,sans-serif}
+.post-likes{padding:0 12px 8px;font-size:12.5px;color:#e0245e;font-weight:700;font-family:-apple-system,Arial,sans-serif}
+.post-comments{background:#fafafa;padding:8px 12px}
+.comment{padding:6px 0;border-top:1px dashed #ddd;font-family:-apple-system,Arial,sans-serif}
+.comment:first-child{border-top:none}
+.comment b{font-size:12.5px}
+.comment .ctext{font-size:13px}
+.translate-line{border-bottom:1px solid #aaa;height:18px;margin-top:4px}
+
+@media print {
+  body * { visibility: hidden; }
+  #printArea, #printArea * { visibility: visible; }
+  #printArea { position: absolute; left: 0; top: 0; width: 100%; margin: 0; }
+  .a4-page { box-shadow: none; margin: 0; page-break-after: always; }
+  .no-print { display: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap no-print">
+  <header>
+    <a class="back" href="/phu-huynh/" title="Trang Phụ Huynh">🏠</a>
+    <div>
+      <h1>🖨️ In Bài Tập</h1>
+      <p class="sub">AI soạn đề thi chuẩn hoặc bài tập kiểu mạng xã hội — xem trước rồi in ra giấy A4</p>
+    </div>
+  </header>
+
+  <div id="viewGuide" class="card hidden"></div>
+
+  <div id="viewMain" class="hidden">
+    <div class="tabs">
+      <button type="button" class="tab active" data-mode="exam">📝 Đề Thi Chuẩn</button>
+      <button type="button" class="tab" data-mode="social">📱 Bài Tập Mạng Xã Hội</button>
+    </div>
+
+    <div class="card" id="examForm">
+      <label>Tên bé (in trên đề)</label>
+      <input id="examKidName" placeholder="Tên bé" />
+      <label>Chuẩn / cấp độ</label>
+      <select id="examLevel"></select>
+      <label>Loại đề</label>
+      <select id="examType">
+        <option value="grammar">Trắc nghiệm Ngữ pháp</option>
+        <option value="vocab">Trắc nghiệm Từ vựng</option>
+        <option value="translate">Luyện dịch (đoạn văn)</option>
+      </select>
+      <label id="examCountLabel">Số câu</label>
+      <input id="examCount" type="number" min="1" max="30" value="15" />
+      <div class="err" id="examErr"></div>
+      <button id="btnGenExam">🤖 Tạo đề bằng AI</button>
+    </div>
+
+    <div class="card hidden" id="socialForm">
+      <label>Tên bé (in trên đề)</label>
+      <input id="socialKidName" placeholder="Tên bé" />
+      <label>Chủ đề (để trống = ngẫu nhiên vui nhộn)</label>
+      <input id="socialTopic" placeholder="Vd: động vật, đồ ăn, trường học, thể thao..." />
+      <label>Số bài đăng</label>
+      <input id="socialCount" type="number" min="1" max="4" value="2" />
+      <div class="err" id="socialErr"></div>
+      <button id="btnGenSocial">🤖 Tạo bằng AI</button>
+    </div>
+  </div>
+</div>
+
+<div id="previewWrap">
+  <div class="wrap no-print">
+    <div class="preview-toolbar">
+      <span id="previewInfo"></span>
+      <button type="button" id="btnPrint" style="margin:0">🖨️ In</button>
+      <button type="button" id="btnClosePreview" class="ghost" style="margin:0">✖ Đóng xem trước</button>
+    </div>
+  </div>
+  <div class="a4-scroll">
+    <div id="printArea"></div>
+  </div>
+</div>
+
+<script src="/server-config.js"></script>
+<script type="module" src="src/app.js"></script>
+</body>
+</html>
