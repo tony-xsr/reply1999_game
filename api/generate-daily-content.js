@@ -137,12 +137,19 @@ async function ensureTranslationBuffer(profile, settings, wantDays, tally, weakS
     for (const day of toGenerate) {
       // eslint-disable-next-line no-await-in-loop -- chạy tuần tự để không dồn dập gọi AI cùng lúc (tránh 429)
       const pool = await familyPassagePool(profile.family_id, level, sinceDay);
-      const picked = pickReusableContent(pool, { profileId: profile.id, todayKey: day, doneIds });
+      // Lọc bỏ trước bằng TIÊU ĐỀ (myTitles — toàn bộ lịch sử của CHÍNH bé
+      // này, không chỉ bài ĐÃ NỘP) chứ không chỉ dựa vào doneIds: nếu không,
+      // bài của ngày X trong CÙNG lượt buffer (chưa kịp nộp) vẫn bị coi là
+      // "còn mới" và bị `pickReusableContent` chọn lại y hệt cho ngày X+1.
+      const eligiblePool = pool.filter((p) => !myTitles.has(p.title));
+      const picked = pickReusableContent(eligiblePool, { profileId: profile.id, todayKey: day, doneIds });
       let passages;
       let source;
       if (picked) {
         passages = [{ title: picked.title, passage_en: picked.passage_en, vocab: picked.vocab }];
         pool.push({ ...picked, day, profile_id: profile.id }); // đánh dấu đã gán hôm nay -> sibling khác không trùng
+        doneIds.add(picked.id);
+        myTitles.add(picked.title); // không mượn lại ĐÚNG bài này nữa cho CHÍNH bé này ở các ngày khác trong CÙNG lượt buffer
         source = 'reused';
       } else {
         // eslint-disable-next-line no-await-in-loop
@@ -195,12 +202,17 @@ async function ensureGrammarQuizBuffer(profile, settings, wantDays, tally, weakS
     for (const day of toGenerate) {
       // eslint-disable-next-line no-await-in-loop
       const pool = await familyQuizPool(profile.family_id, level, quizType, sinceDay);
-      const picked = pickReusableContent(pool, { profileId: profile.id, todayKey: day, doneIds });
+      // Lọc bỏ trước bằng PROMPT (donePrompts — toàn bộ lịch sử của CHÍNH bé
+      // này) — cùng lý do như ensureTranslationBuffer() phía trên.
+      const eligiblePool = pool.filter((qz) => !(qz.questions || []).some((q) => donePrompts.has(q.prompt)));
+      const picked = pickReusableContent(eligiblePool, { profileId: profile.id, todayKey: day, doneIds });
       let questions;
       let source;
       if (picked) {
         questions = picked.questions;
         pool.push({ ...picked, day, profile_id: profile.id });
+        doneIds.add(picked.id);
+        picked.questions.forEach((q) => donePrompts.add(q.prompt)); // không mượn lại ĐÚNG đề này nữa cho CHÍNH bé này ở các ngày khác trong CÙNG lượt buffer
         source = 'reused';
       } else {
         // eslint-disable-next-line no-await-in-loop

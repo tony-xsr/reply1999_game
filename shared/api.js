@@ -879,12 +879,23 @@ export async function ensureTranslationPassages(profileId, level, day) {
   const existing = await passagesForDay(profileId, day);
   if (existing.length) return existing;
   const sinceDay = dateKeyOffset(-REUSE_WINDOW_DAYS);
-  const [pool, submissions] = await Promise.all([
+  const [pool, submissions, mine] = await Promise.all([
     familyPassagesForReuse(level, sinceDay),
     kidTranslationSubmissions(profileId, 300),
+    // Toàn bộ TIÊU ĐỀ bài đã từng được GÁN cho CHÍNH bé này (dù đã nộp hay
+    // chưa) — BẮT BUỘC phải lọc thêm bằng title chứ không chỉ dựa vào
+    // `doneIds` (chỉ phản ánh bài ĐÃ NỘP): nếu không, khi hàm này được gọi
+    // liên tiếp cho nhiều ngày trong cùng 1 lượt (vd shared/kid-bar.js
+    // checkDailyAiContent() chuẩn bị hôm nay RỒI ngày mai), bài của "hôm nay"
+    // vừa lưu xong (chưa kịp nộp) vẫn còn "trống" trong doneIds nên bị chọn
+    // lại y hệt cho "ngày mai" — đây chính là lỗi "hôm nay trùng y chang hôm
+    // qua" mà phụ huynh phản ánh.
+    get(`translation_passages?select=title&profile_id=eq.${profileId}&level=eq.${level}&limit=2000`),
   ]);
   const doneIds = new Set(submissions.map((s) => s.passage_id));
-  const picked = pickReusableContent(pool, { profileId, todayKey: day, doneIds });
+  const myTitles = new Set(mine.map((m) => m.title));
+  const eligiblePool = pool.filter((p) => !myTitles.has(p.title));
+  const picked = pickReusableContent(eligiblePool, { profileId, todayKey: day, doneIds });
   if (picked) return savePassages(profileId, [{ level, title: picked.title, passage_en: picked.passage_en, vocab: picked.vocab }], day);
   const fromPool = await passagePoolPick(level, profileId);
   if (!fromPool) return [];
@@ -897,12 +908,17 @@ export async function ensureGrammarQuiz(profileId, level, quizType, day) {
   const existing = await grammarQuizForDay(profileId, day, quizType);
   if (existing) return existing;
   const sinceDay = dateKeyOffset(-REUSE_WINDOW_DAYS);
-  const [pool, submissions] = await Promise.all([
+  const [pool, submissions, mine] = await Promise.all([
     familyGrammarQuizzesForReuse(level, quizType, sinceDay),
     kidGrammarQuizSubmissions(profileId, 300),
+    // Toàn bộ PROMPT câu hỏi đã từng được GÁN cho CHÍNH bé này — xem giải
+    // thích ở ensureTranslationPassages() phía trên, cùng một loại lỗi.
+    get(`grammar_quizzes?select=questions&profile_id=eq.${profileId}&level=eq.${level}&quiz_type=eq.${quizType}&limit=2000`),
   ]);
   const doneIds = new Set(submissions.map((s) => s.quiz_id));
-  const picked = pickReusableContent(pool, { profileId, todayKey: day, doneIds });
+  const donePrompts = new Set(mine.flatMap((m) => (m.questions || []).map((q) => q.prompt)));
+  const eligiblePool = pool.filter((qz) => !(qz.questions || []).some((q) => donePrompts.has(q.prompt)));
+  const picked = pickReusableContent(eligiblePool, { profileId, todayKey: day, doneIds });
   if (picked) return saveGrammarQuiz(profileId, { level, questions: picked.questions, quizType }, day);
   const fromPool = await quizPoolPick(level, quizType, profileId);
   if (!fromPool) return null;
