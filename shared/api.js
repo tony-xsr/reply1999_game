@@ -832,13 +832,48 @@ export async function familyGrammarQuizzesForReuse(level, quizType, sinceDay) {
   return get(`grammar_quizzes?select=id,day,profile_id,questions&level=eq.${level}&quiz_type=eq.${quizType}&day=gte.${sinceDay}&order=day.asc&limit=500`);
 }
 
+/* ===== Kho nội dung DÙNG CHUNG cho MỌI gia đình (xem migrate-18-content-pool.sql) =====
+ * Khác familyPassagesForReuse/familyGrammarQuizzesForReuse ở trên (chỉ tái
+ * dùng nội dung CÙNG NHÀ), đây là kho do Claude soạn tay hàng loạt (xem
+ * server/bulk-insert-content.js), KHÔNG gắn family_id — mọi gia đình, kể cả
+ * gia đình đăng ký sau này, đều tự động mượn được. */
+
+/** 1 bài trong passage_pool mà bé `profileId` CHƯA từng làm (so theo title,
+ * toàn bộ lịch sử — không chỉ REUSE_WINDOW_DAYS), hoặc null nếu kho đã hết
+ * cho bé này (mọi bài cùng cấp độ đều đã làm hoặc kho chưa có bài nào). */
+export async function passagePoolPick(level, profileId) {
+  // .catch(() => []): nếu chưa chạy migrate-18-content-pool.sql thì bảng
+  // passage_pool chưa tồn tại — coi như kho rỗng, KHÔNG chặn bên gọi.
+  const [pool, mine] = await Promise.all([
+    get(`passage_pool?select=id,title,passage_en,vocab&level=eq.${level}&order=created_at.asc&limit=500`).catch(() => []),
+    get(`translation_passages?select=title&profile_id=eq.${profileId}&level=eq.${level}&limit=2000`),
+  ]);
+  const doneTitles = new Set(mine.map((m) => m.title));
+  return pool.find((p) => !doneTitles.has(p.title)) || null;
+}
+
+/** Tương tự passagePoolPick nhưng cho quiz_pool — so trùng theo `prompt` của
+ * CÂU ĐẦU TIÊN trong đề (đủ để nhận diện 1 đề đã soạn sẵn, giống cách
+ * server/bulk-insert-content.js chống trùng khi insert). */
+export async function quizPoolPick(level, quizType, profileId) {
+  // .catch(() => []): nếu chưa chạy migrate-18-content-pool.sql thì bảng
+  // quiz_pool chưa tồn tại — coi như kho rỗng, KHÔNG chặn bên gọi.
+  const [pool, mine] = await Promise.all([
+    get(`quiz_pool?select=id,questions&level=eq.${level}&quiz_type=eq.${quizType}&order=created_at.asc&limit=500`).catch(() => []),
+    get(`grammar_quizzes?select=questions&profile_id=eq.${profileId}&level=eq.${level}&quiz_type=eq.${quizType}&limit=2000`),
+  ]);
+  const donePrompts = new Set(mine.flatMap((m) => (m.questions || []).map((q) => q.prompt)));
+  return pool.find((qz) => !(qz.questions || []).some((q) => donePrompts.has(q.prompt))) || null;
+}
+
 /**
- * Chuẩn bị bài Luyện Dịch cho `profileId` vào ngày `day` — ưu tiên TÁI SỬ
- * DỤNG nội dung có sẵn của CẢ NHÀ nếu tìm được phù hợp (xem shared/content-
- * reuse.js: tiết kiệm AI, anh/chị/em cùng ngày không trùng bài, nội dung cũ
- * tự nhiên "trồi lại" thành ôn tập). Trả về mảng passages đã sẵn sàng nếu
- * tái dùng được, hoặc [] nếu KHÔNG tìm được gì phù hợp — bên gọi tự sinh AI
- * mới rồi lưu bằng savePassages(profileId, generated, day).
+ * Chuẩn bị bài Luyện Dịch cho `profileId` vào ngày `day` — thử lần lượt: (1)
+ * TÁI SỬ DỤNG nội dung có sẵn của CẢ NHÀ (xem shared/content-reuse.js: tiết
+ * kiệm AI, anh/chị/em cùng ngày không trùng bài, nội dung cũ tự nhiên "trồi
+ * lại" thành ôn tập); (2) MƯỢN 1 bài từ kho chung mọi gia đình (passage_pool)
+ * mà bé này chưa làm. Trả về mảng passages đã sẵn sàng nếu tìm được, hoặc []
+ * nếu KHÔNG tìm được gì (cả 2 nguồn đều hết) — bên gọi tự sinh AI mới rồi lưu
+ * bằng savePassages(profileId, generated, day).
  */
 export async function ensureTranslationPassages(profileId, level, day) {
   const existing = await passagesForDay(profileId, day);
@@ -850,12 +885,14 @@ export async function ensureTranslationPassages(profileId, level, day) {
   ]);
   const doneIds = new Set(submissions.map((s) => s.passage_id));
   const picked = pickReusableContent(pool, { profileId, todayKey: day, doneIds });
-  if (!picked) return [];
-  return savePassages(profileId, [{ level, title: picked.title, passage_en: picked.passage_en, vocab: picked.vocab }], day);
+  if (picked) return savePassages(profileId, [{ level, title: picked.title, passage_en: picked.passage_en, vocab: picked.vocab }], day);
+  const fromPool = await passagePoolPick(level, profileId);
+  if (!fromPool) return [];
+  return savePassages(profileId, [{ level, title: fromPool.title, passage_en: fromPool.passage_en, vocab: fromPool.vocab }], day);
 }
 
 /** Tương tự ensureTranslationPassages nhưng cho Trắc Nghiệm — trả về đề nếu
- * tái dùng được, hoặc null nếu bên gọi cần tự sinh AI mới. */
+ * tái dùng/mượn được, hoặc null nếu bên gọi cần tự sinh AI mới. */
 export async function ensureGrammarQuiz(profileId, level, quizType, day) {
   const existing = await grammarQuizForDay(profileId, day, quizType);
   if (existing) return existing;
@@ -866,8 +903,10 @@ export async function ensureGrammarQuiz(profileId, level, quizType, day) {
   ]);
   const doneIds = new Set(submissions.map((s) => s.quiz_id));
   const picked = pickReusableContent(pool, { profileId, todayKey: day, doneIds });
-  if (!picked) return null;
-  return saveGrammarQuiz(profileId, { level, questions: picked.questions, quizType }, day);
+  if (picked) return saveGrammarQuiz(profileId, { level, questions: picked.questions, quizType }, day);
+  const fromPool = await quizPoolPick(level, quizType, profileId);
+  if (!fromPool) return null;
+  return saveGrammarQuiz(profileId, { level, questions: fromPool.questions, quizType }, day);
 }
 
 /**
