@@ -16,9 +16,11 @@
 //
 // Thứ tự bảng dưới đây tôn trọng khoá ngoại: cha trước, con sau khi NẠP LẠI
 // (families -> profiles/settings/devices -> sessions/... -> translation_
-// submissions/grammar_quiz_submissions). Bước XOÁ chỉ cần xoá `families` vì
-// mọi bảng khác đều có `on delete cascade` theo family_id/passage_id/quiz_id
-// — xoá families tự động xoá sạch mọi bảng con.
+// submissions/grammar_quiz_submissions). Bước XOÁ xoá `families` (mọi bảng
+// có family_id đều `on delete cascade` theo đó — tự động xoá sạch mọi bảng
+// con), CỘNG THÊM xoá riêng 3 bảng KHÔNG có family_id — passage_pool/
+// quiz_pool (kho nội dung dùng CHUNG mọi gia đình) và system_settings (cờ
+// bật/tắt cron) — vì chúng đứng độc lập, families cascade KHÔNG động tới.
 
 import { verifyAdminToken } from '../shared/admin-auth.js';
 
@@ -32,7 +34,16 @@ const TABLE_ORDER = [
   'sessions', 'miss_events', 'grammar_miss_events', 'reward_ledger', 'purchases', 'manual_rewards', 'kid_logins',
   'translation_passages', 'grammar_quizzes', 'ai_call_log',
   'translation_submissions', 'grammar_quiz_submissions',
+  // 3 bảng KHÔNG có family_id (dùng CHUNG cho mọi gia đình / toàn hệ thống,
+  // xem migrate-18-content-pool.sql + migrate-17-cron-toggle.sql) — KHÔNG bị
+  // xoá tự động bởi cascade khi xoá `families` lúc restore, nên phải tự xoá
+  // riêng trong restoreAll() bên dưới trước khi nạp lại.
+  'passage_pool', 'quiz_pool', 'system_settings',
 ];
+
+// 3 bảng đứng độc lập ở trên — restoreAll() phải XOÁ RIÊNG các bảng này
+// (không nằm trong cascade của `families`) trước khi nạp lại dữ liệu.
+const STANDALONE_TABLES = ['passage_pool', 'quiz_pool', 'system_settings'];
 
 async function sb(path, options = {}) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
@@ -56,7 +67,7 @@ async function sb(path, options = {}) {
 // đều có id. Phải ORDER theo 1 cột ổn định khi phân trang Range, nếu không
 // Postgres không đảm bảo thứ tự giống nhau giữa các trang -> có thể sót/lặp
 // dòng, làm backup THIẾU DỮ LIỆU mà không hề báo lỗi.
-const ORDER_COLUMN = { settings: 'family_id' };
+const ORDER_COLUMN = { settings: 'family_id', system_settings: 'key' };
 
 /** Tải TOÀN BỘ dòng của 1 bảng bằng cách phân trang Range — không giới hạn
  * ngầm ở 1000 dòng như mặc định PostgREST (bản backup phải đủ TẤT CẢ). */
@@ -108,9 +119,15 @@ async function insertRows(table, rows) {
   }
 }
 
-/** XOÁ SẠCH (families cascade xoá hết bảng con) rồi NẠP LẠI đúng thứ tự khoá ngoại. */
+/** XOÁ SẠCH (families cascade xoá hết bảng con, + xoá riêng 3 bảng đứng độc
+ * lập không có family_id) rồi NẠP LẠI đúng thứ tự khoá ngoại. */
 async function restoreAll(tables) {
   await sb('families?id=not.is.null', { method: 'DELETE' });
+  for (const t of STANDALONE_TABLES) {
+    const col = ORDER_COLUMN[t] || 'id';
+    // eslint-disable-next-line no-await-in-loop
+    await sb(`${t}?${col}=not.is.null`, { method: 'DELETE' });
+  }
   const counts = {};
   for (const t of TABLE_ORDER) {
     const rows = tables[t] || [];
