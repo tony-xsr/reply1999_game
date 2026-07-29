@@ -129,6 +129,8 @@ function renderStats(data) {
     <div class="stat">bài dịch<b>${data.db.translation_submissions}</b></div>
     <div class="stat">trắc nghiệm<b>${data.db.grammar_quiz_submissions}</b></div>
     <div class="stat">lượt gọi AI<b>${data.db.ai_call_log}</b></div>
+    <div class="stat">📚 kho bài dịch dùng chung<b>${data.db.passage_pool ?? '—'}</b></div>
+    <div class="stat">📚 kho trắc nghiệm dùng chung<b>${data.db.quiz_pool ?? '—'}</b></div>
   ` : '<i style="color:var(--ink-dim)">Chưa chạy migrate-12 nên chưa có thống kê DB (xem server/migrate-12-admin-stats.sql).</i>';
 
   $('aiRow').innerHTML = `

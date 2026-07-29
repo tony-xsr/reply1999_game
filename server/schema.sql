@@ -240,6 +240,29 @@ create table if not exists grammar_miss_events (
 );
 create index if not exists grammar_miss_events_profile_structure on grammar_miss_events (profile_id, structure);
 
+-- Kho Luyen Dich/Trac Nghiem DUNG CHUNG cho TAT CA gia dinh - KHONG gan
+-- family_id/profile_id (khac translation_passages/grammar_quizzes o tren) -
+-- xem server/migrate-18-content-pool.sql + server/bulk-insert-content.js +
+-- shared/api.js (passagePoolPick/quizPoolPick) + api/generate-daily-content.js
+-- (sharedPassagePool/sharedQuizPool).
+create table if not exists passage_pool (
+  id         uuid primary key default gen_random_uuid(),
+  level      text not null,
+  title      text not null,
+  passage_en text not null,
+  vocab      jsonb not null default '[]',
+  created_at timestamptz not null default now()
+);
+create unique index if not exists passage_pool_level_title on passage_pool (level, title);
+
+create table if not exists quiz_pool (
+  id         uuid primary key default gen_random_uuid(),
+  level      text not null,
+  quiz_type  text not null default 'grammar',
+  questions  jsonb not null default '[]',
+  created_at timestamptz not null default now()
+);
+
 -- ===== View =================================================================
 
 -- So tu yeu hien tai cua tung be (security_invoker de RLS ap dung theo nguoi goi).
@@ -279,6 +302,8 @@ alter table translation_submissions enable row level security;
 alter table grammar_quizzes             enable row level security;
 alter table grammar_quiz_submissions    enable row level security;
 alter table ai_call_log                 enable row level security;
+alter table passage_pool                enable row level security;
+alter table quiz_pool                   enable row level security;
 
 drop policy if exists families_own on families;
 create policy families_own on families
@@ -303,6 +328,17 @@ begin
       t, t);
   end loop;
 end $$;
+
+-- passage_pool/quiz_pool KHONG co family_id (dung chung moi gia dinh) nen
+-- khong nam trong vong lap _fam o tren - moi nguoi da dang nhap (authenticated)
+-- deu DOC duoc toan bo kho chung; KHONG tao policy INSERT/UPDATE/DELETE nao
+-- nghia la CHI server (SERVICE ROLE KEY, dung trong server/bulk-insert-content.js)
+-- moi ghi duoc.
+drop policy if exists passage_pool_read on passage_pool;
+create policy passage_pool_read on passage_pool for select to authenticated using (true);
+
+drop policy if exists quiz_pool_read on quiz_pool;
+create policy quiz_pool_read on quiz_pool for select to authenticated using (true);
 
 -- ===== Admin: bat/tat cron sinh bai AI moi ngay tu trang /admin/ (xem
 -- migrate-17-cron-toggle.sql + api/admin-cron.js + api/generate-daily-content.js).
@@ -342,7 +378,9 @@ begin
     'purchases', (select count(*) from purchases),
     'translation_submissions', (select count(*) from translation_submissions),
     'grammar_quiz_submissions', (select count(*) from grammar_quiz_submissions),
-    'ai_call_log', (select count(*) from ai_call_log)
+    'ai_call_log', (select count(*) from ai_call_log),
+    'passage_pool', (select count(*) from passage_pool),
+    'quiz_pool', (select count(*) from quiz_pool)
   ) into result;
   return result;
 end $$;
