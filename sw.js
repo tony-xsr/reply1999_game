@@ -1,6 +1,6 @@
 /* Reply1999 Games — root service worker.
    Scope = '/'. Cache hub + các game khi truy cập lần đầu. */
-const CACHE = 'reply1999-v183';
+const CACHE = 'reply1999-v184';
 const PRECACHE = [
   './', './index.html', './manifest.json', './i18n.js', './server-config.js',
   './shared/api.js',
@@ -799,6 +799,10 @@ self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
   if (url.origin !== location.origin) return;
+  // API luôn phải tươi (thống kê admin, dữ liệu Supabase...) — không được cache
+  // kiểu stale-while-revalidate như file tĩnh, nếu không trang sẽ hiện số liệu
+  // CŨ trong lúc âm thầm tải bản mới, gây hiểu lầm là ghi dữ liệu không thành công.
+  if (url.pathname.startsWith('/api/')) return;
   e.respondWith(
     caches.match(e.request).then((cached) => {
       const network = fetch(e.request)
