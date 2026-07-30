@@ -23,6 +23,15 @@
 // đó sẽ TIẾP TỤC đúng chỗ nối từ vựng, không bắt gõ lại từ đầu. Nếu AI chấm
 // lỗi, có thử chấm lại NGẦM mỗi lần mở danh sách, và chấm lại NGAY nếu bé mở
 // đúng bài đó ra.
+//
+// LÀM LẠI ĐỂ CHẤM LẠI (trong vòng 24h nếu điểm dưới 80/100): nếu điểm CAO
+// NHẤT hiện tại của bé cho 1 bài (trong số hôm nay) vẫn dưới 80, VÀ lần nộp
+// gần nhất còn trong vòng 24 giờ, màn "xem lại bài" sẽ hiện nút "Làm lại bài
+// này" — bấm vào sẽ tạo một LƯỢT NỘP MỚI (không ghi đè lượt cũ, giữ lại lịch
+// sử) trên CÙNG bài dịch đó. Khi hiển thị/tính điểm cho 1 bài, luôn lấy điểm
+// CAO NHẤT trong tất cả các lượt nộp đã hoàn thành (xem `bestDoneSubmission`)
+// — không lấy "lượt gần nhất", để tránh làm lại xong điểm thấp hơn lại đè
+// mất điểm tốt trước đó.
 
 import * as api from './api.js';
 import * as aiProvider from './ai-provider.js';
@@ -112,13 +121,48 @@ async function openTranslateOverlay(levelId, { speak } = {}) {
   renderList(ov, { levelLabel, passages, submissions, kid, say });
 }
 
-function latestSubmissionFor(submissions, passageId) {
-  return submissions.find((s) => s.passage_id === passageId) || null;
-}
-
 /** Bài đã dịch VÀ đã nối từ vựng xong — "hoàn thành" đúng nghĩa để tính %/thưởng. */
 function isFullyDone(sub) {
   return !!sub && sub.vocab_total > 0;
+}
+
+/** Mọi lượt nộp (kể cả lượt "làm lại") của bé cho 1 `passageId`, giữ nguyên
+ * thứ tự DESC (mới nhất trước) như `kidTranslationSubmissions` trả về. */
+function submissionsForPassage(submissions, passageId) {
+  return submissions.filter((s) => s.passage_id === passageId);
+}
+
+/** Trong các lượt nộp ĐÃ HOÀN THÀNH (đã nối từ vựng) cho 1 bài, lấy lượt có
+ * ĐIỂM CAO NHẤT — không lấy "lượt gần nhất", vì bé có thể làm lại nhiều lần
+ * và lần sau chưa chắc cao hơn lần trước (không được để điểm thấp hơn đè
+ * mất điểm tốt đã đạt được trước đó). */
+function bestDoneSubmission(subs) {
+  const done = subs.filter(isFullyDone);
+  if (!done.length) return null;
+  return done.reduce((best, s) => ((s.ai_score ?? -1) > (best.ai_score ?? -1) ? s : best));
+}
+
+/** Lượt nộp nên hiển thị/thao tác cho 1 bài: nếu lượt GẦN NHẤT chưa hoàn
+ * thành (còn dở phần nối từ vựng) thì ưu tiên cho bé TIẾP TỤC đúng chỗ đó;
+ * ngược lại lấy lượt có điểm CAO NHẤT trong số đã hoàn thành. */
+function bestSubmissionFor(submissions, passageId) {
+  const subs = submissionsForPassage(submissions, passageId);
+  if (!subs.length) return null;
+  if (!isFullyDone(subs[0])) return subs[0];
+  return bestDoneSubmission(subs) || subs[0];
+}
+
+/** Bé được "làm lại để chấm lại" 1 bài dịch nếu: điểm CAO NHẤT hiện tại vẫn
+ * dưới 80/100, VÀ lượt nộp GẦN NHẤT (kể cả lượt làm lại trước đó, nếu có)
+ * còn trong vòng 24 giờ — hết 24h kể từ lượt thử gần nhất thì đóng cửa sổ
+ * làm lại (tránh sửa đi sửa lại vô thời hạn cho 1 bài đã qua ngày). */
+const REDO_WINDOW_MS = 24 * 60 * 60 * 1000;
+function canRedoTranslation(subs) {
+  const best = bestDoneSubmission(subs);
+  if (!best || best.ai_score == null || best.ai_score >= 80) return false;
+  const latest = subs[0];
+  if (!latest?.submitted_at) return false;
+  return Date.now() - new Date(latest.submitted_at).getTime() < REDO_WINDOW_MS;
 }
 
 /** Bài CŨ (không thuộc "hôm nay") bé từng làm trong REUSE_WINDOW_DAYS ngày
@@ -140,16 +184,19 @@ function recentOldPassages(passages, submissions) {
 
 function renderList(ov, ctx) {
   const { levelLabel, passages, submissions } = ctx;
-  const doneCount = passages.filter((p) => isFullyDone(latestSubmissionFor(submissions, p.id))).length;
+  const doneCount = passages.filter((p) => isFullyDone(bestSubmissionFor(submissions, p.id))).length;
   const total = passages.length;
   const pct = Math.round(quotaProgress(doneCount, total) * 100);
   const done = isQuotaComplete(doneCount, total);
   const cardsHtml = passages.map((p, i) => {
-    const sub = latestSubmissionFor(submissions, p.id);
+    const sub = bestSubmissionFor(submissions, p.id);
     let statusHtml;
     if (!sub) statusHtml = '<div style="font-size:12.5px;color:#5d5370;font-weight:600">Chưa làm</div>';
     else if (!isFullyDone(sub)) statusHtml = '<div style="font-size:12.5px;color:#b45309;font-weight:700">⏳ Đã nộp bài dịch — bấm để làm tiếp phần nối từ vựng</div>';
-    else statusHtml = `<div class="done">✅ Đã làm — điểm ${sub.ai_score ?? '⏳ đang chờ chấm'}${sub.ai_score != null ? '/100' : ''}</div>`;
+    else {
+      const canRedo = canRedoTranslation(submissionsForPassage(submissions, p.id));
+      statusHtml = `<div class="done">✅ Đã làm — điểm ${sub.ai_score ?? '⏳ đang chờ chấm'}${sub.ai_score != null ? '/100' : ''}${canRedo ? ' · <span style="color:#b45309">🔁 có thể làm lại trong 24h</span>' : ''}</div>`;
+    }
     return `<div class="r99-ai-card" data-idx="${i}">
       ${i + 1}. ${p.title}
       ${statusHtml}
@@ -158,10 +205,13 @@ function renderList(ov, ctx) {
   const oldItems = recentOldPassages(passages, submissions);
   const oldHtml = oldItems.length ? `
     <p style="font-size:12.5px;color:#5d5370;font-weight:700;margin:16px 0 6px">📚 Ôn lại bài cũ (làm lại để nhớ lâu hơn):</p>
-    ${oldItems.map((s, i) => `<div class="r99-ai-card" data-old-idx="${i}">
+    ${oldItems.map((s, i) => {
+      const bestScore = bestDoneSubmission(submissionsForPassage(submissions, s.passage_id))?.ai_score ?? s.ai_score;
+      return `<div class="r99-ai-card" data-old-idx="${i}">
       ${escapeHtml(s.translation_passages?.title || '(không rõ tiêu đề)')}
-      <div style="font-size:12px;color:#5d5370">Điểm lần trước: ${s.ai_score ?? '—'}${s.ai_score != null ? '/100' : ''}</div>
-    </div>`).join('')}` : '';
+      <div style="font-size:12px;color:#5d5370">Điểm cao nhất trước đó: ${bestScore ?? '—'}${bestScore != null ? '/100' : ''}</div>
+    </div>`;
+    }).join('')}` : '';
   renderAiBox(ov, `
     <h3>📝 Luyện Dịch</h3>
     <p style="font-size:13px;color:#5d5370;margin:0 0 6px">Cấp độ: <b>${levelLabel}</b> — chọn 1 trong ${total} bài hôm nay để dịch:</p>
@@ -175,7 +225,7 @@ function renderList(ov, ctx) {
   ov.querySelectorAll('.r99-ai-card[data-idx]').forEach((card) => {
     card.addEventListener('click', () => {
       const passage = passages[Number(card.dataset.idx)];
-      const sub = latestSubmissionFor(submissions, passage.id);
+      const sub = bestSubmissionFor(submissions, passage.id);
       const nextCtx = { ...ctx, passage };
       if (sub && !isFullyDone(sub)) resumeUnfinished(ov, nextCtx, sub);
       else if (sub) reviewDone(ov, nextCtx, sub);
@@ -198,7 +248,7 @@ function renderList(ov, ctx) {
   // Thử chấm lại NGẦM cho bài đã nộp nhưng AI chưa chấm được lần trước (lỗi
   // mạng/hết quota) — không chặn giao diện, chỉ âm thầm cập nhật lên server.
   for (const p of passages) {
-    const sub = latestSubmissionFor(submissions, p.id);
+    const sub = bestSubmissionFor(submissions, p.id);
     if (sub && sub.ai_score == null) backgroundRegrade(p, sub);
   }
 }
@@ -282,11 +332,15 @@ async function resumeUnfinished(ov, ctx, sub) {
   renderFeedback(ov, { ...ctx, submission: sub, grade });
 }
 
-/** Bé xem lại 1 bài ĐÃ hoàn thành hết (đã nộp + đã nối từ vựng) — chỉ đọc. */
+/** Bé xem lại 1 bài ĐÃ hoàn thành hết (đã nộp + đã nối từ vựng) — điểm hiện
+ * ra là điểm CAO NHẤT trong các lượt nộp. Nếu điểm đó vẫn dưới 80/100 và
+ * lượt gần nhất còn trong vòng 24h, thêm nút "Làm lại bài này" để bé nộp
+ * một lượt MỚI (không mất lượt cũ) chờ AI chấm lại. */
 function reviewDone(ov, ctx, sub) {
   const grade = sub.ai_score != null
     ? { score: sub.ai_score, feedback: sub.ai_feedback, referenceVi: sub.ai_reference_vi }
     : null;
+  const canRedo = canRedoTranslation(submissionsForPassage(ctx.submissions, ctx.passage.id));
   renderAiBox(ov, `
     <h3 style="font-size:15px">${ctx.passage.title}</h3>
     <p style="margin:6px 0"><b>Bản dịch của bé:</b> ${escapeHtml(sub.submitted_text)}</p>
@@ -296,8 +350,14 @@ function reviewDone(ov, ctx, sub) {
          ${grade.referenceVi ? `<div class="r99-ai-feedback"><b>📖 Bản dịch mẫu của AI:</b><br>${grade.referenceVi}</div>` : ''}`
       : '<p class="r99-ai-msg">⏳ AI chưa chấm được bài này, đang tự thử lại...</p>'}
     <p style="font-size:13px;color:#5d5370;margin:8px 0 0">Nối từ vựng: ${sub.vocab_correct}/${sub.vocab_total}</p>
+    ${canRedo ? `
+    <p class="r99-ai-msg" style="color:#b45309;font-weight:600;margin-top:10px">Điểm dưới 80 — bé có thể làm lại bài này trong vòng 24 giờ để AI chấm lại!</p>
+    <button type="button" class="r99-ai-btn" id="trRedoBtn">🔁 Làm lại bài này</button>` : ''}
     <button type="button" class="r99-ai-btn ghost" id="trBackBtn">Về danh sách bài hôm nay</button>
   `);
+  if (canRedo) {
+    ov.querySelector('#trRedoBtn').addEventListener('click', () => renderWork(ov, ctx));
+  }
   ov.querySelector('#trBackBtn').addEventListener('click', () => renderList(ov, ctx));
 }
 

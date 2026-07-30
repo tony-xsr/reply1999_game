@@ -620,15 +620,19 @@ function formatSeconds(sec) {
  * passage/quiz id với id đã có trong translation_submissions/
  * grammar_quiz_submissions của bé). */
 function renderAiResourceStats({ translations, grammarQuizzes, allPassages, allQuizzes }) {
+  // Đếm theo SỐ BÀI GỐC (passage_id/quiz_id) khác nhau, không phải số dòng
+  // nộp bài — 1 bài có thể có NHIỀU lượt nộp nếu bé "làm lại để chấm lại"
+  // (điểm dưới 80/100, trong vòng 24h — xem shared/translate-ui.js), nên
+  // đếm thẳng translations.length sẽ bị tính trùng.
   const trDoneIds = new Set(translations.map((t) => t.passage_id));
   const trAvailable = allPassages.filter((p) => !trDoneIds.has(p.id)).length;
   const gqDoneIds = new Set(grammarQuizzes.map((s) => s.quiz_id));
   const gqAvailable = allQuizzes.filter((q) => !gqDoneIds.has(q.id)).length;
   $('trResourceStats').innerHTML = `
-    <div class="stat">📝 Bài dịch đã làm<b>${translations.length}</b></div>
+    <div class="stat">📝 Bài dịch đã làm<b>${trDoneIds.size}</b></div>
     <div class="stat">📝 Bài dịch còn sẵn<b>${trAvailable}</b></div>`;
   $('gqResourceStats').innerHTML = `
-    <div class="stat">🧩 Trắc nghiệm đã làm<b>${grammarQuizzes.length}</b></div>
+    <div class="stat">🧩 Trắc nghiệm đã làm<b>${gqDoneIds.size}</b></div>
     <div class="stat">🧩 Trắc nghiệm còn sẵn<b>${gqAvailable}</b></div>`;
 }
 
