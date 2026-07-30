@@ -430,15 +430,17 @@ async function renderKidStats(k) {
     labels.appendChild(lb);
   }
 
-  // Từ hay sai + nút đọc thử
+  // Từ hay sai + nút đọc thử — danh sách dạng hàng dọc gọn gàng (dễ quét mắt
+  // hơn lưới chip cũ khi có nhiều mục), cuộn trong khung nhỏ mặc định, có
+  // thể "🔍 Mở rộng xem tất cả" ra popup để xem hết không bị giới hạn chiều cao.
   const box = $('weakWords');
   box.innerHTML = weak.length ? '' : '<i style="font-size:13px;color:var(--good)">Không có từ nào cần ôn — bé đang làm rất tốt! 🎉</i>';
   for (const w of weak.slice(0, 60)) {
-    const chip = document.createElement('span');
-    chip.className = 'word-chip';
+    const row = document.createElement('div');
+    row.className = 'word-row';
     const genCount = weakGenCountsCache[w.word] || 0;
-    chip.innerHTML = `<input type="checkbox" class="weak-pick" data-word="${w.word}" title="Chọn để tạo bài từ AI" />`
-      + `<b>${w.word}</b> <span class="n">×${w.misses}</span>${genCount ? ` <span title="Đã tạo ${genCount} bài riêng cho từ này">🤖${genCount}</span>` : ''}`;
+    row.innerHTML = `<input type="checkbox" class="weak-pick" data-word="${w.word}" title="Chọn để tạo bài từ AI" />`
+      + `<b title="${w.word}">${w.word}</b> <span class="n">×${w.misses}</span>${genCount ? ` <span title="Đã tạo ${genCount} bài riêng cho từ này">🤖${genCount}</span>` : ''}`;
     const btn = document.createElement('button');
     btn.textContent = '🔊';
     btn.addEventListener('click', () => {
@@ -450,8 +452,8 @@ async function renderKidStats(k) {
         speechSynthesis.speak(u);
       } catch { /* ignore */ }
     });
-    chip.appendChild(btn);
-    box.appendChild(chip);
+    row.appendChild(btn);
+    box.appendChild(row);
   }
 
   renderAnalytics(sessions);
@@ -680,6 +682,25 @@ function getSelectedWeakStructures() {
     .filter(Boolean);
 }
 
+// "🔍 Mở rộng xem tất cả" — CHUYỂN (không nhân bản) chính node #weakWords
+// sang trong popup rồi trả về đúng chỗ cũ khi đóng, để giữ nguyên mọi ô
+// checkbox đã tick + nút 🔊 gắn sẵn, không cần đồng bộ 2 bản sao riêng.
+$('btnExpandWeakWords').addEventListener('click', () => {
+  $('wwModalSlot').appendChild($('weakWords'));
+  $('wwModalBackdrop').classList.remove('hidden');
+});
+function closeWeakWordsModal() {
+  $('weakWordsSlot').appendChild($('weakWords'));
+  $('wwModalBackdrop').classList.add('hidden');
+}
+$('wwModalClose').addEventListener('click', closeWeakWordsModal);
+$('wwModalBackdrop').addEventListener('click', (e) => {
+  if (e.target.id === 'wwModalBackdrop') closeWeakWordsModal();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !$('wwModalBackdrop').classList.contains('hidden')) closeWeakWordsModal();
+});
+
 $('btnCreateTargetedTranslate').addEventListener('click', async () => {
   const msg = $('targetedGenOk');
   const kid = state.kid;
@@ -867,17 +888,27 @@ function renderGrammarQuizLogRows(submissions) {
          <button data-action="regrade-gq" data-id="${s.id}" style="margin-left:6px;padding:2px 9px;font-size:12px">🔁 Chấm lại</button></p>`;
     const qsHtml = questions.map((q, i) => {
       const a = s.answers?.[i] || {};
-      const pickedText = q.options?.[a.selected] ?? '—';
-      const correctText = q.options?.[q.answer] ?? '—';
-      const pickedExplain = q.explanations?.[a.selected];
-      const correctExplain = q.explanations?.[q.answer];
+      // Hiện CẢ 4 lựa chọn kèm giải thích riêng của từng lựa chọn (dữ liệu
+      // `q.explanations` đã có sẵn giải thích cho mọi option, không chỉ đáp
+      // án đúng/lựa chọn của bé) — để phụ huynh giải thích được với bé vì
+      // sao các đáp án còn lại sai, không chỉ đáp án bé chọn.
+      const optionsHtml = (q.options || []).map((opt, oi) => {
+        const isPicked = oi === a.selected;
+        const isCorrect = oi === q.answer;
+        const tag = isCorrect ? ' ✅ đáp án đúng' : isPicked ? ' ❌ bé chọn' : '';
+        const color = isCorrect ? 'var(--good)' : isPicked ? 'var(--bad)' : 'var(--ink)';
+        const explain = q.explanations?.[oi];
+        return `<div style="margin:5px 0;padding:5px 8px;background:${isPicked || isCorrect ? 'var(--panel)' : 'transparent'};border-radius:6px;border:1px solid ${isCorrect ? 'var(--good)' : isPicked ? 'var(--bad)' : 'transparent'}">
+          <div style="font-size:12.5px"><b style="color:${color}">${opt}</b>${tag}</div>
+          ${explain ? `<div style="font-size:12px;margin:2px 0 0;color:var(--ink-dim)">💡 ${explain}</div>` : ''}
+        </div>`;
+      }).join('');
       return `<div style="margin:8px 0;padding:8px 10px;background:var(--panel2);border-radius:8px">
         <div><b>Câu ${i + 1}:</b> ${q.prompt}</div>
-        <div style="font-size:12.5px;margin:4px 0">Bé chọn: <b style="color:${a.correct ? 'var(--good)' : 'var(--bad)'}">${pickedText}</b>${a.correct ? ' ✅' : ` ❌ (đúng: ${correctText})`}</div>
-        ${pickedExplain ? `<div style="font-size:12.5px;margin:4px 0;color:var(--ink-dim)">💡 ${pickedExplain}</div>` : ''}
-        ${!a.correct && correctExplain ? `<div style="font-size:12.5px;margin:4px 0;color:var(--ink-dim)">💡 ${correctExplain}</div>` : ''}
-        ${q.structure ? `<div style="font-size:12.5px;margin:4px 0">📚 <b>Cấu trúc:</b> ${q.structure}</div>` : ''}
-        ${q.translation ? `<div style="font-size:12.5px;margin:4px 0">🇻🇳 <b>Dịch:</b> ${q.translation}</div>` : ''}
+        <div style="font-size:12.5px;margin:6px 0 2px;font-weight:700;color:var(--ink-dim)">Tất cả 4 đáp án:</div>
+        ${optionsHtml}
+        ${q.structure ? `<div style="font-size:12.5px;margin:6px 0 0">📚 <b>Cấu trúc:</b> ${q.structure}</div>` : ''}
+        ${q.translation ? `<div style="font-size:12.5px;margin:4px 0 0">🇻🇳 <b>Dịch:</b> ${q.translation}</div>` : ''}
       </div>`;
     }).join('');
     return `<div class="card" style="margin-bottom:10px;padding:12px 14px">

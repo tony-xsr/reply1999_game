@@ -43,11 +43,20 @@ button:disabled{opacity:.5;cursor:default}
 .bar span{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:10px;color:var(--ink-dim)}
 .bar-labels{display:flex;gap:6px}
 .bar-labels div{flex:1;text-align:center;font-size:10px;color:var(--ink-dim);padding-top:3px}
-.words{display:flex;flex-wrap:wrap;gap:6px}
-.word-chip{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);
-  border-radius:999px;padding:4px 10px;font-size:13px}
-.word-chip button{margin:0;padding:1px 7px;font-size:12px;border-radius:999px}
-.word-chip .n{color:var(--bad);font-weight:800}
+.words{display:flex;flex-direction:column;max-height:280px;overflow-y:auto;border:1px solid var(--line);border-radius:10px}
+.word-row{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid var(--line);font-size:13px}
+.word-row:last-child{border-bottom:none}
+.word-row input[type="checkbox"]{width:auto;flex-shrink:0;padding:0}
+.word-row b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.word-row .n{color:var(--bad);font-weight:800;font-size:12.5px;flex-shrink:0}
+.word-row button{margin:0;padding:2px 8px;font-size:12px;border-radius:999px;flex-shrink:0}
+.words-toolbar{display:flex;justify-content:flex-end;margin:-4px 0 8px}
+.words-toolbar button{margin:0;padding:5px 12px;font-size:12.5px}
+.ww-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;
+  justify-content:center;z-index:9999;padding:16px}
+.ww-modal{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;max-width:480px;
+  width:100%;max-height:80vh;display:flex;flex-direction:column}
+.ww-modal .words{max-height:none;flex:1;border:none}
 table{width:100%;border-collapse:collapse;font-size:13px}
 td,th{padding:6px 8px;border-bottom:1px solid #eadbbe;text-align:left}
 .avatars{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
@@ -269,7 +278,8 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
       <div class="kp-tab hidden" data-kptab="weak">
         <div class="card">
           <h2>🎯 Từ hay sai (bấm 🔊 để nghe)</h2>
-          <div class="words" id="weakWords"><i style="font-size:13px;color:var(--ink-dim)">Đang tải…</i></div>
+          <div class="words-toolbar"><button type="button" class="ghost" id="btnExpandWeakWords">🔍 Mở rộng xem tất cả</button></div>
+          <div id="weakWordsSlot"><div class="words" id="weakWords"><i style="font-size:13px;color:var(--ink-dim)">Đang tải…</i></div></div>
         </div>
         <div class="card">
           <h2>🧩 Cấu trúc ngữ pháp hay sai</h2>
@@ -447,6 +457,15 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
         </div>
       </div>
     </div>
+  </div>
+</div>
+<div class="ww-modal-backdrop hidden" id="wwModalBackdrop">
+  <div class="ww-modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <h3 style="margin:0;font-size:16px;color:var(--gold2)">🎯 Từ hay sai (bấm 🔊 để nghe)</h3>
+      <button type="button" class="ghost" id="wwModalClose" style="margin:0">✕ Đóng</button>
+    </div>
+    <div id="wwModalSlot" style="flex:1;overflow:hidden;display:flex"></div>
   </div>
 </div>
 <script src="/server-config.js"></script>
