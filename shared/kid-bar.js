@@ -354,10 +354,36 @@ async function checkDailyAiContent() {
   } catch { /* mất mạng/AI lỗi: im lặng — bé tự mở mục đó sẽ tự thử sinh lại */ }
 }
 
+/**
+ * Nút 🏠 trên mỗi trang game (`<header class="top"><a class="round-btn"
+ * href="/mot-hub-co-dinh/">`) trỏ tới ĐÚNG 1 hub "chính" viết cứng trong
+ * HTML — nhưng rất nhiều game được liệt kê ở NHIỀU menu/hub khác nhau (vd
+ * "Chém Từ Vựng" nằm cả ở /thi-chung-chi-anh/, /game-mini-tu-vung/, và mục
+ * ngẫu nhiên trên trang chủ). Kết quả: dù bé vào game từ menu nào, bấm 🏠
+ * LUÔN đưa về đúng 1 hub cố định đó — không phải nơi bé vừa vào, đúng lỗi
+ * "back về ra trang khác" phụ huynh phản ánh. Sửa bằng cách: nếu phát hiện
+ * bé thực sự điều hướng TỪ 1 trang khác trong web này tới đây (`document.
+ * referrer` cùng origin), bấm 🏠 sẽ `history.back()` (quay đúng nơi vừa
+ * đến) thay vì đi tới href cố định; nếu vào thẳng bằng link ngoài/bookmark
+ * (không có referrer cùng origin) thì GIỮ NGUYÊN hành vi cũ (đi tới hub mặc
+ * định trong HTML) vì lúc đó không có "nơi vừa đến" nào để quay lại. */
+export function fixSmartHomeBack() {
+  try {
+    const homeLink = document.querySelector('header.top a.round-btn[href]');
+    if (!homeLink || !document.referrer) return;
+    if (new URL(document.referrer).origin !== location.origin) return;
+    homeLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      history.back();
+    });
+  } catch { /* ignore */ }
+}
+
 /** Gọi 1 lần khi game khởi động: thanh avatar + huy hiệu sao trên header +
  * giới hạn ngày + quà bố mẹ chờ mở. */
 export function mountKidFeatures() {
   try {
+    fixSmartHomeBack();
     const kid = api.currentKidInfo();
     if (kid) {
       mountBar(kid);

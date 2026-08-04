@@ -44,7 +44,12 @@ function sayInstruction(text) {
 }
 
 function speakEn(text, rate = 0.7) {
-  speak(text, { lang: 'en-US', rate });
+  // queue:true — bé có thể chém liên tục nhiều icon cùng lúc bay trên màn
+  // hình (không có khái niệm sai, cứ chém là được điểm), nếu cancel() từ
+  // trước như mặc định thì từ đang đọc dở bị cắt ngang bởi lần chém tiếp
+  // theo, bé gần như không bao giờ nghe trọn 1 từ — xem giải thích ở
+  // to-mau/src/speech.js.
+  speak(text, { lang: 'en-US', rate, queue: true });
 }
 
 function updateHud() {
