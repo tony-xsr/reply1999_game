@@ -560,23 +560,41 @@ export async function claimDailyPracticeBonus(profileId, sectionKey, todayKey, r
   return true;
 }
 
-/* ===== Ai Là Triệu Phú (xem shared/millionaire.js) — 1 lần/ngày/bé ===== */
+/* ===== Ai Là Triệu Phú (xem shared/millionaire.js) — chơi lại được TRONG
+ * NGÀY nếu chưa chinh phục trọn 15 câu (đề mới rút từ kho qua
+ * drawNewMillionaireQuiz, không gọi AI lại — tiết kiệm tài nguyên); chỉ CHẶN
+ * chơi thêm sau khi đã thắng trọn vẹn 1 lần trong ngày. ===== */
 
 /**
- * Ghi kết quả 1 lượt chơi "Ai Là Triệu Phú" hôm nay — CHẶN chơi lần 2 trong
- * cùng ngày (đọc settings MỚI NHẤT từ server, không tin cache, để 2 thiết bị/
- * 2 tab không lách chơi được 2 lần/ngày). Cộng sao nếu có.
- * @returns {Promise<boolean>} true nếu vừa ghi nhận, false nếu HÔM NAY đã chơi rồi
+ * Ghi kết quả 1 lượt chơi "Ai Là Triệu Phú" — CHẶN chơi thêm nếu HÔM NAY bé
+ * đã CHINH PHỤC TRỌN VẸN (won=true) rồi (đọc settings MỚI NHẤT từ server,
+ * không tin cache, để 2 thiết bị/2 tab không lách được). Nếu chưa thắng, vẫn
+ * ghi nhận lượt chơi (để bé chơi lại đề khác) nhưng CHỈ cộng sao phần VƯỢT so
+ * với lượt tốt nhất trong ngày — tránh cày sao bằng cách chơi lại nhiều lần
+ * rồi dừng ở cùng 1 mốc.
+ * @returns {Promise<boolean>} true nếu vừa ghi nhận, false nếu hôm nay ĐÃ THẮNG rồi
  */
-export async function claimMillionaireResult(profileId, { stars, correctStreak }, todayKey) {
+export async function claimMillionaireResult(profileId, { stars, correctStreak, won }, todayKey) {
   const settings = await fetchKidSettings(profileId);
   if (settings.millionaireLastPlayedDay === todayKey) return false;
+  const sameDay = settings.millionaireBestDay === todayKey;
+  const prevBestStars = sameDay ? (settings.millionaireBestStars || 0) : 0;
+  const prevBestStreak = sameDay ? (settings.millionaireBestCorrectStreak || 0) : 0;
+  const bestStars = Math.max(prevBestStars, stars);
+  const bestStreak = Math.max(prevBestStreak, correctStreak);
+  const bonusStars = Math.max(0, stars - prevBestStars);
   await updateKid(profileId, {
     settings: {
-      ...settings, millionaireLastPlayedDay: todayKey, millionaireLastStars: stars, millionaireLastCorrectStreak: correctStreak,
+      ...settings,
+      millionaireBestDay: todayKey,
+      millionaireBestStars: bestStars,
+      millionaireBestCorrectStreak: bestStreak,
+      millionaireLastStars: bestStars,
+      millionaireLastCorrectStreak: bestStreak,
+      ...(won ? { millionaireLastPlayedDay: todayKey } : {}),
     },
   });
-  if (stars > 0) await grantStars(profileId, stars, 'trieu-phu:hoan-thanh');
+  if (bonusStars > 0) await grantStars(profileId, bonusStars, 'trieu-phu:hoan-thanh');
   return true;
 }
 
@@ -925,11 +943,11 @@ export async function ensureTranslationPassages(profileId, level, day) {
   return savePassages(profileId, [{ level, title: fromPool.title, passage_en: fromPool.passage_en, vocab: fromPool.vocab }], day);
 }
 
-/** Tương tự ensureTranslationPassages nhưng cho Trắc Nghiệm — trả về đề nếu
- * tái dùng/mượn được, hoặc null nếu bên gọi cần tự sinh AI mới. */
-export async function ensureGrammarQuiz(profileId, level, quizType, day) {
-  const existing = await grammarQuizForDay(profileId, day, quizType);
-  if (existing) return existing;
+/** Rút 1 đề MỚI (chưa từng gán cho bé này) từ nguồn tái dùng của cả nhà rồi
+ * đến kho chung — dùng chung cho ensureGrammarQuiz() (đề đầu tiên trong ngày)
+ * và drawNewMillionaireQuiz() (rút đề KHÁC để bé chơi lại Ai Là Triệu Phú
+ * trong cùng ngày, xem giải thích ở hàm đó). */
+async function drawGrammarQuiz(profileId, level, quizType, day) {
   const sinceDay = dateKeyOffset(-REUSE_WINDOW_DAYS);
   const [pool, submissions, mine] = await Promise.all([
     familyGrammarQuizzesForReuse(level, quizType, sinceDay),
@@ -946,6 +964,26 @@ export async function ensureGrammarQuiz(profileId, level, quizType, day) {
   const fromPool = await quizPoolPick(level, quizType, profileId);
   if (!fromPool) return null;
   return saveGrammarQuiz(profileId, { level, questions: fromPool.questions, quizType }, day);
+}
+
+/** Tương tự ensureTranslationPassages nhưng cho Trắc Nghiệm — trả về đề nếu
+ * tái dùng/mượn được, hoặc null nếu bên gọi cần tự sinh AI mới. */
+export async function ensureGrammarQuiz(profileId, level, quizType, day) {
+  const existing = await grammarQuizForDay(profileId, day, quizType);
+  if (existing) return existing;
+  return drawGrammarQuiz(profileId, level, quizType, day);
+}
+
+/** Rút đề "Ai Là Triệu Phú" MỚI (khác đề vừa chơi) cho bé chơi lại TRONG
+ * CÙNG NGÀY — dùng khi bé CHƯA chinh phục trọn 15 câu (xem claimMillionaireResult:
+ * chỉ chặn chơi thêm sau khi đã thắng trọn vẹn). Cố tình KHÔNG gọi
+ * grammarQuizForDay() trước như ensureGrammarQuiz() (sẽ chỉ trả lại đúng đề
+ * vừa thua) — luôn rút đề TIẾP THEO trong kho (family reuse rồi đến
+ * quiz_pool chung, KHÔNG gọi AI) vì đề vừa thua đã được lưu là "đã gán cho bé
+ * này" nên tự động bị loại khỏi lượt rút kế tiếp. Lưu đè thành bản ghi MỚI
+ * NHẤT của `day` để lỡ bé thoát giữa chừng, mở lại vẫn đúng đề đang chơi dở. */
+export async function drawNewMillionaireQuiz(profileId, level, day) {
+  return drawGrammarQuiz(profileId, level, 'millionaire', day);
 }
 
 /**

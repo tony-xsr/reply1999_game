@@ -1,7 +1,9 @@
-// "🏆 Ai Là Triệu Phú" — 15 câu trắc nghiệm AI tự sinh, TĂNG DẦN độ khó, mỗi
-// ngày chơi 1 lần. Trả lời đúng liên tục thì đi lên thang điểm; sai bất kỳ
-// câu nào thì dừng lại, chỉ giữ số sao của các MỐC (câu 5/10/15) đã hoàn
-// thành trọn vẹn trước đó — xem công thức đầy đủ ở shared/millionaire.js.
+// "🏆 Ai Là Triệu Phú" — 15 câu trắc nghiệm, TĂNG DẦN độ khó. Trả lời đúng
+// liên tục thì đi lên thang điểm; sai bất kỳ câu nào thì dừng lại, chỉ giữ số
+// sao của các MỐC (câu 5/10/15) đã hoàn thành trọn vẹn trước đó — xem công
+// thức đầy đủ ở shared/millionaire.js. Bé CHƯA chinh phục trọn 15 câu thì
+// được CHƠI LẠI bằng 1 đề KHÁC (rút từ kho có sẵn, không gọi AI — tiết kiệm
+// tài nguyên) ngay trong ngày; chỉ khi thắng trọn vẹn mới bị khoá tới mai.
 //
 // Dùng CHUNG cho MỌI trang luyện thi (exam-prep + 4 bản khoá cấp độ
 // luyen-thi-ket/pet/toefl-junior/toeic), cùng khung overlay ở
@@ -63,15 +65,17 @@ function injectMillionaireStyle() {
 
 /**
  * Trả về 1 nút <button> "🏆 Ai Là Triệu Phú" — không cần cấu hình riêng như
- * Luyện Dịch/Trắc Nghiệm, chỉ cần đã chọn bé. Đổi nhãn nếu hôm nay đã chơi
- * rồi (hiện luôn số sao đã nhận, bấm vào vẫn xem lại được kết quả hôm nay).
+ * Luyện Dịch/Trắc Nghiệm, chỉ cần đã chọn bé. Đổi nhãn nếu hôm nay đã CHINH
+ * PHỤC TRỌN VẸN rồi (hiện luôn số sao đã nhận, bấm vào vẫn xem lại được kết
+ * quả) — nếu chỉ mới chơi thử/chưa thắng thì nhãn giữ nguyên, bé bấm vào vẫn
+ * chơi tiếp/chơi lại được bình thường.
  */
 export function buildMillionaireEntryButton(levelId, opts = {}) {
   const kid = api.currentKidInfo();
   if (!kid) return null;
   const todayKey = api.dateKeyOffset(0);
-  const playedToday = kid.settings?.millionaireLastPlayedDay === todayKey;
-  const label = playedToday
+  const wonToday = kid.settings?.millionaireLastPlayedDay === todayKey;
+  const label = wonToday
     ? `🏆 Ai Là Triệu Phú — hôm nay được ${formatStars(kid.settings?.millionaireLastStars || 0)} sao ⭐`
     : '🏆 Ai Là Triệu Phú — 15 câu hôm nay';
   return buildEntryButton(label, () => openMillionaireOverlay(levelId, opts));
@@ -138,9 +142,9 @@ async function openMillionaireOverlay(levelId, { speak } = {}) {
   const questions = quiz.questions;
   const draft = loadDraft(kid.id, quiz.id);
   if (draft?.index > 0 && draft.index < TOTAL_QUESTIONS) {
-    renderQuestion(ov, { levelLabel, questions, quizId: quiz.id, kid, say, index: draft.index });
+    renderQuestion(ov, { levelId, levelLabel, questions, quizId: quiz.id, kid, say, index: draft.index });
   } else {
-    renderIntro(ov, { levelLabel, questions, quizId: quiz.id, kid, say });
+    renderIntro(ov, { levelId, levelLabel, questions, quizId: quiz.id, kid, say });
   }
 }
 
@@ -150,7 +154,7 @@ function renderAlreadyPlayed(ov, kid) {
   renderAiBox(ov, `
     <h3>🏆 Ai Là Triệu Phú</h3>
     <div class="r99-mp-played">
-      ✅ Hôm nay bé đã chơi rồi!<br>
+      🏆 Hôm nay bé đã CHINH PHỤC TRỌN VẸN rồi!<br>
       Trả lời đúng liên tục <b>${streak}/${TOTAL_QUESTIONS}</b> câu — nhận được <b>⭐ ${formatStars(stars)} sao</b>.<br>
       Mai bé quay lại chơi tiếp nhé!
     </div>
@@ -222,31 +226,58 @@ function answerQuestion(ov, ctx, picked) {
 }
 
 async function finishGame(ov, ctx, correctStreak) {
-  const { kid, say, quizId } = ctx;
+  const {
+    kid, say, quizId, levelId,
+  } = ctx;
   clearDraft(kid.id, quizId);
   renderAiBox(ov, '<p class="r99-ai-msg">Đang lưu kết quả…</p>');
   const stars = computeStarsEarned(correctStreak);
+  const won = correctStreak >= TOTAL_QUESTIONS;
   const todayKey = api.dateKeyOffset(0);
   try {
-    await api.claimMillionaireResult(kid.id, { stars, correctStreak }, todayKey);
+    await api.claimMillionaireResult(kid.id, { stars, correctStreak, won }, todayKey);
     if (stars > 0) refreshStarBadge();
   } catch { /* mất mạng: bé vẫn xem được kết quả, thử lại coi như chưa chơi (không mất lượt) */ }
 
-  const won = correctStreak >= TOTAL_QUESTIONS;
   const emoji = won ? '🏆' : stars > 0 ? '🎉' : '💪';
   const msg = won
     ? `Xuất sắc! Bé trả lời đúng TRỌN VẸN cả ${TOTAL_QUESTIONS} câu!`
     : stars > 0
       ? `Bé dừng lại ở câu ${correctStreak + 1} nhưng đã giữ được mốc an toàn gần nhất!`
-      : `Bé dừng lại ở câu ${correctStreak + 1} — chưa qua được mốc an toàn đầu tiên, mai chơi lại nhé!`;
+      : `Bé dừng lại ở câu ${correctStreak + 1} — chưa qua được mốc an toàn đầu tiên!`;
+  const footNote = won
+    ? 'Bé đã chinh phục trọn vẹn hôm nay — hẹn ngày mai chơi tiếp nhé!'
+    : 'Bé CHƯA chinh phục trọn 15 câu — có thể chơi lại với đề khác ngay bây giờ!';
   renderAiBox(ov, `
     <div class="r99-mp-result">${emoji}</div>
     <p style="text-align:center;font-weight:800;font-size:15px">${msg}</p>
     <div class="r99-ai-score">⭐ ${formatStars(stars)} sao</div>
     ${renderLadderHtml(0, correctStreak)}
-    <p style="font-size:12px;color:#5d5370;text-align:center;margin-top:8px">Mỗi ngày chỉ chơi được 1 lần — hẹn bé ngày mai nhé!</p>
+    <p style="font-size:12px;color:#5d5370;text-align:center;margin-top:8px">${footNote}</p>
+    ${won ? '' : '<button type="button" class="r99-ai-btn" id="mpRetryBtn">🔄 CHƠI LẠI — ĐỀ KHÁC</button>'}
     <button type="button" class="r99-ai-btn ghost" id="mpCloseBtn">Đóng</button>
   `);
   say(`${msg} Bé nhận được ${formatStars(stars)} sao!`, { lang: 'vi-VN', rate: 0.92 });
   ov.querySelector('#mpCloseBtn').addEventListener('click', () => closeAiOverlay(ov));
+  const retryBtn = ov.querySelector('#mpRetryBtn');
+  if (retryBtn) retryBtn.addEventListener('click', () => retryQuiz(ov, { kid, say, levelId }));
+}
+
+async function retryQuiz(ov, { kid, say, levelId }) {
+  renderAiBox(ov, '<p class="r99-ai-msg">Đang chuẩn bị đề mới…</p>');
+  const todayKey = api.dateKeyOffset(0);
+  const levelLabel = EXAM_LEVEL_LABELS[levelId] || levelId;
+  try {
+    const quiz = await api.drawNewMillionaireQuiz(kid.id, levelId, todayKey);
+    if (!quiz) {
+      renderAiBox(ov, '<p class="r99-ai-msg">Kho đề đã hết cho hôm nay, bé thử lại vào ngày mai nhé!</p><button type="button" class="r99-ai-btn ghost" id="mpCloseBtn">Đóng</button>');
+      ov.querySelector('#mpCloseBtn').addEventListener('click', () => closeAiOverlay(ov));
+      return;
+    }
+    renderIntro(ov, {
+      levelId, levelLabel, questions: quiz.questions, quizId: quiz.id, kid, say,
+    });
+  } catch (e) {
+    renderAiBox(ov, `<p class="r99-ai-msg">⚠️ ${e.message}</p>`);
+  }
 }
