@@ -98,7 +98,17 @@ export function signOut() {
   writeSession(null);
 }
 
-async function refreshToken() {
+/** Chủ động làm mới access token bằng refresh_token đang lưu — trả về
+ * session mới (đã ghi vào localStorage) hoặc null nếu không làm mới được
+ * (refresh_token cũng hết hạn/không hợp lệ -> coi như đăng xuất). Cần export
+ * vì accessToken() cố tình KHÔNG tự làm mới (xem ghi chú ở đó) — những trang
+ * gọi thẳng 1 API server bằng accessToken() (vd admin/src/app.js gọi
+ * /api/admin-stats) phải tự refresh+thử lại khi gặp 401/403, nếu không access
+ * token cũ (hết hạn sau ~1h không hoạt động) sẽ khiến server từ chối dù đúng
+ * là tài khoản admin — đây chính là lỗi "thỉnh thoảng báo Không có quyền,
+ * phải mở trang khác rồi quay lại mới hết" đã gặp trên /admin/.
+ */
+export async function refreshToken() {
   const s = readSession();
   if (!s?.refresh_token) return null;
   try {

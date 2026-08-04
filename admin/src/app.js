@@ -36,10 +36,28 @@ $('btnSignOut').addEventListener('click', () => { api.signOut(); boot(); });
 $('btnSignOut2').addEventListener('click', () => { api.signOut(); boot(); });
 $('btnRefresh').addEventListener('click', () => { show('viewLoading'); loadStats(); });
 
+/** fetch() 1 API admin kèm access token, TỰ ĐỘNG làm mới token + gọi lại 1
+ * lần nếu gặp 401/403 — access token phiên phụ huynh hết hạn sau ~1 giờ
+ * không hoạt động, và api.accessToken() cố tình không tự làm mới (bên gọi
+ * PHẢI tự xử lý), nếu không sẽ gặp đúng lỗi "thỉnh thoảng báo Không có
+ * quyền dù đúng tài khoản admin, phải mở trang khác rồi quay lại mới hết"
+ * (mở trang khác vô tình kích hoạt refresh token qua shared/api.js rest()). */
+async function adminFetch(path, options = {}) {
+  const doFetch = (token) => fetch(path, {
+    ...options,
+    headers: { ...(options.headers || {}), Authorization: `Bearer ${token}` },
+  });
+  let res = await doFetch(api.accessToken());
+  if (res.status === 401 || res.status === 403) {
+    const renewed = await api.refreshToken();
+    if (renewed?.access_token) res = await doFetch(renewed.access_token);
+  }
+  return res;
+}
+
 async function loadStats() {
   try {
-    const token = api.accessToken();
-    const res = await fetch('/api/admin-stats', { headers: { Authorization: `Bearer ${token}` } });
+    const res = await adminFetch('/api/admin-stats');
     if (res.status === 403) { show('viewDenied'); return; }
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || `Lỗi ${res.status}`);
@@ -58,8 +76,7 @@ async function loadCronState() {
   const row = $('cronStatusRow');
   const btn = $('btnToggleCron');
   try {
-    const token = api.accessToken();
-    const res = await fetch('/api/admin-cron', { headers: { Authorization: `Bearer ${token}` } });
+    const res = await adminFetch('/api/admin-cron');
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || `Lỗi ${res.status}`);
     renderCronState(data);
@@ -86,10 +103,9 @@ async function toggleCron(enabled) {
   btn.disabled = true;
   msg.textContent = '';
   try {
-    const token = api.accessToken();
-    const res = await fetch('/api/admin-cron', {
+    const res = await adminFetch('/api/admin-cron', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ enabled }),
     });
     const data = await res.json();
@@ -169,8 +185,7 @@ $('btnDownloadBackup').addEventListener('click', async () => {
   const ok = $('backupOk');
   ok.textContent = 'Đang tải bản sao lưu…';
   try {
-    const token = api.accessToken();
-    const res = await fetch('/api/admin-backup', { headers: { Authorization: `Bearer ${token}` } });
+    const res = await adminFetch('/api/admin-backup');
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || `Lỗi ${res.status}`);
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -225,10 +240,9 @@ $('btnRestore').addEventListener('click', async () => {
   msg.style.color = 'var(--ink-dim)';
   msg.textContent = 'Đang khôi phục — ĐỪNG đóng trang này…';
   try {
-    const token = api.accessToken();
-    const res = await fetch('/api/admin-backup', {
+    const res = await adminFetch('/api/admin-backup', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(parsed),
     });
     const data = await res.json();
