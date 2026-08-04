@@ -6,8 +6,17 @@ let mutedFn = () => false;
 /** Cho phép app gắn điều kiện tắt tiếng chung (dùng chung nút 🔊 với sfx). */
 export function bindMute(fn) { mutedFn = fn; }
 
-/** Đọc 1 câu tiếng Việt; câu mới sẽ ngắt câu đang đọc. */
-export function speak(text, { rate = 0.9, lang = 'vi-VN' } = {}) {
+/** Đọc 1 câu; mặc định câu mới sẽ NGẮT câu đang đọc (đúng cho các game "1
+ * mục tiêu tại 1 thời điểm" — nói lại/nói câu khác thì câu cũ không còn cần
+ * nữa). Truyền `queue: true` cho các game kiểu "chém/chạm nhiều mục tiêu bay
+ * cùng lúc, không có khái niệm sai" (vd Chém Từ Vựng) — nếu bé chạm liên tục
+ * nhiều icon trong lúc từ trước ĐANG đọc dở, cancel() sẽ cắt ngang khiến bé
+ * gần như không bao giờ nghe trọn 1 từ nào; xếp hàng (không cancel) để đọc
+ * lần lượt hết từng từ thay vì cắt nhau liên tục — số lượng bị chặn tự nhiên
+ * bởi số icon tối đa cùng lúc trên màn hình nên hàng đợi không bao giờ dài. */
+export function speak(text, {
+  rate = 0.9, lang = 'vi-VN', queue = false,
+} = {}) {
   try {
     if (mutedFn() || !window.speechSynthesis) return;
     const prefix = lang.split('-')[0];
@@ -17,7 +26,7 @@ export function speak(text, { rate = 0.9, lang = 'vi-VN' } = {}) {
     // là tiếng Anh) để đọc chữ tiếng Việt, nghe sai hoàn toàn. Im lặng còn
     // hơn đọc sai giọng như vậy — đúng như thiết kế ban đầu của file này.
     if (!voice) return;
-    speechSynthesis.cancel();
+    if (!queue) speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = lang;
     u.rate = rate;

@@ -6,6 +6,9 @@ import { Painter } from './paint.js';
 import { speak, bindMute } from './speech.js';
 import { sfx } from '../../pokemon/src/sfx.js';
 import { currentProfile, recordSession } from '../../pokemon/src/stats.js';
+import { fixSmartHomeBack } from '../../shared/kid-bar.js';
+
+fixSmartHomeBack();
 
 const t = (key, fallback) => {
   const v = window.I18N?.t(key);
