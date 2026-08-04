@@ -35,25 +35,48 @@ body{
     max(48px, calc(env(safe-area-inset-bottom, 0px) + 32px))
     max(18px, env(safe-area-inset-left, 0px));
 }
-header{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:10px 6px 14px;border-bottom:1px solid #e9d3ad;margin-bottom:18px}
+header{display:flex;align-items:center;gap:10px;padding:10px 6px 14px;border-bottom:1px solid #e9d3ad;margin-bottom:18px}
 header .logo{
   width:40px;height:40px;border-radius:11px;
   background:linear-gradient(135deg,#ffe1b0,#ff8a3d);
   border:1px solid rgba(194,65,12,.25);
   display:flex;align-items:center;justify-content:center;
-  font-size:20px;flex:none;
+  font-size:20px;flex:none;text-decoration:none;
   box-shadow:0 3px 9px rgba(194,65,12,.18), inset 0 1px 0 rgba(255,255,255,.4);
 }
-header h1{margin:0;font-size:17px;font-weight:800;letter-spacing:.3px;color:var(--gold2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-header .sub{display:none}
-header .shop-btn{
-  flex:none;display:inline-flex;align-items:center;gap:5px;
-  background:linear-gradient(180deg,#ff9d5c,#c2410c);color:#fff;
-  border:none;border-radius:999px;padding:7px 13px;
-  font-size:12.5px;font-weight:800;text-decoration:none;white-space:nowrap;
-  box-shadow:0 2px 7px rgba(194,65,12,.3);
+/* Menu gọn: chỉ còn logo + hồ sơ bé (số sao) + 1 nút ⚙️ mở bảng cài đặt —
+   thay vì xếp thẳng hàng loạt nút (đổi quà/ngôn ngữ/theme/test âm thanh) như
+   trước, vừa gọn vừa tự responsive trên điện thoại/tablet vì luôn chỉ có 3
+   phần tử ở hàng ngoài cùng bất kể màn hình rộng hay hẹp. */
+.menu-wrap{position:relative;flex:none}
+.settings-btn{
+  width:38px;height:38px;border-radius:11px;flex:none;
+  background:var(--panel2);border:1px solid var(--line);color:var(--gold2);
+  font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;
 }
-header .shop-btn:active{transform:translateY(1px)}
+.settings-btn:active{transform:translateY(1px)}
+.settings-panel{
+  position:absolute;right:0;top:calc(100% + 8px);z-index:40;
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:14px;display:flex;flex-direction:column;gap:12px;
+  min-width:190px;max-width:min(240px, calc(100vw - 24px));
+  box-shadow:0 10px 26px rgba(0,0,0,.2);
+}
+.settings-panel.hidden{display:none}
+/* Chỉ ép rộng 100% cho select/nút Test âm thanh — KHÔNG áp cho các nút nhỏ
+   bên trong bộ chọn theme (mountThemePicker tự xếp inline-flex riêng), nếu
+   không sẽ bị kéo giãn/vỡ dáng thành hình tròn méo như phụ huynh phản ánh. */
+.settings-panel > .settings-group > select,
+.settings-panel .settings-audio-btn{width:100%;box-sizing:border-box}
+.settings-label{font-size:10.5px;font-weight:800;color:var(--ink-dim);
+  text-transform:uppercase;letter-spacing:.5px;margin:0 0 6px}
+.settings-group{display:flex;flex-direction:column}
+.settings-group + .settings-group{padding-top:12px;border-top:1px solid var(--line)}
+.settings-audio-btn{
+  background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+  border-radius:8px;padding:8px 10px;font-size:12.5px;font-weight:700;cursor:pointer;
+}
+.settings-audio-btn:active{transform:translateY(1px)}
 
 .grid, .fam-cards.open{display:grid;grid-template-columns:repeat(2, 1fr);gap:10px}
 @media (min-width:520px){.grid, .fam-cards.open{grid-template-columns:repeat(3, 1fr);gap:12px}}
@@ -196,25 +219,30 @@ footer a{color:var(--gold2)}
 <div class="wrap">
 
   <header>
-    <div class="logo">🌟</div>
-    <div style="flex:1;min-width:80px">
-      <h1 data-i18n="hub.title">Game Collection</h1>
-      <p class="sub" data-i18n="hub.subtitle">Học&luyện tư duy</p>
-    </div>
-    <a class="shop-btn" href="tu-qua/" data-i18n-title="hub.shop.title" title="Đổi sao lấy quà">
-      <span data-i18n="hub.shop.label">🎁 Đổi Quà</span>
-    </a>
+    <a class="logo" href="/" aria-label="Trang chủ" title="Game Collection">🌟</a>
+    <div style="flex:1;min-width:4px"></div>
     <div id="homeProfileSlot" style="display:flex;align-items:center"></div>
-    <div class="lang-picker" id="lang-picker" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-      <button id="btn-test-audio-hub" aria-label="Test audio" title="Test audio (iPhone)" style="background:linear-gradient(180deg,#3b82f6,#1d4ed8);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;cursor:pointer">🔊 Test</button>
-      <select id="lang-select" aria-label="Language" style="background:var(--panel2);color:var(--gold2);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;cursor:pointer;outline:none">
-        <option value="vi">🇻🇳 VI</option>
-        <option value="en">🇬🇧 EN</option>
-        <option value="ja">🇯🇵 JA</option>
-        <option value="zh">🇨🇳 ZH</option>
-        <option value="ar">🇸🇦 AR</option>
-      </select>
-      <div id="themeSlot" style="display:flex;align-items:center"></div>
+    <div class="menu-wrap">
+      <button type="button" class="settings-btn" id="btnSettingsToggle" aria-haspopup="true" aria-expanded="false" aria-label="Cài đặt" title="Cài đặt">⚙️</button>
+      <div class="settings-panel hidden" id="settingsPanel">
+        <div class="settings-group">
+          <div class="settings-label">🎨 Giao diện</div>
+          <div id="themeSlot"></div>
+        </div>
+        <div class="settings-group">
+          <div class="settings-label">🌐 Ngôn ngữ</div>
+          <select id="lang-select" aria-label="Language" style="background:var(--panel2);color:var(--gold2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;font-weight:600;cursor:pointer;outline:none">
+            <option value="vi">🇻🇳 Tiếng Việt</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="ja">🇯🇵 日本語</option>
+            <option value="zh">🇨🇳 中文</option>
+            <option value="ar">🇸🇦 العربية</option>
+          </select>
+        </div>
+        <div class="settings-group">
+          <button type="button" id="btn-test-audio-hub" class="settings-audio-btn" aria-label="Test audio" title="Test audio (iPhone)">🔊 Test âm thanh (iPhone)</button>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -610,6 +638,30 @@ document.getElementById('btnFunReroll')?.addEventListener('click', renderFunPick
 </script>
 <script>
 // Đăng ký service worker + tự kiểm tra bản mới giờ đã chuyển vào i18n.js (chạy trên mọi trang).
+
+// Mở/đóng bảng ⚙️ Cài đặt (ngôn ngữ/theme/test âm thanh) — đóng khi bấm ra
+// ngoài hoặc nhấn Escape, giống hành vi menu thả xuống thông thường.
+(function(){
+  const btn = document.getElementById('btnSettingsToggle');
+  const panel = document.getElementById('settingsPanel');
+  if (!btn || !panel) return;
+  function close(){
+    panel.classList.add('hidden');
+    btn.setAttribute('aria-expanded', 'false');
+  }
+  function open(){
+    panel.classList.remove('hidden');
+    btn.setAttribute('aria-expanded', 'true');
+  }
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (panel.classList.contains('hidden')) open(); else close();
+  });
+  document.addEventListener('click', (e) => {
+    if (!panel.classList.contains('hidden') && !panel.contains(e.target) && e.target !== btn) close();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+})();
 
 // Wire language selector
 (function(){

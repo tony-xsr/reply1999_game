@@ -157,6 +157,8 @@ function showProfileOverlay(kid, stars) {
       <span style="background:#fff;border:2px solid #a8834a;border-radius:999px;padding:6px 12px">⭐ ${starsText}</span>
       ${weak > 0 ? `<span style="background:#fff;border:2px solid #c2410c;border-radius:999px;padding:6px 12px;color:#c2410c">🎯 ${weak} từ cần ôn</span>` : ''}
     </div>
+    <a href="/tu-qua/" style="display:inline-flex;align-items:center;gap:5px;background:linear-gradient(180deg,#ff9d5c,#c2410c);
+      color:#fff;text-decoration:none;border-radius:999px;padding:8px 16px;font-size:13px;margin-bottom:12px">🎁 Đổi Quà</a>
     <a href="/chon-be/" style="display:block;color:#5d5370;font-size:13px;margin-bottom:16px;text-decoration:underline">Đổi bé khác</a>
     <button id="kidProfileClose" style="background:linear-gradient(180deg,#34b566,#1e7a45);color:#fff;border:none;
       border-radius:12px;padding:10px 26px;font-weight:900;font-size:14px;cursor:pointer">ĐÓNG</button>
