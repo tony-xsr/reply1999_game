@@ -268,6 +268,7 @@ function fillEditKid(k) {
   $('editNguphapPerDay').value = k.settings?.nguphapGoal?.perDay ?? '';
   $('editNguphapReward').value = k.settings?.nguphapGoal?.rewardStars ?? '';
   $('editTranslationLevel').value = k.settings?.translationLevel || '';
+  $('editConfirmSubmit').checked = !!k.settings?.confirmBeforeSubmitTranslation;
   $('editGrammarQuizLevel').value = k.settings?.grammarQuizLevel || '';
   $('editGrammarQuizType').value = k.settings?.grammarQuizType || 'grammar';
   $('editKidOk').textContent = '';
@@ -332,6 +333,8 @@ $('btnSaveKid').addEventListener('click', async () => {
   const translationLevel = $('editTranslationLevel').value;
   if (!translationLevel) delete settings.translationLevel;
   else settings.translationLevel = translationLevel;
+  if ($('editConfirmSubmit').checked) settings.confirmBeforeSubmitTranslation = true;
+  else delete settings.confirmBeforeSubmitTranslation;
   const grammarQuizLevel = $('editGrammarQuizLevel').value;
   if (!grammarQuizLevel) delete settings.grammarQuizLevel;
   else settings.grammarQuizLevel = grammarQuizLevel;

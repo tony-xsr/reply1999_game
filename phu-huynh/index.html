@@ -349,6 +349,11 @@ code{background:var(--panel2);padding:2px 6px;border-radius:6px;font-size:12px}
             <label>📝 Cấp độ dùng cho Luyện Dịch (đoạn văn ngắn, chấm bằng AI)</label>
             <select id="editTranslationLevel"></select>
             <p style="font-size:12px;color:var(--ink-dim);margin:4px 0 0">Bỏ trống = ẩn mục "📝 Luyện Dịch" trong Thi Chứng Chỉ Anh của bé. Mỗi ngày AI tự soạn 3 đoạn văn mới đúng cấp độ này cho riêng bé.</p>
+            <label style="display:flex;align-items:center;gap:8px;font-weight:600;margin-top:10px">
+              <input type="checkbox" id="editConfirmSubmit" style="width:auto;margin:0" />
+              Hỏi xác nhận trước khi nộp bài dịch
+            </label>
+            <p style="font-size:12px;color:var(--ink-dim);margin:4px 0 0">Bật lên: bấm "NỘP BÀI DỊCH" sẽ hiện 1 bước hỏi lại "Bé chắc chắn muốn nộp chưa?" (Có/Không) trước khi bài thực sự được gửi đi chấm — tránh bấm nhầm khi chưa xong.</p>
             <label>🧩 Cấp độ dùng cho Trắc Nghiệm (5 câu/ngày, chấm + giải thích bằng AI)</label>
             <select id="editGrammarQuizLevel"></select>
             <select id="editGrammarQuizType" style="margin-top:6px">
