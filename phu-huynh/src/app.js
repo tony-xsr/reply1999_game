@@ -860,6 +860,7 @@ let lastGrammarQuizzes = [];
 function renderGrammarQuizLog(submissions) {
   lastGrammarQuizzes = submissions;
   applyGrammarFilters();
+  renderFavoriteQuizQuestions();
 }
 
 function applyGrammarFilters() {
@@ -869,6 +870,35 @@ function applyGrammarFilters() {
 }
 $('gqFilterRange').addEventListener('change', applyGrammarFilters);
 $('gqFilterSort').addEventListener('change', applyGrammarFilters);
+
+/** true nếu câu hỏi (so theo `prompt`, giống quy ước dedup của cả dự án) đã
+ * được phụ huynh đánh dấu ⭐ yêu thích cho bé đang chọn. */
+function isFavoriteQuizQuestion(prompt) {
+  return !!state.kid?.settings?.favoriteQuizQuestions?.some((f) => f.prompt === prompt);
+}
+
+/** Render 1 câu hỏi trắc nghiệm: hiện CẢ 4 lựa chọn kèm giải thích riêng của
+ * từng lựa chọn (dữ liệu `q.explanations` đã có sẵn giải thích cho mọi
+ * option, không chỉ đáp án đúng/lựa chọn của bé) — để phụ huynh giải thích
+ * được với bé vì sao các đáp án còn lại sai, không chỉ đáp án bé chọn. Dùng
+ * chung cho cả log bài đã làm và danh sách ⭐ Yêu Thích. */
+function renderQuestionDetail(q, pickedIndex) {
+  const optionsHtml = (q.options || []).map((opt, oi) => {
+    const isPicked = oi === pickedIndex;
+    const isCorrect = oi === q.answer;
+    const tag = isCorrect ? ' ✅ đáp án đúng' : isPicked ? ' ❌ bé chọn' : '';
+    const color = isCorrect ? 'var(--good)' : isPicked ? 'var(--bad)' : 'var(--ink)';
+    const explain = q.explanations?.[oi];
+    return `<div style="margin:5px 0;padding:5px 8px;background:${isPicked || isCorrect ? 'var(--panel)' : 'transparent'};border-radius:6px;border:1px solid ${isCorrect ? 'var(--good)' : isPicked ? 'var(--bad)' : 'transparent'}">
+      <div style="font-size:12.5px"><b style="color:${color}">${opt}</b>${tag}</div>
+      ${explain ? `<div style="font-size:12px;margin:2px 0 0;color:var(--ink-dim)">💡 ${explain}</div>` : ''}
+    </div>`;
+  }).join('');
+  return `<div style="font-size:12.5px;margin:6px 0 2px;font-weight:700;color:var(--ink-dim)">Tất cả 4 đáp án:</div>
+    ${optionsHtml}
+    ${q.structure ? `<div style="font-size:12.5px;margin:6px 0 0">📚 <b>Cấu trúc:</b> ${q.structure}</div>` : ''}
+    ${q.translation ? `<div style="font-size:12.5px;margin:4px 0 0">🇻🇳 <b>Dịch:</b> ${q.translation}</div>` : ''}`;
+}
 
 function renderGrammarQuizLogRows(submissions) {
   const box = $('grammarQuizLog');
@@ -891,27 +921,14 @@ function renderGrammarQuizLogRows(submissions) {
          <button data-action="regrade-gq" data-id="${s.id}" style="margin-left:6px;padding:2px 9px;font-size:12px">🔁 Chấm lại</button></p>`;
     const qsHtml = questions.map((q, i) => {
       const a = s.answers?.[i] || {};
-      // Hiện CẢ 4 lựa chọn kèm giải thích riêng của từng lựa chọn (dữ liệu
-      // `q.explanations` đã có sẵn giải thích cho mọi option, không chỉ đáp
-      // án đúng/lựa chọn của bé) — để phụ huynh giải thích được với bé vì
-      // sao các đáp án còn lại sai, không chỉ đáp án bé chọn.
-      const optionsHtml = (q.options || []).map((opt, oi) => {
-        const isPicked = oi === a.selected;
-        const isCorrect = oi === q.answer;
-        const tag = isCorrect ? ' ✅ đáp án đúng' : isPicked ? ' ❌ bé chọn' : '';
-        const color = isCorrect ? 'var(--good)' : isPicked ? 'var(--bad)' : 'var(--ink)';
-        const explain = q.explanations?.[oi];
-        return `<div style="margin:5px 0;padding:5px 8px;background:${isPicked || isCorrect ? 'var(--panel)' : 'transparent'};border-radius:6px;border:1px solid ${isCorrect ? 'var(--good)' : isPicked ? 'var(--bad)' : 'transparent'}">
-          <div style="font-size:12.5px"><b style="color:${color}">${opt}</b>${tag}</div>
-          ${explain ? `<div style="font-size:12px;margin:2px 0 0;color:var(--ink-dim)">💡 ${explain}</div>` : ''}
-        </div>`;
-      }).join('');
+      const fav = isFavoriteQuizQuestion(q.prompt);
       return `<div style="margin:8px 0;padding:8px 10px;background:var(--panel2);border-radius:8px">
-        <div><b>Câu ${i + 1}:</b> ${q.prompt}</div>
-        <div style="font-size:12.5px;margin:6px 0 2px;font-weight:700;color:var(--ink-dim)">Tất cả 4 đáp án:</div>
-        ${optionsHtml}
-        ${q.structure ? `<div style="font-size:12.5px;margin:6px 0 0">📚 <b>Cấu trúc:</b> ${q.structure}</div>` : ''}
-        ${q.translation ? `<div style="font-size:12.5px;margin:4px 0 0">🇻🇳 <b>Dịch:</b> ${q.translation}</div>` : ''}
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+          <div><b>Câu ${i + 1}:</b> ${q.prompt}</div>
+          <button type="button" class="ghost" data-action="toggle-fav-gq" data-sub-id="${s.id}" data-qi="${i}"
+            style="margin:0;padding:2px 8px;font-size:13px;flex-shrink:0" title="${fav ? 'Bỏ yêu thích' : 'Lưu câu này vào ⭐ Yêu Thích'}">${fav ? '⭐' : '☆'}</button>
+        </div>
+        ${renderQuestionDetail(q, a.selected)}
       </div>`;
     }).join('');
     return `<div class="card" style="margin-bottom:10px;padding:12px 14px">
@@ -926,7 +943,84 @@ function renderGrammarQuizLogRows(submissions) {
   }).join('');
 }
 
+/** Đánh dấu/bỏ đánh dấu ⭐ 1 câu hỏi (so trùng theo `prompt`) — lưu SNAPSHOT
+ * đầy đủ câu hỏi (không chỉ id) vào kid.settings.favoriteQuizQuestions vì
+ * "Ai Là Triệu Phú"/trắc nghiệm thường không có bảng riêng dễ tra cứu lại 1
+ * câu cụ thể theo thời gian, và câu hỏi có thể bị dedup/không còn xuất hiện
+ * trong log sau này. */
+async function toggleFavoriteQuizQuestion(quiz, question, pickedIndex) {
+  if (!state.kid) return;
+  const settings = { ...(state.kid.settings || {}) };
+  const favs = [...(settings.favoriteQuizQuestions || [])];
+  const idx = favs.findIndex((f) => f.prompt === question.prompt);
+  if (idx >= 0) favs.splice(idx, 1);
+  else {
+    favs.unshift({
+      prompt: question.prompt,
+      options: question.options,
+      answer: question.answer,
+      explanations: question.explanations,
+      structure: question.structure,
+      translation: question.translation,
+      pickedIndex,
+      level: quiz.level,
+      quizType: quiz.quiz_type,
+      savedAt: new Date().toISOString(),
+    });
+  }
+  settings.favoriteQuizQuestions = favs;
+  const updated = await api.updateKid(state.kid.id, { settings });
+  state.kid = updated || { ...state.kid, settings };
+  applyGrammarFilters();
+  renderFavoriteQuizQuestions();
+}
+
+function renderFavoriteQuizQuestions() {
+  const box = $('favoriteQuizQuestions');
+  if (!box) return;
+  const favs = state.kid?.settings?.favoriteQuizQuestions || [];
+  if (!favs.length) {
+    box.innerHTML = '<i style="color:var(--ink-dim)">Chưa có câu nào được đánh dấu yêu thích — bấm ☆ cạnh 1 câu trong danh sách bài đã làm ở trên để lưu lại.</i>';
+    return;
+  }
+  box.innerHTML = favs.map((f, i) => `<div style="margin:8px 0;padding:8px 10px;background:var(--panel2);border-radius:8px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+      <div><b>${EXAM_LEVEL_LABELS[f.level] || f.level || ''}${f.quizType && f.quizType !== 'grammar' ? ` · ${f.quizType}` : ''}:</b> ${f.prompt}</div>
+      <button type="button" class="ghost" data-action="remove-fav-gq" data-i="${i}" style="margin:0;padding:2px 8px;font-size:13px;flex-shrink:0">🗑️</button>
+    </div>
+    ${renderQuestionDetail(f, f.pickedIndex)}
+  </div>`).join('');
+}
+
+$('favoriteQuizQuestions').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-action="remove-fav-gq"]');
+  if (!btn || !state.kid) return;
+  const i = Number(btn.dataset.i);
+  const settings = { ...(state.kid.settings || {}) };
+  const favs = [...(settings.favoriteQuizQuestions || [])];
+  favs.splice(i, 1);
+  settings.favoriteQuizQuestions = favs;
+  const updated = await api.updateKid(state.kid.id, { settings });
+  state.kid = updated || { ...state.kid, settings };
+  applyGrammarFilters();
+  renderFavoriteQuizQuestions();
+});
+
 $('grammarQuizLog').addEventListener('click', async (e) => {
+  const favBtn = e.target.closest('button[data-action="toggle-fav-gq"]');
+  if (favBtn) {
+    const s = lastGrammarQuizzes.find((x) => x.id === favBtn.dataset.subId);
+    const qi = Number(favBtn.dataset.qi);
+    const q = s?.grammar_quizzes?.questions?.[qi];
+    if (!s || !q) return;
+    favBtn.disabled = true;
+    try {
+      await toggleFavoriteQuizQuestion(s.grammar_quizzes, q, s.answers?.[qi]?.selected);
+    } finally {
+      favBtn.disabled = false;
+    }
+    return;
+  }
   const btn = e.target.closest('button[data-action="regrade-gq"]');
   if (!btn) return;
   const s = lastGrammarQuizzes.find((x) => x.id === btn.dataset.id);
