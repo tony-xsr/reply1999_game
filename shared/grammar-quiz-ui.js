@@ -28,6 +28,11 @@ import { refreshStarBadge } from './kid-bar.js';
 /* ===== Bài đang làm dở (localStorage) — sống sót qua xoay màn hình/đổi app
    giữa chừng, chỉ mất khi bé trả lời xong câu cuối và nộp thành công. ===== */
 
+// Quá 20 phút không trả lời thêm câu nào thì coi như đã BỎ ĐÓ — mở lại tính
+// là phiên làm bài MỚI, không cộng dồn thời gian bỏ đó vào "thời gian làm
+// bài" (secondsSpent) — xem openGrammarQuizOverlay.
+const DRAFT_IDLE_RESET_MS = 20 * 60 * 1000;
+
 function draftKey(kidId, quizId) {
   return `r99-gq-draft:${kidId}:${quizId}`;
 }
@@ -113,7 +118,11 @@ async function openGrammarQuizOverlay(levelId, { speak } = {}) {
 
   const draft = loadDraft(kid.id, quiz.id);
   if (draft?.picks?.length) {
-    renderQuestion(ov, { levelLabel, typeLabel, quiz, kid, say, oldQuizzes, index: draft.index, picks: draft.picks, startedAt: draft.startedAt });
+    // Sửa lỗi "thời gian làm bài" hiện vô lý (vd 518 phút) — nếu bé trả lời
+    // vài câu rồi bỏ đó rất lâu mới quay lại làm tiếp, không cộng dồn
+    // khoảng thời gian bỏ đó vào giờ làm bài (xem DRAFT_IDLE_RESET_MS).
+    const isStale = Date.now() - (draft.lastSavedAt ?? draft.startedAt ?? 0) > DRAFT_IDLE_RESET_MS;
+    renderQuestion(ov, { levelLabel, typeLabel, quiz, kid, say, oldQuizzes, index: draft.index, picks: draft.picks, startedAt: isStale ? Date.now() : draft.startedAt });
   } else {
     renderIntro(ov, { levelLabel, typeLabel, quiz, kid, say, oldQuizzes });
   }
@@ -200,7 +209,7 @@ function renderQuestion(ov, ctx) {
         clearDraft(kid.id, quiz.id);
         finishQuiz(ov, { ...ctx, picks: nextPicks });
       } else {
-        saveDraft(kid.id, quiz.id, { index: nextIndex, picks: nextPicks, startedAt: ctx.startedAt });
+        saveDraft(kid.id, quiz.id, { index: nextIndex, picks: nextPicks, startedAt: ctx.startedAt, lastSavedAt: Date.now() });
         renderQuestion(ov, { ...ctx, index: nextIndex, picks: nextPicks });
       }
     });
@@ -212,7 +221,10 @@ async function finishQuiz(ov, ctx) {
   renderAiBox(ov, '<p class="r99-ai-msg">Đang lưu bài…</p>');
   const results = quiz.questions.map((q, i) => ({ prompt: q.prompt, correct: picks[i] === q.answer }));
   const score = results.filter((r) => r.correct).length;
-  const secondsSpent = Math.max(1, Math.round((Date.now() - (startedAt || Date.now())) / 1000));
+  // Chốt chặn an toàn thứ 2 (ngoài việc reset ở openGrammarQuizOverlay khi
+  // MỞ LẠI đề dở) — lỡ bé mở đề rồi để overlay đứng yên rất lâu mới trả lời
+  // câu cuối, vẫn không để "thời gian làm bài" hiện ra vô lý (giới hạn 1 tiếng).
+  const secondsSpent = Math.min(3600, Math.max(1, Math.round((Date.now() - (startedAt || Date.now())) / 1000)));
 
   // BƯỚC 1 — điểm tính CLIENT-SIDE (không cần AI) nên lưu bài NGAY, trước
   // khi nhờ AI soạn gợi ý (AI lỗi thì bài vẫn được ghi nhận đầy đủ).

@@ -49,6 +49,11 @@ function escapeHtml(s) {
 /* ===== Bản nháp đang gõ dở (localStorage) — sống sót qua xoay màn hình/đổi
    app/mất mạng giữa chừng, chỉ mất khi bé bấm nộp bài thành công. ===== */
 
+// Quá 20 phút không có lần lưu nháp nào mới (bé không gõ gì thêm) thì coi
+// như đã BỎ ĐÓ — lần mở lại tính là phiên làm bài MỚI, không cộng dồn thời
+// gian bỏ đó vào "thời gian làm bài" (xem renderWork).
+const DRAFT_IDLE_RESET_MS = 20 * 60 * 1000;
+
 function draftKey(kidId, passageId) {
   return `r99-tr-draft:${kidId}:${passageId}`;
 }
@@ -265,7 +270,14 @@ async function backgroundRegrade(passage, submission) {
 function renderWork(ov, ctx) {
   const { passage, kid } = ctx;
   const draft = loadDraft(kid.id, passage.id);
-  const startedAt = draft?.startedAt || Date.now();
+  // Sửa lỗi "⏱️ 518 phút" — nếu bé mở bài, gõ vài chữ rồi BỎ ĐÓ (tắt app/khoá
+  // máy) và mãi sau mới quay lại gõ tiếp, `startedAt` cũ vẫn còn nguyên nên
+  // secondsSpent tính luôn cả khoảng thời gian bỏ đó (không phải thời gian
+  // thực sự làm bài). Nếu lần lưu bản nháp GẦN NHẤT đã cách đây quá lâu
+  // (DRAFT_IDLE_RESET_MS), coi như bé bắt đầu lại một phiên MỚI — giữ
+  // nguyên chữ đã gõ, chỉ reset lại mốc tính giờ.
+  const isStale = draft && Date.now() - (draft.lastSavedAt ?? draft.startedAt ?? 0) > DRAFT_IDLE_RESET_MS;
+  const startedAt = (draft && !isStale) ? draft.startedAt : Date.now();
   renderAiBox(ov, `
     <h3 style="font-size:15px">${passage.title}</h3>
     <div class="r99-ai-passage">${passage.passage_en}</div>
@@ -280,37 +292,65 @@ function renderWork(ov, ctx) {
   let saveTimer = null;
   input.addEventListener('input', () => {
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => saveDraft(kid.id, passage.id, { text: input.value, startedAt }), 400);
+    saveTimer = setTimeout(() => saveDraft(kid.id, passage.id, { text: input.value, startedAt, lastSavedAt: Date.now() }), 400);
   });
 
-  btn.addEventListener('click', async () => {
+  btn.addEventListener('click', () => {
     const text = input.value.trim();
     if (!text) { msg.textContent = 'Bé viết bản dịch vào ô trên đã nhé!'; return; }
-    btn.disabled = true;
-    msg.textContent = 'Đang lưu bài…';
-    const secondsSpent = Math.max(1, Math.round((Date.now() - startedAt) / 1000));
-
-    // BƯỚC 1 — lưu bài NGAY, trước khi nhờ AI chấm (AI lỗi thì bài vẫn còn).
-    let submission;
-    try {
-      submission = await api.submitTranslationDraft(passage.id, { submittedText: text, secondsSpent });
-    } catch (e) {
-      msg.textContent = `⚠️ Không lưu được bài (${e.message}) — kiểm tra mạng rồi bấm nộp lại, bản nháp vẫn được giữ.`;
-      btn.disabled = false;
-      return;
+    // Phụ huynh có thể bật "hỏi xác nhận trước khi nộp" riêng cho bé này ở
+    // Trang Phụ Huynh > Cài đặt bé (settings.confirmBeforeSubmitTranslation)
+    // — tránh bấm nhầm khi bài chưa xong hẳn.
+    if (kid.settings?.confirmBeforeSubmitTranslation) {
+      renderConfirmSubmit(ov, ctx, { text, startedAt });
+    } else {
+      doSubmitTranslation(ov, ctx, { text, startedAt });
     }
-    clearDraft(kid.id, passage.id);
-
-    // BƯỚC 2 — nhờ AI chấm (lỗi/hết quota cũng KHÔNG mất bài đã lưu ở bước 1).
-    msg.textContent = '🤖 AI đang chấm bài…';
-    let grade = null;
-    try {
-      const settings = api.cachedSettings() || await api.getSettings();
-      grade = await aiProvider.gradeTranslation(settings, { passageEn: passage.passage_en, submittedVi: text });
-      await api.updateTranslationGrade(submission.id, { aiScore: grade.score, aiFeedback: grade.feedback, aiReferenceVi: grade.referenceVi });
-    } catch { /* AI lỗi: bài đã an toàn, chấm lại sau (renderList/resumeUnfinished tự thử lại) */ }
-    renderFeedback(ov, { ...ctx, submission, grade });
   });
+}
+
+/** Bước hỏi lại trước khi thực sự nộp — chỉ hiện khi phụ huynh đã bật cho
+ * bé này. "Không" quay về màn gõ bài (bản nháp vẫn còn nguyên). */
+function renderConfirmSubmit(ov, ctx, { text, startedAt }) {
+  renderAiBox(ov, `
+    <h3 style="font-size:15px">${ctx.passage.title}</h3>
+    <p style="margin:6px 0"><b>Bản dịch của bé:</b> ${escapeHtml(text)}</p>
+    <p class="r99-ai-msg" style="color:#b45309;font-weight:700">Bé chắc chắn muốn nộp bài này chưa? Nộp rồi AI sẽ chấm điểm ngay.</p>
+    <button type="button" class="r99-ai-btn" id="trConfirmYes">✅ Có, nộp bài</button>
+    <button type="button" class="r99-ai-btn ghost" id="trConfirmNo">↩️ Không, xem lại</button>
+  `);
+  ov.querySelector('#trConfirmYes').addEventListener('click', () => doSubmitTranslation(ov, ctx, { text, startedAt }));
+  ov.querySelector('#trConfirmNo').addEventListener('click', () => renderWork(ov, ctx));
+}
+
+async function doSubmitTranslation(ov, ctx, { text, startedAt }) {
+  const { passage, kid } = ctx;
+  renderAiBox(ov, '<p class="r99-ai-msg">Đang lưu bài…</p>');
+  // Chốt chặn an toàn thứ 2 (ngoài việc reset ở renderWork khi MỞ LẠI bài) —
+  // lỡ bé mở bài rồi để overlay đứng yên rất lâu (không tắt app) mới bấm
+  // nộp, vẫn không để "thời gian làm bài" hiện ra vô lý (giới hạn 1 tiếng).
+  const secondsSpent = Math.min(3600, Math.max(1, Math.round((Date.now() - startedAt) / 1000)));
+
+  // BƯỚC 1 — lưu bài NGAY, trước khi nhờ AI chấm (AI lỗi thì bài vẫn còn).
+  let submission;
+  try {
+    submission = await api.submitTranslationDraft(passage.id, { submittedText: text, secondsSpent });
+  } catch (e) {
+    renderAiBox(ov, `<p class="r99-ai-msg">⚠️ Không lưu được bài (${e.message}) — kiểm tra mạng rồi thử lại, bản nháp vẫn được giữ.</p><button type="button" class="r99-ai-btn ghost" id="trRetryBtn">Thử lại</button>`);
+    ov.querySelector('#trRetryBtn')?.addEventListener('click', () => doSubmitTranslation(ov, ctx, { text, startedAt }));
+    return;
+  }
+  clearDraft(kid.id, passage.id);
+
+  // BƯỚC 2 — nhờ AI chấm (lỗi/hết quota cũng KHÔNG mất bài đã lưu ở bước 1).
+  renderAiBox(ov, '<p class="r99-ai-msg">🤖 AI đang chấm bài…</p>');
+  let grade = null;
+  try {
+    const settings = api.cachedSettings() || await api.getSettings();
+    grade = await aiProvider.gradeTranslation(settings, { passageEn: passage.passage_en, submittedVi: text });
+    await api.updateTranslationGrade(submission.id, { aiScore: grade.score, aiFeedback: grade.feedback, aiReferenceVi: grade.referenceVi });
+  } catch { /* AI lỗi: bài đã an toàn, chấm lại sau (renderList/resumeUnfinished tự thử lại) */ }
+  renderFeedback(ov, { ...ctx, submission, grade });
 }
 
 /** Bé quay lại 1 bài ĐÃ NỘP nhưng CHƯA nối từ vựng xong — tiếp tục đúng chỗ,
