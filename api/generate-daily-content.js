@@ -60,6 +60,23 @@ async function sb(path, options = {}) {
   return text ? JSON.parse(text) : null;
 }
 
+/** Như `sb()` GET nhưng LẤY HẾT mọi dòng bằng phân trang qua header `Range`,
+ * không bị cắt bởi giới hạn mặc định 1000 dòng của PostgREST — kho dùng
+ * chung (`passage_pool`) đã vượt mốc này, nếu không phân trang sẽ mất vĩnh
+ * viễn các bài thêm SAU dòng thứ 1000 (xem cùng lỗi đã sửa ở
+ * server/bulk-insert-content.js `sbAll()` và shared/api.js `getAll()`). */
+async function sbAll(path, pageSize = 1000) {
+  let all = [];
+  let offset = 0;
+  for (;;) {
+    const page = (await sb(path, { headers: { Range: `${offset}-${offset + pageSize - 1}` } })) || [];
+    all = all.concat(page);
+    if (page.length < pageSize) break;
+    offset += pageSize;
+  }
+  return all;
+}
+
 // Pool nội dung của CẢ NHÀ trong REUSE_WINDOW_DAYS ngày gần đây, cache theo
 // "family:level[:quizType]" — dùng chung giữa các bé CÙNG NHÀ CÙNG CẤP ĐỘ
 // trong 1 lượt chạy cron, để anh/chị/em không được gán trùng 1 bài trong
@@ -95,7 +112,7 @@ const quizPoolAllCache = new Map();
 // coi như kho rỗng (fallback AI như trước), KHÔNG chặn cron chạy tiếp.
 async function sharedPassagePool(level) {
   if (!passagePoolAllCache.has(level)) {
-    passagePoolAllCache.set(level, await sb(`passage_pool?select=id,title,passage_en,vocab&level=eq.${level}&order=created_at.asc`).catch(() => []));
+    passagePoolAllCache.set(level, await sbAll(`passage_pool?select=id,title,passage_en,vocab&level=eq.${level}&order=created_at.asc`).catch(() => []));
   }
   return passagePoolAllCache.get(level);
 }
@@ -103,7 +120,7 @@ async function sharedPassagePool(level) {
 async function sharedQuizPool(level, quizType) {
   const key = `${level}:${quizType}`;
   if (!quizPoolAllCache.has(key)) {
-    quizPoolAllCache.set(key, await sb(`quiz_pool?select=id,questions&level=eq.${level}&quiz_type=eq.${quizType}&order=created_at.asc`).catch(() => []));
+    quizPoolAllCache.set(key, await sbAll(`quiz_pool?select=id,questions&level=eq.${level}&quiz_type=eq.${quizType}&order=created_at.asc`).catch(() => []));
   }
   return quizPoolAllCache.get(key);
 }
