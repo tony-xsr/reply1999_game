@@ -148,6 +148,23 @@ const post = (path, body, headers) => rest('POST', path, body, { Prefer: 'return
 const patch = (path, body) => rest('PATCH', path, body, { Prefer: 'return=representation' });
 const del = (path) => rest('DELETE', path);
 
+/** Như `get()` nhưng LẤY HẾT mọi dòng bằng phân trang qua header `Range`,
+ * không bị cắt bởi giới hạn mặc định của PostgREST (hoặc `limit=` cố định
+ * trong query) — dùng cho các bảng kho dùng chung (`passage_pool`/
+ * `quiz_pool`) đã vượt quá 500-1000 dòng, để KHÔNG bỏ sót nội dung mới thêm
+ * (xem lỗi tương tự đã sửa ở server/bulk-insert-content.js `sbAll()`). */
+async function getAll(path, pageSize = 1000) {
+  let all = [];
+  let offset = 0;
+  for (;;) {
+    const page = (await rest('GET', path, undefined, { Range: `${offset}-${offset + pageSize - 1}` })) || [];
+    all = all.concat(page);
+    if (page.length < pageSize) break;
+    offset += pageSize;
+  }
+  return all;
+}
+
 export function uuid() {
   try { return crypto.randomUUID(); } catch {
     return `${Date.now().toString(16)}-${Math.random().toString(16).slice(2, 10)}-${Math.random().toString(16).slice(2, 10)}`;
@@ -844,8 +861,11 @@ export async function familyGrammarQuizzesForReuse(level, quizType, sinceDay) {
 export async function passagePoolPick(level, profileId) {
   // .catch(() => []): nếu chưa chạy migrate-18-content-pool.sql thì bảng
   // passage_pool chưa tồn tại — coi như kho rỗng, KHÔNG chặn bên gọi.
+  // LƯU Ý: dùng getAll() (phân trang), KHÔNG dùng get()+limit cố định — kho
+  // đã vượt 500-1000 dòng, dùng limit cố định sẽ chỉ thấy các bài CŨ NHẤT
+  // (order=created_at.asc) và không bao giờ thấy được bài mới thêm sau này.
   const [pool, mine] = await Promise.all([
-    get(`passage_pool?select=id,title,passage_en,vocab&level=eq.${level}&order=created_at.asc&limit=500`).catch(() => []),
+    getAll(`passage_pool?select=id,title,passage_en,vocab&level=eq.${level}&order=created_at.asc`).catch(() => []),
     get(`translation_passages?select=title&profile_id=eq.${profileId}&level=eq.${level}&limit=2000`),
   ]);
   const doneTitles = new Set(mine.map((m) => m.title));
@@ -858,8 +878,11 @@ export async function passagePoolPick(level, profileId) {
 export async function quizPoolPick(level, quizType, profileId) {
   // .catch(() => []): nếu chưa chạy migrate-18-content-pool.sql thì bảng
   // quiz_pool chưa tồn tại — coi như kho rỗng, KHÔNG chặn bên gọi.
+  // LƯU Ý: dùng getAll() (phân trang), KHÔNG dùng get()+limit cố định — kho
+  // đã vượt 500-1000 dòng, dùng limit cố định sẽ chỉ thấy các đề CŨ NHẤT
+  // (order=created_at.asc) và không bao giờ thấy được đề mới thêm sau này.
   const [pool, mine] = await Promise.all([
-    get(`quiz_pool?select=id,questions&level=eq.${level}&quiz_type=eq.${quizType}&order=created_at.asc&limit=500`).catch(() => []),
+    getAll(`quiz_pool?select=id,questions&level=eq.${level}&quiz_type=eq.${quizType}&order=created_at.asc`).catch(() => []),
     get(`grammar_quizzes?select=questions&profile_id=eq.${profileId}&level=eq.${level}&quiz_type=eq.${quizType}&limit=2000`),
   ]);
   const donePrompts = new Set(mine.flatMap((m) => (m.questions || []).map((q) => q.prompt)));

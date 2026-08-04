@@ -112,7 +112,13 @@ async function openMillionaireOverlay(levelId, { speak } = {}) {
   const levelLabel = EXAM_LEVEL_LABELS[levelId] || levelId;
   let quiz;
   try {
-    quiz = await api.grammarQuizForDay(kid.id, todayKey, 'millionaire');
+    // Trước đây gọi AI SỐNG mỗi lần bé chơi (chậm, tốn quota) — giờ dùng
+    // CHUNG cơ chế "mượn kho trước, AI là phương án cuối" đã có sẵn cho
+    // Trắc Nghiệm Ngữ Pháp thường (ensureGrammarQuiz: tự kiểm tra đề hôm nay
+    // -> tái dùng đề cũ của cả nhà -> mượn từ quiz_pool dùng chung mọi gia
+    // đình (xem server/bulk-insert-content.js MILLIONAIRE_SETS) -> cuối cùng
+    // mới gọi AI nếu cả 2 nguồn trên đều hết).
+    quiz = await api.ensureGrammarQuiz(kid.id, levelId, 'millionaire', todayKey);
     if (!quiz) {
       renderAiBox(ov, `<p class="r99-ai-msg">🤖 AI đang soạn 15 câu hỏi tăng dần độ khó (${levelLabel})…</p>`);
       const settings = api.cachedSettings() || await api.getSettings();
