@@ -6078,5 +6078,130 @@ nhưng theo kiểu sau
 
  dĩ nhiên mức độ câu sẽ tư khó đến dễ , câu trắc nghiệm có thể về ngữ pháp , đọc hiểu đoạn văn và chọn đáp án đúng ...
 
- UI rõ ràng đẹp và thân thiện .
+ UI rõ ràng đẹp và thân thiện  
+
+ Truy cập trang Admin cần 3 thứ trên Vercel (không chỉ ADMIN_EMAIL):
+
+3 biến môi trường (Vercel Dashboard → Project → Settings → Environment Variables):
+
+SUPABASE_URL — có thể đã có sẵn (dùng chung với cron generate-daily-content)
+SUPABASE_SERVICE_ROLE_KEY — có thể đã có sẵn, lấy ở Supabase → Settings → API → service_role (secret key, KHÔNG phải anon key)
+ADMIN_EMAIL — email tài khoản phụ huynh bạn dùng để đăng nhập Admin (phải khớp chính xác, không phân biệt hoa/thường)
+Sau khi thêm/sửa biến → Redeploy lại (biến môi trường chỉ có hiệu lực từ lần deploy tiếp theo).
+
+Chạy 1 lần server/migrate-12-admin-stats.sql trong Supabase SQL Editor nếu chưa chạy — tạo bảng ai_call_log + hàm admin_db_stats(). Thiếu file này thì cả thống kê lẫn backup/restore đều lỗi.
+
+Đăng nhập: vào /admin/, đăng nhập bằng đúng email + mật khẩu bạn dùng ở Trang Phụ Huynh (dùng chung 1 tài khoản Supabase Auth). Nếu email không khớp ADMIN_EMAIL sẽ hiện màn "⛔ Không có quyền" — cái này cố ý, do server tự xác minh danh tính qua token đăng nhập chứ không tin email client gửi lên.
+
+Giờ mình sửa lại server/seed-data.sql — bỏ hết phần streak/điểm danh/hoa/sessions, chỉ giữ lại bài dịch PET + trắc nghiệm PET (vài bài đã làm để test lịch sử, vài bài chưa làm để test hàng đợi/"ôn lại bài cũ
+
+ABC, [28 Jul 2026 at 15:34:06]:
+https://ggamsoybaylxglqiszlr.supabase.co
+
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdnYW1zb3liYXlseGdscWlzemxyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NDIzNzE2NSwiZXhwIjoyMDk5ODEzMTY1fQ.DTzwYWywhWUcS1d7pWp0DEh3LKQk1f3eVsQqvLb2oaE
 ## Quản lý Mindmap từ vựng tiếng Anh 
+
+## Bugs cài đặt bài luyện dịch cho bé 3 bài mà bé chỉ có (0/1)? mặc dù 🎓 Mục tiêu học Thi Chứng Chỉ Anh mỗi ngày là 3 ?
+
+## Số câu trắc nghiêm 1 ngày có thể set không set chỗ nào ?
+
+Phu huynh có thể xem từ vựng bé hay dịch sai , ngữ pháp bé hay dịch sai chọn và ấn tạo thêm bài từ AI dựa trên những từ này , và có lịch sử tạo ví dụ từ went,hold và câu điều kiện bé hay dịch sai, ấn vào chọn từ went và hold sau đó tạo bài AI dịch hoặc trắc nghiệm , nó sẽ show lịch sử sai với số number nhỏ bên phải là bài tạo mới từ từ vựng đó? những bài được tạo dựa trên lịch sử sai sẽ ưu tiên đẩy ra cho bé làm ngày hôm sau... 
+có thể start.stop cronjob thay vì luôn để nó chạy từ admin page?
+
+Generate vào cơ sở dữ liệu trước 300 bài luyện dịch và 2000 câu trắc nghiệm ngữ pháp để lúc nào cũng có dữ liệu sẵn khi trẻ vào làm nhiệm vụ thay vì mỗi ngày cronjob tạo ?
+
+ đã nộp bài dịch nhưng chưa làm nối từ vựng , khi bấm vào lại nó hiển thị đúng là đã nộp bài dịch nhưng chưa nối từ vựng , bấm tiếp tục thì không thấy gì xảy ra, dialog dissmiss . 
+ Lâu ngày dữ liệu này sẽ nhiều và kéo sẽ rất mỏi tay , có filter theo ngày , tháng ,tuần ? 
+ Fitler theo tỷ lệ trả lời đúng cao, thấp , điểm cao thấp ... ? 
+📝 Bài Dịch bé đã nộp
+🧩 Trắc Nghiệm Ngữ Pháp bé đã làm 
+Có views riêng cho 2 phần này thay vì gọp chung như tabbar ? 2 cái dữ liệu đều nhiều thì sẽ rất rối . 
+làm đúng 1/5 câu mà dc tặng 5 sao ?
++5⭐	trac-nghiem:hoan-thanh
+
+
+Câu 3: If it ___ rain, we would go to the park.
+Bé chọn: doesn't ✅
+💡 Đúng vì 'doesn't' chỉ điều kiện hiện tại, phù hợp với câu điều kiện loại 1.
+
+
+Câu 2: By the time I arrived, they ___ their homework.
+Bé chọn: have finished ❌ (đúng: had finished)
+💡 Sai vì 'have finished' không thể đi cùng với 'By the time' trong câu chỉ thời gian.
+💡 Đúng vì 'had finished' chỉ sự hoàn thành trước một thời điểm trong quá khứ.
+
+
+Tổng kết: 300/300 bài Luyện Dịch hoàn tất. Trắc nghiệm vẫn ở mức 240/2000 (12%), chưa động vào suốt 7 đợt vừa qua theo đúng yêu cầu ưu tiên bài dịch của bạn 
+
+ủa sao database trong admin vẫn hiện 
+bài dịch
+8
+trắc nghiệm 
+3
+
+## BUGS 
+
+
+Thêm trắc nghiệm có nhiều câu dễ và ngữ pháp hơn cho đề thi PET và ưu tiên năm vứng trước ví dụ tập trung vào 12 thì cơ bản , hay Vs/es Vpp ,Ved ... Trước mắt lập hơn 300 câu trắc nghiệm về 12 thì này và chia thì/ chia verb ...  và mix ưu tiên chủ đề này lúc nào cũng phải có 40% trong bài thi trắc nghiệm ví dụ 5 câu thì có 2 câu về chủ đề này .
+
+1. Quét tất cả trường còn thiếu về dữ liệu ngoại ngữ.
+2. Tự nghiên cứu từ nguồn đáng tin cậy.
+3. Điền đầy đủ theo đúng format hiện có.
+4. Nếu thiếu chắc chắn thì ghi TODO + lý do, rồi tiếp tục mục khác.
+5. Không dừng giữa chừng để xin xác nhận, trừ khi có nguy cơ phá hỏng dữ liệu hoặc thiếu quyền truy cập.
+6. Tiếp tục cho đến khi hoàn tất toàn bộ file và tạo báo cáo cuối.
+
+- Ai là triệu phú mỗi lần chơi mỗi lần gọi AI tạo ? bạn có thể tạo kho đầy đủ 350 bộ câu hỏi ai là triệu phú ? để ít phải chờ tạo mỗi lần trẻ muốn chơi ?
+2. Tự nghiên cứu từ nguồn đáng tin cậy.
+3. Điền đầy đủ theo đúng format hiện có.
+4. Nếu thiếu chắc chắn thì ghi TODO + lý do, rồi tiếp tục mục khác.
+5. Không dừng giữa chừng để xin xác nhận, trừ khi có nguy cơ phá hỏng dữ liệu hoặc thiếu quyền truy cập.
+6. Tiếp tục cho đến khi hoàn tất toàn bộ file và tạo báo cáo cuối 
+
+ millionaire pool FINISHED at 50 sets 
+ Millionaire pool finished at 50/50 sets (750 questions)C
+
+
+ ## Đã fix 
+ Có thể có mục đánh dấu favorites phụ huynh có thể đánh dấu câu trắc nghiệm yêu thích để xem lại thay vì xem lại quá nhiều ? ví dụ 
+Câu 1: If I ___ rich, I would travel around the world.
+Tất cả 4 đáp án:
+am
+💡 Sai — 'am' là hiện tại đơn, câu điều kiện loại 2 cần động từ 'to be' chia ở quá khứ.
+was ❌ bé chọn
+💡 Sai — dù 'was' đôi khi được dùng thân mật, ngữ pháp chuẩn (kiểu bài thi PET) dùng 'were' cho MỌI chủ ngữ ở câu điều kiện loại 2.
+were ✅ đáp án đúng
+💡 Đúng — câu điều kiện loại 2: If + S + were, S + would + V — diễn tả điều KHÔNG có thật ở hiện tại.
+be
+💡 Sai — 'be' là nguyên mẫu không chia, không dùng trực tiếp sau chủ ngữ.
+📚 Cấu trúc: Câu điều kiện loại 2 (If + S + were, S + would + V) — diễn tả tình huống giả định, KHÔNG có thật ở hiện tại.
+🇻🇳 Dịch: Nếu tôi giàu, tôi sẽ đi du lịch vòng quanh thế giới.
+
+câu này thú vị ngoại lệ tôi muốn lưu nó vào favorites test.
+
+
+Trang admin vãn truy cập bình thường lâu lâu bị lỗi 
+https://reply1999-game.vercel.app/admin/
+⛔ Không có quyền
+Tài khoản này không phải admin. Đăng nhập đúng email admin (biến môi trường ADMIN_EMAIL trên Vercel) rồi tải lại trang.
+
+
+mặc dù vẫn dùng 1 tài khoản , phải truy cập vào link 
+https://reply1999-game.vercel.app/ sau đó reload 
+https://reply1999-game.vercel.app/admin/ thì mới được . 
+
+Game chém từ vựng không đọc tiếng anh ?
+Navigation vẫn còn nhiều chỗ sai , ví dụ từ hompage chọn game ngẫu nhiên play , back về lại ra trang khác, ? có những game, trò nằm ở nhiều menu khác nhau ,back về lại không về menu đã vào đúng phần trước đó . Kiểm tra lại nhé . đặc biệt game, trò chơi nằm ở nhiều nhóm khác nhau .
+
+
+- Sửa lại giao diện , thu gọn header , menu , thành menu gồm setting , profile (show số start...) và hỗ trợ responsive cho điện thoại / tablet ok thay vì hoạt loạt nút và cài đặt ở header - Web title cũng không cần , Logo nhỏ là được rồi. ?? 
+
+
+
+DeepkDeepk deepseek-v4-pro kiểm tra lại có dùng không ? nếu có chuyển qua mặc định deepseek-v4-flash, không nên xài pro ok? 
+
+Bộ đếm thời gian sai ? ví dụ 
+Học Trượt Ván
+20:04:49 1/8/2026 · ⏱️ 518 phút 50 giây => có vẻ tính giờ hơi sai ? bé không làm lâu như vậyy đâuu.
+Nút gởi bài dịch có thể thêm options config bé có muốn gởi bài ngay không ? yes, no option .
